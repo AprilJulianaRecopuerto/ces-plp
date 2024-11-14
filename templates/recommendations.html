@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Recommended Events</title>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap" rel="stylesheet">
+
+        <style>
+            h1 {
+                font-family: 'Poppins', sans-serif;
+                margin-top: 10px;
+            }
+
+            .table-container {
+                font-family: 'Poppins', sans-serif;
+                width: 73.5%;
+                border-radius: 10px;
+                background-color: #ffffff;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adding shadow */
+                padding: 20px;
+                margin-top: 20px;
+                margin-left: 340px;
+            }
+
+            .crud-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-family: 'Poppins', sans-serif;
+                background-color: #ffffff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .crud-table th, .crud-table td {
+                font-family: 'Poppins', sans-serif !important;
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+                white-space: nowrap; /* Prevent text from wrapping */
+            }
+
+            .crud-table th {
+                font-family: 'Poppins', sans-serif !important;
+                text-align: center; 
+                background-color: #4CAF50;
+                color: white;
+                height: 40px;
+                width: 14px; /* Set a fixed width for table headers */
+            }
+
+            .crud-table td {
+                height: 50px;
+                background-color: #fafafa;
+            }
+
+            .crud-table tr:hover {
+                background-color: #f1f1f1;
+            }
+        </style>
+    </head>
+<body>
+    <div class="table-container">
+        <h1>Recommended Events for {{ department }}</h1>
+        <table class="crud-table">
+            <thead>
+                <tr>
+                    <th>Department</th>
+                    <th>Event</th>
+                    <th>Impact Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if events %}
+                    {% for event in events %}
+                        <tr>
+                            <td>{{ event.department }}</td>
+                            <td>{{ event.event }}</td>
+                            <td>{{ (event.average_rating / 100)|round(2) }}%</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5">No recommended events found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
