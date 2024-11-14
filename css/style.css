@@ -1,0 +1,1162 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap');
+@import url('https://fonts.cdnfonts.com/css/glacial-indifference-2');
+@import url('https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
+/*LoadingPage*/
+/* Header styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #fff;
+}
+
+.logo img {
+    max-height: 85px;
+    width: auto;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    margin-top: 13px;
+}
+
+.nav-item {
+    font-family: 'Glacial Indifference', sans-serif;
+    font-size: 18.9px;
+    padding: 14px 16px;
+    color: black;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+.nav-item:hover {
+    background-color: #089451;
+    border-radius: 10px;
+    color: white;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown .dropbtn {
+    font-family: 'Glacial Indifference', sans-serif;
+    font-size: 18.9px;  
+    border: none;
+    border-radius: 12px;
+    outline: none;
+    color: black;
+    padding: 14px 16px;
+    background-color: inherit;
+    margin: 0 8px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    min-width: 180px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.1);
+    z-index: 15;
+    margin-left: 13px;
+}
+
+.dropdown-content a {
+    font-family: 'Poppins', sans-serif;
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+.dropdown-content a:hover {
+    background-color: #ddd;
+    border-radius: 10px;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #089451;
+    color: white;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.header-button {
+    font-family: 'Glacial Indifference', sans-serif;
+    background-color: #089451;
+    font-size: 18.9px;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    width: 130.7px;
+    height: 45.7px;
+    margin-top: 20px;
+    margin-right: 50px;
+    cursor: pointer;
+}
+
+.header-button:hover {
+    background-color: #218838;
+}
+
+
+/* Banner styles*/
+.banner1 {
+    position: relative;
+    background-image: url('plpmain.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 92.8vh;
+    color: white;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+	z-index: 0;
+    border-radius: 60px;
+}
+
+.banner2 {
+    flex-direction: column;
+    position: relative;
+    background-image: url('plpmain.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 92.8vh;
+    color: white;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+	z-index: 0;
+    border-radius: 60px;
+    
+}
+
+.banner3 {  
+	position: relative;
+    background-image: url('plpmain.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 92.8vh;
+    color: white;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+	z-index: 0;
+    border-radius: 60px;
+}
+
+/*Banner Shadow*/
+.banner1 img {
+    position: absolute;
+    top: -110px;
+    left: 0;
+    height: 110%;
+    width: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+.banner2 img {
+    position: absolute;
+    top: -110px;
+    left: 0;
+    height: 110%;
+    width: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+.banner3 img {
+    position: absolute;
+    height: 150%;
+    width: 100%;
+    margin-top: -280px;
+    z-index: -1;
+}
+
+/*text h1 design */
+.banner-heading {
+    font-size: 100px; /* Adjust the font size */
+    color: #ffffff; 
+	text-align: left;
+    margin-top: 20px;
+    margin-left: 80px;
+	margin-right: 350px;
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    padding: 0; /* Remove padding */
+    line-height: 1.2;
+}
+/*LoadingPage*/
+
+/*RoleAccountPage*/
+.home-button {
+    font-family: 'Glacial Indifference', sans-serif;
+    background-color: #089451;
+    font-size: 18.9px;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    width: 130.7px;
+    height: 45.7px;
+    margin-top: 15px;
+    margin-right: 50px;
+    cursor: pointer;
+}
+
+.home-button:hover {
+    background-color: #218838;
+}
+
+.banner-content {
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+    position: relative;
+    margin-left: -70%;
+}
+
+.adminbutton, .userbutton {
+    font-family: 'Glacial Indifference', sans-serif;
+    background-color: #089451;
+    font-size: 30px;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    width: 260px;
+    height: 120px;
+    margin: 10px;
+    cursor: pointer;
+}
+
+.adminbutton:hover, .userbutton:hover {
+    background-color: #218838;
+}
+
+.or {
+    margin: 10px;
+    font-family: 'Glacial Indifference', sans-serif;
+    font-size: 18.9px;
+    color: white;
+}
+
+.overlay {
+    display: none; 
+    position: fixed;
+    top: 0;
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: 10;
+}
+
+.admin-form-container {
+    display: none; 
+    position: fixed; 
+    top: 50%; 
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px; 
+    height: auto;
+    width: 280px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.admin-form-container form {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-form-container label {
+    font-family: 'Glacial Indifference', sans-serif;
+    font-size: 27px;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+.admin-form-container input {
+    font-family: 'Glacial Indifference', sans-serif;
+    font-size: 15px;   
+    height: 38px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.adminb {
+    margin-bottom: 10px;
+    font-family: 'Glacial Indifference', sans-serif;
+    font-size: 17px;
+    background-color: #089451;
+    color: #fff;
+    border-radius: 10px;
+    height: 38px;
+    width: 100%;
+    cursor: pointer;
+}
+
+.adminb:hover {
+    background-color: #218838;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    border: none; 
+    background-color: transparent !important; 
+    padding: 0;
+    margin: 0; 
+}
+
+.close-button img {
+    width: 25px; 
+    height: 25px; 
+    border: none !important; 
+    background-color: transparent !important;
+    transition: transform 0.3s; /* Ensure smooth zoom effect */
+}
+
+.close-button img:hover {
+    transform: scale(1.2); /* Adjust the scale value as needed for zoom effect */
+}
+/*RoleAccountPage*/
+
+/*LogInPage*/
+.login-container {
+    background-color: #ffc107;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 320.5px;
+    height: 410px;
+	margin-right: 950px;
+    margin-top: -50px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.login-form h2 {
+    font-family: 'Glacial Indifference', sans-serif;
+    margin-bottom: -5px;
+    margin-top: 8px;
+    font-size: 45px;
+    color: black;
+    text-align: left;
+    margin-left: 11px;
+}
+
+.sign-in-link {
+    font-family: 'Glacial Indifference', sans-serif;
+    font-size: 17px;
+    background-color: #089451;
+    color: #fff;
+    border: 0.5px solid black;
+    padding: 10px 20px;
+    border-radius: 10px;
+    width: 95%;
+    cursor: pointer;
+    margin-top: 20px !important;
+    margin-bottom: 29px;
+    margin-left: -1px;
+}
+
+.sign-in-link:hover {
+    background-color: #218838;
+}
+
+/* Default style for the link */
+.default-style {
+    font-family: 'Glacial Indifference', sans-serif;
+    color: black !important;
+    font-weight: normal;
+    text-decoration: none;
+}
+
+/* Highlight style for username and password */
+.highlight {
+    font-family: 'Glacial Indifference', sans-serif;
+    font-weight: 300;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.links {
+    text-align: right !important;
+    margin-right: 11px;
+    margin-top: -20px;
+}
+
+.links a {
+    text-decoration: none; /* Remove default underline */
+    color: #007bff; /* Set link color */
+}
+
+.links a:hover {
+    text-decoration: underline; /* Underline on hover */
+    color: #0056b3; /* Adjust link color on hover */
+}
+
+.signin-text {
+    font-family: 'Glacial Indifference', sans-serif;
+    color: #3b3b3b;
+    font-weight: 400;
+    font-size: 16px;
+    text-align: left;
+    margin-bottom: 38px;
+    margin-left: 11px;
+}
+
+/*LogInPage*/
+
+/*Sidebar*/
+.sidebar {
+    width: 300px;
+    background-color: #FFF8A5;
+    padding: 20px 0;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    left: 10px;
+    top: 10px; /* Adjust the top position */
+    bottom: 10px; /* Adjust the bottom position */
+    border-radius: 23px;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.logo-img {
+    width: 40%; /* Adjust the size as needed */
+    height: 40%;
+    margin-right: 20px; /* Space between the logo and text */
+	margin-left:30px;
+    margin-top: -27px;
+}
+
+.logo-text {
+    font-family: "Saira Condensed", sans-serif;
+    font-size: 45px;
+    margin-top: 10px;
+    line-height: 45px;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    margin-top: 5px;
+}
+
+.menu-item {
+    font-family: "Poppins", sans-serif;
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    cursor: pointer;
+}
+
+.menu-item img {
+    width: 29px;
+	height:27px;
+    margin-left: 23px;
+}
+
+.menu-item .text {
+	margin-left:10px;
+	margin-top:4px;
+}
+
+.menu-item:hover {
+    width: 240px;
+    margin-left: 10px;
+    border-radius: 10px;
+    background-color: #22901C;
+    transition: 0.3s;
+    color: white; /* Ensure the text color is white when hovered */
+}
+
+.menu-item.active {
+    width: 240px;
+    margin-left: 10px;
+    border-radius: 10px;
+    background-color: #22901C !important;
+    color: white;
+}
+
+.sign-out {
+    font-family: "Poppins", sans-serif;
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    margin-top: 30px;
+    cursor: pointer;
+}
+
+.sign-out img {
+    width: 29px;
+	height:27px;
+    margin-left: 23px;
+}
+
+.sign-out .text {
+    align-items: top;
+    margin-left: 10px !important; /* Space between image and text */
+}
+
+.sign-out:hover {
+    width: 240px;
+    margin-left: 10px;
+    border-radius: 10px;
+    background-color: #22901C;
+    transition: 0.3s;
+    color: white; /* Ensure the text color is white when hovered */
+}
+
+.logo-user {
+    cursor: pointer; /* Change the cursor to a pointer on hover */
+}
+
+.logo-user img {
+    width: 39px; /* Adjust width as needed */
+    height: 39px; /* Maintain aspect ratio */
+	margin-right:25px;
+}
+
+
+/*Dashboard*/
+.content-dashboard {
+    margin-left: 250px;
+    padding: 22px;
+}
+
+.over {
+    font-family: "Poppins", sans-serif;
+    font-size: 20px;
+    margin-left: 60px;
+}
+
+.dashboard-header {
+    font-family: "Poppins", sans-serif;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+    margin-left: 65px;
+    font-size: 20px;
+}
+
+.welcome-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-header h3 {
+    margin: 0;
+    font-size: 30px;
+    margin-top: 13px;
+    margin-bottom: 15px;
+}
+
+.overview {
+    display: flex;
+    margin-bottom: 5px;
+    height: 25%;
+    margin-left: 18px;
+}
+
+.total-activities, .pending-activities {
+    width: 250px; /* Adjust width as needed */
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-left: 20px; /* Add margin to separate elements */
+}
+
+.total-activities {
+    margin-left: 50px; /* Add margin to separate elements */
+}
+
+.total-activities img, .pending-activities img {
+    width:20%;
+    height: 20%;
+    margin-top: -20px;
+    margin-right: 15px;
+}
+
+.total-activities h2, .pending-activities h2 {
+    font-family: "Poppins", sans-serif;
+    font-size: 18px;
+    margin-left: 15px;
+    margin-top: 5px;
+    margin-bottom: 3px;
+}
+
+.activities-details {
+    display: flex;
+    justify-content: space-between;
+}
+
+.total-activities-count, .pending-activities-count {
+    font-family: "Poppins", sans-serif;
+    font-size: 25px;
+    margin-left: 15px;
+    margin-top: 5px;
+    margin-bottom: 3px;
+}
+
+/*project updates*/
+.proj {
+    font-family: "Poppins", sans-serif;
+    font-size: 20px;
+    margin-left: 60px;
+    margin-top: 25px;
+}
+
+.project-updates {
+    font-family: "Poppins", sans-serif;
+    background-color: #FAFAFA;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin: 0 auto;
+    width: 520px;
+    margin-left: 67px;
+    border-radius: 10px;
+    height: 380px;
+}
+
+.project-updates ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    margin-top: 15px;
+}
+
+.project-updates ul li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.project-updates ul li img {
+    width: 80px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.project-number {
+    text-align: center;
+}
+
+.project-details {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    margin-left: 10px;
+}
+
+.project-name {
+    font-weight: bold;
+	margin-top:5px;
+	margin-left:10px;
+}
+
+.stat{
+	font-weight: bold;
+	margin-bottom:2px;
+	margin-left: 100px;
+}
+
+.delayed .project-status {
+    color: orange;
+	margin-bottom:30px;
+}
+
+.cancelled .project-status {
+    color: red;
+}
+
+.successful .project-status {
+    color: green;
+}
+
+.update {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    height: 60px;
+}
+
+.update.delayed {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+
+.update.cancelled {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.update.successful {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.see-all-link {
+    color: #8A8A8A;
+    margin-left: 463px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.see-all-link:hover {
+    color: black;
+    text-decoration: underline;
+}
+
+/*upcoming activities*/
+.content {
+  margin-left: 250px;
+  padding: 20px;
+  position: relative; /* Ensure the container is positioned relative */
+}
+
+.upco {
+    font-family: "Poppins", sans-serif;
+    font-size: 20px;
+    margin-left: 925px;
+    margin-top: -665px;
+}
+
+.upcoming-activities-container {
+    font-family: "Poppins", sans-serif;
+    position: absolute;
+    top: 115px;
+    right: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 30px;
+    width:500px;
+    margin-right:15px;
+    margin-top: 50px;
+    height:535px;
+    background-color: #FFF8A5;
+    overflow-y: auto; /* Add vertical scroll */
+}
+
+.upcoming-activities-container h2 {
+    margin-bottom: 10px;
+}
+
+.upcoming-activities-list {
+    list-style: none;
+    padding: 0;
+    margin-top:10px;
+}
+
+.upcoming-activities-list li {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.upcoming-activities-list li img {
+    width: 80px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+    margin-top:10px;
+}
+
+.upcoming-activities-list li .activity-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.upcoming-activities-list li .activity-details .activity-name {
+    font-size: 20px;
+    font-weight: 500;
+    margin-top:10px;
+    margin-left:-3px;
+}
+
+.upcoming-activities-list li .activity-details .activity-eta {
+    color: #777;
+    margin-top: 4px;
+    margin-left: -3px;
+}
+
+.money {
+    font-size: 18px;
+    color: #089451;
+    font-weight: 600px;
+    margin-top:-12px;
+    margin-left:140px;
+}
+
+.see-all-link-act {
+    color: #8A8A8A;
+    margin-left: 430px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.see-all-link-act:hover {
+    color: black;
+    text-decoration: underline;
+}
+
+.upcoming-activities-container::-webkit-scrollbar {
+  width: 12px; /* Width of the scrollbar */
+  height: 12px; /* Height of the scrollbar (for horizontal scroll) */
+}
+
+.upcoming-activities-container::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Background color of the scrollbar track */
+  border-radius: 10px;
+}
+
+.upcoming-activities-container::-webkit-scrollbar-thumb {
+  background-color: #888; /* Color of the scrollbar thumb */
+  border-radius: 10px;
+  border: 2px solid #f1f1f1; /* Adds padding around the thumb */
+}
+
+.upcoming-activities-container::-webkit-scrollbar-thumb:hover {
+  background-color: green; /* Color of the scrollbar thumb when hovered */
+}
+
+
+/*projeclist page*/
+.content-projectlist {
+    margin-left: -20px;
+    padding: 20px;
+    position: relative; /* Ensure the container is positioned relative */
+}
+
+.list-container {
+    display: flex;
+    align-items: flex-start;
+    width: 75%;
+	margin-left:350px;
+}
+
+.projectlist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+	margin-left: 350px;
+}
+
+.projectlist-header h1 {
+    font-family: 'Glacial Indifference', sans-serif;
+    font-size: 40px;
+    margin-top: 35px;
+}
+
+.projectlist-header .logo-user {
+	margin-bottom: 18px;
+	width: 39px; /* Adjust width as needed */
+    height: 38px; /* Maintain aspect ratio */
+	margin-right:47px;
+}
+
+.green-container {
+    background-color: #4CAF50;
+    color: #fff;
+    width: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    margin-right: 10px; /* Space between the containers */
+    padding-top: 10px;
+    border-radius: 8px;
+	height: 590px;
+}
+
+.green-container ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+	padding: 45px;
+}
+
+.green-container li {
+    padding: 20px;
+    font-weight: bold;
+}
+
+.yellow-container {
+    background-color: #fff9c4;
+    flex-grow: 1;
+    padding: 10px;
+    border-radius: 8px;
+	height: 580px;
+}
+
+.project-list-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.project-list-table th, .project-list-table td {
+    padding: 12px;
+    text-align: left;
+}
+
+.project-list-table th {
+    color: #333;
+    border: none;
+	margin-left:30px;
+}
+
+.project-list-table img {
+    width: 60px;
+    height: 35px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.table-header .header-title {
+    padding-left: 80px; /* Example: move content to the right */
+}
+
+.table-header .header-departments {
+    padding-left: 10px; /* Example: move content to the right */
+}
+
+.table-header .header-description {
+     margin-right: 100px; /* Example: move content to the left */
+}
+
+.table-header .header-status {
+	left:-15px;
+	position: relative;
+}
+
+/*Calendar */
+.content-calendar {
+    margin-left: 270px;
+}
+
+.calendar-header h1 {
+    font-size: 36px;
+    margin-top: 35px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+	margin-left: 60px;
+}
+
+.calendar-container {
+    width:1150px;
+    margin: auto;
+    padding: 20px;
+    background-color: #ffffcc;
+    border-radius: 8px;
+	position: absolute;
+    top: 56%;
+    left: 60%;
+	justify-content: flex-start;
+    transform: translate(-50%, -50%); /* Centers the container */
+	height:575px;
+}
+
+.container-header{
+	display: flex; /* Flexbox for layout */
+    align-items: center; /* Center vertically */
+    justify-content: flex-start;
+	padding-bottom:10px;
+}
+
+#today-button {
+    padding: 10px 20px;
+	background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#today-button:hover {
+    background-color: #f0f0f0;
+ }
+
+#month-select {
+    padding: 9.5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+	left: -60%;
+	margin-left:10px;
+}
+
+#calendar-table{
+    width: 100%;
+    border-collapse: collapse;
+	height:80%
+}
+
+#calendar-table td {
+    width: 14%;
+    text-align: right;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+#calendar-table th {
+    width: 14%;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.today {
+    background-color: #ACE1AF;
+}
+
+
+.budgetr-header h1{
+    font-family: 'Glacial Indifference', sans-serif;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+	margin-left: 78px;
+}
+
+.header-resource {
+    width: 70%;
+    height: 50px;
+    background-color: #1a8b1d;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    display: flex;
+    overflow: hidden;
+    margin-bottom: 10px; /* Space between header and body table */
+    margin-left: auto; /* Add auto margin to center the container */
+    margin-right: 100px; /* Add auto margin to center the container */
+}
+
+.resource-container {
+    width: 70%;
+    background-color: #fffbcc;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	height:500px;
+    margin-left: auto; /* Add auto margin to center the container */
+    margin-right: 100px;
+}
+
+.resource-table {
+    width: 100%;
+    border-spacing: 10px;
+}
+
+.resource-body {
+    padding: 5px;
+    text-align: center;
+    background-color: #fffbcc;
+    border-radius: 8px;
+}
+
+.rdepartment{
+    padding: 10px;
+	padding-left:2px;
+}
+.rproject{
+    padding: 5px;
+	right:120px;
+}
+.rbudget{
+    padding: 10px;
+	padding-left:20px;
+}
+.rdate{
+    padding: 5px;
+	padding-left:20px;
+}
+.rstatus  {
+    padding: 10px;
+	padding-left:10px;
+}
+
+button.accept, .denied {
+    background-color: #1a8b1d;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button.denied {
+    background-color: #d9534f;
+}
+
+th.departmentr {
+     padding-left: 35px;
+}
+
+th.projectr {
+     padding-left: 130px;
+}
+
+th.budgetr {
+     padding-left: 120px;
+}
+
+th.daterr {
+     padding-left: 50px;
+}
+
+th.statusrr {
+     padding-left: 150px;
+}
