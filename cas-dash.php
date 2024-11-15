@@ -13,11 +13,15 @@ if (!isset($_SESSION['notified_tasks'])) {
 }
 
 // Database credentials for proj_list
-$servername = "localhost";
-$username_db = "root";
-$password_db = "";
-$dbname_proj_list = "admin_todo_list";
-$dbname_user_registration = "user_registration";
+$servername = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_db = "t9riamok80kmok3h";
+$password_db = "lzh13ihy0axfny6d";
+$dbname_proj_list = "g8ri1hhtsfx77ptb";
+
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
 // Create connection to proj_list database
 $conn = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
@@ -151,7 +155,7 @@ if ($result_due_date->num_rows > 0) {
 }
 
 // Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername, $username_db, $password_db, $dbname_user_registration);
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }
