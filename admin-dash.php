@@ -1476,7 +1476,7 @@ if (isset($_POST['delete_notification'])) {
                 $servername_todo = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
                 $username_todo = "t9riamok80kmok3h";
                 $password_todo = "lzh13ihy0axfny6d";
-                $dbname_todo = "lzh13ihy0axfny6d"; // Database name
+                $dbname_todo = "g8ri1hhtsfx77ptb"; // Database name
 
                 // Create connection
                 $conn_todo = new mysqli($servername_todo, $username_todo, $password_todo, $dbname_todo);
