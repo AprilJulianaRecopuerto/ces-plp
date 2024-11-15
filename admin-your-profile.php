@@ -1,13 +1,14 @@
 <?php
 session_start();
 
-$servername = "localhost"; // Database server
-$db_username = "root"; // Database username (change as needed)
-$db_password = ""; // Database password (change as needed)
-$dbname = "user_registration"; // Database name
+// Database connection details
+$servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "equ6v8i5llo3uhjm"; // replace with your database username
+$password = "vkfaxm2are5bjc3q"; // replace with your database password
+$dbname = "ylwrjgaks3fw5sdj";
 
 // Create connection
-$conn = new mysqli($servername, $db_username, $db_password, $dbname);
+$conn = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
 if ($conn->connect_error) {
