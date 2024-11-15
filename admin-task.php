@@ -479,10 +479,10 @@ if (!isset($_SESSION['username'])) {
 
             <?php
             // Database credentials
-            $servername = "localhost";
-            $username = "root";
-            $password = "";
-            $dbname = "task_management"; // Update to your actual database name
+            $servername = "wp433upk59nnhpoh.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+            $username = "wbepy9iso2pubu7f";
+            $password = "l0a6y3bl2x7lfiyy";
+            $dbname = "qlajsw6auv4giknn"; // Update to your actual database name
 
             // Create connection
             $conn = new mysqli($servername, $username, $password, $dbname);
