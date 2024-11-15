@@ -1313,7 +1313,7 @@ if (isset($_POST['delete_notification'])) {
 										SELECT COUNT(*) as total_count FROM cba
 									) as combined_counts
 								";
-								$result = $conn->query($sql);
+								$result = $conn_proj_list->query($sql);
 
 								if ($result && $result->num_rows > 0) {
 									$row = $result->fetch_assoc();
