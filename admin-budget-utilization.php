@@ -504,7 +504,7 @@ if (!isset($_SESSION['username'])) {
 
                 // Fetch budget records for each college
                 $budgetTable = "{$college}_budget";
-                $budgetSql = "SELECT * FROM $budgetTable";
+                $budgetSql = "SELECT * FROM cas_budget";
                 $budgetResult = $conn->query($budgetSql);
 
                 echo "<div class='table-container'>";
