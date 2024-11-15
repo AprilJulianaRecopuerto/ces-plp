@@ -20,14 +20,13 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "certificate";
-$dbname_user_registration = "user_registration";
+$servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "sh9sgtg12c8vyqoa";
+$password = "s3jzz232brki4nnv";
+$dbname = "szk9kdwhvpxy2g77";
+
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-$currentDepartment = mysqli_real_escape_string($conn, $currentDepartment);
 // Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -229,9 +228,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     exit;
 }
 
-// Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername, $username, $password, $dbname_user_registration);
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
+// Fetch the profile picture from the colleges table in user_registration
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }

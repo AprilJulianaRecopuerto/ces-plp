@@ -10,11 +10,11 @@ if (!isset($_SESSION['uname'])) {
 
 $currentUser = $_SESSION['uname']; // Get the currently logged-in username
 
-// Database credentials
-$servername = "localhost";
-$username = "root"; // your database username
-$password = ""; // your database password
-$dbname = "user_registration"; // your database name
+// Database connection details
+$servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "equ6v8i5llo3uhjm"; // replace with your database username
+$password = "vkfaxm2are5bjc3q"; // replace with your database password
+$dbname = "ylwrjgaks3fw5sdj";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -24,14 +24,19 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
 // Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername, $username, $password, $dbname); // Use $dbname here, not $dbname_user_registration
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }
 
 $uname = $_SESSION['uname'];
-$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'uname' to your matching column if necessary
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
 $stmt = $conn_profile->prepare($sql_profile);
 $stmt->bind_param("s", $uname);
 $stmt->execute();
@@ -555,19 +560,19 @@ $conn_profile->close();
             <?php
             session_start(); // Start the session
 
-            // Database credentials
-            $servername = "localhost";
-            $username = "root"; // your database username
-            $password = ""; // your database password
-            $dbname = "user_registration"; // your database name
+            // Database connection details
+$servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "equ6v8i5llo3uhjm"; // replace with your database username
+$password = "vkfaxm2are5bjc3q"; // replace with your database password
+$dbname = "ylwrjgaks3fw5sdj";
 
-            // Create connection
-            $conn = new mysqli($servername, $username, $password, $dbname);
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-            // Check connection
-            if ($conn->connect_error) {
-                die("Connection failed: " . $conn->connect_error);
-            }
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
             // Check if a user is logged in
             if (isset($_SESSION['uname'])) {
