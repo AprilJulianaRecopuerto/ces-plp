@@ -42,6 +42,7 @@ $sql = "SELECT id, task_description, created_at, cas_status FROM cas_notificatio
 $result = $conn->query($sql);
 
 $notifications = [];
+
 if ($result->num_rows > 0) {
     // Fetch all notifications
     while($row = $result->fetch_assoc()) {
@@ -1055,10 +1056,10 @@ $conn->close();
                             <div class="total-activities-count">
                                 <?php
                                 // Database credentials
-                                $servername = "localhost";
-                                $username = "root";
-                                $password = "";
-                                $dbname = "proj_list";
+                                $servername = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                                $username = "zf8r3n4qqjyrfx7o";
+                                $password = "su6qmqa0gxuerg98";
+                                $dbname = "hpvs3ggjc4qfg9jp";
 
                                 // Create connection
                                 $conn = new mysqli($servername, $username, $password, $dbname);
