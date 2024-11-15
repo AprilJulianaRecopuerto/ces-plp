@@ -3,7 +3,7 @@ session_start(); // Start the session
 
 // Check if the user is logged in
 if (!isset($_SESSION['username'])) {
-    header("Location: loginpage.php");
+    header("Location: roleaccount.php");
     exit;
 }
 ?>
@@ -390,6 +390,37 @@ if (!isset($_SESSION['username'])) {
             .swal-cancel {
                 font-family: "Poppins", sans-serif !important;
             }
+
+            /* Chat styles */
+            .navbar .profile-container {
+                display: flex;
+                align-items: center;
+            }
+
+            .chat-icon {
+                font-size: 20px;
+                color: #333;
+                text-decoration: none;
+                position: relative; /* To position the badge correctly */
+                margin-right: 30px;
+                margin-top: 8px;
+                margin-left: -37px;
+            }
+
+            .notification-badge {
+                display: inline-block;
+                background-color: red; /* Change this to your preferred color */
+                color: white;
+                border-radius: 50%;
+                width: 20px; /* Width of the badge */
+                height: 20px; /* Height of the badge */
+                text-align: center;
+                font-weight: bold;
+                position: absolute; /* Position it relative to the chat icon */
+                top: -5px; /* Adjust as needed */
+                right: -10px; /* Adjust as needed */
+                font-size: 14px; /* Size of the exclamation point */
+            }
            
         </style>
     </head>
@@ -397,6 +428,14 @@ if (!isset($_SESSION['username'])) {
     <body>
         <nav class="navbar">
             <h2>Colleges - Budget Allocation</h2> 
+
+            <div class="profile-container">
+                <!-- Chat Icon with Notification Badge -->
+                <a href="chat.php" class="chat-icon" onclick="resetNotifications()">
+                    <i class="fa fa-comments"></i>
+                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+                </a>
+            <div>
 
             <div class="profile" id="profileDropdown">
                 <?php
@@ -500,115 +539,157 @@ if (!isset($_SESSION['username'])) {
             foreach ($colleges as $college) {
                 echo "<div id='{$college}_section' class='college-section' style='display: none;'>"; // Hidden by default
 
+                // Title for the College
                 echo "<h3>" . strtoupper($college) . " - Budget Allocation</h3>";
 
-                // Fetch budget records for each college
-                $budgetTable = "{$college}_budget";
-                $budgetSql = "SELECT * FROM cas_budget";
-                $budgetResult = $conn->query($budgetSql);
+                // Fetch budget records for the details table
+                $detailsTable = "cas_details"; // Budget details table for each college
+                $detailsSql = "SELECT * FROM cas_details";
+                $detailsResult = $conn->query($detailsSql);
 
+                // First Table: Budget Allocation (Details Table)
                 echo "<div class='table-container'>";
                 echo "<table class='crud-table'>";
                 echo "<thead>
                         <tr>
                             <th>ID</th>
-                            <th>Department</th>
                             <th>Semester</th>
-                            <th>Project Title</th>
                             <th>District</th>
                             <th>Barangay</th>
+                        </tr>
+                    </thead>
+                    <tbody>";
+
+                if ($detailsResult && $detailsResult->num_rows > 0) {
+                    while ($row = $detailsResult->fetch_assoc()) {
+                        echo "<tr>
+                                <td>{$row['id']}</td>
+                                <td>{$row['semester']}</td>
+                                <td>{$row['district']}</td>
+                                <td>{$row['barangay']}</td>
+                            </tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='4'>No records found for this college's budget allocation</td></tr>";
+                }
+
+                echo "</tbody>";
+                echo "</table>";
+                echo "</div>"; // Close .table-container
+
+                // Fetch budget event details for the second table (Budget Table)
+                $budgetTable = "cas_budget"; // Budget table for each college
+                $budgetSql = "SELECT * FROM cas_budget ORDER BY details_id";
+                $budgetResult = $conn->query($budgetSql);
+
+                // Second Table: Budget Event Details (Budget Table)
+                echo "<div class='table-container'>";
+                echo "<table class='crud-table'>";
+                echo "<thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Event Title</th>
                             <th>Total Budget</th>
-                            <th>Total Expenses</th>
+                            <th>Expenses</th>
                             <th>Remaining Budget</th>
                         </tr>
                     </thead>
                     <tbody>";
 
                 if ($budgetResult && $budgetResult->num_rows > 0) {
+                    $budgetData = [];
+
+                    // Group budget details by details_id
                     while ($row = $budgetResult->fetch_assoc()) {
-                        // Convert to numeric values to avoid warnings
-                        $total_budget = (float)str_replace(',', '', $row['total_budget']); // Remove commas and convert to float
-                        $total_expenses = (float)str_replace(',', '', $row['total_expenses']); // Remove commas and convert to float
+                        $budgetData[$row['details_id']][] = $row; // Grouping items by details_id
+                    }
 
-                        // Calculate remaining budget
-                        $remaining_balance = $total_budget - $total_expenses;
+                    // Output rows with calculated rowspans for details_id
+                    foreach ($budgetData as $detailsId => $items) {
+                        $firstRow = true; // Track the first row for details_id
 
-                        // Determine the display value for remaining budget
-                        $remaining_budget_display = $remaining_balance > 0 ? number_format($remaining_balance) : "No remaining budget";
+                        foreach ($items as $index => $item) {
+                            echo "<tr>";
 
-                        echo "<tr>
-                                <td>{$row['id']}</td>
-                                <td>{$row['department']}</td>
-                                <td>{$row['semester']}</td>
-                                <td>{$row['project_title']}</td>
-                                <td>{$row['district']}</td>
-                                <td>{$row['barangay']}</td>
-                                <td>" . number_format($total_budget) . "</td> <!-- Format total budget with commas -->
-                                <td>" . number_format($total_expenses) . "</td> <!-- Format total expenses with commas -->
-                                <td>{$remaining_budget_display}</td> <!-- Display remaining budget or message -->
-                            </tr>";
+                            // Display Details ID only once per unique details_id
+                            if ($firstRow) {
+                                echo "<td rowspan='" . count($items) . "'>{$detailsId}</td>";
+                                $firstRow = false; // Set to false after the first row
+                            }
+
+                            // Output remaining columns for the current item
+                            echo "<td>{$item['event_title']}</td>
+                                <td>" . number_format((float)str_replace(',', '', $item['total_budget']), 2) . "</td>
+                                <td>" . number_format((float)str_replace(',', '', $item['expenses']), 2) . "</td>
+                                <td>" . number_format((float)str_replace(',', '', $item['remaining_budget']), 2) . "</td>
+                                </tr>";
+                        }
                     }
                 } else {
-                    echo "<tr><td colspan='10'>No projects found for this college</td></tr>";
+                    echo "<tr><td colspan='5'>No budget event details found for this college</td></tr>";
                 }
 
                 echo "</tbody></table></div>";
+
                 echo "</div>"; // End of college section
             }
 
-            $conn->close();
+            $conn->close(); // Close the connection after processing
             ?>
         </div>
 
         <script>
-            function filterTable(college) {
-                // Hide all college sections
-                const sections = document.querySelectorAll('.college-section');
-                sections.forEach(section => {
-                    section.style.display = 'none';
-                });
+             function filterTable(college) {
+        // Hide all college sections
+        const sections = document.querySelectorAll('.college-section');
+        sections.forEach(section => {
+            section.style.display = 'none';
+        });
 
-                // Show the selected college section
-                const selectedSection = document.getElementById(`${college}_section`);
-                if (selectedSection) {
-                    selectedSection.style.display = 'block';
-                }
-            }
+        // Show the selected college section
+        const selectedSection = document.getElementById(`${college}_section`);
+        if (selectedSection) {
+            selectedSection.style.display = 'block';
+            console.log(`Displaying section: ${college}_section`); // Debugging line
+        } else {
+            console.warn(`Section not found: ${college}_section`); // Debugging line
+        }
+    }
 
-            // Show CAS section by default on page load
-            document.addEventListener('DOMContentLoaded', function() {
-                filterTable('cas');
-            });
+    // Show CAS section by default on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        filterTable('cas');
+    });
 
             function confirmLogout(event) {
-    event.preventDefault();
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you really want to log out?",
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6', // Green confirm button
-        cancelButtonColor: '#dc3545', // Red cancel button
-        confirmButtonText: 'Yes, log me out',
-        cancelButtonText: 'Cancel',
-        customClass: {
-            popup: 'swal-popup',
-            confirmButton: 'swal-confirm',
-            cancelButton: 'swal-cancel'
-        },
-        // Additional custom styles via CSS can be added here
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Pass action in the fetch call
-            fetch('logout.php?action=logout')
-                .then(response => response.text())
-                .then(data => {
-                    console.log(data); // Log response for debugging
-                    window.location.href = 'roleaccount.php';
-                })
-                .catch(error => console.error('Error:', error));
-        }
-    });
-}
+                event.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to log out?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
+                    confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
+                    // Additional custom styles via CSS can be added here
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Pass action in the fetch call
+                        fetch('logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+                                window.location.href = 'roleaccount.php';
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
+                });
+            }
 
             // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
@@ -626,58 +707,64 @@ if (!isset($_SESSION['username'])) {
                 }
             });
 
-            var dropdown = document.getElementsByClassName("dropdown-btn");
-                var i;
+            var dropdowns = document.getElementsByClassName("dropdown-btn");
 
-                for (i = 0; i < dropdown.length; i++) {
-                dropdown[i].addEventListener("click", function() {
-                    var dropdownContent = this.nextElementSibling;
+            for (let i = 0; i < dropdowns.length; i++) {
+                dropdowns[i].addEventListener("click", function () {
+                    // Close all dropdowns first
+                    let dropdownContents = document.getElementsByClassName("dropdown-container");
+                    for (let j = 0; j < dropdownContents.length; j++) {
+                        dropdownContents[j].style.display = "none";
+                    }
+
+                    // Toggle the clicked dropdown's visibility
+                    let dropdownContent = this.nextElementSibling;
                     if (dropdownContent.style.display === "block") {
-                    dropdownContent.style.display = "none";
+                        dropdownContent.style.display = "none";
                     } else {
-                    dropdownContent.style.display = "block";
+                        dropdownContent.style.display = "block";
                     }
                 });
             }
 
             document.addEventListener('DOMContentLoaded', function () {
-        const username = "<?php echo $_SESSION['username']; ?>"; // Get the username from PHP session
+                const username = "<?php echo $_SESSION['username']; ?>"; // Get the username from PHP session
 
-        // Function to log activity
-        function logActivity(buttonName) {
-            const timestamp = new Date().toISOString(); // Get current timestamp
+                // Function to log activity
+                function logActivity(buttonName) {
+                    const timestamp = new Date().toISOString(); // Get current timestamp
 
-            fetch('log_activity.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    buttonFunction: buttonName // Updated to match the PHP variable
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'error') {
-                    console.error('Error logging activity:', data.message);
-                } else {
-                    console.log('Activity logged successfully:', data);
+                    fetch('log_activity.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            buttonFunction: buttonName // Updated to match the PHP variable
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'error') {
+                            console.error('Error logging activity:', data.message);
+                        } else {
+                            console.log('Activity logged successfully:', data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error logging activity:', error);
+                    });
                 }
-            })
-            .catch(error => {
-                console.error('Error logging activity:', error);
-            });
-        }
 
-        // Add event listeners specifically to buttons and links
-        const trackableElements = document.querySelectorAll('button, a'); // Select all buttons and links
-        trackableElements.forEach(element => {
-            element.addEventListener('click', function (event) {
-                const buttonName = this.tagName === 'BUTTON' ? this.innerText.trim() || "Unnamed Button" : this.textContent.trim() || "Unnamed Link";
-                logActivity(buttonName); // Log the button/link activity
+                // Add event listeners specifically to buttons and links
+                const trackableElements = document.querySelectorAll('button, a'); // Select all buttons and links
+                trackableElements.forEach(element => {
+                    element.addEventListener('click', function (event) {
+                        const buttonName = this.tagName === 'BUTTON' ? this.innerText.trim() || "Unnamed Button" : this.textContent.trim() || "Unnamed Link";
+                        logActivity(buttonName); // Log the button/link activity
+                    });
+                });
             });
-        });
-    });
         </script>
     </body>
 </html>
