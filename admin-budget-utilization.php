@@ -579,7 +579,7 @@ if (!isset($_SESSION['username'])) {
 
                 // Fetch budget event details for the second table (Budget Table)
                 $budgetTable = "{$college}_budget"; // Budget table for each college
-                $budgetSql = "SELECT * FROM $budgetTable ORDER BY details_id";
+                $budgetSql = "SELECT * FROM cas_budget ORDER BY details_id";
                 $budgetResult = $conn->query($budgetSql);
 
                 // Second Table: Budget Event Details (Budget Table)
