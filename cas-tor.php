@@ -7,14 +7,13 @@ if (!isset($_SESSION['uname'])) {
     exit;
 }
 
-// Database credentials for proj_list
-$servername = "localhost";
-$username_db = "root";
-$password_db = "";
-$dbname_user_registration = "user_registration";
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
 // Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername, $username_db, $password_db, $dbname_user_registration);
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
 
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
@@ -705,14 +704,14 @@ $conn_profile->close();
             </div>
 
             <?php
-            // Database connection
-            $servername = "localhost";
-            $username = "root";
-            $password = "";
-            $dbname = "resource_utilization"; // Change to your actual database name
+            // Database credentials
+            $servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+            $username_resource = "dnr20srzjycb99tw";
+            $password_resource = "ndfnpz4j74v8t0p7";
+            $dbname_resource = "x8uwt594q5jy7a7o";
 
             // Create connection
-            $conn = new mysqli($servername, $username, $password, $dbname);
+            $conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
 
             // Check connection
             if ($conn->connect_error) {

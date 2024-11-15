@@ -9,41 +9,18 @@ if (!isset($_SESSION['uname'])) {
 }
 
 // Database credentials
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "resource_utilization"; // Your database name
-$dbname_user_registration = "user_registration";
+$servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_resource = "dnr20srzjycb99tw";
+$password_resource = "ndfnpz4j74v8t0p7";
+$dbname_resource = "x8uwt594q5jy7a7o";
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
 
 // Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-
-// Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername, $username, $password, $dbname_user_registration);
-
-if ($conn_profile->connect_error) {
-    die("Connection failed: " . $conn_profile->connect_error);
-}
-
-$uname = $_SESSION['uname'];
-$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
-$stmt = $conn_profile->prepare($sql_profile);
-$stmt->bind_param("s", $uname);
-$stmt->execute();
-$result_profile = $stmt->get_result();
-
-$profilePicture = null;
-if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
-    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
-}
-
-$stmt->close();
-$conn_profile->close();
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -141,6 +118,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Close the database connection
 $conn->close();
+
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
+// Fetch the profile picture from the colleges table in user_registration
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
+}
+
+$uname = $_SESSION['uname'];
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $uname);
+$stmt->execute();
+$result_profile = $stmt->get_result();
+
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
+}
+
+$stmt->close();
+$conn_profile->close();
 ?>
 
 
@@ -774,20 +778,21 @@ $conn->close();
             </div>
 
             <?php
-            // Database connection
-            $servername = "localhost";
-            $username = "root";
-            $password = "";
-            $dbname = "resource_utilization"; // Change to your actual database name
+            // Database credentials
+            $servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+            $username_resource = "dnr20srzjycb99tw";
+            $password_resource = "ndfnpz4j74v8t0p7";
+            $dbname_resource = "x8uwt594q5jy7a7o";
 
             // Create connection
-            $conn = new mysqli($servername, $username, $password, $dbname);
+            $conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
 
             // Check connection
             if ($conn->connect_error) {
                 die("Connection failed: " . $conn->connect_error);
             }
             ?>
+
 
             <div class="data-details">
                 <!-- Table 1: Request Made By -->
