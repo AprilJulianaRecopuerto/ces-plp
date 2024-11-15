@@ -744,7 +744,7 @@ function fetchMessages() {
         setInterval(fetchMessages, 2000);
         fetchMessages(); // Initial fetch to load messages on page load
 
-            // Event listener to reset notifications on page load
+            // Event listener to reset notifications on page load   
             document.addEventListener("DOMContentLoaded", () => {
                 fetch('reset_notifications.php')
                     .then(response => response.json())
