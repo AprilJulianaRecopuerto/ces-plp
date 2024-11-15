@@ -8,13 +8,13 @@ if (!isset($_SESSION['username'])) {
 }
 
 // Database credentials for proj_list
-$servername = "localhost";
-$username_db = "root";
-$password_db = "";
-$dbname_proj_list = "proj_list";
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
 // Create connection to proj_list database
-$conn_proj_list = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
+$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
 // Check connection
 if ($conn_proj_list->connect_error) {
@@ -24,9 +24,13 @@ $query = "SELECT ProjectTitle, Description, StartDate FROM proj_list ORDER BY St
 $result = mysqli_query($conn, $query);
 }
 
-// Database credentials for mov
-$dbname_mov = "mov"; // Your MOV database name
-$conn_mov = new mysqli($servername, $username_db, $password_db, $dbname_mov);
+// Database credentials for proj_list
+$servername_mov = "arfo8ynm6olw6vpn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_mov = "tz8thfim1dq7l3rf";
+$password_mov = "wzt4gssgou2ofyo7";
+$dbname_mov = "uv1qyvm0b8oicg0v";
+
+$conn_mov = new mysqli($servername_mov, $username_mov, $password_mov, $dbname_mov);
 
 // Check connection for MOV database
 if ($conn_mov->connect_error) {
@@ -1284,19 +1288,19 @@ if (isset($_POST['delete_notification'])) {
 						<div class="activities-details">
 							<div class="total-activities-count">
 								<?php
-								// Database credentials
-								$servername = "localhost";
-								$username = "root";
-								$password = "";
-								$dbname = "proj_list";
+								// Database credentials for proj_list
+                                $servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                                $username_proj = "zf8r3n4qqjyrfx7o";
+                                $password_proj = "su6qmqa0gxuerg98";
+                                $dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-								// Create connection
-								$conn = new mysqli($servername, $username, $password, $dbname);
+                                // Create connection to proj_list database
+                                $conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
-								// Check connection
-								if ($conn->connect_error) {
-									die("Connection failed: " . $conn->connect_error);
-								}
+                                // Check connection
+                                if ($conn_proj_list->connect_error) {
+                                    die("Connection failed: " . $conn_proj_list->connect_error);
+                                }
 
 								// SQL query to count total activities across multiple tables
 								$sql = "
@@ -1382,19 +1386,19 @@ if (isset($_POST['delete_notification'])) {
 
 				<canvas id="projectsChart"></canvas>
 				<?php
-				// Database connection details
-				$host = 'localhost';  // or your host
-				$db = 'proj_list';     // database name
-				$user = 'root'; // database username
-				$pass = ''; // database password
+				// Database credentials for proj_list
+                $servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                $username_proj = "zf8r3n4qqjyrfx7o";
+                $password_proj = "su6qmqa0gxuerg98";
+                $dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-				// Create a connection to the database
-				$conn = new mysqli($host, $user, $pass, $db);
+                // Create connection to proj_list database
+                $conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
-				// Check if connection was successful
-				if ($conn->connect_error) {
-					die("Connection failed: " . $conn->connect_error);
-				}
+                // Check connection
+                if ($conn_proj_list->connect_error) {
+                    die("Connection failed: " . $conn_proj_list->connect_error);
+                }
 
 				// Initialize selected month and year as empty strings
 				$selectedMonth = '';
@@ -1469,17 +1473,17 @@ if (isset($_POST['delete_notification'])) {
 
                 <?php
                 // Database connection details
-                $servername = "localhost";
-                $username = "root";
-                $password = "";
-                $dbname = "admin_todo_list"; // Database name
+                $servername_todo = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                $username_todo = "t9riamok80kmok3h";
+                $password_todo = "lzh13ihy0axfny6d";
+                $dbname_todo = "lzh13ihy0axfny6d"; // Database name
 
                 // Create connection
-                $conn = new mysqli($servername, $username, $password, $dbname);
+                $conn_todo = new mysqli($servername, $username, $password, $dbname);
 
                 // Check connection
-                if ($conn->connect_error) {
-                    die("Connection failed: " . $conn->connect_error);
+                if ($conn_todo->connect_error) {
+                    die("Connection failed: " . $conn_todo->connect_error);
                 }
 
                 // Get the selected table from the form, default to cas_tasks if not set
