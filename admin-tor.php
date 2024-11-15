@@ -582,7 +582,7 @@ if (!isset($_SESSION['username'])) {
 
                 // Fetch Food Event records for each college
                 $foodTable = "{$college}_food";
-                $foodSql = "SELECT * FROM $foodTable ORDER BY cas_tor_id, event_date";
+                $foodSql = "SELECT * FROM cas_food ORDER BY cas_tor_id, event_date";
                 $foodResult = $conn->query($foodSql);
 
                 // Initialize array to hold data and calculate rowspans
