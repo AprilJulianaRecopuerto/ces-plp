@@ -33,10 +33,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             unset($_SESSION['lockout_time']);
         }
 
-        $servername = "localhost";
-        $username = "root"; // replace with your database username
-        $password = ""; // replace with your database password
-        $dbname = "user_registration";
+        // Database connection details
+        $servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+        $username = "equ6v8i5llo3uhjm"; // replace with your database username
+        $password = "vkfaxm2are5bjc3q"; // replace with your database password
+        $dbname = "ylwrjgaks3fw5sdj";
 
         // Create connection
         $conn = new mysqli($servername, $username, $password, $dbname);
@@ -97,8 +98,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         // Close the insert statement
                         $insertStmt->close();
                     }
-                    
-
 
                     header("Location: loginpage.php");
                     exit;

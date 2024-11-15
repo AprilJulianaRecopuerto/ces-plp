@@ -34,10 +34,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             unset($_SESSION['lockout_time']);
         }
 
-        $servername = "localhost";
-        $username = "root"; // replace with your database username
-        $password = ""; // replace with your database password
-        $dbname = "user_registration";
+        // Database connection details
+        $servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+        $username = "equ6v8i5llo3uhjm"; // replace with your database username
+        $password = "vkfaxm2are5bjc3q"; // replace with your database password
+        $dbname = "ylwrjgaks3fw5sdj";
 
         // Create connection
         $conn = new mysqli($servername, $username, $password, $dbname);
@@ -47,61 +48,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             die("Connection failed: " . $conn->connect_error);
         }
 
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+        $email = $_POST['email'];
+        $password = $_POST['password'];
 
-    $sql = "SELECT id, uname, password, department FROM colleges WHERE email = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $stmt->store_result();
+        $sql = "SELECT id, uname, password, department FROM colleges WHERE email = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $stmt->store_result();
 
-    if ($stmt->num_rows > 0) {
-        $stmt->bind_result($userId, $username, $storedPassword, $department);
-        $stmt->fetch();
+        if ($stmt->num_rows > 0) {
+            $stmt->bind_result($userId, $username, $storedPassword, $department);
+            $stmt->fetch();
 
-        if ($password === $storedPassword) {
-            if ($collegeID === $userId) {
-                $_SESSION['uname'] = $username;
-                $_SESSION['collegeID'] = $userId;
-                $_SESSION['department'] = $department;
-                $_SESSION['login_success'] = true; // Set login success session variable
-                $_SESSION['redirect'] = $department;
-                $_SESSION['login_attempts'] = 0; // Reset attempts
+            if ($password === $storedPassword) {
+                if ($collegeID === $userId) {
+                    $_SESSION['uname'] = $username;
+                    $_SESSION['collegeID'] = $userId;
+                    $_SESSION['department'] = $department;
+                    $_SESSION['login_success'] = true; // Set login success session variable
+                    $_SESSION['redirect'] = $department;
+                    $_SESSION['login_attempts'] = 0; // Reset attempts
 
-                $loginTime = date('Y-m-d H:i:s'); // Get the current timestamp
-                $insertTimestampSql = "INSERT INTO college_history (uname, ts, logout_ts) VALUES (?, ?, NULL)";
-                $insertStmt = $conn->prepare($insertTimestampSql);
-                
-                if ($insertStmt === false) {
-                    die("MySQL prepare failed: " . $conn->error);
-                }
+                    $loginTime = date('Y-m-d H:i:s'); // Get the current timestamp
+                    $insertTimestampSql = "INSERT INTO college_history (uname, ts, logout_ts) VALUES (?, ?, NULL)";
+                    $insertStmt = $conn->prepare($insertTimestampSql);
+                    
+                    if ($insertStmt === false) {
+                        die("MySQL prepare failed: " . $conn->error);
+                    }
 
-                // Bind parameters: first is the username, second is the login timestamp
-                $insertStmt->bind_param("ss", $username, $loginTime);
-                
-                // Execute the insert
-                if (!$insertStmt->execute()) {
-                    die("Error inserting login timestamp: " . $insertStmt->error); // Display specific error
+                    // Bind parameters: first is the username, second is the login timestamp
+                    $insertStmt->bind_param("ss", $username, $loginTime);
+                    
+                    // Execute the insert
+                    if (!$insertStmt->execute()) {
+                        die("Error inserting login timestamp: " . $insertStmt->error); // Display specific error
+                    } else {
+                        // Optional: Set a success message here
+                        // echo "Login timestamp inserted successfully.";
+                    }
+
+                    // Close the insert statement
+                    $insertStmt->close();
+                    
+                    header("Location: ".$_SERVER['PHP_SELF']);
+                    exit;
                 } else {
-                    // Optional: Set a success message here
-                    // echo "Login timestamp inserted successfully.";
+                    $error = 'ID does not match with the email and password!';
                 }
-
-                // Close the insert statement
-                $insertStmt->close();
-                
-                header("Location: ".$_SERVER['PHP_SELF']);
-                exit;
             } else {
-                $error = 'ID does not match with the email and password!';
+                $error = 'Invalid email or password!';
             }
         } else {
             $error = 'Invalid email or password!';
         }
-    } else {
-        $error = 'Invalid email or password!';
-    }
 
             // Increment login attempts after a failed login
             $_SESSION['login_attempts'] = isset($_SESSION['login_attempts']) ? $_SESSION['login_attempts'] + 1 : 1;

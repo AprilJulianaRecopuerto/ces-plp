@@ -2,10 +2,10 @@
 session_start();
 
 // Database connection details
-$servername = "localhost";
-$username = "root"; // replace with your database username
-$password = ""; // replace with your database password
-$dbname = "user_registration";
+$servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "equ6v8i5llo3uhjm"; // replace with your database username
+$password = "vkfaxm2are5bjc3q"; // replace with your database password
+$dbname = "ylwrjgaks3fw5sdj";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -594,9 +594,9 @@ $conn->close();
         <!-- Header Logo -->
         <header class="header">
         <div class="logo">
-           <a href="loadingpage.php"> <img src="images/logo.png" alt="Logo"></a>
+            <a href="loadingpage.php"> <img src="images/logo.png" alt="Logo"></a>
         </div>
-    
+
         <nav class="navbar">
             <div class="dropdown">
                 <button class="dropbtn">About us &nbsp; 
@@ -627,7 +627,7 @@ $conn->close();
             <a href="programs-act.php" class="nav-item">Programs and Activities</a>
         </nav>
 
-            <button class="home-button">Home</button>
+        <button class="home-button">Home</button>
         </header>
 
         <!-- Container for Slider and Image Banner -->
