@@ -8,15 +8,14 @@ if (!isset($_SESSION['uname'])) {
     exit;
 }
 
-// Database credentials for mov
-$servername = "localhost";
-$username_db = "root";
-$password_db = "";
-$dbname_mov = "task_management";
-$dbname_user_registration = "user_registration";
+// Database credentials
+$servername = "wp433upk59nnhpoh.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "wbepy9iso2pubu7f";
+$password = "l0a6y3bl2x7lfiyy";
+$dbname_mov = "qlajsw6auv4giknn"; // Update to your actual database name
 
 // Create connection to mov database
-$conn_mov = new mysqli($servername, $username_db, $password_db, $dbname_mov);
+$conn_mov = new mysqli($servername, $username, $password, $dbname_mov);
 
 // Check connection
 if ($conn_mov->connect_error) {
@@ -73,8 +72,13 @@ unset($_SESSION['message']); // Clear the message after displaying it
 
 $conn_mov->close();
 
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
 // Create connection to user_registration database
-$conn_user_registration = new mysqli($servername, $username_db, $password_db, $dbname_user_registration);
+$conn_user_registration = new mysqli($sn, $un, $psd, $dbname_user_registration);
 
 // Check connection
 if ($conn_user_registration->connect_error) {
@@ -95,7 +99,7 @@ $conn_user_registration->close();
 $departmentName = htmlspecialchars($departmentName);
 
 // Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername, $username_db, $password_db, $dbname_user_registration);
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }
@@ -683,10 +687,10 @@ $conn_profile->close();
                     <tbody>
                         <?php
                         // Database credentials
-                        $servername = "localhost";
-                        $username = "root";
-                        $password = "";
-                        $dbname = "task_management";
+                        $servername = "wp433upk59nnhpoh.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                        $username = "wbepy9iso2pubu7f";
+                        $password = "l0a6y3bl2x7lfiyy";
+                        $dbname = "qlajsw6auv4giknn"; // Update to your actual database name
 
                         // Create connection
                         $conn = new mysqli($servername, $username, $password, $dbname);

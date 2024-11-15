@@ -551,6 +551,37 @@ $departmentName = htmlspecialchars($departmentName);
             .pagination-link:hover {
                 background-color: #45a049; /* Darker green on hover */
             }
+
+            /* Chat styles */
+            .navbar .profile-container {
+                display: flex;
+                align-items: center;
+            }
+
+            .chat-icon {
+                font-size: 20px;
+                color: #333;
+                text-decoration: none;
+                position: relative; /* To position the badge correctly */
+                margin-right: 30px;
+                margin-top: 8px;
+                margin-left: -37px;
+            }
+
+            .notification-badge {
+                display: inline-block;
+                background-color: red; /* Change this to your preferred color */
+                color: white;
+                border-radius: 50%;
+                width: 20px; /* Width of the badge */
+                height: 20px; /* Height of the badge */
+                text-align: center;
+                font-weight: bold;
+                position: absolute; /* Position it relative to the chat icon */
+                top: -5px; /* Adjust as needed */
+                right: -10px; /* Adjust as needed */
+                font-size: 14px; /* Size of the exclamation point */
+            }
         </style>
     </head>
 
@@ -558,25 +589,33 @@ $departmentName = htmlspecialchars($departmentName);
         <nav class="navbar">
             <h2>Budget Allocation</h2> 
 
-            <div class="profile" id="profileDropdown">
-                <?php
-                    // Check if a profile picture is set in the session
-                    if (!empty($_SESSION['picture'])) {
-                        // Show the profile picture
-                        echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
-                    } else {
-                        // Get the first letter of the username for the placeholder
-                        $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
-                        echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
-                    }
-                ?>
+            <div class="profile-container">
+                <!-- Chat Icon with Notification Badge -->
+                <a href="cas-chat.php" class="chat-icon" onclick="resetNotifications()">
+                    <i class="fa fa-comments"></i>
+                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+                </a>
 
-                <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+                <div class="profile" id="profileDropdown">
+                    <?php
+                        // Check if a profile picture is set in the session
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
+                        } else {
+                            // Get the first letter of the username for the placeholder
+                            $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
+                            echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
+                        }
+                    ?>
 
-                <i class="fa fa-chevron-down dropdown-icon"></i>
-                <div class="dropdown-menu">
-                    <a href="cas-your-profile.php">Profile</a>
-                    <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+
+                    <i class="fa fa-chevron-down dropdown-icon"></i>
+                    <div class="dropdown-menu">
+                        <a href="cas-your-profile.php">Profile</a>
+                        <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -614,15 +653,15 @@ $departmentName = htmlspecialchars($departmentName);
                     <a href="cas-mov.php">Mode of Verification</a>
                 </div>
 
-                <li><a href="responses.php"><img src="images/setting.png">Responses</a></li>
+                <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
-                    <img src="images/resource.png"> Audit Trails
+                    <img src="images/logs.png"> Audit Trails
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="cas-login.php">Log In History</a>
+                    <a href="cas-history.php">Log In History</a>
                     <a href="cas-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>
