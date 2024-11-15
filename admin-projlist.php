@@ -20,7 +20,7 @@ if ($conn_proj_list->connect_error) {
     die("Connection failed: " . $conn_proj_list->connect_error);
 	
 $query = "SELECT ProjectTitle, Description, StartDate FROM proj_list ORDER BY StartDate DESC LIMIT 5";
-$result = mysqli_query($conn, $query);
+$result = mysqli_query($conn_proj_list, $query);
 }
 
 // Database credentials for proj_list
@@ -584,9 +584,9 @@ if (isset($_GET['fetch_notifications'])) {
                         $table = isset($_GET['table']) ? $_GET['table'] : 'cas'; // Default to 'cas' if no table is selected
                         // Fetch projects in descending order
                         $sql = "SELECT * FROM $table ORDER BY id DESC"; // or replace 'id' with the relevant column you want to sort by
-                        $result = $conn->query($sql);
+                        $result = $conn_proj_list->query($sql);
 
-                        $result = $conn->query($sql);
+                        $result = $conn_proj_list->query($sql);
 
                         if ($result->num_rows > 0) {
                             // Output data of each row
@@ -616,7 +616,7 @@ if (isset($_GET['fetch_notifications'])) {
                         } else {
                             echo "<tr><td colspan='17'>No records found</td></tr>";
                         }
-                        $conn->close();
+                        $conn_proj_list->close();
                         ?>
                     </tbody>
                 </table>

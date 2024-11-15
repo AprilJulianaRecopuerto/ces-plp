@@ -21,7 +21,7 @@ if ($conn_proj_list->connect_error) {
     die("Connection failed: " . $conn_proj_list->connect_error);
 	
 $query = "SELECT ProjectTitle, Description, StartDate FROM proj_list ORDER BY StartDate DESC LIMIT 5";
-$result = mysqli_query($conn, $query);
+$result = mysqli_query($conn_proj_list, $query);
 }
 
 // Database credentials for proj_list
@@ -1322,7 +1322,7 @@ if (isset($_POST['delete_notification'])) {
 									echo "0";
 								}
 
-								$conn->close();
+								$conn_proj_list->close();
 								?>
 							</div>
 							<img src="images/total.png" alt="Up Icon">
@@ -1428,7 +1428,7 @@ if (isset($_POST['delete_notification'])) {
 						$sql .= " AND YEAR(date_of_sub) = '$selectedYear'";
 					}
 
-					$result = $conn->query($sql);
+					$result = $conn_proj_list->query($sql);
 
 					if ($result->num_rows > 0) {
 						while ($row = $result->fetch_assoc()) {
@@ -1440,7 +1440,7 @@ if (isset($_POST['delete_notification'])) {
 				}
 
 				// Close the connection
-				$conn->close();
+				$conn_proj_list->close();
 				?>
 			</div>
 
@@ -1491,7 +1491,7 @@ if (isset($_POST['delete_notification'])) {
 
                 // Fetch tasks from the selected table
                 $sql = "SELECT * FROM $selectedTable";
-                $result = $conn->query($sql);
+                $result = $conn_todo->query($sql);
 
                 ?>
 
@@ -1554,7 +1554,7 @@ if (isset($_POST['delete_notification'])) {
 
                 <?php
                 // Close connection
-                $conn->close();
+                $conn_todo->close();
                 ?>
             </div>
 
