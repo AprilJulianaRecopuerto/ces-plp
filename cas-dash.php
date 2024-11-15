@@ -1145,10 +1145,10 @@ $conn->close();
                 <canvas id="projectsChart"></canvas>
                 <?php
                 // Database connection details
-                $host = 'localhost';  // or your host
-                $db = 'proj_list';     // database name
-                $user = 'root'; // database username
-                $pass = ''; // database password
+                $host = 'ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com';  // or your host
+                $db = 'hpvs3ggjc4qfg9jp';     // database name
+                $user = 'zf8r3n4qqjyrfx7o'; // database username
+                $pass = 'su6qmqa0gxuerg98'; // database password
 
                 // Create a connection to the database
                 $conn = new mysqli($host, $user, $pass, $db);
@@ -1208,10 +1208,10 @@ $conn->close();
 
                 <?php
                 // Database connection details
-                $servername = "localhost";
-                $username = "root";
-                $password = "";
-                $dbname = "admin_todo_list";  // Database for tasks
+                $servername = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                $username = "t9riamok80kmok3h";
+                $password = "lzh13ihy0axfny6d";
+                $dbname = "g8ri1hhtsfx77ptb";  // Database for tasks
 
                 // Create connection
                 $conn = new mysqli($servername, $username, $password, $dbname);
