@@ -1479,7 +1479,7 @@ if (isset($_POST['delete_notification'])) {
                 $dbname_todo = "lzh13ihy0axfny6d"; // Database name
 
                 // Create connection
-                $conn_todo = new mysqli($servername, $username, $password, $dbname);
+                $conn_todo = new mysqli($servername_todo, $username_todo, $password_todo, $dbname_todo);
 
                 // Check connection
                 if ($conn_todo->connect_error) {
