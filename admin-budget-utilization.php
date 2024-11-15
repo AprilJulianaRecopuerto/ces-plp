@@ -508,15 +508,15 @@ if (!isset($_SESSION['username'])) {
         </div>
 
         <div class="content-budget">
-            <div class="button-container">
-                <button class="filter-button" onclick="filterTable('cas')">CAS</button>
-                <button class="filter-button" onclick="filterTable('cba')">CBA</button>
-                <button class="filter-button" onclick="filterTable('ccs')">CCS</button>
-                <button class="filter-button" onclick="filterTable('coed')">COED</button>
-                <button class="filter-button" onclick="filterTable('coe')">COE</button>
-                <button class="filter-button" onclick="filterTable('cihm')">CIHM</button>
-                <button class="filter-button" onclick="filterTable('con')">CON</button>
-            </div>
+        <div class="button-container">
+        <button class="filter-button" onclick="filterTable('cas')">CAS</button>
+        <button class="filter-button" onclick="filterTable('cba')">CBA</button>
+        <button class="filter-button" onclick="filterTable('ccs')">CCS</button>
+        <button class="filter-button" onclick="filterTable('coed')">COED</button>
+        <button class="filter-button" onclick="filterTable('coe')">COE</button>
+        <button class="filter-button" onclick="filterTable('cihm')">CIHM</button>
+        <button class="filter-button" onclick="filterTable('con')">CON</button>
+    </div>
 
             <?php
             // Database credentials
@@ -639,7 +639,7 @@ if (!isset($_SESSION['username'])) {
         </div>
 
         <script>
-             function filterTable(college) {
+            function filterTable(college) {
         // Hide all college sections
         const sections = document.querySelectorAll('.college-section');
         sections.forEach(section => {
@@ -650,9 +650,6 @@ if (!isset($_SESSION['username'])) {
         const selectedSection = document.getElementById(`${college}_section`);
         if (selectedSection) {
             selectedSection.style.display = 'block';
-            console.log(`Displaying section: ${college}_section`); // Debugging line
-        } else {
-            console.warn(`Section not found: ${college}_section`); // Debugging line
         }
     }
 
