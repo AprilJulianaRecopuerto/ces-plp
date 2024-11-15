@@ -11,7 +11,7 @@ if (!isset($_SESSION['username'])) {
 $servername = "uoa25ublaow4obx5.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username = "lcq4zy2vi4302d1q";
 $password = "xswigco0cdxdi5dd";
-$dbname = "kup80a8cc3mqs4ao"; // Changed database to `messages`
+$dbname = "kup80a8cc3mqs4ao"; // Messages database
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -20,7 +20,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch user role
+// Fetch user role from the `user_registration` schema (specify schema)
 $userRoleSql = "SELECT roles FROM user_registration.users WHERE username = ?";
 $roleStmt = $conn->prepare($userRoleSql);
 $roleStmt->bind_param("s", $_SESSION['username']);
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_message_id'])) 
     $deleteStmt->close();
 }
 
-// Fetch all messages from `sent_messages`
+// Fetch all messages from `sent_messages` and related user data
 $chatMessages = [];
 $fetchSql = "
     SELECT sent_messages.*, 
@@ -80,6 +80,7 @@ $fetchStmt->close();
 // Close connections
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
