@@ -6,18 +6,18 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-// Database connection credentials
-$dbHost = 'localhost'; // Database host
-$dbUser = 'root';      // Database username
-$dbPass = '';          // Database password
-$dbName = 'proj_list'; // Database name
+// Database credentials for proj_list
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-// Create a new connection
-$conn = new mysqli($dbHost, $dbUser, $dbPass, $dbName);
+// Create connection to proj_list database
+$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
 // Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($conn_proj_list->connect_error) {
+    die("Connection failed: " . $conn_proj_list->connect_error);
 }
 
 // Check if 'month' and 'year' parameters are present in the GET request for event days
@@ -34,7 +34,7 @@ if (isset($_GET['month']) && isset($_GET['year'])) {
 
     foreach ($tables as $table) {
         // Use prepared statements to prevent SQL injection
-        $stmt = $conn->prepare("SELECT DAY(dateof_imple) AS event_day FROM $table WHERE MONTH(dateof_imple) = ? AND YEAR(dateof_imple) = ?");
+        $stmt = $conn_proj_list->prepare("SELECT DAY(dateof_imple) AS event_day FROM $table WHERE MONTH(dateof_imple) = ? AND YEAR(dateof_imple) = ?");
         $stmt->bind_param("ii", $selectedMonth, $selectedYear);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -72,7 +72,7 @@ if (isset($_GET['date'])) {
 
     foreach ($tables as $table) {
         // Use prepared statements to prevent SQL injection
-        $stmt = $conn->prepare("SELECT dept, proj_title, dateof_imple FROM $table WHERE dateof_imple = ?");
+        $stmt = $conn_proj_list->prepare("SELECT dept, proj_title, dateof_imple FROM $table WHERE dateof_imple = ?");
         $stmt->bind_param("s", $selectedDate);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -88,7 +88,7 @@ if (isset($_GET['date'])) {
                 ];
             }
         } else {
-            echo "<p style='color: red;'>Error in query for $table: " . htmlspecialchars($conn->error) . "</p>"; // Output error if the query fails
+            echo "<p style='color: red;'>Error in query for $table: " . htmlspecialchars($conn_proj_list->error) . "</p>"; // Output error if the query fails
             exit;
         }
 
@@ -96,7 +96,7 @@ if (isset($_GET['date'])) {
     }
 
     // Close the connection
-    $conn->close();
+    $conn_proj_list->close();
 
     // Output the events in a structured way
     echo "<p style='font-weight: bold; 
@@ -134,9 +134,7 @@ if (isset($_GET['date'])) {
 }
 
 // Close the database connection if no specific query is made
-$conn->close();
-
-
+$conn_proj_list->close();
 ?>
 
 
