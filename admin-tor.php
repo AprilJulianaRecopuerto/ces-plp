@@ -529,10 +529,10 @@ if (!isset($_SESSION['username'])) {
             $servername = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
             $username = "dnr20srzjycb99tw";
             $password = "ndfnpz4j74v8t0p7";
-            $dbname = "x8uwt594q5jy7a7o";
+            $dbname_resource = "x8uwt594q5jy7a7o";
 
             // Create connection
-            $conn = new mysqli($servername, $username, $password, $dbname);
+            $conn = new mysqli($servername, $username, $password, $dbname_resource);
 
             // Check connection
             if ($conn->connect_error) {
