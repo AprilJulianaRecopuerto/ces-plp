@@ -9,11 +9,10 @@ if (!isset($_SESSION['uname'])) {
 }
 
 // Database credentials
-$servername = "localhost";
-$username_db = "root";
-$password_db = "";
-$dbname_mov = "task_mov";
-$dbname_user_registration = "user_registration";
+$servername = "l7cup2om0gngra77.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_db = "gv5xdrzqyrg1qyvs";
+$password_db = "uv4wrt6zlfqzrpni";
+$dbname_mov = "tcbjgh4zgu5wj4bo";
 
 // Create connection to the database
 $conn_mov = new mysqli($servername, $username_db, $password_db, $dbname_mov);
@@ -146,9 +145,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $result = $conn_mov->query("SELECT * FROM cas_mov");
 $conn_mov->close();
 
-// Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername, $username_db, $password_db, $dbname_user_registration);
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
+// Fetch the profile picture from the colleges table in user_registration
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }
