@@ -8,11 +8,15 @@ if (!isset($_SESSION['uname'])) {
 }
 
 // Database connection to `messages` database
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "messages"; // Changed database to `messages`
-$dbname_user_registration = "user_registration"; // your database name
+$servername = "uoa25ublaow4obx5.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "lcq4zy2vi4302d1q";
+$password = "xswigco0cdxdi5dd";
+$dbname = "kup80a8cc3mqs4ao	"; // Changed database to `messages`
+
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj"; // your database name
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -22,7 +26,7 @@ if ($conn->connect_error) {
 }
 
 // Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername, $username, $password, $dbname_user_registration);
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }

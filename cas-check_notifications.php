@@ -2,10 +2,10 @@
 session_start();
 
 // Database connection to `messages` database
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "messages"; // Changed database to `messages`
+$servername = "uoa25ublaow4obx5.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "lcq4zy2vi4302d1q";
+$password = "xswigco0cdxdi5dd";
+$dbname = "kup80a8cc3mqs4ao	"; // Changed database to `messages`
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
