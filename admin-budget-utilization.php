@@ -543,7 +543,7 @@ if (!isset($_SESSION['username'])) {
                 echo "<h3>" . strtoupper($college) . " - Budget Allocation</h3>";
 
                 // Fetch budget records for the details table
-                $detailsTable = "{$college}_details"; // Budget details table for each college
+                $detailsTable = "cas_details"; // Budget details table for each college
                 $detailsSql = "SELECT * FROM cas_details";
                 $detailsResult = $conn->query($detailsSql);
 
@@ -578,7 +578,7 @@ if (!isset($_SESSION['username'])) {
                 echo "</div>"; // Close .table-container
 
                 // Fetch budget event details for the second table (Budget Table)
-                $budgetTable = "{$college}_budget"; // Budget table for each college
+                $budgetTable = "cas_budget"; // Budget table for each college
                 $budgetSql = "SELECT * FROM cas_budget ORDER BY details_id";
                 $budgetResult = $conn->query($budgetSql);
 
