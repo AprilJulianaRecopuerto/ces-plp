@@ -544,7 +544,7 @@ if (!isset($_SESSION['username'])) {
 
                 // Fetch budget records for the details table
                 $detailsTable = "{$college}_details"; // Budget details table for each college
-                $detailsSql = "SELECT * FROM $detailsTable";
+                $detailsSql = "SELECT * FROM cas_details";
                 $detailsResult = $conn->query($detailsSql);
 
                 // First Table: Budget Allocation (Details Table)

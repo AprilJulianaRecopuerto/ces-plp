@@ -409,6 +409,7 @@ $conn->close();
                 justify-content: flex-end; /* Align buttons to the right */
                 margin-bottom: 20px; /* Space below the buttons */
                 margin-right: 20px;
+                margin-top: 110px;
             }
 
             .button-container button {
