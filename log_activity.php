@@ -6,7 +6,7 @@ if (!isset($_SESSION['username'])) {
 date_default_timezone_set('Asia/Manila');
 
 // Database connection
-$log_conn = new mysqli('localhost', 'root', '', 'user_registration');
+$log_conn = new mysqli('l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com', 'equ6v8i5llo3uhjm', 'vkfaxm2are5bjc3q', 'ylwrjgaks3fw5sdj');
 if ($log_conn->connect_error) {
     exit(json_encode(["status" => "error", "message" => "Connection failed: " . $log_conn->connect_error]));
 }
