@@ -14,9 +14,8 @@ $un = "equ6v8i5llo3uhjm";
 $psd = "vkfaxm2are5bjc3q";
 $dbname_user_registration = "ylwrjgaks3fw5sdj";
 
-
 // Create connection to user_registration database
-$conn_user_registration = new mysqli($servername, $username, $password, $dbname_user_registration);
+$conn_user_registration = new mysqli($sn, $un, $psd, $dbname_user_registration);
 
 // Check connection
 if ($conn_user_registration->connect_error) {
