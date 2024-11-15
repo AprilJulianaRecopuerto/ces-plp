@@ -7,12 +7,16 @@ if (!isset($_SESSION['uname'])) {
     exit;
 }
 
-// Database connection credentials
-$dbHost = 'localhost'; // Database host
-$dbUser = 'root';      // Database username
-$dbPass = '';          // Database password
-$dbName = 'proj_list'; // Database name
-$dbname_user_registration = "user_registration";
+// Database credentials for proj_list
+$dbHost = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$dbUser = "t9riamok80kmok3h";
+$dbPass = "lzh13ihy0axfny6d";
+$dbName = "g8ri1hhtsfx77ptb";//projlist
+
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
 // Create a new connection
 $conn = new mysqli($dbHost, $dbUser, $dbPass, $dbName);
@@ -139,7 +143,7 @@ if (isset($_GET['date'])) {
 $conn->close();
 
 // Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($dbHost, $dbUser, $dbPass, $dbname_user_registration);
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }

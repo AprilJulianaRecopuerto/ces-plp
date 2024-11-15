@@ -15,11 +15,15 @@ if (!isset($_SESSION['uname'])) {
 }
 
 // Database credentials for proj_list
-$servername = "localhost";
-$username_db = "root";
-$password_db = "";
-$dbname_proj_list = "proj_list";
-$dbname_user_registration = "user_registration";
+$servername = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_db = "t9riamok80kmok3h";
+$password_db = "lzh13ihy0axfny6d";
+$dbname_proj_list = "g8ri1hhtsfx77ptb";//projlist
+
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
 // Create connection to proj_list database
 $conn_proj_list = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
@@ -67,8 +71,11 @@ if (isset($_POST['delete_id'])) {
 
         // Now send the email notification to the admin
         // Database connection to fetch admin email (user_registration database)
-        $user_dbname = "user_registration"; // For user data
-        $conn_users = new mysqli($servername, $username_db, $password_db, $user_dbname);
+        $srn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+        $undb = "equ6v8i5llo3uhjm";
+        $passdb = "vkfaxm2are5bjc3q";
+        $user_dbname = "ylwrjgaks3fw5sdj"; // For user data
+        $conn_users = new mysqli($srn, $undb, $passdb, $user_dbname);
 
         if ($conn_users->connect_error) {
             die("Connection to 'user_registration' database failed: " . $conn_users->connect_error);
@@ -133,11 +140,11 @@ unset($_SESSION['message']); // Clear the message after displaying it
 
 $conn_proj_list->close();
 
-// Database credentials for user_registration
-$dbname_user_registration = "user_registration";
+
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
 // Create connection to user_registration database
-$conn_user_registration = new mysqli($servername, $username_db, $password_db, $dbname_user_registration);
+$conn_user_registration = new mysqli($srn, $undb, $passdb, $dbname_user_registration);
 
 // Check connection
 if ($conn_user_registration->connect_error) {
