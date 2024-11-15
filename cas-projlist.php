@@ -15,23 +15,32 @@ if (!isset($_SESSION['uname'])) {
 }
 
 // Database credentials for proj_list
-$servername = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_db = "t9riamok80kmok3h";
-$password_db = "lzh13ihy0axfny6d";
-$dbname_proj_list = "g8ri1hhtsfx77ptb";//projlist
+// Database credentials for proj_list
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
+// Database connection details
+$servername_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_ur = "equ6v8i5llo3uhjm"; // replace with your database username
+$password_ur = "vkfaxm2are5bjc3q"; // replace with your database password
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
 // Create connection to proj_list database
-$conn_proj_list = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
+$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
 // Check connection
 if ($conn_proj_list->connect_error) {
     die("Connection failed: " . $conn_proj_list->connect_error);
 }
 
+// Database credentials for 'mov' (notifications)
 $servername_mov = "arfo8ynm6olw6vpn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username_mov = "tz8thfim1dq7l3rf";
 $password_mov = "wzt4gssgou2ofyo7";
 $dbname_mov = "uv1qyvm0b8oicg0v";
+
 $conn_mov = new mysqli($servername_mov, $username_mov, $password_mov, $dbname_mov);
 
 // Check connection for 'mov'
@@ -68,12 +77,8 @@ if (isset($_POST['delete_id'])) {
 
         // Now send the email notification to the admin
         // Database connection to fetch admin email (user_registration database)
-        $srn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-        $undb = "equ6v8i5llo3uhjm";
-        $passdb = "vkfaxm2are5bjc3q";
         $user_dbname = "ylwrjgaks3fw5sdj"; // For user data
-
-        $conn_users = new mysqli($srn, $undb, $passdb, $user_dbname);
+        $conn_users = new mysqli($servername_ur, $username_ur, $password_ur, $user_dbname);
 
         if ($conn_users->connect_error) {
             die("Connection to 'user_registration' database failed: " . $conn_users->connect_error);
@@ -138,11 +143,11 @@ unset($_SESSION['message']); // Clear the message after displaying it
 
 $conn_proj_list->close();
 
-
+// Database credentials for user_registration
 $dbname_user_registration = "ylwrjgaks3fw5sdj";
 
 // Create connection to user_registration database
-$conn_user_registration = new mysqli($srn, $undb, $passdb, $dbname_user_registration);
+$conn_user_registration = new mysqli($servername_ur, $username_ur, $password_ur, $dbname_user_registration);
 
 // Check connection
 if ($conn_user_registration->connect_error) {
@@ -163,7 +168,7 @@ $conn_user_registration->close();
 $departmentName = htmlspecialchars($departmentName);
 
 // Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername, $username_db, $password_db, $dbname_user_registration);
+$conn_profile = new mysqli($servername_ur, $username_ur, $password_ur, $dbname_user_registration);
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }
@@ -791,18 +796,18 @@ $conn_profile->close();
 
                     <tbody>
                         <?php
-                        // Database credentials for proj_list
-                        $servername = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-                        $username_db = "t9riamok80kmok3h";
-                        $password_db = "lzh13ihy0axfny6d";
-                        $dbname_proj_list = "g8ri1hhtsfx77ptb";//projlist
+                        // Database credentials
+                        $servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                        $username_proj = "zf8r3n4qqjyrfx7o";
+                        $password_proj = "su6qmqa0gxuerg98";
+                        $dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-                        // Create connection to proj_list database
-                        $conn_proj_list = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
+                        // Create connection
+                        $conn = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
                         // Check connection
-                        if ($conn_proj_list->connect_error) {
-                            die("Connection failed: " . $conn_proj_list->connect_error);
+                        if ($conn->connect_error) {
+                            die("Connection failed: " . $conn->connect_error);
                         }
 
                         // Pagination variables
@@ -817,8 +822,8 @@ $conn_profile->close();
                         $totalPages = ceil($totalRecords / $limit); // Calculate total pages
 
                         // Fetch projects with LIMIT, OFFSET, and ORDER BY DESC for pagination
-                        $sql = "SELECT * FROM cas ORDER BY id DESC LIMIT $limit OFFSET $offset";
-                        $result = $conn_proj_lis->query($sql);
+$sql = "SELECT * FROM cas ORDER BY id DESC LIMIT $limit OFFSET $offset";
+                        $result = $conn->query($sql);
 
                         if ($result->num_rows > 0) {
                             // Output data of each row
@@ -853,7 +858,7 @@ $conn_profile->close();
                             echo "<tr><td colspan='17'>No records found</td></tr>";
                         }
 
-                        $conn_proj_lis->close();
+                        $conn->close();
                         ?>
                     </tbody>
                 </table>
