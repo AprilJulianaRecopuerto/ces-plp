@@ -576,7 +576,7 @@ if ($conn->connect_error) {
 						echo "</table>";
 
 						// Close the connection
-						$connt->close();
+						$conn->close();
 						?>
 
                     </tbody>
