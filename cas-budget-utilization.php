@@ -9,22 +9,25 @@ if (!isset($_SESSION['uname'])) {
 }
 
 // Database credentials
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "budget_utilization";
+$servername = "alv4v3hlsipxnujn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "ctk6gpo1v7sapq1l";
+$password = "u1cgfgry8lu5rliz";
+$dbname = "oshzbyiasuos5kn4"; // Update to your actual database name
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
-if ($conn->connect_error) { // Use $conn here
-    die("Connection failed: " . $conn->connect_error); // Use $conn here
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
 
-// Database credentials for user_registration
-$dbname_user_registration = "user_registration";
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
 
 // Create connection to user_registration database
 $conn_user_registration = new mysqli($servername, $username, $password, $dbname_user_registration);
