@@ -3,7 +3,7 @@ session_start(); // Start the session
 
 // Check if the user is logged in
 if (!isset($_SESSION['username'])) {
-    header("Location: loginpage.php");
+    header("Location: roleaccount.php");
     exit;
 }
 ?>
@@ -520,10 +520,10 @@ if (!isset($_SESSION['username'])) {
 
             <?php
             // Database credentials
-            $servername = "localhost";
-            $username = "root";
-            $password = "";
-            $dbname = "budget_utilization"; // Update to your actual database name
+            $servername = "alv4v3hlsipxnujn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+            $username = "ctk6gpo1v7sapq1l";
+            $password = "u1cgfgry8lu5rliz";
+            $dbname = "oshzbyiasuos5kn4"; // Update to your actual database name
 
             // Create connection
             $conn = new mysqli($servername, $username, $password, $dbname);
