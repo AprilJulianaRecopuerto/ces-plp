@@ -2,10 +2,10 @@
 session_start();
 date_default_timezone_set('Asia/Manila');
 
-$servername = "localhost";
-$username = "root"; 
-$password = ""; 
-$dbname = "user_registration"; 
+$servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "equ6v8i5llo3uhjm"; // replace with your database username
+$password = "vkfaxm2are5bjc3q"; // replace with your database password
+$dbname = "ylwrjgaks3fw5sdj";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
