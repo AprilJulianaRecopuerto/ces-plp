@@ -8,10 +8,10 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "certificate";
+$servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "sh9sgtg12c8vyqoa";
+$password = "s3jzz232brki4nnv";
+$dbname = "szk9kdwhvpxy2g77";
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
@@ -797,7 +797,7 @@ $conn->close();
                     <tbody id="table-body">
                         <?php
                         // Establish a connection to the database
-                        $conn = new mysqli("localhost", "root", "", "certificate"); // Replace with actual DB name
+                        $conn = new mysqli("iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com", "sh9sgtg12c8vyqoa", "s3jzz232brki4nnv", "szk9kdwhvpxy2g77"); // Replace with actual DB name
 
                         // Check the connection
                         if ($conn->connect_error) {

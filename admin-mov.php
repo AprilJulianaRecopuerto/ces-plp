@@ -442,24 +442,24 @@ foreach ($colleges as $college) {
                 font-size: 22px; /* Adjust the font size as needed */
             }
 
-       /* Custom Popup */
-        .swal-popup {
-            font-family: "Poppins", sans-serif !important;
-            width: 400px;
-        }
+        /* Custom Popup */
+            .swal-popup {
+                font-family: "Poppins", sans-serif !important;
+                width: 400px;
+            }
 
-        /* SweetAlert confirm button */
-        .swal-confirm {
-            font-family: "Poppins", sans-serif !important;
-        }
+            /* SweetAlert confirm button */
+            .swal-confirm {
+                font-family: "Poppins", sans-serif !important;
+            }
 
-        /* SweetAlert cancel button */
-        .swal-cancel {
-            font-family: "Poppins", sans-serif !important;
-        }
+            /* SweetAlert cancel button */
+            .swal-cancel {
+                font-family: "Poppins", sans-serif !important;
+            }
 
-        /* Chat styles */
-        .navbar .profile-container {
+            /* Chat styles */
+            .navbar .profile-container {
                 display: flex;
                 align-items: center;
             }
