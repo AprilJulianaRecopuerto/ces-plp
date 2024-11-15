@@ -20,9 +20,23 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Database connection details
+$servername_u = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_u = "equ6v8i5llo3uhjm"; // replace with your database username
+$password_u = "vkfaxm2are5bjc3q"; // replace with your database password
+$dbname_u = "ylwrjgaks3fw5sdj";
+
+// Create connection
+$conn_u = new mysqli($servername_u, $username_u, $password_u, $dbname_u);
+
+// Check connection
+if ($conn_u->connect_error) {
+    die("Connection failed: " . $conn_u->connect_error);
+}
+
 // Fetch user role
 $userRoleSql = "SELECT roles FROM user_registration.users WHERE username = ?";
-$roleStmt = $conn->prepare($userRoleSql);
+$roleStmt = $conn_u->prepare($userRoleSql);
 $roleStmt->bind_param("s", $_SESSION['username']);
 $roleStmt->execute();
 $roleResult = $roleStmt->get_result();
