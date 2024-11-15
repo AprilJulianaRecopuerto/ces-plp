@@ -524,14 +524,16 @@ if (!isset($_SESSION['username'])) {
             </div>
 
             <?php
-            // Database connection
-            $servername = "localhost";
-            $username = "root";
-            $password = "";
-            $dbname = "resource_utilization";
+            // Database credentials
+            $servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+            $username_resource = "dnr20srzjycb99tw";
+            $password_resource = "ndfnpz4j74v8t0p7";
+            $dbname_resource = "x8uwt594q5jy7a7o";
 
-            $conn = new mysqli($servername, $username, $password, $dbname);
+            // Create connection
+            $conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
 
+            // Check connection
             if ($conn->connect_error) {
                 die("Connection failed: " . $conn->connect_error);
             }
