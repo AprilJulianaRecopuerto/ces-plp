@@ -8,11 +8,25 @@ if (!isset($_SESSION['username'])) {
 }
 
 // Database connection to `messages` database
-$servername = "uoa25ublaow4obx5.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username = "lcq4zy2vi4302d1q";
-$password = "xswigco0cdxdi5dd";
-$dbname = "kup80a8cc3mqs4ao"; // Changed database to `messages`
+$servername_mess = "uoa25ublaow4obx5.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_mess = "lcq4zy2vi4302d1q";
+$password_mess = "xswigco0cdxdi5dd";
+$dbname_mess = "kup80a8cc3mqs4ao"; // Changed database to `messages`
 
+$conn_mess = new mysqli($servername_mess, $username_mess, $password_mess, $dbname_mess);
+
+// Check connection
+if ($conn_mess->connect_error) {
+    die("Connection failed: " . $conn_mess->connect_error);
+}
+
+// Database connection details
+$servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "equ6v8i5llo3uhjm"; // replace with your database username
+$password = "vkfaxm2are5bjc3q"; // replace with your database password
+$dbname = "ylwrjgaks3fw5sdj";
+
+// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
@@ -22,7 +36,7 @@ if ($conn->connect_error) {
 
 // Fetch user role
 $userRoleSql = "SELECT roles FROM user_registration.users WHERE username = ?";
-$roleStmt = $conn->prepare($userRoleSql);
+$roleStmt = $conn_mess->prepare($userRoleSql);
 $roleStmt->bind_param("s", $_SESSION['username']);
 $roleStmt->execute();
 $roleResult = $roleStmt->get_result();
@@ -35,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['message'])) {
     $message = $_POST['message'];
 
     $insertSql = "INSERT INTO sent_messages (sender, role, message, timestamp) VALUES (?, ?, ?, NOW())"; // Adjusted to include role
-    $insertStmt = $conn->prepare($insertSql);
+    $insertStmt = $conn_mess->prepare($insertSql);
     $insertStmt->bind_param("sss", $sender, $userRole, $message); // Binding role
 
     if (!$insertStmt->execute()) {
@@ -50,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_message_id'])) 
 
     // Delete the message if it belongs to the current user
     $deleteSql = "DELETE FROM sent_messages WHERE id = ? AND sender = ?";
-    $deleteStmt = $conn->prepare($deleteSql);
+    $deleteStmt = $conn_mess->prepare($deleteSql);
     $deleteStmt->bind_param("is", $messageId, $_SESSION['username']);
     $deleteStmt->execute();
     $deleteStmt->close();
@@ -67,7 +81,7 @@ $fetchSql = "
     LEFT JOIN user_registration.users ON sent_messages.sender = users.username
     ORDER BY sent_messages.timestamp";
 
-$fetchStmt = $conn->prepare($fetchSql);
+$fetchStmt = $conn_mess->prepare($fetchSql);
 $fetchStmt->bind_param("s", $_SESSION['username']);
 $fetchStmt->execute();
 $messageResult = $fetchStmt->get_result();
@@ -78,7 +92,7 @@ while ($msgRow = $messageResult->fetch_assoc()) {
 $fetchStmt->close();
 
 // Close connections
-$conn->close();
+$conn_mess->close();
 ?>
 
 <!DOCTYPE html>
