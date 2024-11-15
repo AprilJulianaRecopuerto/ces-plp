@@ -8,18 +8,18 @@ if (!isset($_SESSION['username'])) {
 
 $currentUser = $_SESSION['username']; // Get the currently logged-in username
 
-// Database credentials for proj_list
-$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_proj = "zf8r3n4qqjyrfx7o";
-$password_proj = "su6qmqa0gxuerg98";
-$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+// Database connection details
+$servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "equ6v8i5llo3uhjm"; // replace with your database username
+$password = "vkfaxm2are5bjc3q"; // replace with your database password
+$dbname = "ylwrjgaks3fw5sdj";
 
-// Create connection to proj_list database
-$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
-if ($conn_proj_list->connect_error) {
-    die("Connection failed: " . $conn_proj_list->connect_error);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 ?>
 
@@ -527,18 +527,18 @@ if ($conn_proj_list->connect_error) {
                     </thead>
                     <tbody id="table-body">
 						<?php
-						// Database credentials for proj_list
-                        $servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-                        $username_proj = "zf8r3n4qqjyrfx7o";
-                        $password_proj = "su6qmqa0gxuerg98";
-                        $dbname_proj_list = "hpvs3ggjc4qfg9jp";
-
-                        // Create connection to proj_list database
-                        $conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
-
+						// Database connection details
+                        $servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                        $username = "equ6v8i5llo3uhjm"; // replace with your database username
+                        $password = "vkfaxm2are5bjc3q"; // replace with your database password
+                        $dbname = "ylwrjgaks3fw5sdj";
+                
+                        // Create connection
+                        $conn = new mysqli($servername, $username, $password, $dbname);
+                
                         // Check connection
-                        if ($conn_proj_list->connect_error) {
-                            die("Connection failed: " . $conn_proj_list->connect_error);
+                        if ($conn->connect_error) {
+                            die("Connection failed: " . $conn->connect_error);
                         }
 
                         $limit = 5; // Number of records per page
@@ -547,14 +547,14 @@ if ($conn_proj_list->connect_error) {
 
                         // Count total requisition records
                         $countSql = "SELECT COUNT(*) as total FROM adhistory";
-                        $countResult = $conn_proj_list->query($countSql);
+                        $countResult = $conn->query($countSql);
                         $totalRecords = $countResult->fetch_assoc()['total'];
                         $totalPages = ceil($totalRecords / $limit); // Calculate total pages
 
 						// Fetch users' usernames and timestamps
 						$sql = "SELECT username, ts, logout_ts FROM adhistory ORDER BY id DESC LIMIT $limit OFFSET $offset";
  
-						$result = $conn_proj_list->query($sql);
+						$result = $conn->query($sql);
 
 						// Start the HTML table
 
@@ -576,7 +576,7 @@ if ($conn_proj_list->connect_error) {
 						echo "</table>";
 
 						// Close the connection
-						$conn_proj_list->close();
+						$connt->close();
 						?>
 
                     </tbody>

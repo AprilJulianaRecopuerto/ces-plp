@@ -1227,7 +1227,7 @@ if (isset($_POST['delete_notification'])) {
                 <i class="fa fa-chevron-down dropdown-icon"></i>
                 
                 <div class="dropdown-menu">
-                    <a href="your-profile.php">Profile</a>
+                    <a href="admin-your-profile.php">Profile</a>
                     <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
                 </div>
             </div>

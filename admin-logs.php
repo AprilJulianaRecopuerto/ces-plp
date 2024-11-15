@@ -3,7 +3,7 @@
 session_start();
 
 if (!isset($_SESSION['username'])) {
-    header("Location: roleaccount.php"); // Redirect to login if not logged in
+    header("Location: loginpage.php"); // Redirect to login if not logged in
     exit;
 }
 ?>
@@ -542,18 +542,18 @@ if (!isset($_SESSION['username'])) {
                         if (isset($_SESSION['username'])) {
                             $loggedInUser = $_SESSION['username'];
 
-                            // Database credentials for proj_list
-                            $servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-                            $username_proj = "zf8r3n4qqjyrfx7o";
-                            $password_proj = "su6qmqa0gxuerg98";
-                            $dbname_proj_list = "hpvs3ggjc4qfg9jp";
+                            // Database connection details
+                            $servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                            $username = "equ6v8i5llo3uhjm"; // replace with your database username
+                            $password = "vkfaxm2are5bjc3q"; // replace with your database password
+                            $dbname = "ylwrjgaks3fw5sdj";
 
-                            // Create connection to proj_list database
-                            $conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
+                            // Create connection
+                            $conn = new mysqli($servername, $username, $password, $dbname);
 
                             // Check connection
-                            if ($conn_proj_list->connect_error) {
-                                die("Connection failed: " . $conn_proj_list->connect_error);
+                            if ($conn->connect_error) {
+                                die("Connection failed: " . $conn->connect_error);
                             }
 
                             $limit = 5; // Number of records per page
@@ -562,13 +562,13 @@ if (!isset($_SESSION['username'])) {
 
                             // Count total requisition records
                             $countSql = "SELECT COUNT(*) as total FROM activity_logs";
-                            $countResult = $conn_proj_list->query($countSql);
+                            $countResult = $conn->query($countSql);
                             $totalRecords = $countResult->fetch_assoc()['total'];
                             $totalPages = ceil($totalRecords / $limit); // Calculate total pages
 
                             // Fetch logs for the logged-in user
                             $sql = "SELECT username, button_name, timestamp FROM activity_logs WHERE username = ? ORDER BY id DESC LIMIT $limit OFFSET $offset";
-                            $stmt = $conn_proj_list->prepare($sql);
+                            $stmt = $conn->prepare($sql);
                             $stmt->bind_param("s", $loggedInUser);
                             $stmt->execute();
                             $result = $stmt->get_result();
@@ -589,7 +589,7 @@ if (!isset($_SESSION['username'])) {
 
                             // Close the statement and connection
                             $stmt->close();
-                            $conn_proj_list->close();
+                            $conn->close();
                         } else {
                             echo "<tr><td colspan='3'>User not logged in.</td></tr>";
                         }
