@@ -508,15 +508,15 @@ if (!isset($_SESSION['username'])) {
         </div>
 
         <div class="content-budget">
-        <div class="button-container">
-        <button class="filter-button" onclick="filterTable('cas')">CAS</button>
-        <button class="filter-button" onclick="filterTable('cba')">CBA</button>
-        <button class="filter-button" onclick="filterTable('ccs')">CCS</button>
-        <button class="filter-button" onclick="filterTable('coed')">COED</button>
-        <button class="filter-button" onclick="filterTable('coe')">COE</button>
-        <button class="filter-button" onclick="filterTable('cihm')">CIHM</button>
-        <button class="filter-button" onclick="filterTable('con')">CON</button>
-    </div>
+            <div class="button-container">
+                <button class="filter-button" onclick="filterTable('cas')">CAS</button>
+                <button class="filter-button" onclick="filterTable('cba')">CBA</button>
+                <button class="filter-button" onclick="filterTable('ccs')">CCS</button>
+                <button class="filter-button" onclick="filterTable('coed')">COED</button>
+                <button class="filter-button" onclick="filterTable('coe')">COE</button>
+                <button class="filter-button" onclick="filterTable('cihm')">CIHM</button>
+                <button class="filter-button" onclick="filterTable('con')">CON</button>
+            </div>
 
             <?php
             // Database credentials
@@ -543,8 +543,8 @@ if (!isset($_SESSION['username'])) {
                 echo "<h3>" . strtoupper($college) . " - Budget Allocation</h3>";
 
                 // Fetch budget records for the details table
-                $detailsTable = "cas_details"; // Budget details table for each college
-                $detailsSql = "SELECT * FROM cas_details";
+                $detailsTable = "{$college}_details"; // Budget details table for each college
+                $detailsSql = "SELECT * FROM $detailsTable";
                 $detailsResult = $conn->query($detailsSql);
 
                 // First Table: Budget Allocation (Details Table)
@@ -578,8 +578,8 @@ if (!isset($_SESSION['username'])) {
                 echo "</div>"; // Close .table-container
 
                 // Fetch budget event details for the second table (Budget Table)
-                $budgetTable = "cas_budget"; // Budget table for each college
-                $budgetSql = "SELECT * FROM cas_budget ORDER BY details_id";
+                $budgetTable = "{$college}_budget"; // Budget table for each college
+                $budgetSql = "SELECT * FROM $budgetTable ORDER BY details_id";
                 $budgetResult = $conn->query($budgetSql);
 
                 // Second Table: Budget Event Details (Budget Table)
@@ -640,23 +640,23 @@ if (!isset($_SESSION['username'])) {
 
         <script>
             function filterTable(college) {
-        // Hide all college sections
-        const sections = document.querySelectorAll('.college-section');
-        sections.forEach(section => {
-            section.style.display = 'none';
-        });
+                // Hide all college sections
+                const sections = document.querySelectorAll('.college-section');
+                sections.forEach(section => {
+                    section.style.display = 'none';
+                });
 
-        // Show the selected college section
-        const selectedSection = document.getElementById(`${college}_section`);
-        if (selectedSection) {
-            selectedSection.style.display = 'block';
-        }
-    }
+                // Show the selected college section
+                const selectedSection = document.getElementById(`${college}_section`);
+                if (selectedSection) {
+                    selectedSection.style.display = 'block';
+                }
+            }
 
-    // Show CAS section by default on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        filterTable('cas');
-    });
+            // Show CAS section by default on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                filterTable('cas');
+            });
 
             function confirmLogout(event) {
                 event.preventDefault();
