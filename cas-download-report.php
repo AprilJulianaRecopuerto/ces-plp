@@ -8,13 +8,13 @@ use Dompdf\Options;
 if (isset($_GET['id'])) {
     $id = (int)$_GET['id']; // Sanitize input
 
-    $servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-    $username_resource = "dnr20srzjycb99tw";
-    $password_resource = "ndfnpz4j74v8t0p7";
-    $dbname_resource = "x8uwt594q5jy7a7o";
+    // Database connection
+    $servername = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+    $username = "dnr20srzjycb99tw";
+    $password = "ndfnpz4j74v8t0p7";
+    $dbname = "x8uwt594q5jy7a7o";
 
-    // Create connection
-    $conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
+    $conn = new mysqli($servername, $username, $password, $dbname);
 
     // Check connection
     if ($conn->connect_error) {
@@ -64,16 +64,16 @@ if (isset($_GET['id'])) {
                 padding: 8px;
                 text-align: left;
             }
-                th {
-                    background-color: #f2f2f2;
-                }
-                .logo {
-                    text-align: center;
-                    margin-bottom: 20px;
-                }
-                .logo img {
-                    width: 150px; /* Adjust width as needed */
-                }
+            th {
+                background-color: #f2f2f2;
+            }
+            .logo {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .logo img {
+                width: 150px; /* Adjust width as needed */
+            }
         </style>
 
         <div class='logo'>
