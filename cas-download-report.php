@@ -1,4 +1,5 @@
 <?php
+// Ensure the composer autoload is included for dependencies (Dompdf)
 require 'vendor/autoload.php';
 
 use Dompdf\Dompdf;
