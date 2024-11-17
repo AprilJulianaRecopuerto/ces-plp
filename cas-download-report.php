@@ -37,7 +37,7 @@ if (isset($_GET['id'])) {
         }
 
         // Convert image to base64
-        $imagePath = __DIR__ . "/images/pasiglogo.png"; // Update path as needed
+        $imagePath = __DIR__ . "/CES/images/pasiglogo.png"; // Update path as needed
         $imageData = file_get_contents($imagePath);
         $base64Image = base64_encode($imageData);
         $base64ImageSrc = 'data:image/png;base64,' . $base64Image;
