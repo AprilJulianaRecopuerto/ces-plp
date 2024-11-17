@@ -7,7 +7,7 @@ use Dompdf\Options;
 
 // Check if an ID is passed via the URL
 if (isset($_GET['id'])) {
-    $id = (int)$_GET['id']; // Sanitize input
+    $id = (int)$_GET['id']; // Sanitize input to prevent SQL injection
 
     // Database connection
     $servername = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
@@ -39,9 +39,13 @@ if (isset($_GET['id'])) {
 
         // Convert image to base64
         $imagePath = __DIR__ . "/images/pasiglogo.png"; // Update path as needed
-        $imageData = file_get_contents($imagePath);
-        $base64Image = base64_encode($imageData);
-        $base64ImageSrc = 'data:image/png;base64,' . $base64Image;
+        if (file_exists($imagePath)) {
+            $imageData = file_get_contents($imagePath);
+            $base64Image = base64_encode($imageData);
+            $base64ImageSrc = 'data:image/png;base64,' . $base64Image;
+        } else {
+            $base64ImageSrc = ''; // Handle missing image gracefully
+        }
 
         // HTML content for the PDF
         $html = "
@@ -88,10 +92,10 @@ if (isset($_GET['id'])) {
         if ($resultEventForm && $resultEventForm->num_rows > 0) {
             while ($row = $resultEventForm->fetch_assoc()) {
                 $html .= "<table>
-                    <tr><th>Department</th><td>" . $row["college_name"] . "</td></tr>
-                    <tr><th>Procurement Title</th><td>" . $row["procurement_title"] . "</td></tr>
-                    <tr><th>Agency</th><td>" . $row["agency"] . "</td></tr>
-                    <tr><th>Date of Delivery</th><td>" . $row["date_of_delivery"] . "</td></tr>
+                    <tr><th>Department</th><td>" . htmlspecialchars($row["college_name"]) . "</td></tr>
+                    <tr><th>Procurement Title</th><td>" . htmlspecialchars($row["procurement_title"]) . "</td></tr>
+                    <tr><th>Agency</th><td>" . htmlspecialchars($row["agency"]) . "</td></tr>
+                    <tr><th>Date of Delivery</th><td>" . htmlspecialchars($row["date_of_delivery"]) . "</td></tr>
                 </table>";
             }
         }
@@ -125,23 +129,23 @@ if (isset($_GET['id'])) {
 
                     // Display Event Form ID only once per unique event_form_id
                     if ($firstEventRow) {
-                        $html .= "<td rowspan='" . array_sum(array_map("count", $dates)) . "'>" . $eventFormId . "</td>";
+                        $html .= "<td rowspan='" . $dateRowCount . "'>" . htmlspecialchars($eventFormId) . "</td>";
                         $firstEventRow = false;
                     }
 
                     // Display Event Date only once per unique event_date
                     if ($firstDateRow) {
-                        $html .= "<td rowspan='" . $dateRowCount . "'>" . $eventDate . "</td>";
+                        $html .= "<td rowspan='" . $dateRowCount . "'>" . htmlspecialchars($eventDate) . "</td>";
                         $firstDateRow = false;
                     }
 
                     // Output remaining columns
-                    $html .= "<td>" . $row['event_title'] . "</td>
-                            <td>" . $row['meal_type'] . "</td>
-                            <td>" . $row['menu'] . "</td>
-                            <td>" . $row['total_meals'] . "</td>
-                            <td>" . $row['total_usage'] . "</td>
-                            <td>" . $row['utilization_percentage'] . '%' . "</td>
+                    $html .= "<td>" . htmlspecialchars($row['event_title']) . "</td>
+                            <td>" . htmlspecialchars($row['meal_type']) . "</td>
+                            <td>" . htmlspecialchars($row['menu']) . "</td>
+                            <td>" . htmlspecialchars($row['total_meals']) . "</td>
+                            <td>" . htmlspecialchars($row['total_usage']) . "</td>
+                            <td>" . htmlspecialchars($row['utilization_percentage']) . '%' . "</td>
                         </tr>";
                 }
             }
@@ -150,18 +154,22 @@ if (isset($_GET['id'])) {
         $html .= "</tbody></table>";
 
         // Generate the PDF
-        $options = new Options();
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('isPhpEnabled', true);
-        $options->set('isImageEnabled', true);
+        try {
+            $options = new Options();
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isPhpEnabled', true);
+            $options->set('isImageEnabled', true);
 
-        $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
+            $dompdf = new Dompdf($options);
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
 
-        // Stream the PDF to the browser
-        $dompdf->stream("TOR_$id.pdf", ["Attachment" => 1]);
+            // Stream the PDF to the browser
+            $dompdf->stream("TOR_$id.pdf", ["Attachment" => 1]);
+        } catch (Exception $e) {
+            echo "Error generating PDF: " . $e->getMessage();
+        }
 
     } else {
         echo "No event details found for this ID.";
