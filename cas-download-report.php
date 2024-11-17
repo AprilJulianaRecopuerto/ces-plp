@@ -2,6 +2,7 @@
 require 'vendor/autoload.php';
 
 use Dompdf\Dompdf;
+use Dompdf\Options;
 
 // Check if an ID is passed via the URL
 if (isset($_GET['id'])) {
@@ -34,12 +35,6 @@ if (isset($_GET['id'])) {
         while ($row = $resultEventDetails->fetch_assoc()) {
             $eventData[$row['cas_tor_id']][$row['event_date']][] = $row;
         }
-
-        // Convert image to base64
-        $imagePath = __DIR__ . "/CES/images/pasiglogo.png"; // Update path as needed
-        $imageData = file_get_contents($imagePath);
-        $base64Image = base64_encode($imageData);
-        $base64ImageSrc = 'data:image/png;base64,' . $base64Image;
 
         // HTML content for the PDF
         $html = "
@@ -74,10 +69,6 @@ if (isset($_GET['id'])) {
                 width: 150px; /* Adjust width as needed */
             }
         </style>
-
-        <div class='logo'>
-            <img src='$base64ImageSrc' alt='Logo'>
-        </div>
 
         <h3>Event Form Details</h3>
         ";
