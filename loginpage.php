@@ -659,7 +659,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </head>
 
  <body>
-    <header class="header">
+        <header class="header">
             <div class="logo">
                <a href="loadingpage.php"> <img src="images/logo.png" alt="Logo"></a>
             </div>
