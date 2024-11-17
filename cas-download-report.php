@@ -64,16 +64,16 @@ if (isset($_GET['id'])) {
                 padding: 8px;
                 text-align: left;
             }
-            th {
-                background-color: #f2f2f2;
-            }
-            .logo {
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            .logo img {
-                width: 150px; /* Adjust width as needed */
-            }
+                th {
+                    background-color: #f2f2f2;
+                }
+                .logo {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                .logo img {
+                    width: 150px; /* Adjust width as needed */
+                }
         </style>
 
         <div class='logo'>
