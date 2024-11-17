@@ -2,7 +2,6 @@
 require 'vendor/autoload.php';
 
 use Dompdf\Dompdf;
-use Dompdf\Options;
 
 // Check if an ID is passed via the URL
 if (isset($_GET['id'])) {
