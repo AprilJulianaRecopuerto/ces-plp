@@ -13,16 +13,16 @@ $username = "lcq4zy2vi4302d1q";
 $password = "xswigco0cdxdi5dd";
 $dbname = "kup80a8cc3mqs4ao"; // Messages database
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn_mess = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($conn_mess->connect_error) {
+    die("Connection failed: " . $conn_mess->connect_error);
 }
 
 // Fetch user role from the `user_registration` schema (specify schema)
 $userRoleSql = "SELECT roles FROM user_registration.users WHERE username = ?";
-$roleStmt = $conn->prepare($userRoleSql);
+$roleStmt = $conn_mess->prepare($userRoleSql);
 $roleStmt->bind_param("s", $_SESSION['username']);
 $roleStmt->execute();
 $roleResult = $roleStmt->get_result();
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['message'])) {
     $message = $_POST['message'];
 
     $insertSql = "INSERT INTO sent_messages (sender, role, message, timestamp) VALUES (?, ?, ?, NOW())"; // Adjusted to include role
-    $insertStmt = $conn->prepare($insertSql);
+    $insertStmt = $conn_mess->prepare($insertSql);
     $insertStmt->bind_param("sss", $sender, $userRole, $message); // Binding role
 
     if (!$insertStmt->execute()) {
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_message_id'])) 
 
     // Delete the message if it belongs to the current user
     $deleteSql = "DELETE FROM sent_messages WHERE id = ? AND sender = ?";
-    $deleteStmt = $conn->prepare($deleteSql);
+    $deleteStmt = $conn_mess->prepare($deleteSql);
     $deleteStmt->bind_param("is", $messageId, $_SESSION['username']);
     $deleteStmt->execute();
     $deleteStmt->close();
@@ -67,7 +67,7 @@ $fetchSql = "
     LEFT JOIN user_registration.users ON sent_messages.sender = users.username
     ORDER BY sent_messages.timestamp";
 
-$fetchStmt = $conn->prepare($fetchSql);
+$fetchStmt = $conn_mess->prepare($fetchSql);
 $fetchStmt->bind_param("s", $_SESSION['username']);
 $fetchStmt->execute();
 $messageResult = $fetchStmt->get_result();
@@ -78,7 +78,7 @@ while ($msgRow = $messageResult->fetch_assoc()) {
 $fetchStmt->close();
 
 // Close connections
-$conn->close();
+$conn_mess->close();
 ?>
 
 
@@ -551,7 +551,7 @@ $conn->close();
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="admin-login.php">Log In History</a>
+                    <a href="admin-history.php">Log In History</a>
                     <a href="admin-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>

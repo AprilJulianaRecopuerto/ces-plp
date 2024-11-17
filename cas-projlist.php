@@ -822,7 +822,7 @@ $conn_profile->close();
                         $totalPages = ceil($totalRecords / $limit); // Calculate total pages
 
                         // Fetch projects with LIMIT, OFFSET, and ORDER BY DESC for pagination
-$sql = "SELECT * FROM cas ORDER BY id DESC LIMIT $limit OFFSET $offset";
+                        $sql = "SELECT * FROM cas ORDER BY id DESC LIMIT $limit OFFSET $offset";
                         $result = $conn->query($sql);
 
                         if ($result->num_rows > 0) {

@@ -632,6 +632,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: adds a shadow */
             }
 
+            .error-message {
+                font-family: 'Poppins', sans-serif;
+                margin-top: 10px;
+                padding: 15px; /* Space inside the box */
+                background-color: #f8d7da; /* Light red background */
+                color: #721c24; /* Darker red text */
+                border-radius: 5px; /* Rounded corners */
+                border: 1px solid #f5c6cb; /* Optional: subtle border */
+                display: inline-block; /* Adjusts width to content */
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: adds a shadow */
+            }
+
             #capsLockWarning {
                 font-family: 'Poppins', sans-serif;
                 font-size: 12px;
