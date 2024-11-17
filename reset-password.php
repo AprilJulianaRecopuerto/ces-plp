@@ -2,10 +2,10 @@
 session_start(); // Start session to manage SweetAlert success messages
 
 // Connect to the database
-$servername = "localhost"; // Update as needed
-$username = "root"; // Update as needed
-$password = ""; // Update as needed
-$dbname = "user_registration"; // Your database name
+$servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com"; // Update as needed
+$username = "equ6v8i5llo3uhjm"; // Update as needed
+$password = "vkfaxm2are5bjc3q"; // Update as needed
+$dbname = "ylwrjgaks3fw5sdj"; // Your database name
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -55,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="icon" href="images/logoicon.png">
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- SweetAlert2 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap');
@@ -68,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             height: 100vh;
             background-color: #f9f9f9;
             margin: 0;
+            overflow-y: hidden;
         }
 
          /*Banner Shadow*/
@@ -93,11 +95,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         h2 {
             margin-bottom: 15px;
             text-align: center;
+            margin-top: -5px;
         }
 
         input[type="email"],
         input[type="password"] {
             font-family: 'Poppins', sans-serif;
+            font-size: 14px;
             height: 23px;
             width: 93.2%;
             padding: 10px;
@@ -107,128 +111,192 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         button {
-            background-color: #4CAF50;
-                border: none;
-                color: black;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
+            background-color: green;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            margin-left: 160px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
         
         button:hover {
             background-color: #45a049; /* Darker green on hover */
+            color:black;
         }
 
         .custom-swal-title {
-                font-family: 'Poppins', sans-serif;
-                color: #3085d6; /* Custom title color */
-            }
+            font-family: 'Poppins', sans-serif;
+            color: #3085d6; /* Custom title color */
+        }
 
-            .custom-swal-confirm {
-                font-family: 'Poppins', sans-serif;
-                font-size: 17px;
-                background-color: #089451;
-                border: 0.5px #089451 !important;
-                color: #fff;
-                border-radius: 10px;
-                cursor: pointer;
-                outline: none !important; /* Remove default focus outline */
-            }
+        .custom-swal-confirm {
+            font-family: 'Poppins', sans-serif;
+            font-size: 17px;
+            background-color: #089451;
+            border: 0.5px #089451 !important;
+            color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            outline: none !important; /* Remove default focus outline */
+        }
 
-            .custom-swal-cancel {
-                font-family: 'Poppins', sans-serif;
-                font-size: 17px;
-                background-color: #e74c3c;
-                color: #fff;
-                border-radius: 10px;
-                cursor: pointer;
-                outline: none; /* Remove default focus outline */
-            }
+        .custom-swal-cancel {
+            font-family: 'Poppins', sans-serif;
+            font-size: 17px;
+            background-color: #e74c3c;
+            color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            outline: none; /* Remove default focus outline */
+        }
 
-            .custom-error-popup {
-                font-family: 'Poppins', sans-serif;
-                width: 400px !important; /* Set a larger width */
-            }
+        .custom-error-popup {
+            font-family: 'Poppins', sans-serif;
+            width: 400px !important; /* Set a larger width */
+        }
 
-            .custom-error-title {
-                font-family: 'Poppins', sans-serif;
-                color: #e74c3c; /* Custom title color for error */
-            }
+        .custom-error-title {
+            font-family: 'Poppins', sans-serif;
+            color: #e74c3c; /* Custom title color for error */
+        }
 
-            .custom-error-confirm {
-                font-family: 'Poppins', sans-serif;
-                font-size: 17px;
-                background-color: #e74c3c;
-                color: #fff;
-                border-radius: 10px;
-                cursor: pointer;
-                outline: none; /* Remove default focus outline */
-            }
+        .custom-error-confirm {
+            font-family: 'Poppins', sans-serif;
+            font-size: 17px;
+            background-color: #e74c3c;
+            color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            outline: none; /* Remove default focus outline */
+        }
+
+        /* Password container and icon styling */
+        .password-container {
+            font-family: 'Poppins', sans-serif;
+            position: relative;
+        }
+
+        .password-container input {
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            height: 23px;
+            width: 93.2%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 0.5px solid black;
+            border-radius: 4px;
+        }
+
+        .password-container i {
+            position: absolute;
+            right: 10px;
+            top: 22px;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #888;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        /* Hover effect for eye icon */
+        .password-container i:hover {
+            color: #007bff;
+        }
     </style>
 </head>
-<body>
-<div class="banner1">
-    <img src="images/Admin (1).png">
-</div>
 
-<div class="reset-password-box">
-    <h2>Reset Password</h2>
+    <body>
+        <div class="banner1">
+            <img src="images/Admin (1).png">
+        </div>
 
-    <form autocomplete="off" method="POST" action="">
-        <label for="email">Email</label>
-        <input type="email" id="email" placeholder="Your email address" required name="email-field" autocomplete="new-email">
+        <div class="reset-password-box">
+            <h2>Reset Password</h2>
 
-        <label for="new-password">New Password</label>
-        <input type="password" id="new-password" placeholder="New password" required name="new-password-field" autocomplete="new-password">
+            <form autocomplete="off" method="POST" action="">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Your email address" required name="email-field" autocomplete="new-email">
 
-        <label for="confirm-password">Re-Enter Password</label>
-        <input type="password" id="confirm-password" placeholder="Re-enter password" required name="confirm-password-field" autocomplete="new-password">
+                <label for="new-password">New Password</label>
+                <div class="password-container">
+                    <input type="password" id="new-password" placeholder="New password" required name="new-password-field" autocomplete="new-password">
+                    <i id="toggleNewPassword" class="eye-icon fa fa-eye-slash" style="cursor: pointer;"></i>
+                </div>
 
-        <button type="submit">Change</button>
-    </form>
-</div>
+                <label for="confirm-password">Re-Enter Password</label>
+                <div class="password-container">
+                    <input type="password" id="confirm-password" placeholder="Re-enter password" required name="confirm-password-field" autocomplete="new-password">
+                    <i id="toggleConfirmPassword" class="eye-icon fa fa-eye-slash" style="cursor: pointer;"></i>
+                </div>
 
-<?php if (isset($_SESSION['success'])): ?>
-    <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: '<?php echo $_SESSION['success']; ?>',
-            customClass: {
-                popup: 'custom-swal-popup',
-                title: 'custom-swal-title',
-                confirmButton: 'custom-swal-confirm'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Redirect to 'roleaccount' page
-                window.location.href = 'roleaccount.php';
-            }
-        });
-    </script>
-    <?php unset($_SESSION['success']); ?>
-<?php endif; ?>
+                <button type="submit">Change Password</button>
+            </form>
+        </div>
 
-<?php if (isset($_SESSION['error'])): ?>
-    <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: '<?php echo $_SESSION['error']; ?>',
-            customClass: {
-                popup: 'custom-error-popup',
-                title: 'custom-error-title',
-                confirmButton: 'custom-error-confirm'
-            }
-        });
-    </script>
-    <?php unset($_SESSION['error']); ?>
-<?php endif; ?>
+        <?php if (isset($_SESSION['success'])): ?>
+            <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: '<?php echo $_SESSION['success']; ?>',
+                    customClass: {
+                        popup: 'custom-swal-popup',
+                        title: 'custom-swal-title',
+                        confirmButton: 'custom-swal-confirm'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Redirect to 'roleaccount' page
+                        window.location.href = 'roleaccount.php';
+                    }
+                });
+            </script>
+            <?php unset($_SESSION['success']); ?>
+        <?php endif; ?>
 
+        <?php if (isset($_SESSION['error'])): ?>
+            <script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: '<?php echo $_SESSION['error']; ?>',
+                    customClass: {
+                        popup: 'custom-error-popup',
+                        title: 'custom-error-title',
+                        confirmButton: 'custom-error-confirm'
+                    }
+                });
+            </script>
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
 
-</body>
+        <script>
+            function togglePasswordVisibility(fieldId, iconId) {
+    const field = document.getElementById(fieldId);
+    const icon = document.getElementById(iconId);
+    if (field.type === "password") {
+        field.type = "text";
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    } else {
+        field.type = "password";
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    }
+}
+
+document.getElementById('toggleNewPassword').onclick = function() {
+    togglePasswordVisibility('new-password', 'toggleNewPassword');
+};
+
+document.getElementById('toggleConfirmPassword').onclick = function() {
+    togglePasswordVisibility('confirm-password', 'toggleConfirmPassword');
+};
+
+        </script>
+    </body>
 </html>

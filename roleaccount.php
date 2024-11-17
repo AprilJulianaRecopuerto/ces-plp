@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 header('Content-Type: application/json');
                 echo json_encode(['valid' => true, 'message' => $message]);
             } else {
-                $message = 'Invalid ID!';
+                $message = 'Invalid ID for Head Coordinator!';
                 header('Content-Type: application/json');
                 echo json_encode(['valid' => false, 'message' => $message]);
             }
@@ -73,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 header('Content-Type: application/json');
                 echo json_encode(['valid' => true, 'message' => $message]);
             } else {
-                $message = 'Invalid ID!';
+                $message = 'Invalid ID for College Coordinator!';
                 header('Content-Type: application/json');
                 echo json_encode(['valid' => false, 'message' => $message]);
             }

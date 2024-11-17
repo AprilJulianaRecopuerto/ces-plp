@@ -238,7 +238,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }).then(() => {
             // Redirect to 'college-otp-send.php' if the alert was successful
             <?php if ($_SESSION['alertType'] === 'success'): ?>
-                window.location.href = 'college-otp-send.php';
+                window.location.href = 'otp-send.php';
             <?php endif; ?>
         });
 

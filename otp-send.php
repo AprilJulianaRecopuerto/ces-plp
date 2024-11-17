@@ -236,7 +236,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }).then((result) => {
                 if (result.isConfirmed && '<?php echo $_SESSION['alertType']; ?>' === 'success') {
                     // Redirect to college-reset-password.php on confirmation for success
-                    window.location.href = 'college-reset-password.php';
+                    window.location.href = 'reset-password.php';
                 }
             });
 
