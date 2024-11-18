@@ -41,7 +41,7 @@ $messageResult = $fetchStmt->get_result();
 
 while ($msgRow = $messageResult->fetch_assoc()) {
     // Fetch the role for the sender from the users table (only if it's accessible)
-    $roleSql = "SELECT roles FROM user_registration.users WHERE username = ?";
+    $roleSql = "SELECT roles FROM users WHERE username = ?";
     $roleStmt = $conn_user->prepare($roleSql);
     $roleStmt->bind_param("s", $msgRow['sender']);
     $roleStmt->execute();
@@ -49,7 +49,7 @@ while ($msgRow = $messageResult->fetch_assoc()) {
     $role = $roleResult->fetch_assoc()['roles'] ?? null;
 
     // Fetch the role from the colleges table (only if it's accessible)
-    $collegeSql = "SELECT role FROM user_registration.colleges WHERE uname = ?";
+    $collegeSql = "SELECT role FROM colleges WHERE uname = ?";
     $collegeStmt = $conn_user->prepare($collegeSql);
     $collegeStmt->bind_param("s", $msgRow['sender']);
     $collegeStmt->execute();
