@@ -607,12 +607,12 @@ $conn_users->close();
                         </small>
                         
                         <?php if ($chatMessage['sender'] == $_SESSION['username']): ?>
-                        <!-- Delete button -->
-                        <form method="POST" action="chat.php" style="display:inline;" id="deleteForm_<?php echo $chatMessage['id']; ?>">
-                            <input type="hidden" name="delete_message_id" value="<?php echo $chatMessage['id']; ?>">
-                            <button type="submit" class="delete-btn">Delete</button>
-                        </form>
-                    <?php endif; ?>
+                    <!-- Delete button with an onclick event to trigger confirmDelete -->
+                    <form method="POST" action="chat.php" style="display:inline;" id="deleteForm_<?php echo $chatMessage['id']; ?>">
+                        <input type="hidden" name="delete_message_id" value="<?php echo $chatMessage['id']; ?>">
+                        <button type="button" class="delete-btn" onclick="confirmDelete(<?php echo $chatMessage['id']; ?>)">Delete</button>
+                    </form>
+                <?php endif; ?>
             </div>
 
                 <?php endforeach; ?>
