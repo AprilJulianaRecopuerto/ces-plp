@@ -14,6 +14,19 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj"; // your database name
+
+$conn_user = new mysqli($sn, $un, $psd, $dbname_user_registration);
+
+// Check connection
+if ($conn_user->connect_error) {
+    die("Connection failed: " . $conn_user->connect_error);
+}
+
+
 // Fetch messages for the logged-in user from sent_messages
 $chatMessages = [];
 $fetchSql = "
@@ -30,7 +43,7 @@ $messageResult = $fetchStmt->get_result();
 while ($msgRow = $messageResult->fetch_assoc()) {
     // Fetch the role separately
     $roleSql = "SELECT role FROM colleges WHERE uname = ?";
-    $roleStmt = $conn->prepare($roleSql);
+    $roleStmt = $conn_user->prepare($roleSql);
     $roleStmt->bind_param("s", $msgRow['sender']);
     $roleStmt->execute();
     $roleResult = $roleStmt->get_result();
