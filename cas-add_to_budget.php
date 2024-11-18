@@ -16,7 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $leadPerson = $_POST['leadPerson'];
     $semester = $_POST['semester'];
     $expenses = (int) $_POST['expenses']; // Ensure it's treated as an integer
-    $totalBudget = (int) $_POST['totalBudget'];
 
     // Check if project already exists
     $checkSql = "SELECT details_id FROM cas_budget WHERE proj_title = ?";
@@ -37,9 +36,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $remainingBudget = $allottedBudget - $expenses;  // Calculate based on the project's expenses
 
         // Insert the new project with its remaining budget
-        $insertSql = "INSERT INTO cas_budget (proj_title, lead_person, semester, total_budget, expenses, remaining_budget) VALUES (?, ?, ?, ?, ?, ?)";
+        $insertSql = "INSERT INTO cas_budget (proj_title, lead_person, semester, expenses, remaining_budget) VALUES (?, ?, ?, ?, ?)";
         $stmtInsert = $conn->prepare($insertSql);
-        $stmtInsert->bind_param("sssiii", $projTitle, $leadPerson, $semester, $totalBudget, $expenses, $remainingBudget);
+        
+        if (!$stmtInsert) {
+            die("Prepare failed: " . $conn->error); // Add this line for debugging
+        }
+
+        $stmtInsert->bind_param("sssii", $projTitle, $leadPerson, $semester, $expenses, $remainingBudget);
 
         if ($stmtInsert->execute()) {
             echo "success";
