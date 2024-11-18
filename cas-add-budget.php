@@ -655,7 +655,7 @@ $conn_profile->close();
                 var leadPerson = document.getElementById("lead_person_" + projectId).innerText;
                 var semester = document.getElementById("semester_" + projectId).innerText;
                 var expenses = 0; 
-                var totalBudget = 0; 
+                var totalBudget = 40000; 
 
                 var xhr = new XMLHttpRequest();
                 xhr.open("POST", "cas-add_to_budget.php", true);
@@ -679,7 +679,7 @@ $conn_profile->close();
                 var projTitle = document.getElementById("proj_title_" + projectId).innerText;
                 var leadPerson = document.getElementById("lead_person_" + projectId).innerText;
                 var semester = document.getElementById("semester_" + projectId).innerText;
-                var totalBudget = 0; 
+                var totalBudget = 40000; 
 
                 // Use SweetAlert for inputting expenses
                 Swal.fire({
