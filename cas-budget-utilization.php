@@ -108,6 +108,7 @@ $remainingBudget = $allottedBudget - $totalExpenses;
 
 // Close the connection for allotted_budget table
 $conn_budget_allotment->close();
+$conn_budget_utilization->close();
 
 $stmt->close();
 $conn_profile->close();
