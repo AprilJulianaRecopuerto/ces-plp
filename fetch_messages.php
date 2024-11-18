@@ -31,7 +31,7 @@ $chatMessages = [];
 $fetchSql = "
     SELECT sent_messages.*, 
            IF(sent_messages.sender = ?, 'user', 'other') AS message_type,
-           DATE_FORMAT(CONVERT_TZ(sent_messages.timestamp, '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s') AS timestamp_utc8
+           CONVERT_TZ(sent_messages.timestamp, '+00:00', '+08:00') AS timestamp_utc8
     FROM sent_messages
     ORDER BY sent_messages.timestamp";
 
