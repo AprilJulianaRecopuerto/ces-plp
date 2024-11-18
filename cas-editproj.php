@@ -13,24 +13,30 @@ use PHPMailer\PHPMailer\Exception;
 
 // Load Composer's autoloader
 require 'vendor/autoload.php';
-// Database credentials
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "proj_list";
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+// Database credentials
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
+// Create connection to proj_list database
+$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
 // Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($conn_proj_list->connect_error) {
+    die("Connection failed: " . $conn_proj_list->connect_error);
 }
 
-$dbname_mov = "mov"; // For notifications
-$conn_mov = new mysqli($servername, $username, $password, $dbname_mov);
+// Database credentials for 'mov' (notifications)
+$servername_mov = "arfo8ynm6olw6vpn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_mov = "tz8thfim1dq7l3rf";
+$password_mov = "wzt4gssgou2ofyo7";
+$dbname_mov = "uv1qyvm0b8oicg0v";
 
-// Check connection for mov database
+$conn_mov = new mysqli($servername_mov, $username_mov, $password_mov, $dbname_mov);
+
+// Check connection for 'mov'
 if ($conn_mov->connect_error) {
     die("Connection to 'mov' database failed: " . $conn_mov->connect_error);
 }
@@ -52,10 +58,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $implementor = $_POST['implementor'];
     $attendees = $_POST['attendees'];
     $proj_title = $_POST['proj_title'];
-    $classification = $_POST['classification'];
+
+    $sdg = $_POST['sdg'];
      // If "Others" is selected, capture the value from the custom input
-     if ($classification == 'Others') {
-        $classification = $_POST['other_classification'];
+     if ($sdg == 'Others') {
+        $sdg = $_POST['other_classification'];
     }
 
     $specific_activity = $_POST['specific_activity'];
@@ -66,11 +73,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $barangay = $_POST['barangay'];
     $beneficiary = $_POST['beneficiary'];
     $duration = $_POST['duration'];
-    $budget = $_POST['budget'];
     $status = $_POST['status'];
 
     // Prepare and bind to retrieve the current project data
-    $stmt = $conn->prepare("SELECT * FROM cas WHERE id = ?");
+    $stmt = $conn_proj_list->prepare("SELECT * FROM cas WHERE id = ?");
     $stmt->bind_param("i", $projectId);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -85,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $currentProject['implementor'] === $implementor &&
         $currentProject['attendees'] === $attendees &&
         $currentProject['proj_title'] === $proj_title &&
-        $currentProject['classification'] === $classification &&
+        $currentProject['sdg'] === $sdg &&
         $currentProject['specific_activity'] === $specific_activity &&
         $currentProject['dateof_imple'] === $dateof_imple &&
         $currentProject['time_from'] === $time_from &&
@@ -94,7 +100,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $currentProject['barangay'] === $barangay &&
         $currentProject['beneficiary'] === $beneficiary &&
         $currentProject['duration'] === $duration &&
-        $currentProject['budget'] === $budget &&
         $currentProject['status'] === $status
     )) {
         // No changes made
@@ -104,7 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Prepare and bind the update statement
-    $stmt = $conn->prepare("UPDATE cas SET 
+    $stmt = $conn_proj_list->prepare("UPDATE cas SET 
         date_of_sub=?, 
         semester=?, 
         lead_person=?, 
@@ -112,7 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         implementor=?, 
         attendees=?, 
         proj_title=?, 
-        classification=?, 
+        sdg=?, 
         specific_activity=?, 
         dateof_imple=?, 
         time_from=?, 
@@ -121,16 +126,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         barangay=?, 
         beneficiary=?, 
         duration=?, 
-        budget=?, 
         status=? 
     WHERE id=?");
 
     if ($stmt === false) {
-        die("Prepare failed: " . $conn->error);
+        die("Prepare failed: " . $conn_proj_list->error);
     }
 
     // Adjust the type definition string to include all parameters
-    $stmt->bind_param('ssssssssssssssssssi', $date_of_sub, $semester, $lead_person, $dept, $implementor, $attendees, $proj_title, $classification, $specific_activity, $dateof_imple, $time_from, $time_to, $district, $barangay, $beneficiary, $duration, $budget, $status, $projectId);
+    $stmt->bind_param('sssssssssssssssssi', $date_of_sub, $semester, $lead_person, $dept, $implementor, $attendees, $proj_title, $sdg, $specific_activity, $dateof_imple, $time_from, $time_to, $district, $barangay, $beneficiary, $duration, $status, $projectId);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = 'Project updated successfully.';
@@ -165,8 +169,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $notification_message .= "Project Title changed from '{$currentProject['proj_title']}' to '$proj_title'. ";
         }
         
-        if ($classification !== $currentProject['classification']) {
-            $notification_message .= "Classification changed from '{$currentProject['classification']}' to '$classification'. ";
+        if ($sdg !== $currentProject['sdg']) {
+            $notification_message .= "Sustainable Development Goals changed from '{$currentProject['classification']}' to '$sdg'. ";
         }
         
         if ($specific_activity !== $currentProject['specific_activity']) {
@@ -200,10 +204,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($duration !== $currentProject['duration']) {
             $notification_message .= "Duration changed from '{$currentProject['duration']}' to '$duration'. ";
         }
-
-        if ($budget !== $currentProject['budget']) {
-            $notification_message .= "Total Budget changed from '{$currentProject['budget']}' to '$budget'. ";
-        }
         
         if ($status !== $currentProject['status']) {
             $notification_message .= "Status changed from '{$currentProject['status']}' to '$status'. ";
@@ -226,8 +226,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         
         // Database connection to fetch admin email (user_registration database)
-        $user_dbname = "user_registration"; // For user data
-        $conn_users = new mysqli($servername, $username, $password, $user_dbname);
+        $servername_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+        $username_ur = "equ6v8i5llo3uhjm"; // replace with your database username
+        $password_ur = "vkfaxm2are5bjc3q"; // replace with your database password
+        $user_dbname = "ylwrjgaks3fw5sdj"; // For user data
+
+        $conn_users = new mysqli($servername_ur, $username_ur, $password_ur, $user_dbname);
 
         if ($conn_users->connect_error) {
             die("Connection to 'user_registration' database failed: " . $conn_users->connect_error);
@@ -291,10 +295,10 @@ if (isset($_GET['id'])) {
     $projectId = intval($_GET['id']);
 
     // Prepare and bind
-    $stmt = $conn->prepare("SELECT * FROM cas WHERE id = ?");
+    $stmt = $conn_proj_list->prepare("SELECT * FROM cas WHERE id = ?");
 
     if ($stmt === false) {
-        die("Prepare failed: " . $conn->error);
+        die("Prepare failed: " . $conn_proj_list->error);
     }
 
     $stmt->bind_param("i", $projectId);
@@ -315,7 +319,7 @@ if (isset($_GET['id'])) {
 }
 
 $stmt->close();
-$conn->close();
+$conn_proj_list->close();
 ?>
 
 <!DOCTYPE html>
@@ -866,25 +870,42 @@ $conn->close();
                     </div>
 
                     <div class="form-group">
-                        <label for="classification">Classification:</label>
-                        <select id="classification" name="classification" onchange="toggleOtherClassificationInput()" required>
-                            <option value="Seminar" <?php echo ($project['classification'] == 'Seminar') ? 'selected' : ''; ?>>Seminar</option>
-                            <option value="Workshop" <?php echo ($project['classification'] == 'Workshop') ? 'selected' : ''; ?>>Workshop</option>
-                            <option value="Conference" <?php echo ($project['classification'] == 'Conference') ? 'selected' : ''; ?>>Conference</option>
-                            <option value="Webinar" <?php echo ($project['classification'] == 'Webinar') ? 'selected' : ''; ?>>Webinar</option>
-                            <option value="Training" <?php echo ($project['classification'] == 'Training') ? 'selected' : ''; ?>>Training</option>
-                            <option value="Meeting" <?php echo ($project['classification'] == 'Meeting') ? 'selected' : ''; ?>>Meeting</option>
-                            <option value="Symposium" <?php echo ($project['classification'] == 'Symposium') ? 'selected' : ''; ?>>Symposium</option>
-                            <option value="Forum" <?php echo ($project['classification'] == 'Forum') ? 'selected' : ''; ?>>Forum</option>
-                            <option value="Environment" <?php echo ($project['classification'] == 'Environment') ? 'selected' : ''; ?>>Environment</option>
-                            <option value="Others" <?php echo !in_array($project['classification'], ['Seminar', 'Workshop', 'Conference', 'Webinar', 'Training', 'Meeting', 'Symposium', 'Forum', 'Environment']) ? 'selected' : ''; ?>>Others (Please specify)</option>
+                        <label for="sdg">Sustainable Development Goals</label>
+                        <select id="sdg" name="sdg" onchange="toggleOtherClassificationInput()" required>
+                            <option value="SDG 1: No Poverty" <?php echo ($project['sdg'] == 'SDG 1: No Poverty') ? 'selected' : ''; ?>>SDG 1: No Poverty</option>
+                            <option value="SDG 2: Zero Hunger" <?php echo ($project['sdg'] == 'WorkSDG 2: Zero Hungershop') ? 'selected' : ''; ?>>SDG 2: Zero Hunger</option>
+                            <option value="SDG 3: Good Health and Well-being" <?php echo ($project['sdg'] == 'SDG 3: Good Health and Well-being') ? 'selected' : ''; ?>>SDG 3: Good Health and Well-being</option>
+                            <option value="SDG 4: Quality Education" <?php echo ($project['sdg'] == 'SDG 4: Quality Education') ? 'selected' : ''; ?>>SDG 4: Quality Education</option>
+                            <option value="SDG 5: Gender Equality" <?php echo ($project['sdg'] == 'SDG 5: Gender Equality') ? 'selected' : ''; ?>>SDG 5: Gender Equality</option>
+                            <option value="SDG 6: Clean Water and Sanitation" <?php echo ($project['sdg'] == 'SDG 6: Clean Water and Sanitation') ? 'selected' : ''; ?>>SDG 6: Clean Water and Sanitation</option>
+                            <option value="SDG 7: Affordable and Clean Energy" <?php echo ($project['sdg'] == 'SDG 7: Affordable and Clean Energy') ? 'selected' : ''; ?>>SDG 7: Affordable and Clean Energy</option>
+                            <option value="SDG 8: Decent Work and Economic Growth" <?php echo ($project['sdg'] == 'SDG 8: Decent Work and Economic Growth') ? 'selected' : ''; ?>>SDG 8: Decent Work and Economic Growth</option>
+                            <option value="SDG 9: Industry, Innovation, and Infrastructure" <?php echo ($project['sdg'] == 'SDG 9: Industry, Innovation, and Infrastructure') ? 'selected' : ''; ?>>SDG 9: Industry, Innovation, and Infrastructure</option>
+                            <option value="SDG 10: Reduced Inequalities" <?php echo ($project['sdg'] == 'SDG 10: Reduced Inequalities') ? 'selected' : ''; ?>>SDG 10: Reduced Inequalities</option>
+                            <option value="SDG 11: Sustainable Cities and Communities" <?php echo ($project['sdg'] == 'SDG 11: Sustainable Cities and Communities') ? 'selected' : ''; ?>>SDG 11: Sustainable Cities and Communities</option>
+                            <option value="SDG 12: Responsible Consumption and Production" <?php echo ($project['sdg'] == 'SDG 12: Responsible Consumption and Production') ? 'selected' : ''; ?>>SDG 12: Responsible Consumption and Production</option>
+                            <option value="SDG 13: Climate Action" <?php echo ($project['sdg'] == 'SDG 13: Climate Action') ? 'selected' : ''; ?>>SDG 13: Climate Action</option>
+                            <option value="SDG 14: Life Below Water" <?php echo ($project['sdg'] == 'SDG 14: Life Below Water') ? 'selected' : ''; ?>>SDG 14: Life Below Water</option>
+                            <option value="SDG 15: Life on Land" <?php echo ($project['sdg'] == 'SDG 15: Life on Land') ? 'selected' : ''; ?>>SDG 15: Life on Land</option>
+                            <option value="SDG 16: Peace, Justice, and Strong Institutions" <?php echo ($project['sdg'] == 'SDG 16: Peace, Justice, and Strong Institutions') ? 'selected' : ''; ?>>SDG 16: Peace, Justice, and Strong Institutions</option>
+                            <option value="SDG 17: Partnerships for the Goals" <?php echo ($project['sdg'] == 'SDG 17: Partnerships for the Goals') ? 'selected' : ''; ?>>SDG 17: Partnerships for the Goals</option>
+
+                            <option value="Others" <?php echo !in_array($project['sdg'], ['SDG 1: No Poverty', 'SDG 2: Zero Hunger', 'SDG 3: Good Health and Well-being', 'SDG 4: Quality Education', 'SDG 5: Gender Equality', 
+                            'SDG 6: Clean Water and Sanitation', 'SDG 7: Affordable and Clean Energy', 'SDG 8: Decent Work and Economic Growth', 'SDG 9: Industry, Innovation, and Infrastructure', 'SDG 10: Reduced Inequalities', 
+                            'SDG 11: Sustainable Cities and Communities', 'SDG 12: Responsible Consumption and Production', 'SDG 13: Climate Action', 'SDG 14: Life Below Water', 'SDG 15: Life on Land', 'SDG 16: Peace, Justice, and Strong Institutions', 'SDG 17: Partnerships for the Goals']) ? 'selected' : ''; ?>>Others (Please specify)</option>
                         </select>
                     </div>
 
                     <!-- Conditional input field for "Others" -->
-                    <div class="form-group" id="other_classification_group" style="display: <?php echo ($project['classification'] == 'Others' || !in_array($project['classification'], ['Seminar', 'Workshop', 'Conference', 'Webinar', 'Training', 'Meeting', 'Symposium', 'Forum', 'Environment'])) ? 'block' : 'none'; ?>;">
-                        <input type="text" id="other_classification" name="other_classification" placeholder="Enter Classification" 
-                            value="<?php echo ($project['classification'] != 'Others' && !in_array($project['classification'], ['Seminar', 'Workshop', 'Conference', 'Webinar', 'Training', 'Meeting', 'Symposium', 'Forum', 'Environment'])) ? htmlspecialchars($project['classification']) : ''; ?>">
+                    <div class="form-group" id="other_classification_group" style="display: <?php echo ($project['sdg'] == 'Others' || !in_array($project['sdg'], 
+                    ['SDG 1: No Poverty', 'SDG 2: Zero Hunger', 'SDG 3: Good Health and Well-being', 'SDG 4: Quality Education', 'SDG 5: Gender Equality', 'SDG 6: Clean Water and Sanitation', 'SDG 7: Affordable and Clean Energy', 'SDG 8: Decent Work and Economic Growth', 'SDG 9: Industry, Innovation, and Infrastructure', 
+                    'SDG 10: Reduced Inequalities', 'SDG 11: Sustainable Cities and Communities', 'SDG 12: Responsible Consumption and Production', 'SDG 13: Climate Action', 'SDG 14: Life Below Water', 'SDG 15: Life on Land', 'SDG 16: Peace, Justice, and Strong Institutions', 'SDG 17: Partnerships for the Goals'])) ? 'block' : 'none'; ?>;">
+                        
+                        <input type="text" id="other_classification" name="other_classification" placeholder="Enter Sustainable Development Goals" 
+                            value="<?php echo ($project['sdg'] != 'Others' && !in_array($project['sdg'], ['SDG 1: No Poverty', 'SDG 2: Zero Hunger', 'SDG 3: Good Health and Well-being', 'SDG 4: Quality Education', 'SDG 5: Gender Equality', 
+                            'SDG 6: Clean Water and Sanitation', 'SDG 7: Affordable and Clean Energy', 'SDG 8: Decent Work and Economic Growth', 
+                            'SDG 9: Industry, Innovation, and Infrastructure', 'SDG 10: Reduced Inequalities', 'SDG 11: Sustainable Cities and Communities', 'SDG 12: Responsible Consumption and Production', 'SDG 13: Climate Action', 
+                            'SDG 14: Life Below Water', 'SDG 15: Life on Land', 'SDG 16: Peace, Justice, and Strong Institutions', 'SDG 17: Partnerships for the Goals'])) ? htmlspecialchars($project['sdg']) : ''; ?>">
                     </div>
 
                     <div class="form-group">
@@ -939,11 +960,6 @@ $conn->close();
                             <option value="One Day" <?php echo $project['duration'] == 'One Day' ? 'selected' : ''; ?>>One Day</option>
                             <option value="Sustained" <?php echo $project['duration'] == 'Sustained' ? 'selected' : ''; ?>>Sustained</option>
                         </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="budget">Budget:</label>
-                        <input type="text" name="budget" value="<?php echo htmlspecialchars($project['budget']); ?>" required>
                     </div>
 
                     <div class="form-group">

@@ -15,7 +15,6 @@ if (!isset($_SESSION['uname'])) {
 }
 
 // Database credentials for proj_list
-// Database credentials for proj_list
 $servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username_proj = "zf8r3n4qqjyrfx7o";
 $password_proj = "su6qmqa0gxuerg98";
