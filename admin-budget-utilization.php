@@ -528,7 +528,7 @@ foreach ($colleges as $college => $budgetTable) {
     echo "<div id='{$college}_section' class='college-section' style='display: none;'>"; // Hidden by default
 
     // Title for the College
-    echo "<h3 style = 'font-size:50px;'>" . strtoupper($college) . " - Budget Allocation</h3>";
+    echo "<h3 style = 'font-size:30px;'>" . strtoupper($college) . " - Budget Allocation</h3>";
 
     // Fetch the allotted budget for the current college
     $allottedBudget = isset($allottedBudgets[strtoupper($college)]) ? number_format($allottedBudgets[strtoupper($college)], 2) : 'Not Available';
