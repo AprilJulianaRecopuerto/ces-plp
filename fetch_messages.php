@@ -14,6 +14,10 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Set timezone for the session to UTC+8
+$conn->query("SET time_zone = '+08:00'");
+
+// User database connection
 $sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $un = "equ6v8i5llo3uhjm";
 $psd = "vkfaxm2are5bjc3q";
@@ -31,7 +35,7 @@ $chatMessages = [];
 $fetchSql = "
     SELECT sent_messages.*, 
            IF(sent_messages.sender = ?, 'user', 'other') AS message_type,
-           CONVERT_TZ(sent_messages.timestamp, '+00:00', '+08:00') AS timestamp_utc8
+           sent_messages.timestamp AS timestamp_utc8
     FROM sent_messages
     ORDER BY sent_messages.timestamp";
 
@@ -59,6 +63,12 @@ while ($msgRow = $messageResult->fetch_assoc()) {
 
     // Add the message with roles to the chat array
     $msgRow['role'] = $role ?? $collegeRole;
+
+    // Convert timestamp from UTC to UTC+8
+    $timestamp = new DateTime($msgRow['timestamp_utc8'], new DateTimeZone('UTC'));
+    $timestamp->setTimezone(new DateTimeZone('Asia/Manila'));
+    $msgRow['timestamp_utc8'] = $timestamp->format('F j, Y || h:i A');
+
     $chatMessages[] = $msgRow;
 
     $roleStmt->close();
@@ -72,4 +82,5 @@ $conn->close();
 // Return messages as JSON
 header('Content-Type: application/json');
 echo json_encode($chatMessages);
+
 ?>
