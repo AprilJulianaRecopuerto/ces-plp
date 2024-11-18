@@ -395,6 +395,13 @@ if (!isset($_SESSION['username'])) {
                 font-family: "Poppins", sans-serif !important;
             }
            
+            .allotted-budget{
+                font-size:10px;
+            }
+
+            .remaining-budget{
+                font-size:10px;
+            }
         </style>
     </head>
 
