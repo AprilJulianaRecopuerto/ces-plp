@@ -595,40 +595,45 @@ $conn->close();
         </div>
     
         <div class="content">
-            <div class="chat-window" id="chatWindow">
-                <?php foreach ($chatMessages as $chatMessage): ?>
-                    <div class="message <?php echo ($chatMessage['message_type'] == 'user') ? 'user' : 'other'; ?>" 
-                        style="text-align: <?php echo ($chatMessage['message_type'] == 'user') ? 'right' : 'left'; ?>;">
-                        <strong><?php echo htmlspecialchars($chatMessage['role']); ?>:</strong> <!-- Display the sender's role -->
-                        <p><?php echo htmlspecialchars($chatMessage['message']); ?></p>
-                        <small>
-                            <?php 
-                            // Set timezone to Asia/Manila or your desired timezone
-                            $timestamp = new DateTime($chatMessage['timestamp'], new DateTimeZone('UTC')); // assuming stored in UTC
-                            $timestamp->setTimezone(new DateTimeZone('Asia/Manila')); // Adjust to local timezone
-                            echo $timestamp->format('F j, Y || h:i A'); // Format the timestamp
-                            ?>
-                        </small>
-                        
-                        <?php if ($chatMessage['sender'] == $_SESSION['uname']): ?>
-                        <!-- Delete button with type "button" to prevent immediate submission -->
-                        <form method="POST" action="cas-chat.php" style="display:inline;" id="deleteForm_<?php echo $chatMessage['id']; ?>">
-                            <input type="hidden" name="delete_message_id" value="<?php echo $chatMessage['id']; ?>">
-                            <button type="button" class="delete-btn" onclick="confirmDelete(<?php echo $chatMessage['id']; ?>)">Delete</button>
-                        </form>
-                    <?php endif; ?>
-            </div>
-
-                <?php endforeach; ?>
-            </div>
-
-            <div class="message-input">
-                <form method="POST" action="cas-chat.php" style="width: 100%;" id="chat-form">
-                    <textarea name="message" placeholder="Type your message..." required></textarea>
-                    <button type="submit">Send</button>
+    <div class="chat-window" id="chatWindow">
+        <?php foreach ($chatMessages as $chatMessage): ?>
+            <div class="message <?php echo ($chatMessage['message_type'] == 'user') ? 'user' : 'other'; ?>" 
+                style="text-align: <?php echo ($chatMessage['message_type'] == 'user') ? 'right' : 'left'; ?>;">
+                <strong><?php echo htmlspecialchars($chatMessage['role']); ?>:</strong>
+                <p><?php echo htmlspecialchars($chatMessage['message']); ?></p>
+                <small>
+                    <?php 
+                    // Debugging the raw timestamp
+                    echo 'Raw Timestamp: ' . htmlspecialchars($chatMessage['timestamp']) . '<br>';
+                    
+                    // Convert the timestamp to a DateTime object
+                    $timestamp = new DateTime($chatMessage['timestamp'], new DateTimeZone('UTC'));
+                    $timestamp->setTimezone(new DateTimeZone('Asia/Manila')); // Convert to Manila time
+                    
+                    // Output the formatted timestamp
+                    echo $timestamp->format('F j, Y || h:i A');
+                    ?>
+                </small>
+                
+                <?php if ($chatMessage['sender'] == $_SESSION['uname']): ?>
+                <!-- Delete button with type "button" to prevent immediate submission -->
+                <form method="POST" action="cas-chat.php" style="display:inline;" id="deleteForm_<?php echo $chatMessage['id']; ?>">
+                    <input type="hidden" name="delete_message_id" value="<?php echo $chatMessage['id']; ?>">
+                    <button type="button" class="delete-btn" onclick="confirmDelete(<?php echo $chatMessage['id']; ?>)">Delete</button>
                 </form>
+                <?php endif; ?>
             </div>
-        </div>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="message-input">
+        <form method="POST" action="cas-chat.php" style="width: 100%;" id="chat-form">
+            <textarea name="message" placeholder="Type your message..." required></textarea>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</div>
+
 
         <script>
              // Get the form and textarea elements
