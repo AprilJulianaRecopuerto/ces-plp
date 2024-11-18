@@ -14,6 +14,10 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Set MySQL timezone to the desired timezone (e.g., Asia/Manila for UTC +8)
+$conn->query("SET time_zone = '+08:00'");
+
+// Database connection to user_registration database
 $sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $un = "equ6v8i5llo3uhjm";
 $psd = "vkfaxm2are5bjc3q";
@@ -40,6 +44,12 @@ $fetchStmt->execute();
 $messageResult = $fetchStmt->get_result();
 
 while ($msgRow = $messageResult->fetch_assoc()) {
+    // Convert the timestamp to your local timezone (e.g., Philippines Time, UTC+8)
+    $utcTimestamp = $msgRow['timestamp'];
+    $dateTime = new DateTime($utcTimestamp, new DateTimeZone('UTC'));
+    $dateTime->setTimezone(new DateTimeZone('Asia/Manila')); // Change to your timezone (e.g., Asia/Manila for UTC+8)
+    $msgRow['timestamp'] = $dateTime->format('Y-m-d H:i:s'); // Convert to desired format (e.g., Y-m-d H:i:s)
+
     // Fetch the role for the sender from the users table (only if it's accessible)
     $roleSql = "SELECT roles FROM users WHERE username = ?";
     $roleStmt = $conn_user->prepare($roleSql);
@@ -67,6 +77,7 @@ $fetchStmt->close();
 
 // Close connection
 $conn->close();
+$conn_user->close();
 
 // Return messages as JSON
 header('Content-Type: application/json');
