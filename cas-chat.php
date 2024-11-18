@@ -100,7 +100,6 @@ if (isset($_GET['delete_id'])) {
 
 $conn->close();
 ?>
-l
 
 <!DOCTYPE html>
 <html lang="en">
@@ -546,7 +545,52 @@ l
             </div>
         </nav>
     
-        
+        <div class="sidebar">
+            <div class="logo">
+                <img src="images/logo.png" alt="Logo">
+            </div>
+
+            <ul class="menu">
+                <li><a href="cas-dash.php"><img src="images/home.png">Dashboard</a></li>
+                <li><a href="cas-projlist.php"><img src="images/project-list.png">Project List</a></li>
+                <li><a href="cas-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
+
+                <!-- Dropdown for Resource Utilization -->
+                <button class="dropdown-btn">
+                    <img src="images/resource.png"> Resource Utilization
+                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
+                </button>
+                <div class="dropdown-container">
+                    <a href="cas-tor.php">Term of Reference</a>
+                    <a href="cas-requi.php">Requisition</a>
+                    <a href="cas-venue.php">Venue</a>
+                </div>
+
+                <li><a href="cas-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
+
+                <!-- Dropdown for Task Management -->
+                <button class="dropdown-btn">
+                    <img src="images/task.png">Task Management
+                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
+                </button>
+                <div class="dropdown-container">
+                    <a href="cas-task.php">Upload Files</a>
+                    <a href="cas-mov.php">Mode of Verification</a>
+                </div>
+
+                <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
+
+                <!-- Dropdown for Audit Trails -->
+                <button class="dropdown-btn">
+                    <img src="images/logs.png"> Audit Trails
+                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
+                </button>
+                <div class="dropdown-container">
+                    <a href="cas-history.php">Log In History</a>
+                    <a href="cas-activitylogs.php">Activity Logs</a>
+                </div>
+            </ul>
+        </div>
     
         <div class="content">
             <div class="chat-window" id="chatWindow">
