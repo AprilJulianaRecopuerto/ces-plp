@@ -30,7 +30,8 @@ if ($conn_user->connect_error) {
 $chatMessages = [];
 $fetchSql = "
     SELECT sent_messages.*, 
-           IF(sent_messages.sender = ?, 'user', 'other') AS message_type
+           IF(sent_messages.sender = ?, 'user', 'other') AS message_type,
+           CONVERT_TZ(sent_messages.timestamp, '+00:00', '+08:00') AS timestamp_utc8
     FROM sent_messages
     ORDER BY sent_messages.timestamp";
 
@@ -56,8 +57,10 @@ while ($msgRow = $messageResult->fetch_assoc()) {
     $collegeResult = $collegeStmt->get_result();
     $collegeRole = $collegeResult->fetch_assoc()['role'] ?? null;
 
-    // Add the message with roles to the chat array
+    // Add the message with roles and converted timestamp to the chat array
     $msgRow['role'] = $role ?? $collegeRole;
+    $msgRow['timestamp'] = $msgRow['timestamp_utc8']; // Use the adjusted timestamp
+    unset($msgRow['timestamp_utc8']); // Remove the original timestamp field
     $chatMessages[] = $msgRow;
 
     $roleStmt->close();
