@@ -5,7 +5,7 @@ session_start();
 $servername = "uoa25ublaow4obx5.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username = "lcq4zy2vi4302d1q";
 $password = "xswigco0cdxdi5dd";
-$dbname = "kup80a8cc3mqs4ao"; // Changed database to `messages`
+$dbname = "kup80a8cc3mqs4ao"; // Changed database to messages
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -18,11 +18,10 @@ if ($conn->connect_error) {
 $chatMessages = [];
 $fetchSql = "
     SELECT sent_messages.*, 
-           IF(users.roles IS NOT NULL, users.roles, colleges.role) AS role,
+           (SELECT users.roles FROM user_registration.users WHERE users.username = sent_messages.sender LIMIT 1) AS role,
+           (SELECT colleges.role FROM user_registration.colleges WHERE colleges.uname = sent_messages.sender LIMIT 1) AS role_from_college,
            IF(sent_messages.sender = ?, 'user', 'other') AS message_type
     FROM sent_messages
-    LEFT JOIN user_registration.colleges ON sent_messages.sender = colleges.uname
-    LEFT JOIN user_registration.users ON sent_messages.sender = users.username
     ORDER BY sent_messages.timestamp";
 
 $fetchStmt = $conn->prepare($fetchSql);
@@ -30,6 +29,7 @@ $fetchStmt->bind_param("s", $_SESSION['uname']); // Get messages sent to or from
 $fetchStmt->execute();
 $messageResult = $fetchStmt->get_result();
 
+$chatMessages = [];
 while ($msgRow = $messageResult->fetch_assoc()) {
     $chatMessages[] = $msgRow;
 }
@@ -42,4 +42,3 @@ $conn->close();
 header('Content-Type: application/json');
 echo json_encode($chatMessages);
 ?>
-
