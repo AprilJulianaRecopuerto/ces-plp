@@ -65,8 +65,6 @@ if (isset($_POST['delete_id'])) {
     if ($stmt->execute()) {
         $_SESSION['message'] = "Data deleted successfully";
 
-        $notification_message = "$proj_title has been deleted";
-
         // Prepare and execute the notification insert for 'mov' database
         $notification_sql = "INSERT INTO notifications (project_name, notification_message) VALUES (?, ?)";
         $stmt_notification = $conn_mov->prepare($notification_sql);
