@@ -396,11 +396,11 @@ if (!isset($_SESSION['username'])) {
             }
            
             .allotted-budget{
-                font-size:50px;
+                font-size:20px;
             }
 
             .remaining-budget{
-                font-size:50px;
+                font-size:20px;
             }
         </style>
     </head>
