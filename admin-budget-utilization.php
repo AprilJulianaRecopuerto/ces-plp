@@ -3,7 +3,7 @@ session_start(); // Start the session
 
 // Check if the user is logged in
 if (!isset($_SESSION['username'])) {
-    header("Location: roleaccount.php");
+    header("Location: loginpage.php");
     exit;
 }
 ?>
@@ -390,37 +390,6 @@ if (!isset($_SESSION['username'])) {
             .swal-cancel {
                 font-family: "Poppins", sans-serif !important;
             }
-
-            /* Chat styles */
-            .navbar .profile-container {
-                display: flex;
-                align-items: center;
-            }
-
-            .chat-icon {
-                font-size: 20px;
-                color: #333;
-                text-decoration: none;
-                position: relative; /* To position the badge correctly */
-                margin-right: 30px;
-                margin-top: 8px;
-                margin-left: -37px;
-            }
-
-            .notification-badge {
-                display: inline-block;
-                background-color: red; /* Change this to your preferred color */
-                color: white;
-                border-radius: 50%;
-                width: 20px; /* Width of the badge */
-                height: 20px; /* Height of the badge */
-                text-align: center;
-                font-weight: bold;
-                position: absolute; /* Position it relative to the chat icon */
-                top: -5px; /* Adjust as needed */
-                right: -10px; /* Adjust as needed */
-                font-size: 14px; /* Size of the exclamation point */
-            }
            
         </style>
     </head>
@@ -428,14 +397,6 @@ if (!isset($_SESSION['username'])) {
     <body>
         <nav class="navbar">
             <h2>Colleges - Budget Allocation</h2> 
-
-            <div class="profile-container">
-                <!-- Chat Icon with Notification Badge -->
-                <a href="chat.php" class="chat-icon" onclick="resetNotifications()">
-                    <i class="fa fa-comments"></i>
-                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
-                </a>
-            <div>
 
             <div class="profile" id="profileDropdown">
                 <?php
@@ -520,10 +481,10 @@ if (!isset($_SESSION['username'])) {
 
             <?php
             // Database credentials
-            $servername = "alv4v3hlsipxnujn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-            $username = "ctk6gpo1v7sapq1l";
-            $password = "u1cgfgry8lu5rliz";
-            $dbname = "oshzbyiasuos5kn4"; // Update to your actual database name
+            $servername = "localhost";
+            $username = "root";
+            $password = "";
+            $dbname = "budget_utilization"; // Update to your actual database name
 
             // Create connection
             $conn = new mysqli($servername, $username, $password, $dbname);
@@ -544,7 +505,7 @@ if (!isset($_SESSION['username'])) {
 
                 // Fetch budget records for the details table
                 $detailsTable = "{$college}_details"; // Budget details table for each college
-                $detailsSql = "SELECT * FROM cas_details";
+                $detailsSql = "SELECT * FROM $detailsTable";
                 $detailsResult = $conn->query($detailsSql);
 
                 // First Table: Budget Allocation (Details Table)
@@ -579,7 +540,7 @@ if (!isset($_SESSION['username'])) {
 
                 // Fetch budget event details for the second table (Budget Table)
                 $budgetTable = "{$college}_budget"; // Budget table for each college
-                $budgetSql = "SELECT * FROM cas_budget ORDER BY details_id";
+                $budgetSql = "SELECT * FROM $budgetTable ORDER BY details_id";
                 $budgetResult = $conn->query($budgetSql);
 
                 // Second Table: Budget Event Details (Budget Table)
