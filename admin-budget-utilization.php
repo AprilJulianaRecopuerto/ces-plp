@@ -396,11 +396,11 @@ if (!isset($_SESSION['username'])) {
             }
            
             .allotted-budget{
-                font-size:10px;
+                font-size:50px;
             }
 
             .remaining-budget{
-                font-size:10px;
+                font-size:50px;
             }
         </style>
     </head>
@@ -545,13 +545,13 @@ foreach ($colleges as $college => $budgetTable) {
     }
 
     // Display the allotted budget
-    echo "<p><strong>Allotted Budget: </strong>
+    echo "<p class='allotted-budget'<strong>Allotted Budget: </strong>
             <input type='text' class='allotted-budget' id='{$college}_budget' value='" . $allottedBudget . "' />
             <button class='update-budget-btn' onclick='updateBudget(\"{$college}\")'>Update</button>
           </p>";
 
     // Display the remaining budget
-    echo "<p><strong>Remaining Budget: </strong>
+    echo "<p class='remaining-budget'><strong>Remaining Budget: </strong>
             <input type='text' class='remaining-budget' id='{$college}_remaining_budget' value='" . number_format($remainingBudget, 2) . "' disabled />
           </p>";
     
