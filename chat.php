@@ -20,6 +20,7 @@ if ($conn_mess->connect_error) {
     die("Connection failed: " . $conn_mess->connect_error);
 }
 
+// Database connection to `user_registration` schema
 $sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $un = "equ6v8i5llo3uhjm";
 $psd = "vkfaxm2are5bjc3q";
@@ -40,6 +41,17 @@ $roleStmt->execute();
 $roleResult = $roleStmt->get_result();
 $userRole = $roleResult->fetch_assoc()['roles'];
 $roleStmt->close();
+
+// If no role found in users table, fetch from the colleges table
+if (!$userRole) {
+    $collegeRoleSql = "SELECT role FROM colleges WHERE uname = ?";
+    $collegeRoleStmt = $conn_users->prepare($collegeRoleSql);
+    $collegeRoleStmt->bind_param("s", $_SESSION['username']);
+    $collegeRoleStmt->execute();
+    $collegeRoleResult = $collegeRoleStmt->get_result();
+    $userRole = $collegeRoleResult->fetch_assoc()['role'];
+    $collegeRoleStmt->close();
+}
 
 // Handle new message submission to `sent_messages` table
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['message'])) {
@@ -65,30 +77,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_message_id'])) 
     $deleteStmt->close();
 }
 
-// Fetch all messages from `sent_messages` and related user data
+// Fetch all messages from `sent_messages` (no JOIN)
 $chatMessages = [];
-$fetchSql = "
-    SELECT sent_messages.*, 
-           IF(users.roles IS NOT NULL, users.roles, colleges.role) AS role,
-           IF(sent_messages.sender = ?, 'user', 'other') AS message_type
-    FROM sent_messages
-    LEFT JOIN user_registration.colleges ON sent_messages.sender = colleges.uname
-    LEFT JOIN user_registration.users ON sent_messages.sender = users.username
-    ORDER BY sent_messages.timestamp";
-
+$fetchSql = "SELECT * FROM sent_messages ORDER BY timestamp";
 $fetchStmt = $conn_mess->prepare($fetchSql);
-$fetchStmt->bind_param("s", $_SESSION['username']);
 $fetchStmt->execute();
 $messageResult = $fetchStmt->get_result();
+
 while ($msgRow = $messageResult->fetch_assoc()) {
+    // Manually fetch the role for each message
+    $msgSender = $msgRow['sender'];
+    $role = $userRole; // Default role
+
+    // Check if the sender's role is from colleges
+    if ($msgSender != $_SESSION['username']) {
+        $collegeRoleSql = "SELECT role FROM colleges WHERE uname = ?";
+        $collegeRoleStmt = $conn_users->prepare($collegeRoleSql);
+        $collegeRoleStmt->bind_param("s", $msgSender);
+        $collegeRoleStmt->execute();
+        $collegeRoleResult = $collegeRoleStmt->get_result();
+        $role = $collegeRoleResult->fetch_assoc()['role'];
+        $collegeRoleStmt->close();
+    }
+
+    // Add the message and its sender role to the chat messages array
+    $msgRow['role'] = $role;
+    $msgRow['message_type'] = ($msgRow['sender'] == $_SESSION['username']) ? 'user' : 'other';
     $chatMessages[] = $msgRow;
 }
+
 $fetchStmt->close();
 
 // Close connections
 $conn_mess->close();
 $conn_users->close();
 ?>
+
 
 
 <!DOCTYPE html>
