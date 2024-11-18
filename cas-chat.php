@@ -84,13 +84,15 @@ $fetchStmt->execute();
 $result_messages = $fetchStmt->get_result();
 
 // Handle message deletion
-if (isset($_GET['delete_message_id'])) {
-    $deleteId = $_GET['delete_message_id'];
+if (isset($_POST['delete_message_id'])) {
+    $deleteId = $_POST['delete_message_id'];
     $deleteSql = "DELETE FROM sent_messages WHERE id = ? AND sender = ?";
     $deleteStmt = $conn->prepare($deleteSql);
     $deleteStmt->bind_param("is", $deleteId, $uname);
+    
     if ($deleteStmt->execute()) {
-        header("Location: cas-chat.php"); // Redirect after deletion
+        // Redirect to refresh the page after deletion
+        header("Location: cas-chat.php"); 
         exit;
     } else {
         echo "Error deleting message: " . $deleteStmt->error;
@@ -608,13 +610,13 @@ $conn->close();
                             ?>
                         </small>
                         
-                <?php if ($chatMessage['sender'] == $_SESSION['uname']): ?>
-                    <!-- Delete button -->
-                    <form method="POST" action="cas-chat.php" style="display:inline;" id="deleteForm_<?php echo $chatMessage['id']; ?>">
-                        <input type="hidden" name="delete_message_id" value="<?php echo $chatMessage['id']; ?>">
-                        <button type="button" class="delete-btn" onclick="confirmDelete(<?php echo $chatMessage['id']; ?>)">Delete</button>
-                    </form>
-                <?php endif; ?>
+                        <?php if ($chatMessage['sender'] == $_SESSION['uname']): ?>
+                        <!-- Delete button with type "button" to prevent immediate submission -->
+                        <form method="POST" action="cas-chat.php" style="display:inline;" id="deleteForm_<?php echo $chatMessage['id']; ?>">
+                            <input type="hidden" name="delete_message_id" value="<?php echo $chatMessage['id']; ?>">
+                            <button type="button" class="delete-btn" onclick="confirmDelete(<?php echo $chatMessage['id']; ?>)">Delete</button>
+                        </form>
+                    <?php endif; ?>
             </div>
 
                 <?php endforeach; ?>
@@ -665,6 +667,7 @@ $conn->close();
                     }
                 });
             }
+
 
             // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
