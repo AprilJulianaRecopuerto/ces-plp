@@ -1,6 +1,9 @@
 <?php
 session_start();
 
+// Ensure default timezone is set to Manila
+date_default_timezone_set('Asia/Manila'); // This ensures the system timezone is Manila
+
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
     header("Location: roleaccount.php");
@@ -603,15 +606,12 @@ $conn->close();
                 <p><?php echo htmlspecialchars($chatMessage['message']); ?></p>
                 <small>
                     <?php 
-                    // Debugging the raw timestamp
-                    echo 'Raw Timestamp: ' . htmlspecialchars($chatMessage['timestamp']) . '<br>';
-                    
-                    // Convert the timestamp to a DateTime object
-                    $timestamp = new DateTime($chatMessage['timestamp'], new DateTimeZone('UTC'));
+                    // Convert the timestamp from UTC to Manila time
+                    $timestamp = new DateTime($chatMessage['timestamp'], new DateTimeZone('UTC')); // Assuming UTC storage
                     $timestamp->setTimezone(new DateTimeZone('Asia/Manila')); // Convert to Manila time
                     
                     // Output the formatted timestamp
-                    echo $timestamp->format('F j, Y || h:i A');
+                    echo $timestamp->format('F j, Y || h:i A'); // Shows the date and time in 12-hour format with AM/PM
                     ?>
                 </small>
                 
