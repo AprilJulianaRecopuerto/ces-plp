@@ -20,9 +20,10 @@ $username_db = "zf8r3n4qqjyrfx7o"; // MySQL username (e.g., root for local devel
 $password_db = "su6qmqa0gxuerg98"; // MySQL password (e.g., empty for local development)
 $dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-$servername_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+
+$sn_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username_ur = "equ6v8i5llo3uhjm"; // MySQL username (e.g., root for local development)
-$password_ur = "vkfaxm2are5bjc3q";
+$pass_ur = "vkfaxm2are5bjc3q"; // MySQL password (e.g., empty for local development)
 $dbname_user_registration = "ylwrjgaks3fw5sdj";
 
 // Create connection to the proj_list database
@@ -35,7 +36,7 @@ if ($conn_proj_list->connect_error) {
 
 
 // Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername_ur, $username_ur, $password_ur, $dbname_user_registration);
+$conn_profile = new mysqli($sn_ur, $username_ur, $pass_ur, $dbname_user_registration);
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }
