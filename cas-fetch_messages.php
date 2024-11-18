@@ -14,6 +14,18 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj"; // your database name
+
+$conn_user = new mysqli($sn, $un, $psd, $dbname_user_registration);
+
+// Check connection
+if ($conn_user->connect_error) {
+    die("Connection failed: " . $conn_user->connect_error);
+}
+
 // Fetch messages for the logged-in user from sent_messages
 $chatMessages = [];
 $fetchSql = "
@@ -30,7 +42,7 @@ $messageResult = $fetchStmt->get_result();
 while ($msgRow = $messageResult->fetch_assoc()) {
     // Fetch the role for the sender from the users table (only if it's accessible)
     $roleSql = "SELECT roles FROM user_registration.users WHERE username = ?";
-    $roleStmt = $conn->prepare($roleSql);
+    $roleStmt = $conn_user->prepare($roleSql);
     $roleStmt->bind_param("s", $msgRow['sender']);
     $roleStmt->execute();
     $roleResult = $roleStmt->get_result();
@@ -38,7 +50,7 @@ while ($msgRow = $messageResult->fetch_assoc()) {
 
     // Fetch the role from the colleges table (only if it's accessible)
     $collegeSql = "SELECT role FROM user_registration.colleges WHERE uname = ?";
-    $collegeStmt = $conn->prepare($collegeSql);
+    $collegeStmt = $conn_user->prepare($collegeSql);
     $collegeStmt->bind_param("s", $msgRow['sender']);
     $collegeStmt->execute();
     $collegeResult = $collegeStmt->get_result();
