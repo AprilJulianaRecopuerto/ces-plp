@@ -30,7 +30,8 @@ if ($conn_user->connect_error) {
 $chatMessages = [];
 $fetchSql = "
     SELECT sent_messages.*, 
-           IF(sent_messages.sender = ?, 'user', 'other') AS message_type
+           IF(sent_messages.sender = ?, 'user', 'other') AS message_type,
+           CONVERT_TZ(sent_messages.timestamp, '+00:00', '+08:00') AS timestamp_utc8
     FROM sent_messages
     ORDER BY sent_messages.timestamp";
 
