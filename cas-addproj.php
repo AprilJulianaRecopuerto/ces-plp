@@ -12,22 +12,26 @@ if (!isset($_SESSION['uname'])) {
     exit;
 }
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "proj_list";
-$dbname_user_registration = "user_registration";
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
 // Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
 // Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername, $username, $password, $dbname_user_registration);
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }
@@ -59,9 +63,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     
     // For Classification
-    $classification = $_POST['classification'];
-    if ($classification == "Others") {
-        $classification = $_POST['other_classification'];  // Use the 'Other' field value
+    $sdg = $_POST['sdg'];
+    if ($sdg == "Others") {
+        $sdg = $_POST['other_classification'];  // Use the 'Other' field value
     }
 
     $dept = $_POST['dept'];
@@ -76,22 +80,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $barangay = $_POST['barangay'];
     $beneficiary = $_POST['beneficiary'];
     $duration = $_POST['duration'];
-    $budget = $_POST['budget'];
     $status = $_POST['status'];
 
     // Prepare the SQL statement for inserting the data
     $stmt = $conn->prepare("INSERT INTO cas (
         date_of_sub, semester, lead_person, dept, implementor, attendees, proj_title, 
-        classification, specific_activity, dateof_imple, time_from, time_to, district, 
-        barangay, beneficiary, duration, budget, status) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        sdg, specific_activity, dateof_imple, time_from, time_to, district, 
+        barangay, beneficiary, duration, status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
     if ($stmt === false) {
         $_SESSION['error'] = "Prepare statement failed: " . $conn->error;
         $redirect_url = 'cas-addproj.php';
     } else {
         $stmt->bind_param(
-            "ssssssssssssssssss", 
+            "sssssssssssssssss", 
             $date_of_sub, 
             $semester, 
             $lead_person, 
@@ -99,7 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $implementor, 
             $attendees, 
             $proj_title, 
-            $classification, 
+            $sdg, 
             $specific_activity, 
             $dateof_imple, 
             $time_from, 
@@ -108,7 +111,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $barangay, 
             $beneficiary, 
             $duration, 
-            $budget, 
             $status
         );        
 
@@ -209,7 +211,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-    <!DOCTYPE html>
+<!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -756,18 +758,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
 
                     <div class="form-group">
-                        <label for="classification">Classification:</label>
-                        <select id="classification" name="classification" onchange="toggleOtherClassificationInput()" required>
-                            <option value="" disabled selected>Select Classification</option>
-                            <option value="Seminar">Seminar</option>
-                            <option value="Workshop">Workshop</option>
-                            <option value="Conference">Conference</option>
-                            <option value="Webinar">Webinar</option>
-                            <option value="Training">Training</option>
-                            <option value="Meeting">Meeting</option>
-                            <option value="Symposium">Symposium</option>
-                            <option value="Forum">Forum</option>
-                            <option value="Environment">Environment</option>
+                        <label for="sdg">Sustainable Development Goals:</label>
+                        <select id="sdg" name="sdg" onchange="toggleOtherClassificationInput()" required>
+                            <option value="" disabled selected>Select Sustainable Development Goals</option>
+                            <option value="SDG 1: No Poverty">SDG 1: No Poverty</option>
+                            <option value="SDG 2: Zero Hunger">SDG 2: Zero Hunger</option>
+                            <option value="SDG 3: Good Health and Well-being">SDG 3: Good Health and Well-Being</option>
+                            <option value="SDG 4: Quality Education">SDG 4: Quality Education</option>
+                            <option value="SDG 5: Gender Equality">SDG 5: Gender Equality </option>
+                            <option value="SDG 6: Clean Water and Sanitation">SDG 6: Clean Water and Sanitation</option>
+                            <option value="SDG 7: Affordable and Clean Energy">SDG 7: Affordable and Clean Energy</option>
+                            <option value="SDG 8: Decent Work and Economic Growth">SDG 8: Decent Work and Economic Growth</option>
+                            <option value="SDG 9: Industry, Innovation, and Infrastructure">SDG 9: Industry, Innovation, and Infrastructureonment</option>
+                            <option value="SDG 10: Reduced Inequalities">SDG 10: Reduced Inequalities</option>
+                            <option value="SDG 11: Sustainable Cities and Communities">SDG 11: Sustainable Cities and Communities</option>
+                            <option value="SDG 12: Responsible Consumption and Production">SDG 12: Responsible Consumption and Production</option>
+                            <option value="SDG 13: Climate Action">SDG 13: Climate Action</option>
+                            <option value="SDG 14: Life Below Water">SDG 14: Life Below Water</option>
+                            <option value="SDG 15: Life on Land">SDG 15: Life on Land</option>
+                            <option value="SDG 16: Peace, Justice, and Strong Institutions">SDG 16: Peace, Justice, and Strong Institutions</option>
+                            <option value="SDG 17: Partnerships for the Goals">SDG 17: Partnerships for the Goals</option>
                             <option value="Others">Others (Please specify)</option>
                         </select>
                     </div>
@@ -824,11 +834,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <option value="One Day">One day</option>
                             <option value="Sustained">Sustained</option>
                         </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="budget">Total Budget:</label>
-                        <input type="text" id="budget" name="budget" placeholder="Enter Total Bugdet for this Event (e.g 40,000)" required>
                     </div>
 
                     <div class="form-group">

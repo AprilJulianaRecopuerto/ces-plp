@@ -779,7 +779,7 @@ $conn_profile->close();
                             <th>Implementor</th>
                             <th>Number of Target Participants</th>
                             <th>Project Title</th>
-                            <th>Classification</th>
+                            <th>Sustainable Development Goals</th>
                             <th>Specific Activity</th>
                             <th>Date of Implementation</th>
                             <th>Time From</th>
@@ -788,7 +788,6 @@ $conn_profile->close();
                             <th>Barangay</th>
                             <th>Beneficiary</th>
                             <th>Duration of Project</th>
-                            <th>Total Budget</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -829,7 +828,7 @@ $conn_profile->close();
                             // Output data of each row
                             while ($row = $result->fetch_assoc()) {
                                 echo "<tr>
-                                        <td>" . $row["id"] . "</td>
+                                         <td>" . $row["id"] . "</td>
                                         <td>" . $row["date_of_sub"] . "</td>
                                         <td>" . $row["semester"] . "</td>
                                         <td>" . $row["lead_person"] . "</td>
@@ -837,7 +836,7 @@ $conn_profile->close();
                                         <td>" . $row["implementor"] . "</td>
                                         <td>" . $row["attendees"] . "</td>
                                         <td>" . $row["proj_title"] . "</td>
-                                        <td>" . $row["classification"] . "</td>
+                                        <td>" . $row["sdg"] . "</td>
                                         <td>" . $row["specific_activity"] . "</td>
                                         <td>" . $row["dateof_imple"] . "</td>
                                         <td>" . $row["time_from"] . "</td>
@@ -846,7 +845,6 @@ $conn_profile->close();
                                         <td>" . $row["barangay"] . "</td>
                                         <td>" . $row["beneficiary"] . "</td>
                                         <td>" . $row["duration"] . "</td>
-                                        <td>" . $row["budget"] . "</td>
                                         <td>" . $row["status"] . "</td>
                                         <td class='edit'>
                                             <a href='cas-editproj.php?id=" . $row["id"] . "'>EDIT</a>
