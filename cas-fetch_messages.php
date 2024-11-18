@@ -18,8 +18,6 @@ if ($conn->connect_error) {
 $chatMessages = [];
 $fetchSql = "
     SELECT sent_messages.*, 
-           (SELECT users.roles FROM user_registration.users WHERE users.username = sent_messages.sender LIMIT 1) AS role,
-           (SELECT colleges.role FROM user_registration.colleges WHERE colleges.uname = sent_messages.sender LIMIT 1) AS role_from_college,
            IF(sent_messages.sender = ?, 'user', 'other') AS message_type
     FROM sent_messages
     ORDER BY sent_messages.timestamp";
@@ -29,9 +27,29 @@ $fetchStmt->bind_param("s", $_SESSION['uname']); // Get messages sent to or from
 $fetchStmt->execute();
 $messageResult = $fetchStmt->get_result();
 
-$chatMessages = [];
 while ($msgRow = $messageResult->fetch_assoc()) {
+    // Fetch the role for the sender from the users table (only if it's accessible)
+    $roleSql = "SELECT roles FROM user_registration.users WHERE username = ?";
+    $roleStmt = $conn->prepare($roleSql);
+    $roleStmt->bind_param("s", $msgRow['sender']);
+    $roleStmt->execute();
+    $roleResult = $roleStmt->get_result();
+    $role = $roleResult->fetch_assoc()['roles'] ?? null;
+
+    // Fetch the role from the colleges table (only if it's accessible)
+    $collegeSql = "SELECT role FROM user_registration.colleges WHERE uname = ?";
+    $collegeStmt = $conn->prepare($collegeSql);
+    $collegeStmt->bind_param("s", $msgRow['sender']);
+    $collegeStmt->execute();
+    $collegeResult = $collegeStmt->get_result();
+    $collegeRole = $collegeResult->fetch_assoc()['role'] ?? null;
+
+    // Add the message with roles to the chat array
+    $msgRow['role'] = $role ?? $collegeRole;
     $chatMessages[] = $msgRow;
+
+    $roleStmt->close();
+    $collegeStmt->close();
 }
 $fetchStmt->close();
 
