@@ -3,7 +3,8 @@
 date_default_timezone_set('Asia/Manila');
 
 session_start(); // Start the session at the very top of the file
-    // Database connection details
+
+// Database connection details
 $servername = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username_db = "t9riamok80kmok3h";
 $password_db = "lzh13ihy0axfny6d";

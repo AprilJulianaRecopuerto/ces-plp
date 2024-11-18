@@ -1,9 +1,9 @@
 <?php
 // Database connection details
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "admin_todo_list";  // Database for tasks
+$servername = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "t9riamok80kmok3h";
+$password = "lzh13ihy0axfny6d";
+$dbname = "g8ri1hhtsfx77ptb";
 
 // Check if task_id is provided
 if (isset($_POST['task_id'])) {

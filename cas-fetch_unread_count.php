@@ -1,9 +1,9 @@
 <?php
 // Database credentials
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "admin_todo_list";
+$servername = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "t9riamok80kmok3h";
+$password = "lzh13ihy0axfny6d";
+$dbname = "g8ri1hhtsfx77ptb";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
