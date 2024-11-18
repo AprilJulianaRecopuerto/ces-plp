@@ -600,7 +600,7 @@ $conn_users->close();
                         <small>
                             <?php 
                             // Set timezone to Asia/Manila or your desired timezone
-                            $timestamp = new DateTime($chatMessage['timestamp'], new DateTimeZone('UTC+8')); // assuming stored in UTC
+                            $timestamp = new DateTime($chatMessage['timestamp'], new DateTimeZone('UTC')); // assuming stored in UTC
                             $timestamp->setTimezone(new DateTimeZone('Asia/Manila')); // Adjust to local timezone
                             echo $timestamp->format('F j, Y || h:i A'); // Format the timestamp
                             ?>
