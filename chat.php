@@ -7,69 +7,78 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-// Database connection for `messages` database
-$servername_mess = "uoa25ublaow4obx5.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_mess = "lcq4zy2vi4302d1q";
-$password_mess = "xswigco0cdxdi5dd";
-$dbname_mess = "kup80a8cc3mqs4ao"; // messages database
+// Database connection to `messages` database
+$servername = "uoa25ublaow4obx5.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "lcq4zy2vi4302d1q";
+$password = "xswigco0cdxdi5dd";
+$dbname = "kup80a8cc3mqs4ao";
 
-$conn_mess = new mysqli($servername_mess, $username_mess, $password_mess, $dbname_mess);
+$conn_mess = new mysqli($servername, $username, $password, $dbname);
 
-// Check connection for messages database
+// Check connection
 if ($conn_mess->connect_error) {
     die("Connection failed: " . $conn_mess->connect_error);
 }
 
-// Database connection for `user_registration` database
-$servername_user_registration = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_user_registration = "equ6v8i5llo3uhjm";
-$password_user_registration = "vkfaxm2are5bjc3q";
-$dbname_user_registration = "ylwrjgaks3fw5sdj"; // user_registration database
-
-$conn_user_registration = new mysqli($servername_user_registration, $username_user_registration, $password_user_registration, $dbname_user_registration);
-
-// Check connection for user_registration database
-if ($conn_user_registration->connect_error) {
-    die("Connection failed: " . $conn_user_registration->connect_error);
-}
-
 // Fetch user role from the `user_registration` schema (specify schema)
-$userRoleSql = "SELECT roles FROM users WHERE username = ?";
-$roleStmt = $conn_user_registration->prepare($userRoleSql);
+$userRoleSql = "SELECT roles FROM user_registration.users WHERE username = ?";
+$roleStmt = $conn_mess->prepare($userRoleSql);
 $roleStmt->bind_param("s", $_SESSION['username']);
 $roleStmt->execute();
 $roleResult = $roleStmt->get_result();
 $userRole = $roleResult->fetch_assoc()['roles'];
 $roleStmt->close();
 
-// Fetch all messages from `sent_messages`
+// Handle new message submission to `sent_messages` table
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['message'])) {
+    $sender = $_SESSION['username'];
+    $message = $_POST['message'];
+
+    $insertSql = "INSERT INTO sent_messages (sender, role, message, timestamp) VALUES (?, ?, ?, NOW())"; // Adjusted to include role
+    $insertStmt = $conn_mess->prepare($insertSql);
+    $insertStmt->bind_param("sss", $sender, $userRole, $message); // Binding role
+
+    if (!$insertStmt->execute()) {
+        echo "Error preparing insert statement: " . $insertStmt->error;
+    }
+    $insertStmt->close();
+}
+
+// Handle delete message request
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_message_id'])) {
+    $messageId = $_POST['delete_message_id'];
+
+    // Delete the message if it belongs to the current user
+    $deleteSql = "DELETE FROM sent_messages WHERE id = ? AND sender = ?";
+    $deleteStmt = $conn_mess->prepare($deleteSql);
+    $deleteStmt->bind_param("is", $messageId, $_SESSION['username']);
+    $deleteStmt->execute();
+    $deleteStmt->close();
+}
+
+// Fetch all messages from `sent_messages` and related user data
 $chatMessages = [];
-$fetchSql = "SELECT id, sender, message, timestamp FROM sent_messages ORDER BY timestamp";
+$fetchSql = "
+    SELECT sent_messages.*, 
+           IF(users.roles IS NOT NULL, users.roles, colleges.role) AS role,
+           IF(sent_messages.sender = ?, 'user', 'other') AS message_type
+    FROM sent_messages
+    LEFT JOIN user_registration.colleges ON sent_messages.sender = colleges.uname
+    LEFT JOIN user_registration.users ON sent_messages.sender = users.username
+    ORDER BY sent_messages.timestamp";
+
 $fetchStmt = $conn_mess->prepare($fetchSql);
+$fetchStmt->bind_param("s", $_SESSION['username']);
 $fetchStmt->execute();
 $messageResult = $fetchStmt->get_result();
 
 while ($msgRow = $messageResult->fetch_assoc()) {
-    // Fetch role from `colleges` table based on sender username
-    $roleSql = "SELECT role FROM colleges WHERE uname = ?";
-    $roleStmt = $conn_user_registration->prepare($roleSql);
-    $roleStmt->bind_param("s", $msgRow['sender']);
-    $roleStmt->execute();
-    $roleResult = $roleStmt->get_result();
-    $role = $roleResult->fetch_assoc()['role'] ?? $userRole; // Fallback to user role if college role is not found
-    $roleStmt->close();
-
-    // Add the message and its corresponding role to the chat messages array
-    $msgRow['role'] = $role;
-    $msgRow['message_type'] = ($msgRow['sender'] === $_SESSION['username']) ? 'user' : 'other';
     $chatMessages[] = $msgRow;
 }
-
 $fetchStmt->close();
 
 // Close connections
 $conn_mess->close();
-$conn_user_registration->close();
 ?>
 
 
