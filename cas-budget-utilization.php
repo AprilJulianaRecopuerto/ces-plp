@@ -76,8 +76,8 @@ if ($conn_budget_utilization->connect_error) {
 $budgetSql = "SELECT details_id, proj_title, lead_person, semester, expenses, remaining_budget, total_budget FROM cas_budget ORDER BY details_id";
 $resultBudget = $conn_budget_utilization->query($budgetSql);
 
-// Connect to the database where allotted_budget is stored
-$conn_budget_allotment = new mysqli($servername, $username_db, $password_db, "budget_utilization");
+
+$conn_budget_allotment = new mysqli($servername_bu, $username_bu, $password_bu, $dbname_budget_utilization);
 
 // Check connection for the allotted_budget table
 if ($conn_budget_allotment->connect_error) {
