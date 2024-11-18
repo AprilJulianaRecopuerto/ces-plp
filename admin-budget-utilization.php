@@ -35,6 +35,7 @@ if (!isset($_SESSION['username'])) {
             body {
                 margin: 0;
                 background-color: #F6F5F5; /* Light gray background color */
+                font-family: 'Glacial Indifference', sans-serif;
             }
 
             .navbar {
