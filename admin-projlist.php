@@ -551,7 +551,7 @@ if (isset($_GET['fetch_notifications'])) {
                             <th>Implementor</th>
                             <th>Number of Target Participants</th>
                             <th>Project Title</th>
-                            <th>Classification</th>
+                            <th>SDG Classification</th>
                             <th>Specific Activity</th>
                             <th>Date of Implementation</th>
                             <th>Time From</th>
@@ -600,7 +600,7 @@ if (isset($_GET['fetch_notifications'])) {
                                         <td>" . $row["implementor"] . "</td>
                                         <td>" . $row["attendees"] . "</td>
                                         <td>" . $row["proj_title"] . "</td>
-                                        <td>" . $row["classification"] . "</td>
+                                        <td>" . $row["sdg"] . "</td>
                                         <td>" . $row["specific_activity"] . "</td>
                                         <td>" . $row["dateof_imple"] . "</td>
                                         <td>" . $row["time_from"] . "</td>

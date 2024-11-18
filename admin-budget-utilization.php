@@ -1,3 +1,4 @@
+admin-budget-utilization.php
 <?php
 session_start(); // Start the session
 
@@ -23,6 +24,9 @@ if (!isset($_SESSION['username'])) {
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <!-- SweetAlert 2 CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap');
@@ -469,260 +473,266 @@ if (!isset($_SESSION['username'])) {
         </div>
 
         <div class="content-budget">
-            <div class="button-container">
-                <button class="filter-button" onclick="filterTable('cas')">CAS</button>
-                <button class="filter-button" onclick="filterTable('cba')">CBA</button>
-                <button class="filter-button" onclick="filterTable('ccs')">CCS</button>
-                <button class="filter-button" onclick="filterTable('coed')">COED</button>
-                <button class="filter-button" onclick="filterTable('coe')">COE</button>
-                <button class="filter-button" onclick="filterTable('cihm')">CIHM</button>
-                <button class="filter-button" onclick="filterTable('con')">CON</button>
-            </div>
+    <div class="button-container">
+        <button class="filter-button" onclick="filterTable('cas')">CAS</button>
+        <button class="filter-button" onclick="filterTable('cba')">CBA</button>
+        <button class="filter-button" onclick="filterTable('ccs')">CCS</button>
+        <button class="filter-button" onclick="filterTable('coed')">COED</button>
+        <button class="filter-button" onclick="filterTable('coe')">COE</button>
+        <button class="filter-button" onclick="filterTable('cihm')">CIHM</button>
+        <button class="filter-button" onclick="filterTable('con')">CON</button>
+    </div>
+    <?php
+// Database credentials
+$servername = "alv4v3hlsipxnujn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "ctk6gpo1v7sapq1l";
+$password = "u1cgfgry8lu5rliz";
+$dbname = "oshzbyiasuos5kn4"; // Database name
 
-            <?php
-            // Database credentials
-            $servername = "localhost";
-            $username = "root";
-            $password = "";
-            $dbname = "budget_utilization"; // Update to your actual database name
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-            // Create connection
-            $conn = new mysqli($servername, $username, $password, $dbname);
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
-            // Check connection
-            if ($conn->connect_error) {
-                die("Connection failed: " . $conn->connect_error);
-            }
+// Fetch allotted budget for each department
+$allottedBudgetSql = "SELECT department_name, allotted_budget FROM allotted_budget";
+$allottedBudgetResult = $conn->query($allottedBudgetSql);
+$allottedBudgets = [];
 
-            // Array of colleges
-            $colleges = ['cas', 'cba', 'ccs', 'coed', 'coe', 'cihm', 'con'];
+if ($allottedBudgetResult && $allottedBudgetResult->num_rows > 0) {
+    while ($row = $allottedBudgetResult->fetch_assoc()) {
+        $allottedBudgets[$row['department_name']] = $row['allotted_budget'];
+    }
+}
 
-            foreach ($colleges as $college) {
-                echo "<div id='{$college}_section' class='college-section' style='display: none;'>"; // Hidden by default
+$colleges = [
+    'cas' => 'cas_budget',
+    'cba' => 'cba_budget',
+    'ccs' => 'ccs_budget',
+    'coed' => 'coed_budget',
+    'coe' => 'coe_budget',
+    'cihm' => 'cihm_budget',
+    'con' => 'con_budget'
+];
+foreach ($colleges as $college => $budgetTable) {
+    echo "<div id='{$college}_section' class='college-section' style='display: none;'>"; // Hidden by default
 
-                // Title for the College
-                echo "<h3>" . strtoupper($college) . " - Budget Allocation</h3>";
+    // Title for the College
+    echo "<h3>" . strtoupper($college) . " - Budget Allocation</h3>";
 
-                // Fetch budget records for the details table
-                $detailsTable = "{$college}_details"; // Budget details table for each college
-                $detailsSql = "SELECT * FROM $detailsTable";
-                $detailsResult = $conn->query($detailsSql);
+    // Fetch the allotted budget for the current college
+    $allottedBudget = isset($allottedBudgets[strtoupper($college)]) ? number_format($allottedBudgets[strtoupper($college)], 2) : 'Not Available';
 
-                // First Table: Budget Allocation (Details Table)
-                echo "<div class='table-container'>";
-                echo "<table class='crud-table'>";
-                echo "<thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Semester</th>
-                            <th>District</th>
-                            <th>Barangay</th>
-                        </tr>
-                    </thead>
-                    <tbody>";
+    // Calculate the total expenses for the current college
+    $expensesSql = "SELECT SUM(expenses) AS total_expenses FROM $budgetTable";
+    $expensesResult = $conn->query($expensesSql);
+    $remainingBudget = 0;
 
-                if ($detailsResult && $detailsResult->num_rows > 0) {
-                    while ($row = $detailsResult->fetch_assoc()) {
-                        echo "<tr>
-                                <td>{$row['id']}</td>
-                                <td>{$row['semester']}</td>
-                                <td>{$row['district']}</td>
-                                <td>{$row['barangay']}</td>
-                            </tr>";
-                    }
-                } else {
-                    echo "<tr><td colspan='4'>No records found for this college's budget allocation</td></tr>";
+    if ($expensesResult && $expensesResult->num_rows > 0) {
+        $expenseRow = $expensesResult->fetch_assoc();
+        $totalExpenses = $expenseRow['total_expenses'] ? $expenseRow['total_expenses'] : 0;
+        $remainingBudget = $allottedBudgets[strtoupper($college)] - $totalExpenses;
+    }
+
+    // Display the allotted budget
+    echo "<p><strong>Allotted Budget: </strong>
+            <input type='text' class='allotted-budget' id='{$college}_budget' value='" . $allottedBudget . "' />
+            <button class='update-budget-btn' onclick='updateBudget(\"{$college}\")'>Update</button>
+          </p>";
+
+    // Display the remaining budget
+    echo "<p><strong>Remaining Budget: </strong>
+            <input type='text' class='remaining-budget' id='{$college}_remaining_budget' value='" . number_format($remainingBudget, 2) . "' disabled />
+          </p>";
+    
+    // Fetch budget records for the budget table
+    $budgetSql = "SELECT * FROM $budgetTable ORDER BY details_id";
+    $budgetResult = $conn->query($budgetSql);
+
+    // Budget Table: Event Budget Details
+    echo "<div class='table-container'>";
+    echo "<table class='crud-table'>";
+    echo "<thead>
+            <tr>
+                <th>ID</th>
+                <th>Event Title</th>
+                <th>Semester</th>
+                <th>Expenses</th>
+            </tr>
+        </thead>
+        <tbody>";
+
+    if ($budgetResult && $budgetResult->num_rows > 0) {
+        $budgetData = [];
+
+        // Group budget details by details_id
+        while ($row = $budgetResult->fetch_assoc()) {
+            $budgetData[$row['details_id']][] = $row; // Grouping items by details_id
+        }
+
+        // Output rows with calculated rowspans for details_id
+        foreach ($budgetData as $detailsId => $items) {
+            $firstRow = true; // Track the first row for details_id
+
+            foreach ($items as $index => $item) {
+                echo "<tr>";
+
+                // Display Details ID only once per unique details_id
+                if ($firstRow) {
+                    echo "<td rowspan='" . count($items) . "'>{$detailsId}</td>";
+                    $firstRow = false; // Set to false after the first row
                 }
 
-                echo "</tbody>";
-                echo "</table>";
-                echo "</div>"; // Close .table-container
+                // Output remaining columns for the current item
+                echo "<td>{$item['proj_title']}</td>
+                      <td>{$item['semester']}</td>
+                      <td>" . number_format((float)str_replace(',', '', $item['expenses']), 2) . "</td>
+                      </tr>";
+            }
+        }
+    } else {
+        echo "<tr><td colspan='5'>No budget event details found for this college</td></tr>";
+    }
 
-                // Fetch budget event details for the second table (Budget Table)
-                $budgetTable = "{$college}_budget"; // Budget table for each college
-                $budgetSql = "SELECT * FROM $budgetTable ORDER BY details_id";
-                $budgetResult = $conn->query($budgetSql);
+    echo "</tbody></table></div>";
 
-                // Second Table: Budget Event Details (Budget Table)
-                echo "<div class='table-container'>";
-                echo "<table class='crud-table'>";
-                echo "<thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Event Title</th>
-                            <th>Total Budget</th>
-                            <th>Expenses</th>
-                            <th>Remaining Budget</th>
-                        </tr>
-                    </thead>
-                    <tbody>";
+    echo "</div>"; // End of college section
+}
 
-                if ($budgetResult && $budgetResult->num_rows > 0) {
-                    $budgetData = [];
 
-                    // Group budget details by details_id
-                    while ($row = $budgetResult->fetch_assoc()) {
-                        $budgetData[$row['details_id']][] = $row; // Grouping items by details_id
-                    }
+$conn->close(); // Close the connection after processing
+?>
 
-                    // Output rows with calculated rowspans for details_id
-                    foreach ($budgetData as $detailsId => $items) {
-                        $firstRow = true; // Track the first row for details_id
+</div>
 
-                        foreach ($items as $index => $item) {
-                            echo "<tr>";
+<script>
+    function filterTable(college) {
+        // Hide all college sections
+        const sections = document.querySelectorAll('.college-section');
+        sections.forEach(section => {
+            section.style.display = 'none';
+        });
 
-                            // Display Details ID only once per unique details_id
-                            if ($firstRow) {
-                                echo "<td rowspan='" . count($items) . "'>{$detailsId}</td>";
-                                $firstRow = false; // Set to false after the first row
-                            }
+        // Show the selected college section
+        const selectedSection = document.getElementById(`${college}_section`);
+        if (selectedSection) {
+            selectedSection.style.display = 'block';
+        }
+    }
 
-                            // Output remaining columns for the current item
-                            echo "<td>{$item['event_title']}</td>
-                                <td>" . number_format((float)str_replace(',', '', $item['total_budget']), 2) . "</td>
-                                <td>" . number_format((float)str_replace(',', '', $item['expenses']), 2) . "</td>
-                                <td>" . number_format((float)str_replace(',', '', $item['remaining_budget']), 2) . "</td>
-                                </tr>";
+    // Show CAS section by default on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        filterTable('cas');
+    });
+
+    function updateBudget(college) {
+    // Get the updated budget value
+    const updatedBudget = document.getElementById(`${college}_budget`).value;
+
+    // Create an AJAX request to send the updated value to the server
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'admin-update_budget.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+    // Send the data (college and updated budget) to the server
+    xhr.send(`college=${college}&updatedBudget=${updatedBudget}`);
+
+    // Handle the response from the server
+    xhr.onload = function() {
+        if (xhr.status == 200) {
+            // Update the remaining budget field based on the updated budget and new expenses
+            updateRemainingBudget(college);
+
+            // Show SweetAlert success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Budget Updated',
+                text: 'The budget has been successfully updated!',
+                confirmButtonText: 'OK'
+            });
+        } else {
+            // Show SweetAlert error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'There was an error updating the budget!',
+                confirmButtonText: 'OK'
+            });
+        }
+    };
+}
+
+
+function updateRemainingBudget(college) {
+    // Fetch the current remaining budget for the selected college
+    const remainingBudgetInput = document.getElementById(`${college}_remaining_budget`);
+    
+    // Get the total expenses for the current college from the server
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', `admin-get_remaining_budget.php?college=${college}`, true);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            // Update the remaining budget input with the new value
+            remainingBudgetInput.value = xhr.responseText; // Response contains the updated remaining budget
+        } else {
+            alert('Error fetching remaining budget!');
+        }
+    };
+    xhr.send();
+}
+
+
+            // Add event listeners when the page is fully loaded
+            document.addEventListener("DOMContentLoaded", function() {
+                // Log clicks on main menu links
+                document.querySelectorAll(".menu > li > a").forEach(function(link) {
+                    link.addEventListener("click", function() {
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+                // Handle dropdown button clicks
+                var dropdowns = document.getElementsByClassName("dropdown-btn");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].addEventListener("click", function () {
+                        let dropdownContents = document.getElementsByClassName("dropdown-container");
+                        for (let j = 0; j < dropdownContents.length; j++) {
+                            dropdownContents[j].style.display = "none";
                         }
-                    }
-                } else {
-                    echo "<tr><td colspan='5'>No budget event details found for this college</td></tr>";
-                }
-
-                echo "</tbody></table></div>";
-
-                echo "</div>"; // End of college section
-            }
-
-            $conn->close(); // Close the connection after processing
-            ?>
-        </div>
-
-        <script>
-            function filterTable(college) {
-                // Hide all college sections
-                const sections = document.querySelectorAll('.college-section');
-                sections.forEach(section => {
-                    section.style.display = 'none';
-                });
-
-                // Show the selected college section
-                const selectedSection = document.getElementById(`${college}_section`);
-                if (selectedSection) {
-                    selectedSection.style.display = 'block';
-                }
-            }
-
-            // Show CAS section by default on page load
-            document.addEventListener('DOMContentLoaded', function() {
-                filterTable('cas');
-            });
-
-            function confirmLogout(event) {
-                event.preventDefault();
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "Do you really want to log out?",
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6', // Green confirm button
-                    cancelButtonColor: '#dc3545', // Red cancel button
-                    confirmButtonText: 'Yes, log me out',
-                    cancelButtonText: 'Cancel',
-                    customClass: {
-                        popup: 'swal-popup',
-                        confirmButton: 'swal-confirm',
-                        cancelButton: 'swal-cancel'
-                    },
-                    // Additional custom styles via CSS can be added here
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Pass action in the fetch call
-                        fetch('logout.php?action=logout')
-                            .then(response => response.text())
-                            .then(data => {
-                                console.log(data); // Log response for debugging
-                                window.location.href = 'roleaccount.php';
-                            })
-                            .catch(error => console.error('Error:', error));
-                    }
-                });
-            }
-
-            // Dropdown menu toggle
-            document.getElementById('profileDropdown').addEventListener('click', function() {
-                const dropdown = this.querySelector('.dropdown-menu');
-                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-            });
-
-            // Close dropdown if clicked outside
-            window.addEventListener('click', function(event) {
-                if (!document.getElementById('profileDropdown').contains(event.target)) {
-                    const dropdown = document.querySelector('.dropdown-menu');
-                    if (dropdown) {
-                        dropdown.style.display = 'none';
-                    }
-                }
-            });
-
-            var dropdowns = document.getElementsByClassName("dropdown-btn");
-
-            for (let i = 0; i < dropdowns.length; i++) {
-                dropdowns[i].addEventListener("click", function () {
-                    // Close all dropdowns first
-                    let dropdownContents = document.getElementsByClassName("dropdown-container");
-                    for (let j = 0; j < dropdownContents.length; j++) {
-                        dropdownContents[j].style.display = "none";
-                    }
-
-                    // Toggle the clicked dropdown's visibility
-                    let dropdownContent = this.nextElementSibling;
-                    if (dropdownContent.style.display === "block") {
-                        dropdownContent.style.display = "none";
-                    } else {
-                        dropdownContent.style.display = "block";
-                    }
-                });
-            }
-
-            document.addEventListener('DOMContentLoaded', function () {
-                const username = "<?php echo $_SESSION['username']; ?>"; // Get the username from PHP session
-
-                // Function to log activity
-                function logActivity(buttonName) {
-                    const timestamp = new Date().toISOString(); // Get current timestamp
-
-                    fetch('log_activity.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            buttonFunction: buttonName // Updated to match the PHP variable
-                        }),
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'error') {
-                            console.error('Error logging activity:', data.message);
+                        let dropdownContent = this.nextElementSibling;
+                        if (dropdownContent.style.display === "block") {
+                            dropdownContent.style.display = "none";
                         } else {
-                            console.log('Activity logged successfully:', data);
+                            dropdownContent.style.display = "block";
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error logging activity:', error);
                     });
                 }
 
-                // Add event listeners specifically to buttons and links
-                const trackableElements = document.querySelectorAll('button, a'); // Select all buttons and links
-                trackableElements.forEach(element => {
-                    element.addEventListener('click', function (event) {
-                        const buttonName = this.tagName === 'BUTTON' ? this.innerText.trim() || "Unnamed Button" : this.textContent.trim() || "Unnamed Link";
-                        logActivity(buttonName); // Log the button/link activity
+                // Log clicks on dropdown links
+                document.querySelectorAll(".dropdown-container a").forEach(function(link) {
+                    link.addEventListener("click", function(event) {
+                        event.stopPropagation();
+                        logAction(link.textContent.trim());
                     });
                 });
+
+                document.querySelectorAll("td.edit a").forEach(function(link) {
+                link.addEventListener("click", function(event) {
+                    event.preventDefault(); // Prevent the default action
+                    var url = this.href; // Get the URL from the href attribute
+                    logAndRedirect("Edit Budget", url); // Log the action and redirect
+                });
             });
-        </script>
-    </body>
+
+            // Log clicks on the "Profile" link
+            document.querySelector('.dropdown-menu a[href="cas-your-profile.php"]').addEventListener("click", function() {
+                logAction("Profile");
+            });
+        });
+
+</script>
+</body>
 </html>
