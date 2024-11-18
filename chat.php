@@ -7,29 +7,42 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-// Database connection to `messages` database
-$servername = "uoa25ublaow4obx5.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username = "lcq4zy2vi4302d1q";
-$password = "xswigco0cdxdi5dd";
-$dbname = "kup80a8cc3mqs4ao";
+// Database connection for `messages` database
+$servername_mess = "uoa25ublaow4obx5.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_mess = "lcq4zy2vi4302d1q";
+$password_mess = "xswigco0cdxdi5dd";
+$dbname_mess = "kup80a8cc3mqs4ao"; // messages database
 
-$conn_mess = new mysqli($servername, $username, $password, $dbname);
+$conn_mess = new mysqli($servername_mess, $username_mess, $password_mess, $dbname_mess);
 
-// Check connection
+// Check connection for messages database
 if ($conn_mess->connect_error) {
     die("Connection failed: " . $conn_mess->connect_error);
 }
 
+// Database connection for `user_registration` database
+$servername_user_registration = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_user_registration = "equ6v8i5llo3uhjm";
+$password_user_registration = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj"; // user_registration database
+
+$conn_user_registration = new mysqli($servername_user_registration, $username_user_registration, $password_user_registration, $dbname_user_registration);
+
+// Check connection for user_registration database
+if ($conn_user_registration->connect_error) {
+    die("Connection failed: " . $conn_user_registration->connect_error);
+}
+
 // Fetch user role from the `user_registration` schema (specify schema)
-$userRoleSql = "SELECT roles FROM user_registration.users WHERE username = ?";
-$roleStmt = $conn_mess->prepare($userRoleSql);
+$userRoleSql = "SELECT roles FROM users WHERE username = ?";
+$roleStmt = $conn_user_registration->prepare($userRoleSql);
 $roleStmt->bind_param("s", $_SESSION['username']);
 $roleStmt->execute();
 $roleResult = $roleStmt->get_result();
 $userRole = $roleResult->fetch_assoc()['roles'];
 $roleStmt->close();
 
-// Handle new message submission to `sent_messages` table
+// Handle new message submission to `sent_messages` table in messages database
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['message'])) {
     $sender = $_SESSION['username'];
     $message = $_POST['message'];
@@ -56,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_message_id'])) 
     $deleteStmt->close();
 }
 
-// Fetch all messages from `sent_messages` and related user data
+// Fetch all messages from `sent_messages` and related user data from user_registration database
 $chatMessages = [];
 $fetchSql = "
     SELECT sent_messages.*, 
@@ -79,6 +92,7 @@ $fetchStmt->close();
 
 // Close connections
 $conn_mess->close();
+$conn_user_registration->close();
 ?>
 
 
