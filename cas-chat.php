@@ -13,11 +13,6 @@ $username = "lcq4zy2vi4302d1q";
 $password = "xswigco0cdxdi5dd";
 $dbname = "kup80a8cc3mqs4ao"; // Changed database to `messages`
 
-$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$un = "equ6v8i5llo3uhjm";
-$psd = "vkfaxm2are5bjc3q";
-$dbname_user_registration = "ylwrjgaks3fw5sdj"; // your database name
-
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
@@ -25,7 +20,12 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch the profile picture from the colleges table in user_registration
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj"; // your database name
+
+// Connection for profile fetching
 $conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
@@ -46,66 +46,61 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
 $stmt->close();
 $conn_profile->close();
 
-// Fetch user role
-$userRoleSql = "SELECT role FROM user_registration.colleges WHERE uname = ?";
-$roleStmt = $conn->prepare($userRoleSql);
-$roleStmt->bind_param("s", $_SESSION['uname']);
+// Fetch user role from `colleges` table
+$conn_role = new mysqli($sn, $un, $psd, $dbname_user_registration);
+if ($conn_role->connect_error) {
+    die("Connection failed: " . $conn_role->connect_error);
+}
+
+$userRoleSql = "SELECT role FROM colleges WHERE uname = ?";
+$roleStmt = $conn_role->prepare($userRoleSql);
+$roleStmt->bind_param("s", $uname);
 $roleStmt->execute();
 $roleResult = $roleStmt->get_result();
 $userRole = $roleResult->fetch_assoc()['role'];
 $roleStmt->close();
+$conn_role->close();
 
 // Handle new message submission to `sent_messages` table
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['message'])) {
     $sender = $_SESSION['uname'];
     $message = $_POST['message'];
 
-    $insertSql = "INSERT INTO sent_messages (sender, role, message, timestamp) VALUES (?, ?, ?, NOW())"; // Adjusted to include role
+    $insertSql = "INSERT INTO sent_messages (sender, role, message, timestamp) VALUES (?, ?, ?, NOW())";
     $insertStmt = $conn->prepare($insertSql);
-    $insertStmt->bind_param("sss", $sender, $userRole, $message); // Binding role
+    $insertStmt->bind_param("sss", $sender, $userRole, $message);
 
     if (!$insertStmt->execute()) {
-        echo "Error preparing insert statement: " . $insertStmt->error;
+        echo "Error: " . $insertStmt->error;
     }
     $insertStmt->close();
 }
 
-// Handle delete message request
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_message_id'])) {
-    $messageId = $_POST['delete_message_id'];
+// Fetch messages for the logged-in user from `sent_messages`
+$sql_fetch_messages = "SELECT id, sender, role, message, timestamp FROM sent_messages WHERE sender = ? ORDER BY timestamp DESC";
+$fetchStmt = $conn->prepare($sql_fetch_messages);
+$fetchStmt->bind_param("s", $uname);
+$fetchStmt->execute();
+$result_messages = $fetchStmt->get_result();
 
-    // Delete the message if it belongs to the current user
+// Handle message deletion
+if (isset($_GET['delete_id'])) {
+    $deleteId = $_GET['delete_id'];
     $deleteSql = "DELETE FROM sent_messages WHERE id = ? AND sender = ?";
     $deleteStmt = $conn->prepare($deleteSql);
-    $deleteStmt->bind_param("is", $messageId, $_SESSION['uname']);
-    $deleteStmt->execute();
+    $deleteStmt->bind_param("is", $deleteId, $uname);
+    if ($deleteStmt->execute()) {
+        header("Location: messages.php"); // Redirect after deletion
+        exit;
+    } else {
+        echo "Error deleting message: " . $deleteStmt->error;
+    }
     $deleteStmt->close();
 }
 
-// Fetch messages for the logged-in user from sent_messages
-$chatMessages = [];
-$fetchSql = "
-    SELECT sent_messages.*, 
-           IF(users.roles IS NOT NULL, users.roles, colleges.role) AS role,
-           IF(sent_messages.sender = ?, 'user', 'other') AS message_type
-    FROM sent_messages
-    LEFT JOIN user_registration.colleges ON sent_messages.sender = colleges.uname
-    LEFT JOIN user_registration.users ON sent_messages.sender = users.username
-    ORDER BY sent_messages.timestamp";
-
-$fetchStmt = $conn->prepare($fetchSql);
-$fetchStmt->bind_param("s", $_SESSION['uname']); // Get messages sent to or from the logged-in user
-$fetchStmt->execute();
-$messageResult = $fetchStmt->get_result();
-
-while ($msgRow = $messageResult->fetch_assoc()) {
-    $chatMessages[] = $msgRow;
-}
-$fetchStmt->close();
-
-// Close connections
 $conn->close();
 ?>
+l
 
 <!DOCTYPE html>
 <html lang="en">
