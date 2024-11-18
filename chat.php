@@ -619,7 +619,7 @@ $conn_users->close();
             </div>
 
             <div class="message-input">
-                <form method="POST" action="chat.php" style="width: 100%;">
+                <form method="POST" action="chat.php" style="width: 100%;" id="chat-form">
                     <textarea name="message" placeholder="Type your message..." required></textarea>
                     <button type="submit">Send</button>
                 </form>
@@ -627,6 +627,22 @@ $conn_users->close();
         </div>
 
         <script>
+             // Get the form and textarea elements
+             const form = document.getElementById('chat-form');
+            const textarea = form.querySelector('textarea');
+            
+            // Add an event listener to the textarea to listen for the 'Enter' key
+            textarea.addEventListener('keydown', function(event) {
+                // Check if the pressed key is 'Enter' (keyCode 13)
+                if (event.key === 'Enter') {
+                    // Prevent the default action (adding a newline)
+                    event.preventDefault();
+                    
+                    // Submit the form
+                    form.submit();
+                }
+            });
+
              // Function to confirm the deletion of a message
             function confirmDelete(chatMessageId) {
                 Swal.fire({
