@@ -20,10 +20,12 @@ if ($conn_mess->connect_error) {
     die("Connection failed: " . $conn_mess->connect_error);
 }
 
-// Database connection to `user_registration` schema
-$dbname_users = "ylwrjgaks3fw5sdj"; // User registration database
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
-$conn_users = new mysqli($servername, $username, $password, $dbname_users);
+$conn_users = new mysqli($sn, $un, $psd, $dbname_user_registration);
 
 // Check connection to user_registration schema
 if ($conn_users->connect_error) {
