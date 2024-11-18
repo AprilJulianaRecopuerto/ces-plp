@@ -11,11 +11,11 @@ $password_db = "lzh13ihy0axfny6d";
 $$dbname_proj_list = "g8ri1hhtsfx77ptb";  // Database for tasks
 
 // Create connection to proj_list database
-$conn_task= new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
+$conn= new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
 
 // Check for a successful connection
-if ($conn_task->connect_error) {
-    die("Connection failed: " . $conn_task->connect_error);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
 use PHPMailer\PHPMailer\PHPMailer;
