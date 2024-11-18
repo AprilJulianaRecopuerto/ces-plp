@@ -1,6 +1,5 @@
 <?php
 session_start();
-
 $servername = "alv4v3hlsipxnujn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username_db = "ctk6gpo1v7sapq1l";
 $password_db = "u1cgfgry8lu5rliz";
