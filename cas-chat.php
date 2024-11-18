@@ -1,9 +1,6 @@
 <?php
 session_start();
 
-// Ensure default timezone is set to Manila
-date_default_timezone_set('Asia/Manila'); // This ensures the system timezone is Manila
-
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
     header("Location: roleaccount.php");
@@ -69,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['message'])) {
     $sender = $_SESSION['uname'];
     $message = $_POST['message'];
 
-    $insertSql = "INSERT INTO sent_messages (sender, role, message, timestamp) VALUES (?, ?, ?, NOW())";
+    $insertSql = "INSERT INTO sent_messages (sender, role, message, timestamp) VALUES (?, ?, ?, UTC_TIMESTAMP())";
     $insertStmt = $conn->prepare($insertSql);
     $insertStmt->bind_param("sss", $sender, $userRole, $message);
 
@@ -598,42 +595,40 @@ $conn->close();
         </div>
     
         <div class="content">
-    <div class="chat-window" id="chatWindow">
-        <?php foreach ($chatMessages as $chatMessage): ?>
-            <div class="message <?php echo ($chatMessage['message_type'] == 'user') ? 'user' : 'other'; ?>" 
-                style="text-align: <?php echo ($chatMessage['message_type'] == 'user') ? 'right' : 'left'; ?>;">
-                <strong><?php echo htmlspecialchars($chatMessage['role']); ?>:</strong>
-                <p><?php echo htmlspecialchars($chatMessage['message']); ?></p>
-                <small>
-                    <?php 
-                    // Convert the timestamp from UTC to Manila time
-                    $timestamp = new DateTime($chatMessage['timestamp'], new DateTimeZone('UTC')); // Assuming UTC storage
-                    $timestamp->setTimezone(new DateTimeZone('Asia/Manila')); // Convert to Manila time
-                    
-                    // Output the formatted timestamp
-                    echo $timestamp->format('F j, Y || h:i A'); // Shows the date and time in 12-hour format with AM/PM
-                    ?>
-                </small>
-                
-                <?php if ($chatMessage['sender'] == $_SESSION['uname']): ?>
-                <!-- Delete button with type "button" to prevent immediate submission -->
-                <form method="POST" action="cas-chat.php" style="display:inline;" id="deleteForm_<?php echo $chatMessage['id']; ?>">
-                    <input type="hidden" name="delete_message_id" value="<?php echo $chatMessage['id']; ?>">
-                    <button type="button" class="delete-btn" onclick="confirmDelete(<?php echo $chatMessage['id']; ?>)">Delete</button>
-                </form>
-                <?php endif; ?>
+            <div class="chat-window" id="chatWindow">
+                <?php foreach ($chatMessages as $chatMessage): ?>
+                    <div class="message <?php echo ($chatMessage['message_type'] == 'user') ? 'user' : 'other'; ?>" 
+                        style="text-align: <?php echo ($chatMessage['message_type'] == 'user') ? 'right' : 'left'; ?>;">
+                        <strong><?php echo htmlspecialchars($chatMessage['role']); ?>:</strong> <!-- Display the sender's role -->
+                        <p><?php echo htmlspecialchars($chatMessage['message']); ?></p>
+                        <small>
+                            <?php 
+                            // Set timezone to Asia/Manila or your desired timezone
+                            $timestamp = new DateTime($chatMessage['timestamp'], new DateTimeZone('UTC')); // assuming stored in UTC
+                            $timestamp->setTimezone(new DateTimeZone('Asia/Manila')); // Adjust to local timezone
+                            echo $timestamp->format('F j, Y || h:i A'); // Format the timestamp
+                            ?>
+                        </small>
+                        
+                        <?php if ($chatMessage['sender'] == $_SESSION['uname']): ?>
+                        <!-- Delete button with type "button" to prevent immediate submission -->
+                        <form method="POST" action="cas-chat.php" style="display:inline;" id="deleteForm_<?php echo $chatMessage['id']; ?>">
+                            <input type="hidden" name="delete_message_id" value="<?php echo $chatMessage['id']; ?>">
+                            <button type="button" class="delete-btn" onclick="confirmDelete(<?php echo $chatMessage['id']; ?>)">Delete</button>
+                        </form>
+                    <?php endif; ?>
             </div>
-        <?php endforeach; ?>
-    </div>
 
-    <div class="message-input">
-        <form method="POST" action="cas-chat.php" style="width: 100%;" id="chat-form">
-            <textarea name="message" placeholder="Type your message..." required></textarea>
-            <button type="submit">Send</button>
-        </form>
-    </div>
-</div>
+                <?php endforeach; ?>
+            </div>
 
+            <div class="message-input">
+                <form method="POST" action="cas-chat.php" style="width: 100%;" id="chat-form">
+                    <textarea name="message" placeholder="Type your message..." required></textarea>
+                    <button type="submit">Send</button>
+                </form>
+            </div>
+        </div>
 
         <script>
              // Get the form and textarea elements
