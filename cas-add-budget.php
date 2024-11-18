@@ -36,7 +36,6 @@ $dbname_user_registration = "ylwrjgaks3fw5sdj";
 
 // Fetch the profile picture from the colleges table in user_registration
 $conn_profile = new mysqli($sn_ur, $username_ur, $pass_ur, $dbname_user_registration);
-
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }
