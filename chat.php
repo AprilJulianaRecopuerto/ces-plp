@@ -591,21 +591,21 @@ $conn_users->close();
         </div>
     
         <div class="content">
-            <div class="chat-window" id="chatWindow">
-                <?php foreach ($chatMessages as $chatMessage): ?>
-                    <div class="message <?php echo ($chatMessage['message_type'] == 'user') ? 'user' : 'other'; ?>" 
-                        style="text-align: <?php echo ($chatMessage['message_type'] == 'user') ? 'right' : 'left'; ?>;">
-                        <strong><?php echo htmlspecialchars($chatMessage['role']); ?>:</strong> <!-- Display the sender's role -->
-                        <p><?php echo htmlspecialchars($chatMessage['message']); ?></p>
-                        <small>
-                            <?php 
-                            // Set timezone to Asia/Manila or your desired timezone
-                            $timestamp = new DateTime($chatMessage['timestamp'], new DateTimeZone('UTC+8')); // assuming stored in UTC
-                            $timestamp->setTimezone(new DateTimeZone('Asia/Manila')); // Adjust to local timezone
-                            echo $timestamp->format('F j, Y || h:i A'); // Format the timestamp
-                            ?>
-                        </small>
-                        
+    <div class="chat-window" id="chatWindow">
+        <?php foreach ($chatMessages as $chatMessage): ?>
+            <div class="message <?php echo ($chatMessage['message_type'] == 'user') ? 'user' : 'other'; ?>" 
+                style="text-align: <?php echo ($chatMessage['message_type'] == 'user') ? 'right' : 'left'; ?>;">
+                <strong><?php echo htmlspecialchars($chatMessage['role']); ?>:</strong> <!-- Display the sender's role -->
+                <p><?php echo htmlspecialchars($chatMessage['message']); ?></p>
+                <small>
+                    <?php 
+                    // Convert timestamp to Asia/Manila timezone
+                    $timestamp = new DateTime($chatMessage['timestamp'], new DateTimeZone('UTC')); // assuming stored in UTC
+                    $timestamp->setTimezone(new DateTimeZone('Asia/Manila')); // Adjust to local timezone (UTC+8)
+                    echo $timestamp->format('F j, Y || h:i A'); // Format the timestamp
+                    ?>
+                </small>
+                
                 <?php if ($chatMessage['sender'] == $_SESSION['username']): ?>
                     <!-- Delete button with an onclick event to trigger confirmDelete -->
                     <form method="POST" action="chat.php" style="display:inline;" id="deleteForm_<?php echo $chatMessage['id']; ?>">
@@ -614,17 +614,17 @@ $conn_users->close();
                     </form>
                 <?php endif; ?>
             </div>
+        <?php endforeach; ?>
+    </div>
 
-                <?php endforeach; ?>
-            </div>
+    <div class="message-input">
+        <form method="POST" action="chat.php" style="width: 100%;" id="chat-form">
+            <textarea name="message" placeholder="Type your message..." required></textarea>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</div>
 
-            <div class="message-input">
-                <form method="POST" action="chat.php" style="width: 100%;" id="chat-form">
-                    <textarea name="message" placeholder="Type your message..." required></textarea>
-                    <button type="submit">Send</button>
-                </form>
-            </div>
-        </div>
 
         <script>
              // Get the form and textarea elements
