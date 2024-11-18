@@ -1376,7 +1376,7 @@ $conn->close();
            
             <?php
                 // Function to fetch the recommended events for a department from Flask API
-                $url = "https://ces-python-1da82b6d81f5.herokuapp.com/College%20of%20Arts%20and%20Sciences";
+                $url = "https://ces-python-1da82b6d81f5.herokuapp.com/get_recommended_events/College%20of%20Arts%20and%20Sciences";
                 
                 // Use cURL to fetch the data from the Flask API
                 $ch = curl_init();
