@@ -7,22 +7,32 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-// Database connection to `messages` database
+// Database connection to `messages` database (kup80a8cc3mqs4ao)
 $servername = "uoa25ublaow4obx5.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username = "lcq4zy2vi4302d1q";
 $password = "xswigco0cdxdi5dd";
-$dbname = "kup80a8cc3mqs4ao";
+$dbname_messages = "kup80a8cc3mqs4ao"; // Messages database
 
-$conn_mess = new mysqli($servername, $username, $password, $dbname);
+$conn_mess = new mysqli($servername, $username, $password, $dbname_messages);
 
 // Check connection
 if ($conn_mess->connect_error) {
     die("Connection failed: " . $conn_mess->connect_error);
 }
 
-// Fetch user role from the `user_registration` schema (specify schema)
-$userRoleSql = "SELECT roles FROM user_registration.users WHERE username = ?";
-$roleStmt = $conn_mess->prepare($userRoleSql);
+// Database connection to `user_registration` schema
+$dbname_users = "ylwrjgaks3fw5sdj"; // User registration database
+
+$conn_users = new mysqli($servername, $username, $password, $dbname_users);
+
+// Check connection to user_registration schema
+if ($conn_users->connect_error) {
+    die("Connection failed: " . $conn_users->connect_error);
+}
+
+// Fetch user role from the `user_registration.users` table
+$userRoleSql = "SELECT roles FROM users WHERE username = ?";
+$roleStmt = $conn_users->prepare($userRoleSql);
 $roleStmt->bind_param("s", $_SESSION['username']);
 $roleStmt->execute();
 $roleResult = $roleStmt->get_result();
@@ -37,10 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['message'])) {
     $insertSql = "INSERT INTO sent_messages (sender, role, message, timestamp) VALUES (?, ?, ?, NOW())"; // Adjusted to include role
     $insertStmt = $conn_mess->prepare($insertSql);
     $insertStmt->bind_param("sss", $sender, $userRole, $message); // Binding role
-
-    if (!$insertStmt->execute()) {
-        echo "Error preparing insert statement: " . $insertStmt->error;
-    }
+    $insertStmt->execute();
     $insertStmt->close();
 }
 
@@ -71,7 +78,6 @@ $fetchStmt = $conn_mess->prepare($fetchSql);
 $fetchStmt->bind_param("s", $_SESSION['username']);
 $fetchStmt->execute();
 $messageResult = $fetchStmt->get_result();
-
 while ($msgRow = $messageResult->fetch_assoc()) {
     $chatMessages[] = $msgRow;
 }
@@ -79,6 +85,7 @@ $fetchStmt->close();
 
 // Close connections
 $conn_mess->close();
+$conn_users->close();
 ?>
 
 
