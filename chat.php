@@ -597,22 +597,29 @@ $conn_users->close();
                         style="text-align: <?php echo ($chatMessage['message_type'] == 'user') ? 'right' : 'left'; ?>;">
                         <strong><?php echo htmlspecialchars($chatMessage['role']); ?>:</strong> <!-- Display the sender's role -->
                         <p><?php echo htmlspecialchars($chatMessage['message']); ?></p>
-                        <small><?php echo date('F j, Y || h:i A', strtotime($chatMessage['timestamp'])); ?></small>
+                        <small>
+                            <?php 
+                            // Set timezone to Asia/Manila or your desired timezone
+                            $timestamp = new DateTime($chatMessage['timestamp'], new DateTimeZone('UTC+8')); // assuming stored in UTC
+                            $timestamp->setTimezone(new DateTimeZone('Asia/Manila')); // Adjust to local timezone
+                            echo $timestamp->format('F j, Y || h:i A'); // Format the timestamp
+                            ?>
+                        </small>
                         
-                        <?php if ($chatMessage['sender'] == $_SESSION['username']): ?>
-                        <!-- Delete button -->
-                        <form method="POST" action="chat.php" style="display:inline;" id="deleteForm_<?php echo $chatMessage['id']; ?>">
-                            <input type="hidden" name="delete_message_id" value="<?php echo $chatMessage['id']; ?>">
-                            <button type="submit" class="delete-btn">Delete</button>
-                        </form>
-                    <?php endif; ?>
+                <?php if ($chatMessage['sender'] == $_SESSION['username']): ?>
+                    <!-- Delete button with an onclick event to trigger confirmDelete -->
+                    <form method="POST" action="chat.php" style="display:inline;" id="deleteForm_<?php echo $chatMessage['id']; ?>">
+                        <input type="hidden" name="delete_message_id" value="<?php echo $chatMessage['id']; ?>">
+                        <button type="button" class="delete-btn" onclick="confirmDelete(<?php echo $chatMessage['id']; ?>)">Delete</button>
+                    </form>
+                <?php endif; ?>
             </div>
 
                 <?php endforeach; ?>
             </div>
 
             <div class="message-input">
-                <form method="POST" action="chat.php" style="width: 100%;">
+                <form method="POST" action="chat.php" style="width: 100%;" id="chat-form">
                     <textarea name="message" placeholder="Type your message..." required></textarea>
                     <button type="submit">Send</button>
                 </form>
@@ -620,6 +627,22 @@ $conn_users->close();
         </div>
 
         <script>
+             // Get the form and textarea elements
+             const form = document.getElementById('chat-form');
+            const textarea = form.querySelector('textarea');
+            
+            // Add an event listener to the textarea to listen for the 'Enter' key
+            textarea.addEventListener('keydown', function(event) {
+                // Check if the pressed key is 'Enter' (keyCode 13)
+                if (event.key === 'Enter') {
+                    // Prevent the default action (adding a newline)
+                    event.preventDefault();
+                    
+                    // Submit the form
+                    form.submit();
+                }
+            });
+
              // Function to confirm the deletion of a message
             function confirmDelete(chatMessageId) {
                 Swal.fire({
