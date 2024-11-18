@@ -119,18 +119,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['add_success'] = true; // Set session variable for success
             $redirect_url = 'cas-projlist.php'; // Redirect URL
 
-            /// Database credentials
-            $servername = "wp433upk59nnhpoh.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-            $username = "wbepy9iso2pubu7f";
-            $password = "l0a6y3bl2x7lfiyy";
-            $dbname_mov = "qlajsw6auv4giknn"; // Update to your actual database name
+            // Database credentials for 'mov' (notifications)
+            $servername_mov = "arfo8ynm6olw6vpn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+            $username_mov = "tz8thfim1dq7l3rf";
+            $password_mov = "wzt4gssgou2ofyo7";
+            $dbname_mov = "uv1qyvm0b8oicg0v";
 
-            // Create connection to mov database
-            $conn_mov = new mysqli($servername, $username, $password, $dbname_mov);
+            $conn_mov = new mysqli($servername_mov, $username_mov, $password_mov, $dbname_mov);
 
-            // Check connection
+            // Check connection for 'mov'
             if ($conn_mov->connect_error) {
-                die("Connection failed: " . $conn_mov->connect_error);
+                die("Connection to 'mov' database failed: " . $conn_mov->connect_error);
             }
 
             // Prepare the notification message

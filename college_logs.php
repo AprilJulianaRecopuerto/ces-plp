@@ -3,10 +3,10 @@ session_start(); // Make sure the session is started to access $_SESSION
 
 function logUserActivity($username, $action) {
     // Database connection (update with your own connection details)
-    $servername = "localhost";
-    $usernameDB = "root";
-    $passwordDB = "";
-    $dbname = "user_registration";
+    $servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+    $usernameDB = "equ6v8i5llo3uhjm";
+    $passwordDB = "vkfaxm2are5bjc3q";
+    $dbname = "ylwrjgaks3fw5sdj";
 
     // Create connection
     $conn = new mysqli($servername, $usernameDB, $passwordDB, $dbname);
