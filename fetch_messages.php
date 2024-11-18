@@ -2,44 +2,78 @@
 session_start();
 
 // Database connection to `messages` database
-$servername = "uoa25ublaow4obx5.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username = "lcq4zy2vi4302d1q";
-$password = "xswigco0cdxdi5dd";
-$dbname = "kup80a8cc3mqs4ao"; // Changed database to `messages`
+$servername_messages = "uoa25ublaow4obx5.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_messages = "lcq4zy2vi4302d1q";
+$password_messages = "xswigco0cdxdi5dd";
+$dbname_messages = "kup80a8cc3mqs4ao"; // your messages database name
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn_messages = new mysqli($servername_messages, $username_messages, $password_messages, $dbname_messages);
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// Check connection to messages database
+if ($conn_messages->connect_error) {
+    die("Connection failed: " . $conn_messages->connect_error);
 }
 
-// Fetch messages for the logged-in user from sent_messages
-$chatMessages = [];
-$fetchSql = "
-    SELECT sent_messages.*, 
-           IF(users.roles IS NOT NULL, users.roles, colleges.role) AS role,
-           IF(sent_messages.sender = ?, 'user', 'other') AS message_type
-    FROM sent_messages
-    LEFT JOIN user_registration.colleges ON sent_messages.sender = colleges.uname
-    LEFT JOIN user_registration.users ON sent_messages.sender = users.username
-    ORDER BY sent_messages.timestamp";
+// Database connection to `user_registration` database
+$servername_user = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_user = "equ6v8i5llo3uhjm";
+$password_user = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj"; // your user_registration database name
 
-$fetchStmt = $conn->prepare($fetchSql);
-$fetchStmt->bind_param("s", $_SESSION['username']); // Get messages sent to or from the logged-in user
+$conn_user = new mysqli($servername_user, $username_user, $password_user, $dbname_user_registration);
+
+// Check connection to user_registration database
+if ($conn_user->connect_error) {
+    die("Connection failed: " . $conn_user->connect_error);
+}
+
+// Fetch messages for the logged-in user from sent_messages (messages database)
+$chatMessages = [];
+$fetchSql = "SELECT * FROM sent_messages WHERE sender = ? OR receiver = ? ORDER BY timestamp";
+$fetchStmt = $conn_messages->prepare($fetchSql);
+$fetchStmt->bind_param("ss", $_SESSION['username'], $_SESSION['username']); // Get messages sent to or from the logged-in user
 $fetchStmt->execute();
 $messageResult = $fetchStmt->get_result();
 
 while ($msgRow = $messageResult->fetch_assoc()) {
+    // Fetch role from the user_registration.users table based on the sender (user_registration database)
+    $roleSql = "SELECT role FROM users WHERE username = ?";
+    $roleStmt = $conn_user->prepare($roleSql);
+    $roleStmt->bind_param("s", $msgRow['sender']);
+    $roleStmt->execute();
+    $roleResult = $roleStmt->get_result();
+    
+    // If a role is found, add it to the message
+    $role = '';
+    if ($roleRow = $roleResult->fetch_assoc()) {
+        $role = $roleRow['role'];
+    } else {
+        // If no role is found in users table, try colleges table (user_registration database)
+        $roleSql = "SELECT role FROM colleges WHERE uname = ?";
+        $roleStmt = $conn_user->prepare($roleSql);
+        $roleStmt->bind_param("s", $msgRow['sender']);
+        $roleStmt->execute();
+        $roleResult = $roleStmt->get_result();
+        
+        if ($roleRow = $roleResult->fetch_assoc()) {
+            $role = $roleRow['role'];
+        }
+    }
+
+    // Add the role and message type ('user' or 'other') to the message
+    $msgRow['role'] = $role;
+    $msgRow['message_type'] = ($msgRow['sender'] == $_SESSION['username']) ? 'user' : 'other';
+    
     $chatMessages[] = $msgRow;
 }
+
 $fetchStmt->close();
 
-// Close connection
-$conn->close();
+// Close both database connections
+$conn_messages->close();
+$conn_user->close();
 
 // Return messages as JSON
 header('Content-Type: application/json');
 echo json_encode($chatMessages);
 ?>
-

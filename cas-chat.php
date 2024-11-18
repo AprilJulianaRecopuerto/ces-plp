@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['message'])) {
     $sender = $_SESSION['uname'];
     $message = $_POST['message'];
 
-    $insertSql = "INSERT INTO sent_messages (sender, role, message, timestamp) VALUES (?, ?, ?, UTC_TIMESTAMP())";
+    $insertSql = "INSERT INTO sent_messages (sender, role, message, timestamp) VALUES (?, ?, ?, NOW())";
     $insertStmt = $conn->prepare($insertSql);
     $insertStmt->bind_param("sss", $sender, $userRole, $message);
 
