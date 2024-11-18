@@ -11,7 +11,7 @@ if (!isset($_SESSION['username'])) {
 $servername = "uoa25ublaow4obx5.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username = "lcq4zy2vi4302d1q";
 $password = "xswigco0cdxdi5dd";
-$dbname = "kup80a8cc3mqs4ao"; // Messages database
+$dbname = "kup80a8cc3mqs4ao";
 
 $conn_mess = new mysqli($servername, $username, $password, $dbname);
 
