@@ -115,7 +115,6 @@ $conn_profile->close();
 ?>
 
 
-
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -660,46 +659,11 @@ $conn_profile->close();
                 font-size: 14px; /* Size of the exclamation point */
             }
 
-            /* Modal container */
-            .modal {
-                display: none;
-                position: fixed;
-                z-index: 1;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                overflow: auto;
-                background-color: rgba(0,0,0,0.5);
-                font-family: "Glacial Indifference", sans-serif;
-                margin-left:160px;
-                margin-top:100px;
-            }
-
-            /* Modal content */
-            .modal-content {
-                background-color: #fefefe;
-                margin: 5% auto;
-                padding: 20px;
-                border: 1px solid #888;
-                width: 65%;
-                align-items: center;
-            }
-
-            /* Close button */
-            .close {
-                color: #aaa;
-                float: right;
-                font-size: 28px;
-                font-weight: bold;
-            }
-
-            .close:hover,
-            .close:focus {
-                color: black;
-                text-decoration: none;
-                cursor: pointer;
-            }
+           .expense-input {
+                font-family: 'Poppins', sans-serif;
+                font-size: 15px; /* Size of the exclamation point */
+            
+           }
 
             
         </style>
@@ -791,16 +755,16 @@ $conn_profile->close();
 
 <div class="content-budget">
 
-    <h1 style="margin-top: 120px; margin-bottom: -150px; font-family: Glacial Indifference, sans-serif;">
+    <h1 style="margin-top: 120px; margin-bottom: -150px; font-family: Poppins, sans-serif;">
         Alotted budget: ₱<?php echo number_format($allottedBudget, 2); ?>
     </h1>
 
     <div class="button-container">
-        <button onclick="openModal()">Add Project</button>
+    <button onclick="logAndRedirect('Add Budget', 'cas-add-budget.php')">Add Buddget</button>
     </div>
 
         <!-- New Budget Table -->
-        <h2 style="font-family: Glacial Indifference, sans-serif;">CAS Budget Details</h2>
+        <h2 style="font-family: Poppins, sans-serif;">CAS Budget Details</h2>
         <div class="table-container">
         <table class="crud-table">
             <thead>
@@ -833,149 +797,12 @@ $conn_profile->close();
         </table>
     </div>
 
-    <h2 style=" margin-bottom: -150px; font-family: Glacial Indifference, sans-serif;">
+    <h2 style=" margin-bottom: -150px; font-family: Poppins, sans-serif;">
         Remaining budget: ₱<?php echo number_format($remainingBudget, 2); ?>
     </h2>
-
-    <!-- Modal Structure -->
-    <div id="projectModal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>All Projects in CAS</h2>
-            <table class="crud-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Project Title</th>
-                        <th>Lead Person</th>
-                        <th>Semester</th>
-                        <th>Date of Submission</th>
-                        <th>Date of Implementation</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $projectsSqlModal = "SELECT id, proj_title, lead_person, semester, date_of_sub, dateof_imple FROM cas ORDER BY id";
-                    $resultProjectsModal = $conn_proj_list->query($projectsSqlModal);
-
-                    if ($resultProjectsModal && $resultProjectsModal->num_rows > 0) {
-                        while ($project = $resultProjectsModal->fetch_assoc()) {
-                            echo "<tr>";
-                            echo "<td id='proj_id_" . $project["id"] . "'>" . htmlspecialchars($project["id"]) . "</td>";
-                            echo "<td id='proj_title_" . $project["id"] . "'>" . htmlspecialchars($project["proj_title"]) . "</td>";
-                            echo "<td id='lead_person_" . $project["id"] . "'>" . htmlspecialchars($project["lead_person"]) . "</td>";
-                            echo "<td id='semester_" . $project["id"] . "'>" . htmlspecialchars($project["semester"]) . "</td>";
-                            echo "<td>" . htmlspecialchars($project["date_of_sub"]) . "</td>";
-                            echo "<td>" . htmlspecialchars($project["dateof_imple"]) . "</td>";
-                            echo "<td><button class='add-button' onclick='addProjectToBudget(" . $project["id"] . ")'>Add</button></td>";
-                            echo "</tr>";
-                        }
-                    } else {
-                        echo "<tr><td colspan='7'>No projects found.</td></tr>";
-                    }
-                    $conn_proj_list->close();
-                    ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
 </div>
 
 <script>
-
-function openModal() {
-        var modal = document.getElementById("projectModal");
-        modal.style.display = "block";
-    }
-
-    function closeModal() {
-        var modal = document.getElementById("projectModal");
-        modal.style.display = "none";
-    }
-
-    window.onclick = function(event) {
-        var modal = document.getElementById("projectModal");
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-
-    function addProjectToBudget(projectId) {
-        var projTitle = document.getElementById("proj_title_" + projectId).innerText;
-        var leadPerson = document.getElementById("lead_person_" + projectId).innerText;
-        var semester = document.getElementById("semester_" + projectId).innerText;
-        var expenses = 0; 
-        var totalBudget = 40000; 
-
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "cas-add_to_budget.php", true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                alert(xhr.responseText);
-            }
-        };
-
-        var data = "projectId=" + projectId + "&projTitle=" + encodeURIComponent(projTitle) +
-                   "&leadPerson=" + encodeURIComponent(leadPerson) +
-                   "&semester=" + encodeURIComponent(semester) +
-                   "&expenses=" + expenses +
-                   "&totalBudget=" + totalBudget;
-
-        xhr.send(data);
-    }
-
-function addProjectToBudget(projectId) {
-    var projTitle = document.getElementById("proj_title_" + projectId).innerText;
-    var leadPerson = document.getElementById("lead_person_" + projectId).innerText;
-    var semester = document.getElementById("semester_" + projectId).innerText;
-    var expenses = prompt("Enter the expenses for the new project:");
-    var totalBudget = 40000; 
-
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "cas-add_to_budget.php", true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            if (xhr.responseText === "success") {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Project successfully added!',
-                    showConfirmButton: false,
-                    timer: 1500
-                }).then(function() {
-                    location.reload();
-                });
-            } else if (xhr.responseText === "exists") {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Project already exists!',
-                    text: 'This project has already been added to the budget.',
-                    showConfirmButton: true
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: xhr.responseText,
-                    showConfirmButton: true
-                });
-            }
-        }
-    };
-
-    var data = "projectId=" + projectId + "&projTitle=" + encodeURIComponent(projTitle) +
-               "&leadPerson=" + encodeURIComponent(leadPerson) +
-               "&semester=" + encodeURIComponent(semester) +
-               "&expenses=" + encodeURIComponent(expenses) +
-               "&totalBudget=" + totalBudget;
-
-    xhr.send(data);
-}
-
-
-
 // Listen for changes in the expenses input fields
 document.querySelectorAll('.expense-input').forEach(function(input) {
     input.addEventListener('change', function() {
@@ -993,7 +820,11 @@ document.querySelectorAll('.expense-input').forEach(function(input) {
                         icon: 'success',
                         title: 'Expenses updated successfully!',
                         showConfirmButton: false,
-                        timer: 1500
+                        timer: 1500,
+                        customClass: {
+                            popup: 'custom-swal-popup', // Custom style for the popup
+                            confirmButton: 'custom-swal-confirm', // Custom style for confirm button
+                        }
                     }).then(function() {
                         location.reload(); // Reload the page after the update
                     });
@@ -1002,7 +833,11 @@ document.querySelectorAll('.expense-input').forEach(function(input) {
                         icon: 'error',
                         title: 'Error updating expenses!',
                         text: xhr.responseText,
-                        showConfirmButton: true
+                        showConfirmButton: true,
+                        customClass: {
+                            popup: 'custom-error-popup', // Custom style for the popup
+                            confirmButton: 'custom-error-confirm', // Custom style for confirm button
+                        }
                     });
                 }
             }
