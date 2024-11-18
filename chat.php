@@ -597,16 +597,22 @@ $conn_users->close();
                         style="text-align: <?php echo ($chatMessage['message_type'] == 'user') ? 'right' : 'left'; ?>;">
                         <strong><?php echo htmlspecialchars($chatMessage['role']); ?>:</strong> <!-- Display the sender's role -->
                         <p><?php echo htmlspecialchars($chatMessage['message']); ?></p>
-                        <small><?php echo date('F j, Y || h:i A', strtotime($chatMessage['timestamp'])); ?></small>
+                        <small>
+                            <?php 
+                            // Set timezone to Asia/Manila or your desired timezone
+                            $timestamp = new DateTime($chatMessage['timestamp'], new DateTimeZone('UTC')); // assuming stored in UTC
+                            $timestamp->setTimezone(new DateTimeZone('Asia/Manila')); // Adjust to local timezone
+                            echo $timestamp->format('F j, Y || h:i A'); // Format the timestamp
+                            ?>
+                        </small>
                         
-                <?php if ($chatMessage['sender'] == $_SESSION['username']): ?>
-                    <!-- Delete button -->
-                    <form method="POST" action="chat.php" style="display:inline;" id="deleteForm_<?php echo $chatMessage['id']; ?>">
-                        <input type="hidden" name="delete_message_id" value="<?php echo $chatMessage['id']; ?>">
-                        <button type="button" class="delete-btn">Delete</button>
-                    </form>
-
-                <?php endif; ?>
+                        <?php if ($chatMessage['sender'] == $_SESSION['username']): ?>
+                        <!-- Delete button -->
+                        <form method="POST" action="chat.php" style="display:inline;" id="deleteForm_<?php echo $chatMessage['id']; ?>">
+                            <input type="hidden" name="delete_message_id" value="<?php echo $chatMessage['id']; ?>">
+                            <button type="submit" class="delete-btn">Delete</button>
+                        </form>
+                    <?php endif; ?>
             </div>
 
                 <?php endforeach; ?>
