@@ -18,11 +18,8 @@ if ($conn->connect_error) {
 $chatMessages = [];
 $fetchSql = "
     SELECT sent_messages.*, 
-           IF(users.roles IS NOT NULL, users.roles, colleges.role) AS role,
            IF(sent_messages.sender = ?, 'user', 'other') AS message_type
     FROM sent_messages
-    LEFT JOIN user_registration.colleges ON sent_messages.sender = colleges.uname
-    LEFT JOIN user_registration.users ON sent_messages.sender = users.username
     ORDER BY sent_messages.timestamp";
 
 $fetchStmt = $conn->prepare($fetchSql);
@@ -31,7 +28,19 @@ $fetchStmt->execute();
 $messageResult = $fetchStmt->get_result();
 
 while ($msgRow = $messageResult->fetch_assoc()) {
+    // Fetch the role separately
+    $roleSql = "SELECT role FROM colleges WHERE uname = ?";
+    $roleStmt = $conn->prepare($roleSql);
+    $roleStmt->bind_param("s", $msgRow['sender']);
+    $roleStmt->execute();
+    $roleResult = $roleStmt->get_result();
+    $roleRow = $roleResult->fetch_assoc();
+    $msgRow['role'] = $roleRow['role'] ?? null;  // If no role found, set to null
+
     $chatMessages[] = $msgRow;
+    
+    // Close the role statement
+    $roleStmt->close();
 }
 $fetchStmt->close();
 
@@ -42,4 +51,5 @@ $conn->close();
 header('Content-Type: application/json');
 echo json_encode($chatMessages);
 ?>
+
 
