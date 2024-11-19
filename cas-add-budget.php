@@ -625,14 +625,7 @@ $conn_profile->close();
 
                 <tbody>
                     <?php
-                        $projectsSqlModal = "
-                        SELECT id, proj_title, lead_person, semester, date_of_sub, dateof_imple
-                        FROM cas
-                        WHERE proj_title NOT IN (
-                            SELECT proj_title FROM budget_utilization.cas_budget
-                        )
-                        ORDER BY id";
-                        
+                    $projectsSqlModal = "SELECT id, proj_title, lead_person, semester, date_of_sub, dateof_imple FROM cas ORDER BY id";
                     $resultProjectsModal = $conn_proj_list->query($projectsSqlModal);
 
                     if ($resultProjectsModal && $resultProjectsModal->num_rows > 0) {
