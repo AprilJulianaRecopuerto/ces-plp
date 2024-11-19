@@ -585,7 +585,7 @@ $conn_profile->close();
                 <li><a href="cas-budget-utilization.php" class="active"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <li><a href="cas-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
+                <li><a href="cas-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
 
