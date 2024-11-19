@@ -585,14 +585,7 @@ $conn_profile->close();
                 <li><a href="cas-budget-utilization.php" class="active"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="cas-task.php">Upload Files</a>
-                    <a href="cas-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="cas-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
 
@@ -625,28 +618,9 @@ $conn_profile->close();
 
                 <tbody>
                     <?php
-                    // New connection for the 'budget_utilization' database (cas_budget)
-                    $servername_bu = "alv4v3hlsipxnujn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-                    $username_bu = "ctk6gpo1v7sapq1l"; // MySQL username (e.g., root for local development)
-                    $password_bu = "u1cgfgry8lu5rliz"; // MySQL password
-                    $dbname_budget_utilization = "oshzbyiasuos5kn4";
-
-                    $conn_budget_utilization = new mysqli($servername_bu, $username_bu, $password_bu, $dbname_budget_utilization);
-
-                    // Check the connection
-                    if ($conn_budget_utilization->connect_error) {
-                        die("Connection failed: " . $conn_budget_utilization->connect_error);
-                    }
-
-                    $projectsSqlModal = "
-                    SELECT id, proj_title, lead_person, semester, date_of_sub, dateof_imple
-                    FROM cas
-                    WHERE proj_title NOT IN (
-                        SELECT proj_title FROM cas_budget
-                    )
-                    ORDER BY id";
-
-                    $resultProjectsModal = $conn_budget_utilization->query($projectsSqlModal);
+                    $projectsSqlModal = "SELECT id, proj_title, lead_person, semester, date_of_sub, dateof_imple FROM cas ORDER BY id";
+                        
+                    $resultProjectsModal = $conn_proj_list->query($projectsSqlModal);
 
                     if ($resultProjectsModal && $resultProjectsModal->num_rows > 0) {
                         while ($project = $resultProjectsModal->fetch_assoc()) {
@@ -663,9 +637,6 @@ $conn_profile->close();
                     } else {
                         echo "<tr><td colspan='7'>No projects found.</td></tr>";
                     }
-
-                    // Close the connections
-                    $conn_budget_utilization->close();
                     ?>
                 </tbody>
             </table>
