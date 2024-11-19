@@ -1,11 +1,16 @@
 {
     "require": {
-    "php": "^8.0",
-    "phpmailer/phpmailer": "^6.9",
-    "dompdf/dompdf": "^3.0",
-    "ext-gd": "*",
-    "ext-mbstring": "*",
-    "ext-fileinfo": "*",
-    "ext-json": "*"
+        "php": "^8.0",
+        "phpmailer/phpmailer": "^6.9",
+        "dompdf/dompdf": "^3.0",
+        "sabberworm/php-css-parser": "v8.7.0",
+        "masterminds/html5": "2.9.0",
+        "dompdf/php-svg-lib": "1.0.0",
+        "dompdf/php-font-lib": "1.0.0",
+        "ext-gd": "*",
+        "ext-mbstring": "*",
+        "ext-fileinfo": "*",
+        "ext-json": "*"
+    }
 }
-}
+
