@@ -9,23 +9,101 @@ if (!isset($_SESSION['uname'])) {
 }
 
 // Database credentials
-$servername = "l7cup2om0gngra77.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_db = "gv5xdrzqyrg1qyvs";
-$password_db = "uv4wrt6zlfqzrpni";
-$dbname_mov = "tcbjgh4zgu5wj4bo";
+$servername = "wp433upk59nnhpoh.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_db = "wbepy9iso2pubu7f";
+$password_db = "l0a6y3bl2x7lfiyy";
+$dbname_mov = "qlajsw6auv4giknn";
+
+
+$servername_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_ur = "equ6v8i5llo3uhjm"; 
+$password_ur = "vkfaxm2are5bjc3q"; 
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
+$servername_pl = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_pl = "zf8r3n4qqjyrfx7o";
+$password_pl = "su6qmqa0gxuerg98"; 
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
 // Create connection to the database
 $conn_mov = new mysqli($servername, $username_db, $password_db, $dbname_mov);
+$conn_proj = new mysqli($servername_pl, $username_pl, $password_pl, $dbname_proj_list); // Connection to proj_list database
 
 // Check connection
-if ($conn_mov->connect_error) {
+if ($conn_mov->connect_error || $conn_proj->connect_error) {
     die("Connection failed: " . $conn_mov->connect_error);
 }
 
 // Define the base directory for folders
 $base_directory = 'movuploads/cas-mov/';
 
-// Handle folder creation
+// Fetch the latest project title and dateof_imple from the proj_list database
+$query = "SELECT proj_title, dateof_imple FROM cas ORDER BY id DESC LIMIT 1"; // Adjusted to fetch both columns
+$result_proj = $conn_proj->query($query);
+
+// Check if the query was successful
+if ($result_proj === false) {
+    // Query failed, show an error
+    die("Error executing query: " . $conn_proj->error);
+}
+
+if ($result_proj->num_rows > 0) {
+    // Get the project title and date of implementation
+    $row = $result_proj->fetch_assoc();
+    $proj_title = $row['proj_title'];
+    $dateof_imple = $row['dateof_imple'];
+    
+    // Format dateof_imple if it's not already in the desired format (assuming it's in a valid date format)
+    $formatted_date = date('m-d-Y', strtotime($dateof_imple));
+    
+    // Format folder name (e.g., Project Title 05-20-2024)
+    $folder_name = $proj_title . ' ' . $formatted_date;
+    
+    // Folder path in 'movuploads/cas-mov/'
+    $folder_path = $base_directory . $folder_name;
+
+    // Check if the folder entry already exists in the cas_mov table
+    $check_existing_folder_query = "SELECT * FROM cas_mov WHERE folder_name = '$folder_name'";
+    $result_check = $conn_mov->query($check_existing_folder_query);
+
+    if ($result_check->num_rows == 0) {
+        // Folder entry does not exist in the database, proceed to check filesystem and create folder
+        if (!file_exists($folder_path)) {
+            // Create the folder in the filesystem
+            if (mkdir($folder_path, 0777, true)) {
+                // Define the subfolders to be created
+                $subfolders = ['Attendance', 'Paper Approval', 'Event Images', 'Program'];
+
+                // Create each subfolder inside the main folder
+                foreach ($subfolders as $subfolder) {
+                    $subfolder_path = $folder_path . '/' . $subfolder;
+                    if (!mkdir($subfolder_path, 0777, true)) {
+                        $_SESSION['folder_error'] = 'Error creating subfolder: ' . $subfolder;
+                        break; // Stop creating further subfolders if one fails
+                    }
+                }
+
+                // Insert the folder name into the cas_mov table for tracking
+                $insert_folder_sql = "INSERT INTO cas_mov (folder_name) VALUES ('$folder_name')";
+                if ($conn_mov->query($insert_folder_sql) === TRUE) {
+                    $_SESSION['folder_create_success'] = 'Folder and subfolders created successfully for event: ' . $folder_name;
+                } else {
+                    $_SESSION['folder_error'] = 'Error inserting folder name into database: ' . $conn_mov->error;
+                }
+            } else {
+                $_SESSION['folder_error'] = 'Error creating folder for event: ' . $folder_name;
+            }
+        } else {
+            // The folder already exists in the filesystem but not in the database
+            $_SESSION['folder_error'] = 'The folder already exists in the filesystem but not in the database.';
+        }
+    } else {
+        // The folder entry already exists in the database, no action needed
+        $_SESSION['folder_info'] = 'The folder entry already exists in the database.';
+    }
+}
+
+// Handle folder creation via manual input
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'create') {
     $folder_name = $conn_mov->real_escape_string(trim($_POST['folder_name']));
     $folder_path = $base_directory . $folder_name; // Full path for new folder
@@ -41,11 +119,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     }
 
     // Create the folder in the filesystem
-    if (mkdir($folder_path)) {
+    if (mkdir($folder_path, 0777, true)) {
+        // Define subfolders
+        $subfolders = ['Attendance', 'Paper Approval', 'Event Images', 'Program'];
+        foreach ($subfolders as $subfolder) {
+            $subfolder_path = $folder_path . '/' . $subfolder;
+            if (!mkdir($subfolder_path, 0777, true)) {
+                $_SESSION['folder_error'] = 'Error creating subfolder: ' . $subfolder;
+                break;
+            }
+        }
+
         // Insert folder name into the cas_mov table
         $sql = "INSERT INTO cas_mov (folder_name) VALUES ('$folder_name')";
         if ($conn_mov->query($sql) === TRUE) {
-            $_SESSION['folder_create_success'] = 'Folder created successfully';
+            $_SESSION['folder_create_success'] = 'Folder and subfolders created successfully';
             header('Location: cas-mov.php'); // Redirect after success
             exit();
         } else {
@@ -60,100 +148,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     }
 }
 
-// Handle folder renaming
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'rename') {
-    $old_folder_name = $conn_mov->real_escape_string(trim($_POST['old_folder_name']));
-    $new_folder_name = $conn_mov->real_escape_string(trim($_POST['new_folder_name']));
-    $old_folder_path = $base_directory . $old_folder_name; // Old path
-    $new_folder_path = $base_directory . $new_folder_name; // New path
 
-    // Check if the new folder name already exists
-    $check_sql = "SELECT * FROM cas_mov WHERE folder_name = '$new_folder_name'";
-    $result = $conn_mov->query($check_sql);
+// Fetch folders from the database, excluding deleted records
+$query = "SELECT * FROM cas_mov WHERE folder_name IS NOT NULL"; // Adjusted to filter out deleted records
+$result = $conn_mov->query($query);
 
-    if ($result->num_rows > 0) {
-        $_SESSION['folder_error'] = 'The new folder name already exists. Please choose a different name.';
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    }
-
-    // Rename the folder in the filesystem
-    if (rename($old_folder_path, $new_folder_path)) {
-        // Update the folder name in the database
-        $sql = "UPDATE cas_mov SET folder_name = '$new_folder_name' WHERE folder_name = '$old_folder_name'";
-        if ($conn_mov->query($sql) === TRUE) {
-            $_SESSION['folder_rename_success'] = "Folder renamed successfully.";
-        } else {
-            $_SESSION['folder_error'] = "Error updating database: " . $conn_mov->error;
-        }
-    } else {
-        $_SESSION['folder_error'] = "Error renaming folder in filesystem.";
-    }
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
+// Check if the query was successful
+if ($result === false) {
+    // Query failed, show an error
+    die("Error executing query: " . $conn_mov->error);
 }
 
-// Handle folder deletion
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'delete') {
-    $folder_name = $conn_mov->real_escape_string(trim($_POST['folder_name']));
-    $folder_path = $base_directory . $folder_name; // Define the directory path
-    $recycle_bin_path = 'movuploads/cas-recycle/' . $folder_name; // Path to cas-recycle
-
-    // Create cas-recycle directory if it doesn't exist
-    if (!is_dir('movuploads/cas-recycle')) {
-        mkdir('movuploads/cas-recycle', 0777, true);
-    }
-
-    // Move the folder to the cas-recycle
-    if (is_dir($folder_path)) {
-        if (rename($folder_path, $recycle_bin_path)) {
-            $_SESSION['folder_delete_success'] = "Folder moved to recycle bin successfully.";
-            // Delete the folder from the database
-            $sql = "DELETE FROM cas_mov WHERE folder_name = '$folder_name'";
-            if ($conn_mov->query($sql) !== TRUE) {
-                $_SESSION['folder_error'] = "Error deleting folder entry from database: " . $conn_mov->error;
-            }
-        } else {
-            $_SESSION['folder_error'] = "Error moving folder to recycle bin.";
-        }
-    } else {
-        $_SESSION['folder_error'] = "The folder does not exist: $folder_path";
-    }
-
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
-}
-
-// Fetch folders from the database
-$result = $conn_mov->query("SELECT * FROM cas_mov");
-$conn_mov->close();
-
-
-$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$un = "equ6v8i5llo3uhjm";
-$psd = "vkfaxm2are5bjc3q";
-$dbname_user_registration = "ylwrjgaks3fw5sdj";
-
-// Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
-if ($conn_profile->connect_error) {
-    die("Connection failed: " . $conn_profile->connect_error);
-}
-
-$uname = $_SESSION['uname'];
-$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
-$stmt = $conn_profile->prepare($sql_profile);
-$stmt->bind_param("s", $uname);
-$stmt->execute();
-$result_profile = $stmt->get_result();
-
-$profilePicture = null;
-if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
-    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
-}
-
-$stmt->close();
-$conn_profile->close();
 ?>
 
 
@@ -815,14 +820,7 @@ $conn_profile->close();
                 <li><a href="cas-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="cas-task.php">Upload Files</a>
-                    <a href="cas-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="cas-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
 
@@ -870,7 +868,7 @@ $conn_profile->close();
                         while($row = $result->fetch_assoc()) {
                             $folder_name = htmlspecialchars($row['folder_name']); // Sanitize folder name
                             echo "<div class='folder' data-folder-name='$folder_name'>
-                                    <a href='cas-upload.php?folder=" . urlencode($folder_name) . "' class='folder-link'>
+                                    <a href='cas-subfolder.php?folder=" . urlencode($folder_name) . "' class='folder-link'>
                                         <div class='folder-icon'>
                                             <img src='images/folder.png' alt='File Icon' class='file-icon'>
                                         </div>
@@ -994,19 +992,19 @@ $conn_profile->close();
             });
         });
 
-           // Get modal elements
+        document.addEventListener('DOMContentLoaded', function () {
             var modal = document.getElementById("folderModal");
             var btn = document.getElementById("createFolderBtn");
             var cancelButton = document.getElementById("cancelButton");
 
-            // When the user clicks the button, open the modal
             btn.onclick = function() {
                 modal.style.display = "block";
-            }
+            };
 
             cancelButton.onclick = function() {
                 modal.style.display = "none";
-            }
+            };
+        });
 
             // JavaScript code for context menu actions
             const contextMenu = document.getElementById('contextMenu');
@@ -1021,6 +1019,7 @@ $conn_profile->close();
                     contextMenu.style.display = 'block';
                     contextMenu.style.left = `${event.pageX}px`;
                     contextMenu.style.top = `${event.pageY}px`;
+
 
                     // Rename Folder action
                     document.getElementById('renameFolder').onclick = function () {
@@ -1084,7 +1083,7 @@ $conn_profile->close();
                         contextMenu.style.display = 'none'; // Hide context menu
                         Swal.fire({
                             title: 'Delete Folder',
-                            text: `Are you sure you want to delete "${folderName}"?`,
+                            text: Are you sure you want to delete "${folderName}"?,
                             icon: 'warning',
                             showCancelButton: true,
                             confirmButtonText: 'Delete',
@@ -1255,10 +1254,6 @@ $conn_profile->close();
                     });
                 });
 
-                // Log clicks on the "Create Folder" button
-                document.getElementById("createFolderBtn").addEventListener("click", function() {
-                    logAndRedirect("Create Folder", "#"); // Replace '#' with the intended URL if needed
-                });
 
                 // Log clicks on the "Archive" link
                 document.getElementById("archive").addEventListener("click", function(event) {
