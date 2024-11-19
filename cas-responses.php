@@ -34,12 +34,14 @@ $stmt->bind_param("s", $currentDepartment);
 $stmt->execute();
 $result = $stmt->get_result();
 
+// Handle form submission for sending certificates
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) {
+    $all_sent = true;
     while ($row = $result->fetch_assoc()) {
         $name = $row['name'];
         $email = $row['email'];
-        $event = $row['event'];
         $department = $row['department'];
+        $event = $row['event'];
 
         // Hosted image URLs
         $bgImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
@@ -98,13 +100,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </head>
         <body>
             <div class='certificate'>
-                <img src='$bgImageURL' alt='Background'>
+                <img src='https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='$logoImageURL' alt='Logo'>
+                        <img src='https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png' alt='Logo'>
                         <p>Community Extension Services</p>
                     </div>
                 </div>
