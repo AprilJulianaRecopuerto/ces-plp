@@ -121,11 +121,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             // Generate the PDF
             $options = new Options();
             $options->set('defaultFont', 'Poppins');
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isPhpEnabled', true); // Allow PHP to be used in the HTML
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
-
+            
             // Save PDF to a temporary directory
             $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf';
             file_put_contents($pdfFilePath, $dompdf->output());
