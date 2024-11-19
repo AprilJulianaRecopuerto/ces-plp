@@ -46,19 +46,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
 
         // Define the absolute path for images
 // Function to convert any image to base64
-        function getBase64Image($imagePath) {
-            if (file_exists($imagePath)) {
-            $imageData = file_get_contents($imagePath);  // Read the image file
-            return 'data:image/png;base64,' . base64_encode($imageData);  // Return base64-encoded string with MIME type
-        }
-            return '';  // Return empty string if file doesn't exist
-        }
+function getImagePath($imageName) {
+    $imagePath = __DIR__ . '/images/' . $imageName;
+    return file_exists($imagePath) ? $imagePath : '';  // Return empty if the file doesn't exist
+}
 
-        // Get base64 images for both the background and the logo
-        $imagePath = getBase64Image(__DIR__ . '/images/cert-bg.png');  // Background image
-        $logoPath = getBase64Image(__DIR__ . '/images/logoicon.png');  // Logo image
+// Get the image paths for both the background and the logo
+$imagePath = getImagePath('cert-bg.png');  // Background image
+$logoPath = getImagePath('logoicon.png');  // Logo image
 
-
+// Check if images exist before proceeding
+if (empty($imagePath) || empty($logoPath)) {
+    die('Error: One or more image files are missing.');
+}
         // HTML content for the certificate
         $html = "
         <html>
