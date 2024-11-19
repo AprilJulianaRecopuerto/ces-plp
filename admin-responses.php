@@ -52,15 +52,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Check if files exist before proceeding
         if (!file_exists($imagePath)) {
             error_log("Image not found: " . $imagePath);
+            $all_sent = false;
+            continue;
         }
 
         if (!file_exists($logoPath)) {
             error_log("Logo not found: " . $logoPath);
+            $all_sent = false;
+            continue;
         }
 
-        // Convert images to Base64
-        $base64Image = 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath));
-        $base64Logo = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+        // Convert images to Base64 using your method
+        $imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
+        $imageData = file_get_contents($imagePath);
+        $base64Image = 'data:image/' . $imageType . ';base64,' . base64_encode($imageData);
+
+        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
+        $logoData = file_get_contents($logoPath);
+        $base64Logo = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
 
 
         $html = "
