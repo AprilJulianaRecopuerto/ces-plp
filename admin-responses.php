@@ -44,9 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
 
         // Generate PDF for each participant
         $date = date("l, F j, Y");
-        
-        $imagePath = __DIR__ . '/images/cert-bg.png';
-        $logoPath = __DIR__ . '/images/logoicon.png';
+
+       $imagePath = realpath(__DIR__ . '/CES/images/cert-bg.png');
+    $logoPath = realpath(__DIR__ . '/CES/images/logoicon.png');
+
         
         // Check if files exist before proceeding
         if (!file_exists($imagePath)) {
