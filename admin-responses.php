@@ -45,12 +45,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Generate PDF for each participant
         $date = date("l, F j, Y");
 
+        // Define the path relative to the public directory
+        $imagePath = __DIR__ . '/public/images/cert-bg.png';
+        $logoPath = __DIR__ . '/public/images/logoicon.png';
+
+        // Check if files exist before proceeding
+        if (!file_exists($imagePath)) {
+            error_log("Image not found: " . $imagePath);
+        }
+
+        if (!file_exists($logoPath)) {
+            error_log("Logo not found: " . $logoPath);
+        }
+
         // Convert images to Base64
-        $imagePath = $_SERVER['DOCUMENT_ROOT'] . '/images/cert-bg.png';
-        $logoPath = $_SERVER['DOCUMENT_ROOT'] . '/images/logoicon.png';
-        
         $base64Image = 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath));
         $base64Logo = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+
 
         $html = "
         <html>
