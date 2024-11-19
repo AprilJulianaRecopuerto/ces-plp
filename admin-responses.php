@@ -7,11 +7,10 @@ use Dompdf\Options;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Database connection details
-$servername = "your_database_host";
-$username = "your_database_user";
-$password = "your_database_password";
-$dbname = "your_database_name";
+$servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "sh9sgtg12c8vyqoa";
+$password = "s3jzz232brki4nnv";
+$dbname = "szk9kdwhvpxy2g77";
 
 // Establish connection to the database
 $conn = new mysqli($servername, $username, $password, $dbname);
