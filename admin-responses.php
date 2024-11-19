@@ -46,31 +46,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $date = date("l, F j, Y");
 
         // Define the path relative to the public directory
-// Define the path to the images
-// Define the new paths based on the CES folder
-$imagePath = __DIR__ . '/CES/cert-bg.png';
-$logoPath = __DIR__ . '/CES/logoicon.png';
+        $imagePath = __DIR__ . '/CES/cert-bg.png';
+        $logoPath = __DIR__ . '/CES/logoicon.png';
+        
+        // Check if files exist before proceeding
+        if (!file_exists($imagePath)) {
+            error_log("Image not found: " . $imagePath);
+        }
 
-// Check if files exist before proceeding
-if (!file_exists($imagePath)) {
-    error_log("Image not found: " . $imagePath);
-    die("Background image not found");
-}
+        if (!file_exists($logoPath)) {
+            error_log("Logo not found: " . $logoPath);
+        }
 
-if (!file_exists($logoPath)) {
-    error_log("Logo not found: " . $logoPath);
-    die("Logo image not found");
-}
-
-// Convert images to Base64
-$imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
-$imageData = file_get_contents($imagePath);
-$base64Image = 'data:image/' . $imageType . ';base64,' . base64_encode($imageData);
-
-$logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
-$logoData = file_get_contents($logoPath);
-$base64Logo = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
-
+        // Convert images to Base64
+        $base64Image = 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath));
+        $base64Logo = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
 
 
         $html = "
