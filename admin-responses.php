@@ -46,9 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $date = date("l, F j, Y");
 
         // Convert images to Base64
-        $imagePath = $_SERVER['DOCUMENT_ROOT'] . '/CES/images/cert-bg.png';
-        $logoPath = $_SERVER['DOCUMENT_ROOT'] . '/CES/images/logoicon.png';
-
+        $imagePath = $_SERVER['DOCUMENT_ROOT'] . '/images/cert-bg.png';
+        $logoPath = $_SERVER['DOCUMENT_ROOT'] . '/images/logoicon.png';
+        
         $base64Image = 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath));
         $base64Logo = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
 
@@ -127,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
-            
+
             // Save PDF to a temporary directory
             $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf';
             file_put_contents($pdfFilePath, $dompdf->output());
