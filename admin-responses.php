@@ -3,6 +3,7 @@ session_start();
 
 require 'vendor/autoload.php';
 use Dompdf\Dompdf;
+use Dompdf\Options;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -31,63 +32,117 @@ if (!$result || $result->num_rows === 0) {
     die("No data found");
 }
 
-// Process the request to send certificates
+// Handle form submission for sending certificates
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) {
     $all_sent = true;
 
-    // Loop through all fetched rows
     while ($row = $result->fetch_assoc()) {
         $name = $row['name'];
         $email = $row['email'];
+        $department = $row['department'];
+        $event = $row['event'];
 
-        // Generate the HTML content for the certificate
-        $date = date("F j, Y");
+        // Generate PDF for each participant
+        $date = date("l, F j, Y");
+
+        // Convert images to Base64
+        $imagePath = $_SERVER['DOCUMENT_ROOT'] . '/CES/images/cert-bg.png';
+        $logoPath = $_SERVER['DOCUMENT_ROOT'] . '/CES/images/logoicon.png';
+
+        $base64Image = 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath));
+        $base64Logo = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+
         $html = "
         <html>
         <head>
+        <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
+        <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
             <style>
-                body { text-align: center; font-family: Arial, sans-serif; }
-                .certificate { border: 10px solid green; padding: 20px; max-width: 800px; margin: auto; }
-                h1 { font-size: 48px; }
-                p { font-size: 24px; }
-                .name { font-size: 32px; font-weight: bold; }
+                body {
+                    text-align: center;
+                    margin: 0;
+                    padding: 0;
+                    font-family: 'Poppins', sans-serif;
+                }
+                .certificate img {
+                    position: absolute;
+                    margin-top: -45px;
+                    width: 109%;
+                    margin-left: -45px;
+                    object-fit: cover;
+                    z-index: -1;
+                }
+                .subheading {
+                    margin-top: 240px;
+                    font-size: 20px;
+                }
+                .name {
+                    font-size: 80px;
+                    margin-top: 30px;
+                    text-decoration: underline;
+                    font-style: italic;
+                }
+                .details {
+                    font-size: 22px;
+                }
+                .footer-content {
+                    margin-top: 50px;
+                    display: flex;
+                    justify-content: center;
+                }
+                .footer-content img {
+                    max-width: 80px;
+                    margin-left: 340px;
+                }
+                .footer-text {
+                    font-size: 20px;
+                    margin-left: 110px;
+                }
             </style>
         </head>
         <body>
             <div class='certificate'>
-                <h1>Certificate of Participation</h1>
-                <p>This certificate is awarded to</p>
+                <img src='$base64Image' alt='Background'>
+                <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
-                <p>for their participation in our event.</p>
-                <p>Date: $date</p>
+                <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
+                <div class='footer'>
+                    <div class='footer-content'>
+                        <img src='$base64Logo' alt='Logo'>
+                        <p class='footer-text'>Community Extension Services</p>
+                    </div>
+                </div>
             </div>
         </body>
-        </html>";
+        </html>
+        ";
 
-        // Generate PDF from the HTML content
         try {
-            $dompdf = new Dompdf();
+            // Generate the PDF
+            $options = new Options();
+            $options->set('defaultFont', 'Poppins');
+            $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
-            
-            // Save the generated PDF in the /tmp directory (Heroku compatible)
-            $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf'; // Use urlencode for file safety
+
+            // Save PDF to a temporary directory
+            $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf';
             file_put_contents($pdfFilePath, $dompdf->output());
         } catch (Exception $e) {
-            error_log("PDF generation failed for $name: " . $e->getMessage());
+            error_log("PDF generation failed: " . $e->getMessage());
             $all_sent = false;
-            continue; // Continue to the next user if PDF generation fails
+            continue;
         }
 
-        // Send the generated PDF via email
         try {
+            // Send the email
             $mail = new PHPMailer(true);
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
             $mail->Username = 'communityextensionservices1@gmail.com';
-            $mail->Password = 'ctpy rvsc tsiv fwix'; // Use a valid app password
+            $mail->Password = 'ctpy rvsc tsiv fwix';
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
@@ -97,18 +152,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $mail->Body = 'Attached is your certificate of participation.';
             $mail->addAttachment($pdfFilePath);
 
-            // Attempt to send the email
             $mail->send();
         } catch (Exception $e) {
             error_log("Email sending failed for $email: " . $e->getMessage());
             $all_sent = false;
         }
 
-        // Clean up by removing the temporary PDF file
+        // Clean up the PDF
         unlink($pdfFilePath);
     }
 
-    // Output the result of the operation (success or error)
     echo $all_sent ? 'success' : 'error';
     exit;
 }
