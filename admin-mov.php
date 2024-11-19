@@ -3,7 +3,7 @@ session_start(); // Start the session
 
 // Check if the user is logged in
 if (!isset($_SESSION['username'])) {
-    header("Location: loginpage.php"); // Redirect to login page
+    header("Location: collegelogin.php"); // Redirect to login page
     exit;
 }
 
@@ -441,53 +441,6 @@ foreach ($colleges as $college) {
                 font-family: 'Poppins', sans-serif;
                 font-size: 22px; /* Adjust the font size as needed */
             }
-
-        /* Custom Popup */
-            .swal-popup {
-                font-family: "Poppins", sans-serif !important;
-                width: 400px;
-            }
-
-            /* SweetAlert confirm button */
-            .swal-confirm {
-                font-family: "Poppins", sans-serif !important;
-            }
-
-            /* SweetAlert cancel button */
-            .swal-cancel {
-                font-family: "Poppins", sans-serif !important;
-            }
-
-            /* Chat styles */
-            .navbar .profile-container {
-                display: flex;
-                align-items: center;
-            }
-
-            .chat-icon {
-                font-size: 20px;
-                color: #333;
-                text-decoration: none;
-                position: relative; /* To position the badge correctly */
-                margin-right: 30px;
-                margin-top: 8px;
-                margin-left: -37px;
-            }
-
-            .notification-badge {
-                display: inline-block;
-                background-color: red; /* Change this to your preferred color */
-                color: white;
-                border-radius: 50%;
-                width: 20px; /* Width of the badge */
-                height: 20px; /* Height of the badge */
-                text-align: center;
-                font-weight: bold;
-                position: absolute; /* Position it relative to the chat icon */
-                top: -5px; /* Adjust as needed */
-                right: -10px; /* Adjust as needed */
-                font-size: 14px; /* Size of the exclamation point */
-            }
            
         </style>
     </head>
@@ -495,14 +448,6 @@ foreach ($colleges as $college) {
     <body>
         <nav class="navbar">
             <h2>Colleges - Mode of Verification</h2> 
-
-            <div class="profile-container">
-                <!-- Chat Icon with Notification Badge -->
-                <a href="chat.php" class="chat-icon" onclick="resetNotifications()">
-                    <i class="fa fa-comments"></i>
-                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
-                </a>
-            <div>
 
             <div class="profile" id="profileDropdown">
                 <?php
@@ -512,12 +457,12 @@ foreach ($colleges as $college) {
                         echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
                     } else {
                         // Get the first letter of the username for the placeholder
-                        $firstLetter = strtoupper(substr($_SESSION['username'], 0, 1));
+                        $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
                         echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
                     }
                 ?>
 
-                <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
 
                 <i class="fa fa-chevron-down dropdown-icon"></i>
                 <div class="dropdown-menu">
@@ -551,28 +496,22 @@ foreach ($colleges as $college) {
                 <li><a href="admin-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="admin-task.php">Upload Files</a>
-                    <a href="admin-mov.php" class="active">Mode of Verification</a>
-                </div>
+                <li><a href="admin-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="admin-responses.php"><img src="images/feedback.png">Responses</a></li>
+                <li><a href="responses.php"><img src="images/setting.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
-                    <img src="images/logs.png"> Audit Trails
+                    <img src="images/resource.png"> Audit Trails
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="admin-history.php">Log In History</a>
-                    <a href="admin-logs.php">Activity Logs</a>
+                    <a href="admin-login.php">Log In History</a>
+                    <a href="admin-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>
         </div>
+
         <div class="content-mov">
             <div class="button-container">
                 <button class="filter-button" onclick="filterTable('cas', 'Colleges of Arts and Science MOV')">CAS</button>
@@ -631,35 +570,26 @@ window.onload = function() {
     filterTable('cas', 'Colleges of Arts and Science MOV'); // Change to whichever college you want to show initially
 };
 
-function confirmLogout(event) {
-    event.preventDefault();
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you really want to log out?",
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6', // Green confirm button
-        cancelButtonColor: '#dc3545', // Red cancel button
-        confirmButtonText: 'Yes, log me out',
-        cancelButtonText: 'Cancel',
-        customClass: {
-            popup: 'swal-popup',
-            confirmButton: 'swal-confirm',
-            cancelButton: 'swal-cancel'
-        },
-        // Additional custom styles via CSS can be added here
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Pass action in the fetch call
-            fetch('logout.php?action=logout')
-                .then(response => response.text())
-                .then(data => {
-                    console.log(data); // Log response for debugging
-                    window.location.href = 'roleaccount.php';
-                })
-                .catch(error => console.error('Error:', error));
-        }
-    });
-}
+            function confirmLogout(event) {
+                event.preventDefault(); // Prevent the default link behavior
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to log out?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, log me out',
+                    customClass: {
+                        popup: 'custom-swal-popup',
+                        confirmButton: 'custom-swal-confirm',
+                        cancelButton: 'custom-swal-cancel'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'roleaccount.php'; // Redirect to the logout page
+                    }
+                });
+            }
 
             // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
@@ -690,45 +620,6 @@ function confirmLogout(event) {
                     }
                 });
             }
-
-            document.addEventListener('DOMContentLoaded', function () {
-        const username = "<?php echo $_SESSION['username']; ?>"; // Get the username from PHP session
-
-        // Function to log activity
-        function logActivity(buttonName) {
-            const timestamp = new Date().toISOString(); // Get current timestamp
-
-            fetch('log_activity.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    buttonFunction: buttonName // Updated to match the PHP variable
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'error') {
-                    console.error('Error logging activity:', data.message);
-                } else {
-                    console.log('Activity logged successfully:', data);
-                }
-            })
-            .catch(error => {
-                console.error('Error logging activity:', error);
-            });
-        }
-
-        // Add event listeners specifically to buttons and links
-        const trackableElements = document.querySelectorAll('button, a'); // Select all buttons and links
-        trackableElements.forEach(element => {
-            element.addEventListener('click', function (event) {
-                const buttonName = this.tagName === 'BUTTON' ? this.innerText.trim() || "Unnamed Button" : this.textContent.trim() || "Unnamed Link";
-                logActivity(buttonName); // Log the button/link activity
-            });
-        });
-    });
         </script>
     </body>
 </html>

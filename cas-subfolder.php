@@ -1,19 +1,17 @@
 <?php
-session_start(); // Start the session
+session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
-    // Redirect to login page if the session variable is not set
     header("Location: roleaccount.php");
     exit;
 }
 
 // Database credentials
-$servername = "localhost";
-$username_db = "root";
-$password_db = "";
-$dbname_mov = "task_mov";
-$dbname_user_registration = "user_registration";
+$servername = "wp433upk59nnhpoh.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_db = "wbepy9iso2pubu7f";
+$password_db = "l0a6y3bl2x7lfiyy";
+$dbname_mov = "qlajsw6auv4giknn";
 
 // Create connection to the database
 $conn_mov = new mysqli($servername, $username_db, $password_db, $dbname_mov);
@@ -23,97 +21,125 @@ if ($conn_mov->connect_error) {
     die("Connection failed: " . $conn_mov->connect_error);
 }
 
-// Fetch folders from the database
-$result = $conn_mov->query("SELECT * FROM cas_mov");
+// Base directory for CAS MOV
+$base_directory = 'movuploads/cas-mov/';
 
-// Initialize the folder name variable
-$folder_name = null;
+// Fetch folder and subfolder from GET parameters
+$folder_name = isset($_GET['folder']) ? urldecode($_GET['folder']) : null;
+$subfolder_name = isset($_GET['subfolder']) ? urldecode($_GET['subfolder']) : null;
 
-// Check if a folder is selected (e.g., through a GET parameter)
-if (isset($_GET['folder'])) {
-    $folder_name = basename($_GET['folder']);
-} elseif ($result->num_rows > 0) {
-    // If no folder is selected, default to the first folder
-    $first_folder = $result->fetch_assoc();
-    $folder_name = $first_folder['folder_name']; // Assuming there's a column 'folder_name'
+if (!$folder_name) {
+    die("No folder specified.");
+}
+
+$folder_path = $base_directory . $folder_name;
+
+if (!is_dir($folder_path)) {
+    die("The specified folder does not exist.");
+}
+
+if ($subfolder_name) {
+    $subfolder_path = $folder_path . '/' . $subfolder_name;
+    if (!is_dir($subfolder_path)) {
+        die("The specified subfolder does not exist.");
+    }
+}
+
+// Handle file upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['upload_file'])) {
+    $target_dir = $subfolder_path . '/'; // Target directory
+    $target_file = $target_dir . basename($_FILES['upload_file']['name']);
+    $file_type = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+
+    // Check file type
+    if (!in_array($file_type, ['jpg', 'jpeg', 'png', 'pdf'])) {
+        $error_message = "Only JPG, JPEG, PNG, and PDF files are allowed.";
+    } elseif (move_uploaded_file($_FILES['upload_file']['tmp_name'], $target_file)) {
+        $success_message = "File uploaded successfully!";
+    } else {
+        $error_message = "Error uploading the file.";
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_file'])) {
+    $file_to_delete = $subfolder_path . '/' . basename($_POST['delete_file']);
+    $archive_dir = 'movuploads/cas-recycle'; // Directory to store deleted files
+    $metadata_file = $archive_dir . '/metadata.json';
+
+    if (file_exists($file_to_delete)) {
+        // Ensure the archive directory exists
+        if (!is_dir($archive_dir)) {
+            mkdir($archive_dir, 0777, true);
+        }
+
+        // Archive path
+        $archive_path = $archive_dir . '/' . basename($file_to_delete);
+
+        // Read existing metadata
+        $metadata = file_exists($metadata_file) ? json_decode(file_get_contents($metadata_file), true) : [];
+
+        // Add metadata for the deleted file
+        $metadata[basename($file_to_delete)] = $file_to_delete;
+
+        // Save updated metadata
+        file_put_contents($metadata_file, json_encode($metadata, JSON_PRETTY_PRINT));
+
+        // Move the file to the archive
+        if (rename($file_to_delete, $archive_path)) {
+            $success_message = "File deleted and archived successfully!";
+        } else {
+            $error_message = "Error deleting the file. Please check permissions or file path.";
+        }
+    } else {
+        $error_message = "File does not exist.";
+    }
 }
 
 
 // Handle folder creation
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'create') {
-    $folder_name = $conn_mov->real_escape_string(trim($_POST['folder_name']));
-    $folder_path = $base_directory . $folder_name; // Full path for new folder
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_folder'])) {
+    $new_folder_name = trim($_POST['new_folder_name']);
+    if (!empty($new_folder_name)) {
+        $new_folder_path = $subfolder_name 
+            ? $subfolder_path . '/' . $new_folder_name 
+            : $folder_path . '/' . $new_folder_name;
 
-    // Check if folder already exists
-    $check_sql = "SELECT * FROM cas_mov WHERE folder_name = '$folder_name'";
-    $result = $conn_mov->query($check_sql);
-
-    if ($result->num_rows > 0) {
-        $_SESSION['warning'] = 'The folder name already exists. Please choose a different name.';
-        header('Location: cas-subfolder.php'); // Redirect after setting the session
-        exit();
-    }
-
-    // Create the folder in the filesystem
-    if (mkdir($folder_path)) {
-        // Insert folder name into the cas_mov table
-        $sql = "INSERT INTO cas_mov (folder_name) VALUES ('$folder_name')";
-        if ($conn_mov->query($sql) === TRUE) {
-            $_SESSION['folder_create_success'] = 'Folder created successfully';
-            header('Location: cas-mov.php'); // Redirect after success
-            exit();
-        } else {
-            $_SESSION['folder_error'] = 'Error creating folder in database: ' . $conn_mov->error;
-            header('Location: cas-mov.php'); // Redirect after error
-            exit();
-        }
-    } else {
-        $_SESSION['folder_error'] = 'Error creating folder: ' . error_get_last()['message'];
-        header('Location: cas-mov.php'); // Redirect after error
-        exit();
-    }
+            if (!file_exists($new_folder_path)) {
+                if (mkdir($new_folder_path, 0777, true)) {
+                    $success_message = htmlspecialchars("Folder '$new_folder_name' created successfully!");
+                } else {
+                    $error_message = htmlspecialchars("Error creating the folder.");
+                }
+            } else {
+                $error_message = htmlspecialchars("Folder '$new_folder_name' already exists.");
+            }
+        }            
 }
 
-// Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername, $username_db, $password_db, $dbname_user_registration);
-
-if ($conn_profile->connect_error) {
-    die("Connection failed: " . $conn_profile->connect_error);
+// Refresh the uploaded files list
+$uploaded_files = [];
+if ($subfolder_name && is_dir($subfolder_path)) {
+    $uploaded_files = array_diff(scandir($subfolder_path), ['.', '..']);
 }
-
-$uname = $_SESSION['uname'];
-$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
-$stmt = $conn_profile->prepare($sql_profile);
-$stmt->bind_param("s", $uname);
-$stmt->execute();
-$result_profile = $stmt->get_result();
-
-$profilePicture = null;
-if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
-    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
-}
-
-$stmt->close();
-$conn_profile->close();
-
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= htmlspecialchars($subfolder_name ? $subfolder_name : $folder_name); ?></title>
 
-        <title>CES PLP</title>
+    <link rel="icon" href="images/logoicon.png">
 
-        <link rel="icon" href="images/logoicon.png">
+    <!-- SweetAlert2 CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.0/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.0/dist/sweetalert2.min.js"></script>
 
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Font Awesome for folder icon -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-        <style>
+    <style>
             @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap');
             @import url('https://fonts.cdnfonts.com/css/glacial-indifference-2');
             @import url('https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500&display=swap');
@@ -121,6 +147,7 @@ $conn_profile->close();
             body {
                 margin: 0;
                 background-color: #F6F5F5; /* Light gray background color */
+                font-family: "Glacial Indifference", sans-serif;
             }
 
             .navbar {
@@ -137,6 +164,7 @@ $conn_profile->close();
                 border-radius: 10px;
                 z-index: 5;
                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Added box shadow */
+                margin-top:-80px;
             }
 
             .navbar h2 {
@@ -340,6 +368,8 @@ $conn_profile->close();
             .content-task {
                 margin-left: 340px; /* Align with the sidebar */
                 padding: 20px;
+                margin-top:80px;
+                font-family: 'Poppins', sans-serif;
             }
 
             .content-upload {
@@ -351,6 +381,7 @@ $conn_profile->close();
             .button-container {
                 display: flex;
                 margin-bottom: 20px; /* Space below the buttons */
+                margin-top:110px;
                 margin-left: -10px;
             }
 
@@ -394,11 +425,6 @@ $conn_profile->close();
                 width: 400px !important; /* Set a larger width */
             }
 
-            .custom-swal-title {
-                font-family: 'Poppins', sans-serif;
-                color: #3085d6; /* Custom title color */
-            }
-
             .custom-swal-confirm {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
@@ -420,15 +446,15 @@ $conn_profile->close();
                 outline: none; /* Remove default focus outline */
             }
 
+            .custom-swal-input {
+                width: 90% !important;
+                margin-left: 19px !important;
+            }
+
             /* Custom styles for SweetAlert error popup */
             .custom-error-popup {
                 font-family: 'Poppins', sans-serif;
                 width: 400px !important; /* Set a larger width */
-            }
-
-            .custom-error-title {
-                font-family: 'Poppins', sans-serif;
-                color: #e74c3c; /* Custom title color for error */
             }
 
             .custom-error-confirm {
@@ -442,51 +468,27 @@ $conn_profile->close();
                 outline: none; /* Remove default focus outline */
             }
 
-            .create-subfolder {
+            /* Custom styles for SweetAlert error popup */
+            .custom-warning-popup {
                 font-family: 'Poppins', sans-serif;
-                margin-top:110px;
-                text-align: left; /* Align text to the left */
+                width: 400px !important; /* Set a larger width */
             }
 
-            .create-subfolder h1 {
-                font-size: 24px; /* Font size for the header */
-                margin-top: 22px;
-                margin-bottom: 25px; /* Space below the header */
-            }
-
-            .create-subfolder p{
-                font-size: 18px; /* Font size for the folder name */
-                margin-bottom: 20px; /* Space below the paragraph */
-            }
-
-          
-            .context-menu {
+            .custom-warning-title {
                 font-family: 'Poppins', sans-serif;
-                display: none; /* Hidden by default */
-                position: absolute; /* Position it absolutely */
-                background-color: white; /* Background color */
-                border: 1px solid #ccc; /* Border */
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Shadow */
-                z-index: 1000; /* Make sure it appears on top */
+                color: #e74c3c; /* Custom title color for error */
             }
 
-            .context-menu ul {
-                list-style-type: none; /* Remove bullet points */
-                margin: 0;
-                padding: 5px;
+            .custom-warning-confirm {
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #e74c3c;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none; /* Remove default focus outline */
             }
 
-            .context-menu li {
-                padding: 8px 12px; /* Padding for menu items */
-                cursor: pointer; /* Pointer cursor on hover */
-            }
-
-            .context-menu li:hover {
-                background-color: #4CAF50;
-                color:white;
-            }
-
-            
             .modal {
                 font-family: 'Poppins', sans-serif;
                 display: none; /* Hidden by default */
@@ -567,22 +569,113 @@ $conn_profile->close();
                 cursor: pointer;
             }
 
-            .back-button {
+            .folder-display {
                 font-family: 'Poppins', sans-serif;
-                font-size: 17px;
-                margin-bottom: -10px; /* Space below the button */
-                background-color: transparent; /* No background */
-                border: none; /* Remove border */
-                cursor: pointer; /* Change cursor to pointer */
-                font-weight: bold; /* Bold text */
-                text-decoration: none; /* Remove underline */
-                color: inherit; /* Inherit text color */
+                display: flex; /* Use flexbox to layout folders */
+                flex-wrap: wrap; /* Allow wrapping to the next line */
+                gap: 20px; /* Space between folder items */
             }
 
-            .back-arrow {
-                height: 25px; /* Set the size of the arrow */
-                margin-right: 6px;
-                vertical-align: middle; /* Align image vertically with text */
+            .folder {
+                display: flex; /* Use flex to align items */
+                flex-direction: column; /* Stack items vertically */
+                align-items: center; /* Center items horizontally */
+                padding: 10px;
+                border: 1px solid #ccc; /* Optional border */
+                border-radius: 5px; /* Rounded corners */
+                background-color: #f9f9f9; /* Background color */
+                width: 120px; /* Fixed width for folders */
+                height: 110px;
+                text-align: center; /* Center text */
+            }
+
+            .folder-icon {
+                margin-top:5px;
+                width: 50px; /* Set a fixed width for icons */
+                height: 50px; /* Set a fixed height for icons */
+                margin-bottom: 15px; /* Space between icon and folder name */
+                
+            }
+
+            .folder-link {
+                text-decoration: none; /* Remove underline from link */
+                color: inherit; /* Inherit color from parent */
+                transition: transform 0.2s; /* Smooth scaling effect */
+            }
+
+
+            .folder-name {
+                margin-top: 5px; /* Space above folder name */
+                font-weight: normal; /* Make folder name bold */
+            }
+
+            .alert {
+                padding: 10px;
+                margin-bottom: 20px;
+                border-radius: 5px;
+            }
+
+            .alert-error {
+                background-color: #f8d7da;
+                color: #721c24;
+            }
+
+            .context-menu {
+                font-family: 'Poppins', sans-serif;
+                display: none; /* Hidden by default */
+                position: absolute; /* Position it absolutely */
+                background-color: white; /* Background color */
+                border: 1px solid #ccc; /* Border */
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Shadow */
+                z-index: 1000; /* Make sure it appears on top */
+            }
+
+            .context-menu ul {
+                list-style-type: none; /* Remove bullet points */
+                margin: 0;
+                padding: 5px;
+            }
+
+            .context-menu li {
+                padding: 8px 12px; /* Padding for menu items */
+                cursor: pointer; /* Pointer cursor on hover */
+            }
+
+            .context-menu li:hover {
+                background-color: #4CAF50;
+                color:white;
+            }
+
+            /* Button styling */
+            .btn {
+                font-family: 'Poppins', sans-serif;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 4px;
+                font-size: 17px;
+                cursor: pointer;
+                margin-top: 10px;
+                margin-right: 10px;
+                
+            }
+
+            .btn-create {
+                font-family: 'Poppins', sans-serif !important;
+                background-color: #28a745; /* Green */
+                color: white;
+            }
+
+            .btn-create:hover {
+                background-color: #218838; /* Darker green */
+            }
+
+            .btn-cancel {
+                background-color: #e74c3c;
+                color: white;
+            }
+
+            .btn-cancel:hover {
+                background-color: #c82333; /* Darker red */
             }
 
             .swal-popup {
@@ -600,80 +693,236 @@ $conn_profile->close();
                 font-family: "Poppins", sans-serif !important;
             }
 
-            /* Chat styles */
-            .navbar .profile-container {
-                display: flex;
-                align-items: center;
-            }
-
-            .chat-icon {
-                font-size: 20px;
-                color: #333;
-                text-decoration: none;
-                position: relative; /* To position the badge correctly */
-                margin-right: 30px;
-                margin-top: 8px;
-                margin-left: -37px;
-            }
-
-            .notification-badge {
-                display: inline-block;
-                background-color: red; /* Change this to your preferred color */
-                color: white;
-                border-radius: 50%;
-                width: 20px; /* Width of the badge */
-                height: 20px; /* Height of the badge */
-                text-align: center;
-                font-weight: bold;
-                position: absolute; /* Position it relative to the chat icon */
-                top: -5px; /* Adjust as needed */
-                right: -10px; /* Adjust as needed */
-                font-size: 14px; /* Size of the exclamation point */
-            }   
-
-            /* Button styling */
-            .btn {
+            .back-button {
                 font-family: 'Poppins', sans-serif;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 4px;
                 font-size: 17px;
+                margin-bottom: 20px; /* Space below the button */
+                background-color: transparent; /* No background */
+                border: none; /* Remove border */
+                cursor: pointer; /* Change cursor to pointer */
+                font-weight: bold; /* Bold text */
+                color: inherit; /* Inherit text color */
+            }
+
+            .back-button a {
+                text-decoration: none; /* Remove text underline */
+                color: inherit; /* Ensure the link color matches the parent */
+            }
+
+            .back-arrow {
+                height: 25px; /* Set the size of the arrow */
+                margin-right: 6px;
+                vertical-align: middle; /* Align image vertically with text */
+            }
+
+            /* Folder List */
+            .folder-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                margin-bottom: 20px;
+            }
+
+            .folder-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                padding: 10px;
+                width: 120px;
+                height: 100px;
+                background-color: #f9f9f9; /* Light Green */
+                border: 1px solid #ccc; /* Optional border */
+                border-radius: 5px; /* Rounded corners */
+                text-decoration: none;
+                color: #155724; /* Dark Green Text */
+            
+                font-family: "Glacial Indifference", sans-serif;
+            }
+
+            .folder-item i {
+                font-size: 36px;
+                margin-bottom: 10px;
+                color: inherit;
+            }
+
+            /* Style for the file item list */
+            .file-items {
+                list-style-type: none;
+                display: flex;
+                flex-wrap: wrap;
+                padding: 0;
+                margin: 0;
+            }
+
+            .file-item {
+                width: 135px; /* Set consistent width for the item */
+                margin: 10px;
+                padding: 10px;
+                text-align: center;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                background-color: #f4f4f4;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                overflow: hidden; /* Ensure content doesn't overflow */
+            }
+
+            /* File box alignment to center contents */
+            .file-box {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 10px;
+                text-align: center;
+            }
+
+
+            /* File image and icon shared styles */
+            .file-image img,
+            .file-icon img {
+                width: 100%; /* Set full width of the container */
+                height: 110px; /* Set a fixed height for consistency */
+                object-fit: cover; /* Maintain aspect ratio, cropping as necessary */
+                border-radius: 5px; /* Optional: add rounded corners */
+            }
+
+            .file-name {
+                font-family: 'Poppins', sans-serif;
+                font-size: 14px;
+                color: #000;
+                font-weight: bold;
+                text-align: center;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin-top: 5px;
+                max-width: 100%; /* Match the container's width */
+            }
+
+            /* File link to remove underline */
+            .file-link {
+                text-decoration: none;
+                color: inherit;
+            }
+
+            /* Button styles */
+            .btn-delete {
+                background-color: #ff4d4d;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                font-size: 12px;
                 cursor: pointer;
-                margin-top: 10px;
-                margin-right: 10px;
-                transition: background-color 0.3s ease;
+                border-radius: 3px;
+            }
+
+            .btn-delete:hover {
+                background-color: #e60000;
+            }
+
+            .delete-form {
+                margin-top: 5px;
             }
 
             .btn-create {
+                display: inline-block;
+                padding: 10px 15px;
+                color: #fff;
                 background-color: #28a745; /* Green */
-                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                border:none;
+                font-size: 14px;
+                font-family: "Glacial Indifference", sans-serif;
+                margin-bottom:15px;
             }
 
             .btn-create:hover {
-                background-color: #218838; /* Darker green */
+                background-color: #218838; /* Dark Green */
             }
 
-            .btn-cancel {
-                background-color: #e74c3c;
+            .btn-upload {
+                display: inline-block;
+                padding: 10px 15px;
+                color: #fff;
+                background-color: #28a745; /* Green */
+                text-decoration: none;
+                border-radius: 5px;
+                border:none;
+                font-size: 14px;
+                font-family: "Glacial Indifference", sans-serif;
+                margin-top:15px;
+            }
+
+            .btn-upload:hover {
+                background-color: #218838; /* Dark Green */
+            }
+
+            .input-create {
+                width: 30%; /* Full width to take up the container's width */
+                padding: 8px;
+                border: 1px solid #c3e6cb; /* Green Border */
+                border-radius: 5px;
+                font-family: "Poppins", sans-serif;
+                font-size: 14px;
+            }
+
+            input[type="file"] {
+                margin-bottom: 20px; /* Space below the file input */
+                font-family: 'Poppins', sans-serif;
+                display: block;
+                width: 100%;
+                height: 38px;
+                margin-top: 5px;
+                padding: 0;
+                border: 1px solid #ced4da;
+                border-radius: 4px;
+                font-size: 16px;
+                color: #495057;
+                background-color: #fff;
+                background-clip: padding-box;
+                transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            }
+
+            input[type="file"]::file-selector-button {
+                font-family: 'Poppins', sans-serif;
+                width: 120px;
+                padding: 6px 12px;
+                margin-right: 10px;
+                background-color: #3085d6; /* Custom background color */
                 color: white;
+                border: 1px solid #3085d6;;
+                border-radius: 4px;
+                cursor: pointer;
             }
 
-            .btn-cancel:hover {
-                background-color: #c82333; /* Darker red */
+            .upload-section button {
+                font-family: 'Poppins', sans-serif;
+                background-color: #4CAF50; /* Green background */
+                color: white; /* White text */
+                padding: 10px 15px; /* Padding for the button */
+                border: none; /* Remove border */
+                border-radius: 5px; /* Round corners */
+                cursor: pointer; /* Change cursor on hover */
+                font-size: 16px; /* Font size for the button */
             }
-        </style>
-    </head>
 
-    <body>
+            .upload-section button:hover {
+                background-color: #45a049; /* Darker green on hover */
+            }
+
+            .upload-section label {
+                font-family: 'Poppins', sans-serif;
+            }
+    </style>
+</head>
+<body>
+
         <nav class="navbar">
             <h2>Mode of Verification</h2> 
 
             <div class="profile-container">
-                <!-- Chat Icon with Notification Badge -->
-                <a href="cas-chat.php" class="chat-icon" onclick="resetNotifications()">
-                    <i class="fa fa-comments"></i>
-                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
-                </a>
 
                 <div class="profile" id="profileDropdown">
                     <?php
@@ -723,14 +972,7 @@ $conn_profile->close();
                 <li><a href="cas-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="cas-task.php">Upload Files</a>
-                    <a href="cas-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="cas-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
 
@@ -745,87 +987,186 @@ $conn_profile->close();
                 </div>
             </ul>
         </div>
-
+        
         <div class="content-task">
-            <div class="create-subfolder">
-                <!-- Back Arrow Button with Image -->
-                <a href="cas-mov.php" class="back-button">
-                    <img src="images/left-arrow.png" alt="Back" class="back-arrow" /> Back
-                </a>
+            <div class="header">
+                <h1>Folder Name: <?= htmlspecialchars($subfolder_name ? $subfolder_name : $folder_name); ?></h1>
+                <?php if ($subfolder_name): ?>
 
-                <h1>Folder Name: <?= htmlspecialchars($folder_name); ?></h1>
+                    <div class="back-button">
+                        <a href="cas-subfolder.php?folder=<?= urlencode($folder_name); ?>" class="back-link">
+                            <img src="images/left-arrow.png" class="back-arrow" alt="Back to Subfolders" />
+                            Back
+                        </a>
+                    </div>
 
-                <div class="button-container">
-                <button id="createFolderBtn">Create Folder</button>
-                <a href="cas-archive.php" id="archive" class="archive-button">Archive</a>
+                <?php else: ?>
+                    <div class="back-button">
+                        <a href="cas-mov.php">
+                            <img src="images/left-arrow.png" class="back-arrow" alt="Back to folders" />
+                            Back
+                        </a>
+                    </div>
+
+                    <!-- Folder Creation Form -->
+                    <div class="create-folder-section">
+                        <form class="create-folder-form" method="POST">
+                            <label for="new_folder_name">Create New Folder:</label>
+                            <input type="text" class="input-create" name="new_folder_name" id="new_folder_name" placeholder="Enter folder name" required>
+                            <button type="submit" class="btn-create" name="create_folder">Create</button>
+                        </form>
+                    </div>
+                    <p>Select a subfolder to manage.</p>
+                <?php endif; ?>
             </div>
 
-           <!-- Modal for folder creation -->
-            <div id="folderModal" class="modal" style="display: none;">
-                <div class="modal-content">
-                    <h2>Folder Name</h2>
-                    <p>Enter Event Name and Date of Event (e.g. Blood Letting 05-20-2024)</p>
-                    <form method="POST" action="">
-                        <input type="text" name="subfolder_name" id="folderName" placeholder="Enter Folder Name" required />
-                        <input type="hidden" name="action" value="create" /> <!-- Add this hidden input -->
-                        <button type="submit" class="btn btn-create">Create</button>
-                        <button type="button" id="cancelButton" class="btn btn-cancel">Cancel</button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Display error message -->
-            <?php if (isset($error_message)): ?>
-                <div class="alert alert-error"><?= $error_message; ?></div>
+            <?php if (isset($success_message)): ?>
+                <script>
+                    Swal.fire({
+                        title: 'Success!',
+                        text: "<?= htmlspecialchars($success_message); ?>",
+                        icon: 'success',
+                        showConfirmButton: false, // Hide the "OK" button
+                        timer: 2000, // 2 seconds before closing
+                        timerProgressBar: true, // Optional: show progress bar
+                        customClass: {
+                            popup: 'custom-swal-popup', // Custom class for the popup
+                        }
+                    });
+                </script>
             <?php endif; ?>
 
-            <!-- Folder Display Area -->
-            <div class="folder-display">
-                <?php
-                    if ($result && $result->num_rows > 0) {
-                        while($row = $result->fetch_assoc()) {
-                            $folder_name = htmlspecialchars($row['folder_name']); // Sanitize folder name
-                            echo "<div class='folder' data-folder-name='$folder_name'>
-                                    <a href='cas-subfolder.php?folder=" . urlencode($folder_name) . "' class='folder-link'>
-                                        <div class='folder-icon'>
-                                            <img src='images/folder.png' alt='File Icon' class='file-icon'>
-                                        </div>
-                                        <div class='folder-name'>$folder_name</div>
-                                    </a>
-                                </div>";
+            <?php if (isset($error_message)): ?>
+                <script>
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "<?= addslashes($error_message); ?>", // Use addslashes to escape the quotes for JavaScript
+                        icon: 'error',
+                        showConfirmButton: true,
+                        customClass: {
+                            popup: 'custom-error-popup',
+                            confirmButton: 'custom-error-confirm'
                         }
-                    } else {
-                        echo "<div>No folders created yet.</div>";
-                    }
-                ?>
+                    });
+                </script>
+            <?php endif; ?>
 
-            </div>
 
-            <!-- Context Menu -->
-            <div id="contextMenu" class="context-menu" style="display: none;">
-                <ul>
-                    <li id="renameFolder">Rename Folder</li>
-                    <li id="deleteFolder">Delete Folder</li>
-                </ul>
-            </div>
+            <?php if ($subfolder_name): ?>
+                <!-- File Upload Form -->
+                <div class="upload-section">
+                    <form class="upload-form" method="POST" enctype="multipart/form-data">
+                        <label for="upload_file">Choose file to upload:</label>
+                        <input type="file" name="upload_file" id="upload_file" required>
+                        <button type="submit">Upload</button>
+                    </form>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($subfolder_name): ?>
+                <!-- Display Uploaded Files -->
+                <div class="file-list">
+                    <h3>Uploaded Files:</h3>
+
+                    <?php if (empty($uploaded_files)): ?>
+                        <p class="no-files">No uploaded files.</p>
+                    <?php else: ?>
+
+                        <ul class="file-items">
+                            <?php foreach ($uploaded_files as $file): ?>
+                                <li class="file-item" oncontextmenu="showContextMenu(event, '<?= htmlspecialchars($file) ?>')">
+                                    <?php
+                                    $file_extension = pathinfo($file, PATHINFO_EXTENSION);
+                                    $file_icon = '';
+                                    $file_preview = '';
+
+                                    if (in_array($file_extension, ['jpg', 'jpeg', 'png', 'gif'])) {
+                                        // Image file, display image preview
+                                        $file_preview = '<img src="' . htmlspecialchars($subfolder_path . '/' . $file) . '" alt="Image preview" class="file-preview">';
+                                    } elseif ($file_extension === 'pdf') {
+                                        // PDF file, display PDF image instead of icon
+                                        $file_icon = '<img src="images/pdf.png.png" alt="PDF Icon" class="file-icon">';
+                                    } else {
+                                        // Default file icon for other types
+                                        $file_icon = '<i class="fas fa-file"></i>';
+                                    }
+                                    ?>
+
+                                    <a href="<?= htmlspecialchars($subfolder_path . '/' . $file); ?>" target="_blank" class="file-link">
+                                        <div class="file-box">
+                                            <?php if ($file_preview): ?>
+                                                <div class="file-image"><?= $file_preview; ?></div>
+                                            <?php else: ?>
+                                                <div class="file-icon"><?= $file_icon; ?></div>
+                                            <?php endif; ?>
+                                            <div class="file-name"><?= htmlspecialchars($file); ?></div>
+                                        </div>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+
+                        <div id="contextMenu" class="context-menu" style="display:none;">
+                            <ul>
+                                <li id="deleteImage" onclick="deleteFile()">Delete</li>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php else: ?>
+                
+                <!-- Subfolder List -->
+                <div class="folder-list">
+                    <?php
+                    $subfolders = array_diff(scandir($folder_path), ['.', '..']);
+                    foreach ($subfolders as $subfolder):
+                        $encoded_subfolder = urlencode($subfolder);
+                    ?>
+                        <a href="cas-subfolder.php?folder=<?= urlencode($folder_name); ?>&subfolder=<?= $encoded_subfolder; ?>" class="folder-item">
+                            <div class='folder-icon'>
+                                <img src='images/folder.png' alt='File Icon' class='folder-icon'>
+                            </div>
+                            <span><?= htmlspecialchars($subfolder); ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
 
-        <script>
-            // Get modal elements
-            var modal = document.getElementById("folderModal");
-            var btn = document.getElementById("createFolderBtn");
-            var cancelButton = document.getElementById("cancelButton");
+<script>
 
-            // When the user clicks the button, open the modal
-            btn.onclick = function() {
-                modal.style.display = "block";
-            }
+let selectedFile = '';
+    function showContextMenu(event, file) {
+        event.preventDefault();
+        selectedFile = file;
+        const contextMenu = document.getElementById('contextMenu');
+        contextMenu.style.left = `${event.pageX}px`;
+        contextMenu.style.top = `${event.pageY}px`;
+        contextMenu.style.display = 'block';
+    }
 
-            cancelButton.onclick = function() {
-                modal.style.display = "none";
-            }
+    // Hide context menu on click outside
+    window.addEventListener('click', function() {
+        document.getElementById('contextMenu').style.display = 'none';
+    });
 
-        function confirmLogout(event) {
+    function deleteFile() {
+        // Submit the form to delete the file
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '';
+
+        const fileInput = document.createElement('input');
+        fileInput.type = 'hidden';
+        fileInput.name = 'delete_file';
+        fileInput.value = selectedFile;
+        form.appendChild(fileInput);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+  function confirmLogout(event) {
                 event.preventDefault();
                 Swal.fire({
                     title: 'Are you sure?',
@@ -924,56 +1265,6 @@ $conn_profile->close();
                 logAction("Profile");
             });
         });
-
-       
-
-            // Execute SweetAlert if an action was taken
-            <?php if (isset($_SESSION['action_taken'])): ?>
-                <?php if (isset($_SESSION['folder_rename_success'])): ?>
-                    showSuccessAlert('<?php echo addslashes($_SESSION['folder_rename_success']); ?>').then(() => {
-                        window.location.href = "cas-upload.php?folder=<?php echo urlencode($folder_name); ?>"; // Redirect after closing the alert
-                    });
-                    <?php unset($_SESSION['folder_rename_success']); ?>
-                <?php elseif (isset($_SESSION['folder_rename_error'])): ?>
-                    showErrorAlert('<?php echo addslashes($_SESSION['folder_rename_error']); ?>').then(() => {
-                        window.location.href = "cas-upload.php?folder=<?php echo urlencode($folder_name); ?>"; // Redirect after closing the alert
-                    });
-                    <?php unset($_SESSION['folder_rename_error']); ?>
-                <?php elseif (isset($_SESSION['folder_delete_success'])): ?>
-                    showSuccessAlert('<?php echo addslashes($_SESSION['folder_delete_success']); ?>').then(() => {
-                        window.location.href = "cas-upload.php?folder=<?php echo urlencode($folder_name); ?>"; // Redirect after closing the alert
-                    });
-                    <?php unset($_SESSION['folder_delete_success']); ?>
-                <?php elseif (isset($_SESSION['folder_delete_error'])): ?>
-                    showErrorAlert('<?php echo addslashes($_SESSION['folder_delete_error']); ?>').then(() => {
-                        window.location.href = "cas-upload.php?folder=<?php echo urlencode($folder_name); ?>"; // Redirect after closing the alert
-                    });
-                    <?php unset($_SESSION['folder_delete_error']); ?>
-                <?php endif; ?>
-                <?php unset($_SESSION['action_taken']); ?>
-            <?php endif; ?>
-
-           
-
-            document.addEventListener("DOMContentLoaded", () => {
-                function checkNotifications() {
-                    fetch('cas-check_notifications.php')
-                        .then(response => response.json())
-                        .then(data => {
-                            const chatNotification = document.getElementById('chatNotification');
-                            if (data.unread_count > 0) {
-                                chatNotification.style.display = 'inline-block';
-                            } else {
-                                chatNotification.style.display = 'none';
-                            }
-                        })
-                        .catch(error => console.error('Error checking notifications:', error));
-                }
-
-                // Check for notifications every 2 seconds
-                setInterval(checkNotifications, 2000);
-                checkNotifications(); // Initial check when page loads
-            });
-        </script>
-    </body>
+</script>
+</body>
 </html>

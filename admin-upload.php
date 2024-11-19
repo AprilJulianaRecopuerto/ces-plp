@@ -3,13 +3,15 @@ session_start(); // Start the session
 
 // Check if the user is logged in
 if (!isset($_SESSION['username'])) {
-    header("Location: loginpage.php"); // Redirect to login page
+    header("Location: roleaccount.php"); // Redirect to login page
     exit;
 }
 
-// Initialize the folder name variable
+// Initialize the folder name and college variables
 $folder_name = null;
-$college = null; // Initialize college variable
+$college = null;
+$subfolders = [];
+$files = [];
 
 // Check if a folder is selected (e.g., through a GET parameter)
 if (isset($_GET['folder'])) {
@@ -17,20 +19,40 @@ if (isset($_GET['folder'])) {
     if (count($folder_parts) == 2) {
         $college = $folder_parts[0]; // Get the college part
         $folder_name = $folder_parts[1]; // Get the actual folder name
+    } elseif (count($folder_parts) > 2) {
+        // It's a deeper subfolder
+        $college = $folder_parts[0]; 
+        $folder_name = implode('/', array_slice($folder_parts, 1)); // Get subfolder path
     }
 }
 
-// Define the uploads directory based on the college and folder name
-$uploadDir = 'movuploads/' . $college . '/' . $folder_name . '/';
+// Define the project directory based on the college
+$projectDir = 'movuploads/' . $college . '/';
 
 // Check if the directory exists
-if (!is_dir($uploadDir)) {
-    echo "Directory does not exist.";
+if (!is_dir($projectDir)) {
+    echo "Project directory does not exist.";
     exit;
 }
 
-// Fetch images from the selected folder
-$uploaded_images = glob($uploadDir . "*.{jpg,jpeg,png,gif}", GLOB_BRACE);
+// If no specific folder is selected, list all subfolders inside the project folder
+if (!$folder_name) {
+    // Get all subfolders inside the project folder
+    $subfolders = array_filter(glob($projectDir . '*'), 'is_dir');
+} else {
+    // If a specific folder is selected, display its contents (images, PDFs, or further subfolders)
+    $uploadDir = $projectDir . $folder_name . '/';
+    
+    if (is_dir($uploadDir)) {
+        // Get all subfolders in the selected folder
+        $subfolders = array_filter(glob($uploadDir . '*'), 'is_dir');
+        // Get all files (images and PDFs) in the selected folder
+        $files = glob($uploadDir . "*.{jpg,jpeg,png,gif,pdf}", GLOB_BRACE);
+    } else {
+        echo "The selected folder does not exist.";
+        exit;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -308,12 +330,6 @@ $uploaded_images = glob($uploadDir . "*.{jpg,jpeg,png,gif}", GLOB_BRACE);
                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Add shadow for better depth */
             }
 
-            .uploaded-img {
-                width: 110%; /* Ensure the image uses full width of the container */
-                height: 110px; /* Set a fixed height for images */
-                object-fit: cover; /* Maintain aspect ratio, cropping as necessary */
-                border-radius: 5px; /* Optional: add rounded corners */
-            }
 
             .file-name {
                 width: 100%; /* Ensure filenames take the full width of the image item */
@@ -377,22 +393,197 @@ $uploaded_images = glob($uploadDir . "*.{jpg,jpeg,png,gif}", GLOB_BRACE);
                 vertical-align: middle; /* Align image vertically with text */
             }
 
-                  /* Custom Popup */
-        .swal-popup {
-            font-family: "Poppins", sans-serif !important;
-            width: 400px;
-        }
+            .images-and-names {
+                display: flex;
+                flex-wrap: wrap;
+            }
 
-        /* SweetAlert confirm button */
-        .swal-confirm {
-            font-family: "Poppins", sans-serif !important;
-        }
+            .image-item {
+                margin: 10px;
+                text-align: center;
+            }
 
-        /* SweetAlert cancel button */
-        .swal-cancel {
-            font-family: "Poppins", sans-serif !important;
-        }
-            
+            .file-name {
+                font-size: 14px;
+                color: #333;
+            }
+
+            /* General styles for folder and file listings */
+            .folder-list, .files-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                margin-top: 20px;
+            }
+
+            .file-item {
+                background-color: #f8f9fa;
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #ccc; /* Optional border */
+                width: 120px;
+                text-align: center;
+                cursor: pointer;
+                text-decoration: none;
+                color: #333;
+            }
+
+            .file-item {
+                background-color: #fff;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .file-item .file-name {
+                margin-top: 10px;
+                font-size: 14px;
+                color: #333;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            .file-item .uploaded-img {
+                width: 80%; /* Set full width of the container */
+                height: 110px; /* Set a fixed height for consistency */
+                object-fit: cover; /* Maintain aspect ratio, cropping as necessary */
+                border-radius: 5px; /* Optional: add rounded corners */
+            }
+
+
+
+
+            /* Style specific to image files */
+            .file-img {
+                width: 100% !important; /* Full width of the container */
+                height: 120px; /* Adjust the height as needed for image files */
+                object-fit: cover; /* Crop the image to fit the dimensions without distortion */
+                border-radius: 5px; /* Add rounded corners (optional) */
+            }
+
+
+            /* Folder navigation */
+            h1, h3 {
+                font-size: 22px;
+                color: #333;
+            }
+
+            h3 {
+                margin-top: 20px;
+                font-size: 18px;
+                color: #6c757d;
+            }
+
+            /* Styling for the folder list container */
+            .folder-list {
+                margin-top: 20px;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;  /* Space between folder items */
+            }
+
+            /* Folder item container */
+            .folder-item {
+                background-color: #f9f9f9;
+                border: 1px solid #ccc;
+                font-size: 16px;
+                color: #495057;
+                padding: 12px;
+                border-radius: 5px;
+                text-align: center;
+                width: 120px; /* Fixed width for folders */
+                height: 100px;
+                text-decoration: none;
+                display: flex;
+                flex-direction: column; /* Stack icon and folder name vertically */
+                align-items: center; /* Center contents horizontally */
+                justify-content: center; /* Center contents vertically */
+            }
+
+            /* Style for the folder icon */
+            .folder-icon {
+                width: 50px; /* Fixed width for icons */
+                height: 50px; /* Fixed height for icons */
+                margin-bottom: 5px; /* Space between icon and folder name */
+            }
+
+
+            /* Style for the file name */
+            .file-name {
+                font-weight: bold;
+                font-size: 14px;
+                color: #333;
+                margin-top: 5px;  /* Optional: space between file icon and file name */
+            }
+
+            /* Style for the folder name */
+            .folder-name {
+                font-weight: bold;
+                font-size: 14px;
+                color: #333;
+            }
+
+            /* Optionally, you can adjust the icon color in the above class */
+            .folder-item i {
+                font-size: 24px;
+                color: #007bff;  /* If you use icon fonts */
+            }
+
+            h1, h2, h3 {
+                color: #333;
+            }
+
+            .modal {
+                font-family: 'Poppins', sans-serif;
+                display: none; 
+                position: fixed; 
+                z-index: 1000; 
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto; 
+                background-color: rgba(0, 0, 0, 0.7); 
+                align-items: center; /* Center modal content vertically */
+                justify-content: center; /* Center modal content horizontally */
+                display: flex; /* Flexbox for centering */
+                
+            }
+
+            .modal-content {
+                background-color: #fefefe;
+                padding: 20px;
+                border: 1px solid #888;
+                max-width: 45%; /* Max width for the modal */
+                max-height: 90%; /* Max height for the modal */
+                text-align: center;
+                position: relative; /* To position the close button */
+                margin-left: 400px;
+                margin-top: 70px;
+                border-radius: 5px;
+            }
+
+            .close-button {
+                color: #aaa;
+                position: absolute; /* Position it in the top-right corner */
+                top: 10px;
+                right: 15px;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer; /* Change cursor to pointer */
+            }
+
+            .close-button:hover,
+            .close-button:focus {
+                color: black;
+                text-decoration: none;
+            }
+
+            #modalImage {
+                max-width: 90%; /* Ensure image doesn't exceed modal width */
+                max-height: 70vh; /* Limit height to 70% of viewport height */
+                object-fit: contain; /* Maintain aspect ratio */
+            }
+
         </style>
     </head>
 
@@ -407,11 +598,11 @@ $uploaded_images = glob($uploadDir . "*.{jpg,jpeg,png,gif}", GLOB_BRACE);
                         echo '<img src="' . $_SESSION['picture'] . '" alt="Profile Picture">';
                     } else {
                         // Get the first letter of the username for the placeholder
-                        $firstLetter = strtoupper(substr($_SESSION['username'], 0, 1));
+                        $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
                         echo '<div class="profile-placeholder">' . $firstLetter . '</div>';
                     }
                 ?>
-                <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
 
                 <i class="fa fa-chevron-down dropdown-icon"></i>
                 <div class="dropdown-menu">
@@ -444,92 +635,147 @@ $uploaded_images = glob($uploadDir . "*.{jpg,jpeg,png,gif}", GLOB_BRACE);
                 <li><a href="admin-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="admin-task.php">Upload Files</a>
-                    <a href="admin-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="admin-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="admin-responses.php"><img src="images/feedback.png">Responses</a></li>
+                <li><a href="responses.php"><img src="images/setting.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
-                    <img src="images/logs.png"> Audit Trails
+                    <img src="images/resource.png"> Audit Trails
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="admin-history.php">Log In History</a>
-                    <a href="admin-logs.php">Activity Logs</a>
+                    <a href="admin-login.php">Log In History</a>
+                    <a href="admin-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>
         </div>
 
-        <div class="content-image">
-            <div class="uploaded-images">
-                <a href="admin-mov.php" class="back-button">
-                    <img src="images/left-arrow.png" alt="Back" class="back-arrow" /> Back
-                </a>
+<!-- Display Files and Subfolders -->
+<div class="content-image">
+    <div class="uploaded-images">
+        <!-- Back button -->
+        <a href="javascript:history.back()" class="back-button">
+            <img src="images/left-arrow.png" alt="Back" class="back-arrow" /> Back
+        </a>
 
-                <h1>Folder Name: <?= htmlspecialchars($folder_name); ?></h1>
 
-                <?php if (!empty($uploaded_images)): ?>
-                    <h3>Uploaded Images:</h3>
-                    <div class="images-and-names">
-                        <?php foreach ($uploaded_images as $image): ?>
-                            <div class="image-item" data-image="<?= htmlspecialchars($image); ?>">
-                                <img src="<?= htmlspecialchars($image); ?>" alt="Uploaded Image" class="uploaded-img" onclick="showModal('<?= htmlspecialchars(basename($image)); ?>', '<?= htmlspecialchars($image); ?>')" />
-                                <p class="file-name"><?php echo htmlspecialchars(basename($image)); ?></p>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php else: ?>
-                    <h2>No images found in this folder.</h2>
-                <?php endif; ?>
+        <?php if (!$folder_name): ?>
+            <!-- List top-level subfolders -->
+            <h3>Select a Folder:</h3>
+            <div class="folder-list">
+                <?php foreach ($subfolders as $subfolder): ?>
+                    <a href="admin-upload.php?folder=<?= urlencode($college . '/' . basename($subfolder)); ?>" class="folder-item">
+                        <?= htmlspecialchars(basename($subfolder)); ?>
+                    </a>
+                <?php endforeach; ?>
             </div>
-            
-            <!-- Modal for showing image -->
-            <div id="imageModal" class="modal" style="display: none;">
-                <div class="modal-content">
-                    <span class="close-button" id="closeModal">&times;</span>
-                    <h3>File Name: <span id="modalImageName"></span></h3>
-                    <img id="modalImage" src="" alt="Selected Image" />
+        <?php else: ?>
+            <!-- Display contents of the selected folder -->
+            <h1>Folder Name: <?= htmlspecialchars($folder_name); ?></h1>
+
+            <!-- List subfolders inside the current folder -->
+            <?php if (!empty($subfolders)): ?>
+                <h3>Subfolders:</h3>
+                <div class="folder-list">
+                    <?php foreach ($subfolders as $subfolder): ?>
+                        <a href="admin-upload.php?folder=<?= urlencode($college . '/' . $folder_name . '/' . basename($subfolder)); ?>" class="folder-item">
+                            <!-- Folder icon on top -->
+                            <img src="images/folder.png" alt="Folder Icon" class="folder-icon">
+                            <span><?= htmlspecialchars(basename($subfolder)); ?></span> <!-- Folder name -->
+                        </a>
+                    <?php endforeach; ?>
                 </div>
-            </div>
-        </div>
+            <?php endif; ?>
+
+            <!-- Display files (images and PDFs) in the current folder -->
+            <?php if (!empty($files) || !empty($subfolders)): ?>
+                <div class="files-list">
+                    <?php foreach ($files as $file): ?>
+                        <div class="file-item" data-file="<?= htmlspecialchars($file); ?>">
+                            <?php
+                                $file_extension = pathinfo($file, PATHINFO_EXTENSION);
+                                if (in_array($file_extension, ['jpg', 'jpeg', 'png', 'gif'])) {
+                                    // Display image files
+                                    echo '<img src="' . htmlspecialchars($file) . '" alt="' . htmlspecialchars(basename($file)) . '" class="uploaded-img file-img" />';
+                                    echo '<p class="file-name">' . htmlspecialchars(basename($file)) . '</p>';  // Display image name
+                                } elseif ($file_extension == 'pdf') {
+                                    // Display PDF files as clickable links
+                                    echo '<a href="' . htmlspecialchars($file) . '" target="_blank">
+                                            <img src="images/pdf.png.png" alt="PDF File" class="uploaded-img" />
+                                        </a>';
+                                    echo '<p class="file-name">' . htmlspecialchars(basename($file)) . '</p>';  // Display PDF name
+                                }
+                            ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php elseif (empty($files) && empty($subfolders)): ?>
+                <p>No files available in this folder.</p>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- Modal for showing image -->
+<div id="imageModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button" id="closeModal">&times;</span>
+        <h3>File Name: <span id="modalImageName"></span></h3>
+        <img id="modalImage" src="" alt="Selected Image" />
+    </div>
+</div>
+
+
 
         <script>
-            function confirmLogout(event) {
-            event.preventDefault();
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "Do you really want to log out?",
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6', // Green confirm button
-                cancelButtonColor: '#dc3545', // Red cancel button
-                confirmButtonText: 'Yes, log me out',
-                cancelButtonText: 'Cancel',
-                customClass: {
-                    popup: 'swal-popup',
-                    confirmButton: 'swal-confirm',
-                    cancelButton: 'swal-cancel'
-                },
-                // Additional custom styles via CSS can be added here
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Pass action in the fetch call
-                    fetch('logout.php?action=logout')
-                        .then(response => response.text())
-                        .then(data => {
-                            console.log(data); // Log response for debugging
-                            window.location.href = 'roleaccount.php';
-                        })
-                        .catch(error => console.error('Error:', error));
-                }
-            });
+           // Function to show modal with image details
+function showModal(imageName, imagePath) {
+    // Set the modal image name and image path
+    document.getElementById('modalImageName').innerText = imageName; // Set the filename
+    document.getElementById('modalImage').src = imagePath; // Set the image source
+    document.getElementById('imageModal').style.display = 'block'; // Display the modal
+}
+
+// Close the modal
+document.getElementById('closeModal').onclick = function() {
+    document.getElementById('imageModal').style.display = 'none'; // Close the modal when clicked
+}
+
+// Add event listener for double-click on images
+document.querySelectorAll('.uploaded-img').forEach(function(img) {
+    img.addEventListener('dblclick', function() {
+        const imagePath = img.src; // Get the image source (path)
+        const imageExtension = imagePath.split('.').pop().toLowerCase(); // Get the file extension
+
+        // Check if the file is an image based on its extension
+        if (['jpg', 'jpeg', 'png', 'gif'].includes(imageExtension)) {
+            const imageName = img.alt; // Get the image name (filename from the alt attribute)
+            showModal(imageName, imagePath); // Show the modal with the image and filename
         }
+    });
+});
+
+            function confirmLogout(event) {
+                event.preventDefault(); // Prevent the default link behavior
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to log out?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, log me out',
+                    customClass: {
+                        popup: 'custom-swal-popup',
+                        confirmButton: 'custom-swal-confirm',
+                        cancelButton: 'custom-swal-cancel'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'roleaccount.php'; // Redirect to the logout page
+                    }
+                });
+            }
 
             document.getElementById('profileDropdown').addEventListener('click', function() {
             var dropdownMenu = document.querySelector('.dropdown-menu');
@@ -806,45 +1052,6 @@ $uploaded_images = glob($uploadDir . "*.{jpg,jpeg,png,gif}", GLOB_BRACE);
                     }
                 });
             });
-
-            document.addEventListener('DOMContentLoaded', function () {
-        const username = "<?php echo $_SESSION['username']; ?>"; // Get the username from PHP session
-
-        // Function to log activity
-        function logActivity(buttonName) {
-            const timestamp = new Date().toISOString(); // Get current timestamp
-
-            fetch('log_activity.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    buttonFunction: buttonName // Updated to match the PHP variable
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'error') {
-                    console.error('Error logging activity:', data.message);
-                } else {
-                    console.log('Activity logged successfully:', data);
-                }
-            })
-            .catch(error => {
-                console.error('Error logging activity:', error);
-            });
-        }
-
-        // Add event listeners specifically to buttons and links
-        const trackableElements = document.querySelectorAll('button, a'); // Select all buttons and links
-        trackableElements.forEach(element => {
-            element.addEventListener('click', function (event) {
-                const buttonName = this.tagName === 'BUTTON' ? this.innerText.trim() || "Unnamed Button" : this.textContent.trim() || "Unnamed Link";
-                logActivity(buttonName); // Log the button/link activity
-            });
-        });
-    });
         </script>
     </body>
 </html>
