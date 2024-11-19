@@ -44,14 +44,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Generate PDF for each participant
         $date = date("l, F j, Y");
 
-        // Define the image names
-        $imageName = 'cert-bg.png';  // Background image
-        $logoName = 'logoicon.png';  // Logo image
-        
-        // Get the image paths
-        $imagePath = getImagePath($imageName);
-        $logoPath = getImagePath($logoName);
-        
+        // Define the absolute path for images
+        $imagePath = realpath(__DIR__ . '/images/cert-bg.png');  // Get absolute path to image
+        $logoPath = realpath(__DIR__ . '/images/logoicon.png');  // Get absolute path to logo
+
+        // Check if files exist before proceeding
+        if (!$imagePath) {
+            error_log("Image not found: " . $imagePath);
+        }
+
+        if (!$logoPath) {
+            error_log("Logo not found: " . $logoPath);
+        }
+
         // HTML content for the certificate
         $html = "
         <html>
@@ -123,7 +128,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $options->set('isHtml5ParserEnabled', true);
             $options->set('isPhpEnabled', true); // Ensure this is enabled for PHP functionality
             $options->set('isHtml5ParserEnabled', true);
-            $options->set('isCssFloatEnabled', true); // Ensure floating is enabled            
+            $options->set('isCssFloatEnabled', true); // Ensure floating is enabled
+            
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
