@@ -46,10 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $date = date("l, F j, Y");
 
         // Define the path relative to the public directory
-   // Absolute paths to images (Windows/XAMPP)
-$imagePath = 'C:/xampp/htdocs/CES/images/cert-bg.png';
-$logoPath = 'C:/xampp/htdocs/CES/images/logoicon.png';
-
+        $imagePath = '/images/cert-bg.png';
+        $logoPath = '/images/logoicon.png';
 
         // Check if files exist before proceeding
         if (!file_exists($imagePath)) {
