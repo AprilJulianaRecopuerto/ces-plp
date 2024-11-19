@@ -34,14 +34,12 @@ $stmt->bind_param("s", $currentDepartment);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Handle form submission for sending certificates
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) {
-    $all_sent = true;
     while ($row = $result->fetch_assoc()) {
         $name = $row['name'];
         $email = $row['email'];
-        $department = $row['department'];
         $event = $row['event'];
+        $department = $row['department'];
 
         // Hosted image URLs
         $bgImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
@@ -121,6 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $options->set('isHtml5ParserEnabled', true);
             $options->set('isPhpEnabled', true); // Ensure this is enabled for PHP functionality
             $options->set('isHtml5ParserEnabled', true);
+            $options->set('isRemoteEnabled', true); // Allow external resources
             $options->set('isCssFloatEnabled', true); // Ensure floating is enabled
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
