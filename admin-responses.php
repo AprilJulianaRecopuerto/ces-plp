@@ -46,30 +46,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $date = date("l, F j, Y");
 
         // Define the path relative to the public directory
-        $imagePath = __DIR__ . '/CES/images/cert-bg.png';
-        $logoPath = __DIR__ . '/CES/images/logoicon.png';
+// Define the path to the images
+$imagePath = __DIR__ . '/CES/images/cert-bg.png';
+$logoPath = __DIR__ . '/CES/images/logoicon.png';
 
-        // Check if files exist before proceeding
-        if (!file_exists($imagePath)) {
-            error_log("Image not found: " . $imagePath);
-            $all_sent = false;
-            continue;
-        }
+// Check if files exist before proceeding
+if (!file_exists($imagePath)) {
+    error_log("Image not found: " . realpath($imagePath)); // Log the real path for debugging
+    $all_sent = false;
+    continue; // Skip this iteration if the image is not found
+}
 
-        if (!file_exists($logoPath)) {
-            error_log("Logo not found: " . $logoPath);
-            $all_sent = false;
-            continue;
-        }
+if (!file_exists($logoPath)) {
+    error_log("Logo not found: " . realpath($logoPath)); // Log the real path for debugging
+    $all_sent = false;
+    continue; // Skip this iteration if the logo is not found
+}
 
-        // Convert images to Base64 using your method
-        $imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
-        $imageData = file_get_contents($imagePath);
-        $base64Image = 'data:image/' . $imageType . ';base64,' . base64_encode($imageData);
+// Convert images to Base64 using your method
+$imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
+$imageData = file_get_contents($imagePath);
+$base64Image = 'data:image/' . $imageType . ';base64,' . base64_encode($imageData);
 
-        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
-        $logoData = file_get_contents($logoPath);
-        $base64Logo = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
+$logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
+$logoData = file_get_contents($logoPath);
+$base64Logo = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
+
 
 
         $html = "
