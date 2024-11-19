@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
 
         // Generate PDF for each participant
         $date = date("l, F j, Y");
+        
         $imagePath = __DIR__ . '/images/cert-bg.png';
         $logoPath = __DIR__ . '/images/logoicon.png';
         
@@ -124,8 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </body>
         </html>
         ";
-        echo $html;
-        
+
         try {
             // Generate the PDF
             $options = new Options();
