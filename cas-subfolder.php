@@ -789,7 +789,7 @@ if ($subfolder_name && is_dir($subfolder_path)) {
 
             .file-name {
                 font-family: 'Poppins', sans-serif;
-                font-size: 200px;
+                font-size: 14px;
                 color: #000;
                 font-weight: bold;
                 text-align: center;
