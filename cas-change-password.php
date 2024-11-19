@@ -676,14 +676,7 @@ if (isset($_SESSION['alert_shown']) && $_SESSION['alert_shown']) {
                 <li><a href="cas-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="cas-task.php">Upload Files</a>
-                    <a href="cas-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="cas-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="responses.php"><img src="images/setting.png">Responses</a></li>
 
