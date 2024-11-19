@@ -6,21 +6,22 @@ use Dompdf\Dompdf;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Database connection
+// Database connection details
 $servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username = "sh9sgtg12c8vyqoa";
 $password = "s3jzz232brki4nnv";
 $dbname = "szk9kdwhvpxy2g77";
 
+// Establish connection to the database
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Log connection errors
+// Check for connection errors
 if ($conn->connect_error) {
     error_log("Database connection failed: " . $conn->connect_error);
     die("Database connection error");
 }
 
-// Fetch data
+// Fetch data from the database
 $sql = "SELECT name, email, event, rate, department FROM submissions";
 $result = $conn->query($sql);
 
@@ -30,14 +31,16 @@ if (!$result || $result->num_rows === 0) {
     die("No data found");
 }
 
+// Process the request to send certificates
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) {
     $all_sent = true;
 
+    // Loop through all fetched rows
     while ($row = $result->fetch_assoc()) {
         $name = $row['name'];
         $email = $row['email'];
 
-        // Generate certificate HTML
+        // Generate the HTML content for the certificate
         $date = date("F j, Y");
         $html = "
         <html>
@@ -61,21 +64,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </body>
         </html>";
 
-        // Generate PDF
+        // Generate PDF from the HTML content
         try {
             $dompdf = new Dompdf();
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
-            $pdfFilePath = sys_get_temp_dir() . "/certificate_$name.pdf";
+            
+            // Save the generated PDF in the /tmp directory (Heroku compatible)
+            $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf'; // Use urlencode for file safety
             file_put_contents($pdfFilePath, $dompdf->output());
         } catch (Exception $e) {
-            error_log("PDF generation failed: " . $e->getMessage());
+            error_log("PDF generation failed for $name: " . $e->getMessage());
             $all_sent = false;
-            continue;
+            continue; // Continue to the next user if PDF generation fails
         }
 
-        // Send email
+        // Send the generated PDF via email
         try {
             $mail = new PHPMailer(true);
             $mail->isSMTP();
@@ -92,21 +97,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $mail->Body = 'Attached is your certificate of participation.';
             $mail->addAttachment($pdfFilePath);
 
+            // Attempt to send the email
             $mail->send();
         } catch (Exception $e) {
             error_log("Email sending failed for $email: " . $e->getMessage());
             $all_sent = false;
         }
 
-        // Clean up
+        // Clean up by removing the temporary PDF file
         unlink($pdfFilePath);
     }
 
-    // Response
+    // Output the result of the operation (success or error)
     echo $all_sent ? 'success' : 'error';
     exit;
 }
 ?>
+
 
 
 <!DOCTYPE html>
