@@ -646,7 +646,7 @@ $conn_profile->close();
                     )
                     ORDER BY id";
 
-                    $resultProjectsModal = $conn_proj_list->query($projectsSqlModal);
+                    $resultProjectsModal = $conn_budget_utilization->query($projectsSqlModal);
 
                     if ($resultProjectsModal && $resultProjectsModal->num_rows > 0) {
                         while ($project = $resultProjectsModal->fetch_assoc()) {
@@ -665,7 +665,6 @@ $conn_profile->close();
                     }
 
                     // Close the connections
-                    $conn_proj_list->close();
                     $conn_budget_utilization->close();
                     ?>
                 </tbody>
