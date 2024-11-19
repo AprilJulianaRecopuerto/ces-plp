@@ -1284,4 +1284,3 @@ if ($result === false) {
         </script>
     </body>
 </html>
-
