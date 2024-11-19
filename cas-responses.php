@@ -8,7 +8,7 @@ if (!isset($_SESSION['uname'])) {
     exit;
 }
 
-$currentDepartment= $_SESSION['department']; // Get the currently logged-in username
+$currentDepartment = $_SESSION['department']; // Get the currently logged-in department
 
 $showForm = isset($_SESSION['show_event_form']) && $_SESSION['show_event_form'];
 
@@ -19,7 +19,7 @@ use Dompdf\Options;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Database connection
+// Database connection for submissions
 $servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username = "sh9sgtg12c8vyqoa";
 $password = "s3jzz232brki4nnv";
@@ -33,22 +33,19 @@ if ($conn->connect_error) {
 }
 
 $sql = "SELECT name, email, event, rate, department FROM submissions WHERE department = ?";
-
-// Prepare the statement
 $stmt = $conn->prepare($sql);
-
-// Bind the parameter to the placeholder
-$stmt->bind_param("s", $currentDepartment); // "s" means string (for the department)
-
-// Execute the prepared statement
+$stmt->bind_param("s", $currentDepartment); // Bind department parameter
 $stmt->execute();
-
-// Get the result of the query
 $result = $stmt->get_result();
+
 // Handle form submission for sending certificates
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) {
     $all_sent = true;
-    
+
+    // Fetch the result again inside the POST block to ensure fresh data
+    $stmt->execute();
+    $result = $stmt->get_result();
+
     while ($row = $result->fetch_assoc()) {
         $name = $row['name'];
         $email = $row['email'];
@@ -70,95 +67,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $logoData = file_get_contents($logoPath);
         $base64Logo = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
 
+        // HTML for the PDF
         $html = "
         <html>
         <head>
-
-        <!-- Link Google Fonts directly -->
         <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
         <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
-
-            <style>
-                body { 
-                    text-align: center;
-                    margin: 0; 
-                    padding: 0; 
-                    font-family: 'Poppins', sans-serif;
-                }
-
-                .certificate img {
-                    position: absolute;
-                    margin-top: -45px;
-                    width: 109%;
-                    margin-left: -45px;
-                    object-fit: cover;
-                    z-index: -1;
-                }
-
-                .subheading {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 20px;
-                    color: #666;
-                    margin: 20px 0;
-                    margin-top: 240px;
-                    margin-left: -195px;
-                    letter-spacing: 0.5px;
-                }
-
-                .name { 
-                    font-family: 'Lilita One', sans-serif;
-                    font-size: 80px;
-                    font-weight: bold;
-                    color: #333;
-                    margin: 20px 0;
-                    text-decoration: underline;
-                    font-style: italic;  /* Make it italic if cursive is not working */
-                    text-transform: uppercase; /* Convert text to uppercase */
-                    margin-top: 30px;
-                }
-                    
-                .details {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 22px; 
-                    color: black;
-                    line-height: 1.5;
-                    margin-top: 20px;
-                }
-
-                .date {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 20px; 
-                    color: #888;
-                    margin-top: 30px;
-                }
-
-                .footer {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 18px;
-                    color: black;
-                    text-align: center;
-                    margin-top: 50px;
-                }
-
-                .footer-content {
-                    display: flex;
-                    justify-content: center;  /* Centers items horizontally */
-                
-                }
-
-                .footer-content img {
-                    margin-left: 340px;
-                    max-width: 80px;  /* Adjust the size of the logo */
-                    height: auto;
-                    margin-top: -3px;
-                }
-
-                .footer-text {
-                    font-size: 20px;
-                    margin-left: 110px;
-                    font-weight: normal;
-                }
-            </style>
+        <style>
+            body { text-align: center; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+            .certificate img { position: absolute; margin-top: -45px; width: 109%; margin-left: -45px; object-fit: cover; z-index: -1; }
+            .subheading { font-family: 'Poppins', sans-serif; font-size: 20px; color: #666; margin: 20px 0; margin-top: 240px; margin-left: -195px; letter-spacing: 0.5px; }
+            .name { font-family: 'Lilita One', sans-serif; font-size: 80px; font-weight: bold; color: #333; margin: 20px 0; text-decoration: underline; font-style: italic; text-transform: uppercase; margin-top: 30px; }
+            .details { font-family: 'Poppins', sans-serif; font-size: 22px; color: black; line-height: 1.5; margin-top: 20px; }
+            .date { font-family: 'Poppins', sans-serif; font-size: 20px; color: #888; margin-top: 30px; }
+            .footer { font-family: 'Poppins', sans-serif; font-size: 18px; color: black; text-align: center; margin-top: 50px; }
+            .footer-content { display: flex; justify-content: center; }
+            .footer-content img { margin-left: 340px; max-width: 80px; height: auto; margin-top: -3px; }
+            .footer-text { font-size: 20px; margin-left: 110px; font-weight: normal; }
+        </style>
         </head>
         <body>
             <div class='certificate'>
@@ -168,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='$base64Logo' alt='Community Extension Services Logo' class='footer-logo'>
+                        <img src='$base64Logo' alt='Community Extension Services Logo'>
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
@@ -177,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </html>
         ";
 
-       // Generate the PDF
+        // Generate the PDF
         $options = new Options();
         $options->set('defaultFont', 'Poppins');
         $options->set('isHtml5ParserEnabled', true);
@@ -228,12 +154,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     exit;
 }
 
+// Database connection for user profile
 $sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $un = "equ6v8i5llo3uhjm";
 $psd = "vkfaxm2are5bjc3q";
 $dbname_user_registration = "ylwrjgaks3fw5sdj";
 
-// Fetch the profile picture from the colleges table in user_registration
 $conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
@@ -254,6 +180,7 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
 $stmt->close();
 $conn_profile->close();
 ?>
+
 
 
 <!DOCTYPE html>
