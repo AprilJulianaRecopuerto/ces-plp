@@ -650,6 +650,7 @@ $conn_profile->close();
                     } else {
                         echo "<tr><td colspan='7'>No projects found.</td></tr>";
                     }
+                    $conn_proj_list->close();
                     ?>
                 </tbody>
             </table>
