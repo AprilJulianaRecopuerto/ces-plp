@@ -45,17 +45,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $date = date("l, F j, Y");
 
         // Define the absolute path for images
-        $imagePath = realpath(__DIR__ . '/images/cert-bg.png');  // Get absolute path to image
-        $logoPath = realpath(__DIR__ . '/images/logoicon.png');  // Get absolute path to logo
-
-        // Check if files exist before proceeding
-        if (!$imagePath) {
-            error_log("Image not found: " . $imagePath);
+        function getBase64Image($imagePath) {
+            $imageData = file_get_contents($imagePath);
+            return 'data:image/png;base64,' . base64_encode($imageData);
         }
 
-        if (!$logoPath) {
-            error_log("Logo not found: " . $logoPath);
-        }
+        // Define the absolute path for images
+        $imagePath = getBase64Image(realpath(__DIR__ . '/images/cert-bg.png'));  // Background image
+        $logoPath = getBase64Image(realpath(__DIR__ . '/images/logoicon.png'));  // Logo image
 
         // HTML content for the certificate
         $html = "
@@ -125,9 +122,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         try {
             // Generate the PDF
             $options = new Options();
-            $options->set('defaultFont', 'Poppins');
             $options->set('isHtml5ParserEnabled', true);
-            $options->set('isPhpEnabled', true); // Allow PHP to be used in the HTML
+            $options->set('isPhpEnabled', true); // Ensure this is enabled for PHP functionality
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isCssFloatEnabled', true); // Ensure floating is enabled            
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
