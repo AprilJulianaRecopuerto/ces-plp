@@ -107,8 +107,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
 
-            // Save PDF to a temporary directory
-            $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf';
+            // Use custom directory for saving PDF
+            $tempDirectory = __DIR__ . '/certificates/';
+            if (!file_exists($tempDirectory)) {
+                mkdir($tempDirectory, 0777, true); // Create folder if it doesn't exist
+            }
+
+            $pdfFilePath = $tempDirectory . 'certificate_' . urlencode($name) . '.pdf';
             file_put_contents($pdfFilePath, $dompdf->output());
         } catch (Exception $e) {
             error_log("PDF generation failed: " . $e->getMessage());
@@ -143,10 +148,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         unlink($pdfFilePath);
     }
 
-    // Return response
-    echo $all_sent ? 'success' : 'error';
-    exit;
+    if ($all_sent) {
+        echo "All certificates sent successfully.";
+    } else {
+        echo "Some certificates failed to send.";
+    }
 }
+
+
 
 $sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $un = "equ6v8i5llo3uhjm";
