@@ -140,18 +140,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
 
-            // Save PDF to a temporary directory
-            $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf';
+            // Define path to store PDF
+            $pdfDir = __DIR__ . '/tmp/';  // Use a directory inside your project
+            if (!is_dir($pdfDir)) {
+                mkdir($pdfDir, 0777, true);  // Ensure the directory exists
+            }
+            $pdfFilePath = $pdfDir . 'certificate_' . urlencode($name) . '.pdf';
             file_put_contents($pdfFilePath, $dompdf->output());
-
-            // Optional: Send email with the PDF (code for sending email goes here if needed)
 
         } catch (Exception $e) {
             error_log("PDF generation failed: " . $e->getMessage());
             $all_sent = false;
             continue;
         }
-
 
         try {
             // Send the email
@@ -176,11 +177,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $all_sent = false;
         }
 
-        // Clean up the PDF
-        unlink($pdfFilePath);
+        // Clean up the PDF file
+        if (file_exists($pdfFilePath)) {
+            unlink($pdfFilePath);
+        }
     }
 
-    echo $all_sent ? 'success' : 'error';
+    // Output success or failure
+    echo $all_sent ? 'Certificates sent successfully!' : 'Some certificates could not be sent.';
     exit;
 }
 ?>
