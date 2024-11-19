@@ -23,7 +23,7 @@ if ($conn->connect_error) {
 }
 
 // Fetch data from the database
-$sql = "SELECT name, email, event, department FROM submissions";
+$sql = "SELECT name, email, event, rate, department FROM submissions";
 $result = $conn->query($sql);
 
 // Check if the result set is valid
@@ -32,14 +32,15 @@ if (!$result || $result->num_rows === 0) {
     die("No data found");
 }
 
-// Function to convert image to Base64
+// Function to convert an image to Base64
 function getBase64Image($filePath) {
     if (!file_exists($filePath)) {
         error_log("Image not found: " . $filePath);
         return '';
     }
     $imageData = file_get_contents($filePath);
-    return 'data:image/' . pathinfo($filePath, PATHINFO_EXTENSION) . ';base64,' . base64_encode($imageData);
+    $imageType = pathinfo($filePath, PATHINFO_EXTENSION);
+    return 'data:image/' . $imageType . ';base64,' . base64_encode($imageData);
 }
 
 // Handle form submission for sending certificates
@@ -55,61 +56,63 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Generate PDF for each participant
         $date = date("l, F j, Y");
 
-        // Paths to images
+        // Define the path relative to the current directory
         $imagePath = __DIR__ . '/images/cert-bg.png';
         $logoPath = __DIR__ . '/images/logoicon.png';
 
-        // Convert images to Base64
+        // Convert the images to Base64
         $bgImageBase64 = getBase64Image($imagePath);
         $logoImageBase64 = getBase64Image($logoPath);
 
+        // Generate HTML for the certificate
         $html = "
         <html>
         <head>
         <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
         <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
-            <style>
-                body {
-                    text-align: center;
-                    margin: 0;
-                    padding: 0;
-                    font-family: 'Poppins', sans-serif;
-                }
-                .certificate img {
-                    position: absolute;
-                    margin-top: -45px;
-                    width: 109%;
-                    margin-left: -45px;
-                    object-fit: cover;
-                    z-index: -1;
-                }
-                .subheading {
-                    margin-top: 240px;
-                    font-size: 20px;
-                }
-                .name {
-                    font-size: 80px;
-                    margin-top: 30px;
-                    text-decoration: underline;
-                    font-style: italic;
-                }
-                .details {
-                    font-size: 22px;
-                }
-                .footer-content {
-                    margin-top: 50px;
-                    display: flex;
-                    justify-content: center;
-                }
-                .footer-content img {
-                    max-width: 80px;
-                    margin-left: 340px;
-                }
-                .footer-text {
-                    font-size: 20px;
-                    margin-left: 110px;
-                }
-            </style>
+        <style>
+            body {
+                text-align: center;
+                margin: 0;
+                padding: 0;
+                font-family: 'Poppins', sans-serif;
+            }
+            .certificate img {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover; /* Ensures proper scaling */
+                z-index: -1;
+            }
+            .subheading {
+                margin-top: 240px;
+                font-size: 20px;
+            }
+            .name {
+                font-size: 80px;
+                margin-top: 30px;
+                text-decoration: underline;
+                font-style: italic;
+            }
+            .details {
+                font-size: 22px;
+            }
+            .footer-content {
+                margin-top: 50px;
+                display: flex;
+                justify-content: center;
+            }
+            .footer-content img {
+                max-width: 80px;
+                margin-left: 340px;
+            }
+            .footer-text {
+                font-size: 20px;
+                margin-left: 110px;
+            }
+        </style>
         </head>
         <body>
             <div class='certificate'>
@@ -132,16 +135,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             // Generate the PDF
             $options = new Options();
             $options->set('defaultFont', 'Poppins');
-            $options->set('isHtml5ParserEnabled', true);
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
 
             // Save PDF to a temporary directory
-            $pdfFilePath = sys_get_temp_dir() . '/certificate_' . urlencode($name) . '.pdf';
+            $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf';
             file_put_contents($pdfFilePath, $dompdf->output());
 
+            // Optional: Send email with the PDF (code for sending email goes here if needed)
+
+        } catch (Exception $e) {
+            error_log("PDF generation failed: " . $e->getMessage());
+            $all_sent = false;
+            continue;
+        }
+
+
+        try {
             // Send the email
             $mail = new PHPMailer(true);
             $mail->isSMTP();
@@ -172,7 +184,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     exit;
 }
 ?>
-
 
 
 
