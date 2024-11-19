@@ -522,7 +522,6 @@ if ($conn->connect_error) {
                             <th>User</th>
                             <th>Log In</th>
 							<th>Log Out</th>
-							
                         </tr>
                     </thead>
                     <tbody id="table-body">

@@ -20,6 +20,7 @@ if ($conn_proj_list->connect_error) {
     die("Connection failed: " . $conn_proj_list->connect_error);
 }
 
+
 // Check if 'month' and 'year' parameters are present in the GET request for event days
 if (isset($_GET['month']) && isset($_GET['year'])) {
     // Get the selected month and year from the request
