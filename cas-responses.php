@@ -20,14 +20,13 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "certificate";
-$dbname_user_registration = "user_registration";
+$servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "sh9sgtg12c8vyqoa";
+$password = "s3jzz232brki4nnv";
+$dbname = "szk9kdwhvpxy2g77";
+
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-$currentDepartment = mysqli_real_escape_string($conn, $currentDepartment);
 // Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -60,16 +59,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $date = date("l, F j, Y");
 
         // Convert an image to a Base64-encoded string
-        $imagePath = $_SERVER['DOCUMENT_ROOT'] . '/CES/images/cert-bg.png';
-        $imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
-        $imageData = file_get_contents($imagePath);
-        $base64Image = 'data:image/' . $imageType . ';base64,' . base64_encode($imageData);
+        $imagePath = 'images/cert-bg.png';  // Background image
+        $logoPath = 'images/logoicon.png';  // Logo image
 
-        // Convert logo image to a Base64-encoded string
-        $logoPath = $_SERVER['DOCUMENT_ROOT'] . '/CES/images/logoicon.png'; // Update the path as necessary
-        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
-        $logoData = file_get_contents($logoPath);
-        $base64Logo = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
+        // Check if the images exist before proceeding
+        if (!file_exists($imagePath) || !file_exists($logoPath)) {
+            die('Error: One or more image files are missing.');
+        }
 
         $html = "
         <html>
@@ -178,20 +174,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </html>
         ";
 
-       // Generate the PDF
-        $options = new Options();
-        $options->set('defaultFont', 'Poppins');
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('isPhpEnabled', true); // Allow PHP to be used in the HTML
-        $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'landscape');
-        $dompdf->render();
+        try {
+            // Generate the PDF
+            $options = new Options();
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isPhpEnabled', true); // Ensure this is enabled for PHP functionality
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isCssFloatEnabled', true); // Ensure floating is enabled
+            $dompdf = new Dompdf($options);
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
 
-        // Save the PDF to a file
-        $pdfFileName = "certificate_" . urlencode($name) . ".pdf"; // Use a unique name
-        $pdfFilePath = "certificates/$pdfFileName"; // Directory where the file is saved
-        file_put_contents($pdfFilePath, $dompdf->output());
+            // Save PDF to a temporary directory
+            $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf';
+            file_put_contents($pdfFilePath, $dompdf->output());
+        } catch (Exception $e) {
+            error_log("PDF generation failed: " . $e->getMessage());
+            $all_sent = false;
+            continue;
+        }
 
         // Send Email with the certificate attached
         $mail = new PHPMailer(true);
@@ -229,9 +231,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     exit;
 }
 
-// Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername, $username, $password, $dbname_user_registration);
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
+// Fetch the profile picture from the colleges table in user_registration
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }
@@ -245,13 +251,14 @@ $result_profile = $stmt->get_result();
 
 $profilePicture = null;
 if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
-    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
+    $profilePicture = $row_profile['picture'];
 }
 
-$stmt->close();
-$conn_profile->close();
 ?>
+<!-- HTML and the rest of the PHP code here... -->
 
+<?php
+?>
 
 <!DOCTYPE html>
 <html lang="en">
