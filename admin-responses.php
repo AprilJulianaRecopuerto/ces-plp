@@ -23,13 +23,23 @@ if ($conn->connect_error) {
 }
 
 // Fetch data from the database
-$sql = "SELECT name, email, event, rate, department FROM submissions";
+$sql = "SELECT name, email, event, department FROM submissions";
 $result = $conn->query($sql);
 
 // Check if the result set is valid
 if (!$result || $result->num_rows === 0) {
     error_log("No data found or query error: " . $conn->error);
     die("No data found");
+}
+
+// Function to convert image to Base64
+function getBase64Image($filePath) {
+    if (!file_exists($filePath)) {
+        error_log("Image not found: " . $filePath);
+        return '';
+    }
+    $imageData = file_get_contents($filePath);
+    return 'data:image/' . pathinfo($filePath, PATHINFO_EXTENSION) . ';base64,' . base64_encode($imageData);
 }
 
 // Handle form submission for sending certificates
@@ -45,19 +55,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Generate PDF for each participant
         $date = date("l, F j, Y");
 
-        // Define the path relative to the public directory
+        // Paths to images
         $imagePath = __DIR__ . '/images/cert-bg.png';
         $logoPath = __DIR__ . '/images/logoicon.png';
-        
-        // Check if files exist before proceeding
-        if (!file_exists($imagePath)) {
-            error_log("Image not found: " . $imagePath);
-        }
 
-        if (!file_exists($logoPath)) {
-            error_log("Logo not found: " . $logoPath);
-        }
-
+        // Convert images to Base64
+        $bgImageBase64 = getBase64Image($imagePath);
+        $logoImageBase64 = getBase64Image($logoPath);
 
         $html = "
         <html>
@@ -109,13 +113,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </head>
         <body>
             <div class='certificate'>
-                <img src='$imagePath' alt='Background'>
+                <img src='$bgImageBase64' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='$logoPath' alt='Logo'>
+                        <img src='$logoImageBase64' alt='Logo'>
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
@@ -129,22 +133,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $options = new Options();
             $options->set('defaultFont', 'Poppins');
             $options->set('isHtml5ParserEnabled', true);
-            $options->set('isPhpEnabled', true); // Allow PHP to be used in the HTML
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
 
             // Save PDF to a temporary directory
-            $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf';
+            $pdfFilePath = sys_get_temp_dir() . '/certificate_' . urlencode($name) . '.pdf';
             file_put_contents($pdfFilePath, $dompdf->output());
-        } catch (Exception $e) {
-            error_log("PDF generation failed: " . $e->getMessage());
-            $all_sent = false;
-            continue;
-        }
 
-        try {
             // Send the email
             $mail = new PHPMailer(true);
             $mail->isSMTP();
@@ -175,6 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     exit;
 }
 ?>
+
 
 
 
