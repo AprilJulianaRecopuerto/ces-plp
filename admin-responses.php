@@ -1,73 +1,53 @@
 <?php
 session_start();
 
-// Check if the form should be displayed
-$showForm = isset($_SESSION['show_event_form']) && $_SESSION['show_event_form'];
-
-// Include necessary libraries
 require 'vendor/autoload.php';
 use Dompdf\Dompdf;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Database connection details
+// Database connection
 $servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username = "sh9sgtg12c8vyqoa";
 $password = "s3jzz232brki4nnv";
 $dbname = "szk9kdwhvpxy2g77";
 
-// Connect to the database
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check for a successful connection
+// Log connection errors
 if ($conn->connect_error) {
-    die("Database connection failed: " . $conn->connect_error);
+    error_log("Database connection failed: " . $conn->connect_error);
+    die("Database connection error");
 }
 
-// Fetch submissions from the database
+// Fetch data
 $sql = "SELECT name, email, event, rate, department FROM submissions";
 $result = $conn->query($sql);
 
-// Handle form submission to send certificates
+// Check if the result set is valid
+if (!$result || $result->num_rows === 0) {
+    error_log("No data found or query error: " . $conn->error);
+    die("No data found");
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) {
-    $all_sent = true; // Track whether all emails were sent successfully
+    $all_sent = true;
 
     while ($row = $result->fetch_assoc()) {
         $name = $row['name'];
         $email = $row['email'];
 
-        // Generate certificate content
+        // Generate certificate HTML
         $date = date("F j, Y");
         $html = "
         <html>
         <head>
             <style>
-                body { 
-                    text-align: center; 
-                    font-family: Arial, sans-serif; 
-                    margin: 0; 
-                    padding: 0; 
-                }
-                .certificate {
-                    border: 10px solid green; 
-                    padding: 20px; 
-                    width: 120%; 
-                    max-width: 800px; 
-                    height: 85%; 
-                    box-sizing: border-box; 
-                    margin: auto; 
-                }
-                h1 { 
-                    font-size: 48px; 
-                    margin-bottom: 0; 
-                }
-                p { 
-                    font-size: 24px; 
-                }
-                .name { 
-                    font-size: 32px; 
-                    font-weight: bold; 
-                }
+                body { text-align: center; font-family: Arial, sans-serif; }
+                .certificate { border: 10px solid green; padding: 20px; max-width: 800px; margin: auto; }
+                h1 { font-size: 48px; }
+                p { font-size: 24px; }
+                .name { font-size: 32px; font-weight: bold; }
             </style>
         </head>
         <body>
@@ -79,25 +59,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                 <p>Date: $date</p>
             </div>
         </body>
-        </html>
-        ";
+        </html>";
 
-        // Generate PDF certificate
-        $dompdf = new Dompdf();
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'landscape');
-        $dompdf->render();
-        $pdfFilePath = sys_get_temp_dir() . "/certificate_$name.pdf"; // Use temporary directory
-        file_put_contents($pdfFilePath, $dompdf->output());
-
-        // Send email with the certificate
-        $mail = new PHPMailer(true);
+        // Generate PDF
         try {
+            $dompdf = new Dompdf();
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
+            $pdfFilePath = sys_get_temp_dir() . "/certificate_$name.pdf";
+            file_put_contents($pdfFilePath, $dompdf->output());
+        } catch (Exception $e) {
+            error_log("PDF generation failed: " . $e->getMessage());
+            $all_sent = false;
+            continue;
+        }
+
+        // Send email
+        try {
+            $mail = new PHPMailer(true);
             $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com'; 
+            $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'communityextensionservices1@gmail.com'; 
-            $mail->Password = 'ctpy rvsc tsiv fwix'; // App password
+            $mail->Username = 'communityextensionservices1@gmail.com';
+            $mail->Password = 'ctpy rvsc tsiv fwix'; // Use a valid app password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
@@ -109,25 +94,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
 
             $mail->send();
         } catch (Exception $e) {
-            $all_sent = false; // Mark as failed if an exception occurs
-            break;
+            error_log("Email sending failed for $email: " . $e->getMessage());
+            $all_sent = false;
         }
 
-        // Clean up temporary file
+        // Clean up
         unlink($pdfFilePath);
     }
 
-    // Return response to the front end
-    if ($all_sent) {
-        echo 'success';
-    } else {
-        echo 'error';
-    }
+    // Response
+    echo $all_sent ? 'success' : 'error';
     exit;
 }
 ?>
-
-
 
 
 <!DOCTYPE html>
