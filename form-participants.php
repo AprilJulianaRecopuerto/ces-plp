@@ -3,11 +3,10 @@ session_start();
 $isFormClosed = isset($_SESSION['show_event_form']) && $_SESSION['show_event_form'] === false;
     
 // Database connection
-$servername = "localhost"; // Your database server
-$username = "root"; // Your database username
-$password = ""; // Your database password
-$dbname = "certificate"; // Your database name
-
+$servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "sh9sgtg12c8vyqoa";
+$password = "s3jzz232brki4nnv";
+$dbname = "szk9kdwhvpxy2g77";
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
