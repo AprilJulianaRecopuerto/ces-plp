@@ -72,7 +72,7 @@ if ($result_proj->num_rows > 0) {
             // Create the folder in the filesystem
             if (mkdir($folder_path, 0777, true)) {
                 // Define the subfolders to be created
-                $subfolders = ['Attendance', 'Paper Approval', 'Event Images', 'Program'];
+                $subfolders = ['PROGRAM - COLLOQUIUM', 'PROFILE OF PRESENTERS', 'PRESENTERS', 'PRESENTATION PER PRESENTER', 'POST EVALUATION SURVEY/FEEDBACK', 'PHOTOS', 'CERTIFICATE', 'ATTENDANCE'];
 
                 // Create each subfolder inside the main folder
                 foreach ($subfolders as $subfolder) {
@@ -117,11 +117,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
         header('Location: cas-mov.php'); // Redirect after setting the session
         exit();
     }
-
+    
     // Create the folder in the filesystem
     if (mkdir($folder_path, 0777, true)) {
         // Define subfolders
-        $subfolders = ['Attendance', 'Paper Approval', 'Event Images', 'Program'];
+        $subfolders = ['PROGRAM - COLLOQUIUM', 'PROFILE OF PRESENTERS', 'PRESENTERS', 'PRESENTATION PER PRESENTER', 'POST EVALUATION SURVEY/FEEDBACK', 'PHOTOS', 'CERTIFICATE', 'ATTENDANCE'];
         foreach ($subfolders as $subfolder) {
             $subfolder_path = $folder_path . '/' . $subfolder;
             if (!mkdir($subfolder_path, 0777, true)) {
