@@ -1,37 +1,42 @@
 <?php
 session_start();
 
+// Check if the form should be displayed
 $showForm = isset($_SESSION['show_event_form']) && $_SESSION['show_event_form'];
+
+// Include necessary libraries
 require 'vendor/autoload.php';
 use Dompdf\Dompdf;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Database connection
+// Database connection details
 $servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username = "sh9sgtg12c8vyqoa";
 $password = "s3jzz232brki4nnv";
 $dbname = "szk9kdwhvpxy2g77";
+
+// Connect to the database
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check connection
+// Check for a successful connection
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    die("Database connection failed: " . $conn->connect_error);
 }
 
 // Fetch submissions from the database
 $sql = "SELECT name, email, event, rate, department FROM submissions";
 $result = $conn->query($sql);
 
-// Handle form submission for sending certificates
+// Handle form submission to send certificates
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) {
-    $all_sent = true;
-    
+    $all_sent = true; // Track whether all emails were sent successfully
+
     while ($row = $result->fetch_assoc()) {
         $name = $row['name'];
         $email = $row['email'];
 
-        // Generate PDF for each participant
+        // Generate certificate content
         $date = date("F j, Y");
         $html = "
         <html>
@@ -77,22 +82,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </html>
         ";
 
-        // Generate PDF
+        // Generate PDF certificate
         $dompdf = new Dompdf();
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
-        $pdfFilePath = "certificates/certificate_$name.pdf";
+        $pdfFilePath = sys_get_temp_dir() . "/certificate_$name.pdf"; // Use temporary directory
         file_put_contents($pdfFilePath, $dompdf->output());
 
-        // Send Email with the certificate attached
+        // Send email with the certificate
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com'; 
             $mail->SMTPAuth = true;
             $mail->Username = 'communityextensionservices1@gmail.com'; 
-            $mail->Password = 'ctpy rvsc tsiv fwix'; 
+            $mail->Password = 'ctpy rvsc tsiv fwix'; // App password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
@@ -104,15 +109,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
 
             $mail->send();
         } catch (Exception $e) {
-            $all_sent = false;
-            break; // Stop if an error occurs
+            $all_sent = false; // Mark as failed if an exception occurs
+            break;
         }
 
-        // Remove the PDF file after sending
+        // Clean up temporary file
         unlink($pdfFilePath);
     }
 
-    // Send a response back to the front end
+    // Return response to the front end
     if ($all_sent) {
         echo 'success';
     } else {
@@ -120,9 +125,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     }
     exit;
 }
-
-$conn->close();
 ?>
+
 
 
 
