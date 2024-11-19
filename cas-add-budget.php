@@ -20,7 +20,6 @@ $username_db = "zf8r3n4qqjyrfx7o"; // MySQL username (e.g., root for local devel
 $password_db = "su6qmqa0gxuerg98"; // MySQL password (e.g., empty for local development)
 $dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-
 // Create connection to the proj_list database
 $conn_proj_list = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
 
@@ -33,6 +32,7 @@ $sn_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username_ur = "equ6v8i5llo3uhjm"; // MySQL username (e.g., root for local development)
 $pass_ur = "vkfaxm2are5bjc3q"; // MySQL password (e.g., empty for local development)
 $dbname_user_registration = "ylwrjgaks3fw5sdj";
+
 
 // Fetch the profile picture from the colleges table in user_registration
 $conn_profile = new mysqli($sn_ur, $username_ur, $pass_ur, $dbname_user_registration);  
@@ -625,7 +625,14 @@ $conn_profile->close();
 
                 <tbody>
                     <?php
-                    $projectsSqlModal = "SELECT id, proj_title, lead_person, semester, date_of_sub, dateof_imple FROM cas ORDER BY id";
+                        $projectsSqlModal = "
+                        SELECT id, proj_title, lead_person, semester, date_of_sub, dateof_imple
+                        FROM cas
+                        WHERE proj_title NOT IN (
+                            SELECT proj_title FROM budget_utilization.cas_budget
+                        )
+                        ORDER BY id";
+                        
                     $resultProjectsModal = $conn_proj_list->query($projectsSqlModal);
 
                     if ($resultProjectsModal && $resultProjectsModal->num_rows > 0) {
@@ -673,92 +680,93 @@ $conn_profile->close();
 
                 xhr.send(data);
             }
+            function addProjectToBudget(projectId) {
+    var projTitle = document.getElementById("proj_title_" + projectId).innerText;
+    var leadPerson = document.getElementById("lead_person_" + projectId).innerText;
+    var semester = document.getElementById("semester_" + projectId).innerText;
 
-                function addProjectToBudget(projectId) {
-                var projTitle = document.getElementById("proj_title_" + projectId).innerText;
-                var leadPerson = document.getElementById("lead_person_" + projectId).innerText;
-                var semester = document.getElementById("semester_" + projectId).innerText;
-                var totalBudget = 40000; 
-
-                // Use SweetAlert for inputting expenses
-                Swal.fire({
-                    title: 'Enter the expenses for the new project:',
-                    input: 'text',
-                    inputPlaceholder: 'Enter expenses here...',
-                    showCancelButton: true,
-                    confirmButtonText: 'Submit',
-                    cancelButtonText: 'Cancel',
-                    customClass: {
-                        popup: 'custom-swal-popup', // Custom style for the popup
-                        confirmButton: 'custom-swal-confirm', // Custom style for confirm button
-                        cancelButton: 'custom-swal-cancel' // Custom style for cancel button
-                    },
-                    preConfirm: (value) => {
-                        if (!value || isNaN(value) || value <= 0) {
-                            Swal.showValidationMessage('Please enter a valid amount for the expenses');
-                        }
-                        return value;
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        var expenses = result.value;
-
-                        // Send data to the server using XMLHttpRequest
-                        var xhr = new XMLHttpRequest();
-                        xhr.open("POST", "cas-add_to_budget.php", true);
-                        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                        xhr.onreadystatechange = function () {
-                            if (xhr.readyState == 4 && xhr.status == 200) {
-                                if (xhr.responseText === "success") {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Project successfully added!',
-                                        showConfirmButton: false,
-                                        timer: 1500,
-                                        customClass: {
-                                            popup: 'custom-swal-popup',
-                                            confirmButton: 'custom-swal-confirm'
-                                        }
-                                    }).then(function() {
-                                        // Redirect to 'cas-budget-utilization.php' after the success alert
-                                        window.location.href = 'cas-budget-utilization.php';
-                                    });
-                                } else if (xhr.responseText === "exists") {
-                                    Swal.fire({
-                                        icon: 'warning',
-                                        title: 'Project already exists!',
-                                        text: 'This project has already been added to the budget.',
-                                        showConfirmButton: true,
-                                        customClass: {
-                                            popup: 'custom-swal-popup',
-                                            confirmButton: 'custom-swal-confirm'
-                                        }
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Oops...',
-                                        text: xhr.responseText,
-                                        showConfirmButton: true,
-                                        customClass: {
-                                            popup: 'custom-swal-popup',
-                                            confirmButton: 'custom-swal-confirm'
-                                        }
-                                    });
-                                }
-                            }
-                        };
-
-                        var data = "projectId=" + projectId + "&projTitle=" + encodeURIComponent(projTitle) +
-                                "&leadPerson=" + encodeURIComponent(leadPerson) +
-                                "&semester=" + encodeURIComponent(semester) +
-                                "&expenses=" + encodeURIComponent(expenses) +
-                                "&totalBudget=" + totalBudget;
-
-                        xhr.send(data);
-                    }
-                });
+    // Use SweetAlert for inputting expenses
+    Swal.fire({
+        title: 'Enter the expenses for the new project:',
+        input: 'text',
+        inputPlaceholder: 'Enter expenses here...',
+        showCancelButton: true,
+        confirmButtonText: 'Submit',
+        cancelButtonText: 'Cancel',
+        preConfirm: (value) => {
+            if (!value || isNaN(value) || value <= 0) {
+                Swal.showValidationMessage('Please enter a valid amount for the expenses');
             }
+            return value;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var expenses = parseFloat(result.value);
+
+            // Check if the new expense exceeds the allotted budget
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "cas-check_budget_limit.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var response = xhr.responseText.split('|');
+                    if (response[0] === "error") {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Budget Exceeded!',
+                            text: response[1],
+                            showConfirmButton: true
+                        });
+                    } else if (response[0] === "success") {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Budget Check Passed!',
+                            text: response[1],
+                            showConfirmButton: true
+                        }).then(() => {
+                            // Proceed to add project to budget
+                            var xhrAdd = new XMLHttpRequest();
+                            xhrAdd.open("POST", "cas-add_to_budget.php", true);
+                            xhrAdd.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            xhrAdd.onreadystatechange = function () {
+                                if (xhrAdd.readyState == 4 && xhrAdd.status == 200) {
+                                    if (xhrAdd.responseText === "success") {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Project successfully added!',
+                                            showConfirmButton: false,
+                                            timer: 1500
+                                        }).then(function() {
+                                            window.location.href = 'cas-budget-utilization.php';
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error!',
+                                            text: xhrAdd.responseText,
+                                            showConfirmButton: true
+                                        });
+                                    }
+                                }
+                            };
+
+                            var data = "projectId=" + projectId +
+                                       "&projTitle=" + encodeURIComponent(projTitle) +
+                                       "&leadPerson=" + encodeURIComponent(leadPerson) +
+                                       "&semester=" + encodeURIComponent(semester) +
+                                       "&expenses=" + encodeURIComponent(expenses);
+                            xhrAdd.send(data);
+                        });
+                    }
+                }
+            };
+
+            var checkBudgetData = "newExpense=" + expenses;
+            xhr.send(checkBudgetData);
+        }
+    });
+}
+
 
             function updateBarangays() {
             const district = document.getElementById('district').value;

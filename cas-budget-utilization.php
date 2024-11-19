@@ -10,15 +10,17 @@ if (!isset($_SESSION['uname'])) {
 
 // Database credentials for proj_list and user_registration databases
 $servername = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_db = "zf8r3n4qqjyrfx7o"; // MySQL username (e.g., root for local development)
-$password_db = "su6qmqa0gxuerg98"; // MySQL password (e.g., empty for local development)
+$username_db = "zf8r3n4qqjyrfx7o";
+$password_db = "su6qmqa0gxuerg98"; 
 $dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
 
 // Database credentials for proj_list and user_registration databases
 $servername_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_ur = "equ6v8i5llo3uhjm"; // MySQL username (e.g., root for local development)
-$password_ur = "vkfaxm2are5bjc3q"; // MySQL password (e.g., empty for local development)
+$username_ur = "equ6v8i5llo3uhjm"; 
+$password_ur = "vkfaxm2are5bjc3q"; 
 $dbname_user_registration = "ylwrjgaks3fw5sdj";
+
 
 // Create connection to the proj_list database
 $conn_proj_list = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
@@ -786,7 +788,7 @@ $conn_profile->close();
                     echo "<td>" . htmlspecialchars($budget["proj_title"]) . "</td>";
                     echo "<td>" . htmlspecialchars($budget["lead_person"]) . "</td>";
                     echo "<td>" . htmlspecialchars($budget["semester"]) . "</td>";
-                    echo "<td><input type='number' class='expense-input' value='" . htmlspecialchars($budget["expenses"]) . "' data-id='" . $budget["details_id"] . "' /></td>";
+                    echo "<td>" . htmlspecialchars($budget["expenses"]) . "</td>";
                     echo "</tr>";
                 }
             } else {
@@ -805,45 +807,6 @@ $conn_profile->close();
 <script>
 
 // Listen for changes in the expenses input fields
-document.querySelectorAll('.expense-input').forEach(function(input) {
-    input.addEventListener('change', function() {
-        var detailsId = input.getAttribute('data-id');
-        var newExpense = input.value;
-
-        // Send the updated expense to the server using AJAX
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "cas-update_expenses.php", true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                if (xhr.responseText === "success") {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Expenses updated successfully!',
-                        showConfirmButton: false,
-                        timer: 1500
-                    }).then(function() {
-                        location.reload(); // Reload the page after the update
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error updating expenses!',
-                        text: xhr.responseText,
-                        showConfirmButton: true
-                    });
-                }
-            }
-        };
-
-        var data = "detailsId=" + detailsId + "&newExpense=" + newExpense;
-        xhr.send(data);
-    });
-});
-
-
-
-
         function confirmLogout(event) {
             event.preventDefault();
             Swal.fire({
