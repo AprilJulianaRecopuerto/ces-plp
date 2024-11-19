@@ -44,14 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Generate PDF for each participant
         $date = date("l, F j, Y");
 
-        function getImagePath($imageName) {
-            $imagePath = __DIR__ . '/images/' . $imageName;
-            if (file_exists($imagePath)) {
-                return $imagePath;  // Return image path if file exists
-            }
-            return '';  // Return empty if file does not exist
-        }
-        
         // Define the image names
         $imageName = 'cert-bg.png';  // Background image
         $logoName = 'logoicon.png';  // Logo image
@@ -59,11 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Get the image paths
         $imagePath = getImagePath($imageName);
         $logoPath = getImagePath($logoName);
-        
-        // Check if both images exist before proceeding
-        if (empty($imagePath) || empty($logoPath)) {
-            die('Error: One or more image files are missing.');
-        }
         
         // HTML content for the certificate
         $html = "
