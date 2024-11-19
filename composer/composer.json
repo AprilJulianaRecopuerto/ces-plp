@@ -1,8 +1,11 @@
 {
     "require": {
-        "phpmailer/phpmailer": "^6.9",
-        "dompdf/dompdf": "^3.0",
-        "ext-gd": "*",
-        "ext-mbstring": "*"
-    }
+    "php": "^8.0",
+    "phpmailer/phpmailer": "^6.9",
+    "dompdf/dompdf": "^3.0",
+    "ext-gd": "*",
+    "ext-mbstring": "*",
+    "ext-fileinfo": "*",
+    "ext-json": "*"
+}
 }
