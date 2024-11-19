@@ -45,18 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $date = date("l, F j, Y");
 
         // Define the absolute path for images
-        $imagePath = realpath(__DIR__ . '/images/cert-bg.png');  // Get absolute path to image
-        $logoPath = realpath(__DIR__ . '/images/logoicon.png');  // Get absolute path to logo
-
-        // Check if files exist before proceeding
-        if (!$imagePath) {
-            error_log("Image not found: " . $imagePath);
-        }
-
-        if (!$logoPath) {
-            error_log("Logo not found: " . $logoPath);
-        }
-
+        $imagePath = __DIR__ . '/images/cert-bg.png';  // Background image
+        $logoPath = __DIR__ . '/images/logoicon.png';  // Logo image
+        
         // HTML content for the certificate
         $html = "
         <html>
@@ -107,14 +98,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             </style>
         </head>
         <body>
-            <div class='certificate'>
-                <img src='$imagePath' alt='Background'>
+      <div class='certificate'>
+                <img src='images/cert-bg.png' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='$logoPath' alt='Logo'>
+                        <img src='images/logoicon.png' alt='Logo'>
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
