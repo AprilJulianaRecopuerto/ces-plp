@@ -625,7 +625,27 @@ $conn_profile->close();
 
                 <tbody>
                     <?php
-                    $projectsSqlModal = "SELECT id, proj_title, lead_person, semester, date_of_sub, dateof_imple FROM cas ORDER BY id";
+                    // New connection for the 'budget_utilization' database (cas_budget)
+                    $servername_bu = "alv4v3hlsipxnujn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                    $username_bu = "ctk6gpo1v7sapq1l"; // MySQL username (e.g., root for local development)
+                    $password_bu = "u1cgfgry8lu5rliz"; // MySQL password
+                    $dbname_budget_utilization = "oshzbyiasuos5kn4";
+
+                    $conn_budget_utilization = new mysqli($servername_bu, $username_bu, $password_bu, $dbname_budget_utilization);
+
+                    // Check the connection
+                    if ($conn_budget_utilization->connect_error) {
+                        die("Connection failed: " . $conn_budget_utilization->connect_error);
+                    }
+
+                    $projectsSqlModal = "
+                    SELECT id, proj_title, lead_person, semester, date_of_sub, dateof_imple
+                    FROM cas
+                    WHERE proj_title NOT IN (
+                        SELECT proj_title FROM cas_budget
+                    )
+                    ORDER BY id";
+
                     $resultProjectsModal = $conn_proj_list->query($projectsSqlModal);
 
                     if ($resultProjectsModal && $resultProjectsModal->num_rows > 0) {
@@ -643,7 +663,10 @@ $conn_profile->close();
                     } else {
                         echo "<tr><td colspan='7'>No projects found.</td></tr>";
                     }
+
+                    // Close the connections
                     $conn_proj_list->close();
+                    $conn_budget_utilization->close();
                     ?>
                 </tbody>
             </table>
