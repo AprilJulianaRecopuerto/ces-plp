@@ -8,10 +8,10 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Database connection details
-$servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username = "sh9sgtg12c8vyqoa";
-$password = "s3jzz232brki4nnv";
-$dbname = "szk9kdwhvpxy2g77";
+$servername = "your_database_host";
+$username = "your_database_user";
+$password = "your_database_password";
+$dbname = "your_database_name";
 
 // Establish connection to the database
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -32,17 +32,6 @@ if (!$result || $result->num_rows === 0) {
     die("No data found");
 }
 
-// Function to convert an image to Base64
-function getBase64Image($filePath) {
-    if (!file_exists($filePath)) {
-        error_log("Image not found: " . $filePath);
-        return '';
-    }
-    $imageData = file_get_contents($filePath);
-    $imageType = pathinfo($filePath, PATHINFO_EXTENSION);
-    return 'data:image/' . $imageType . ';base64,' . base64_encode($imageData);
-}
-
 // Handle form submission for sending certificates
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) {
     $all_sent = true;
@@ -56,73 +45,77 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Generate PDF for each participant
         $date = date("l, F j, Y");
 
-        // Define the path relative to the current directory
-        $imagePath = __DIR__ . '/images/cert-bg.png';
-        $logoPath = __DIR__ . '/images/logoicon.png';
+        // Define the absolute path for images
+        $imagePath = realpath(__DIR__ . '/images/cert-bg.png');  // Get absolute path to image
+        $logoPath = realpath(__DIR__ . '/images/logoicon.png');  // Get absolute path to logo
 
-        // Convert the images to Base64
-        $bgImageBase64 = getBase64Image($imagePath);
-        $logoImageBase64 = getBase64Image($logoPath);
+        // Check if files exist before proceeding
+        if (!$imagePath) {
+            error_log("Image not found: " . $imagePath);
+        }
 
-        // Generate HTML for the certificate
+        if (!$logoPath) {
+            error_log("Logo not found: " . $logoPath);
+        }
+
+        // HTML content for the certificate
         $html = "
         <html>
         <head>
         <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
         <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
-        <style>
-            body {
-                text-align: center;
-                margin: 0;
-                padding: 0;
-                font-family: 'Poppins', sans-serif;
-            }
-            .certificate img {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                object-fit: cover; /* Ensures proper scaling */
-                z-index: -1;
-            }
-            .subheading {
-                margin-top: 240px;
-                font-size: 20px;
-            }
-            .name {
-                font-size: 80px;
-                margin-top: 30px;
-                text-decoration: underline;
-                font-style: italic;
-            }
-            .details {
-                font-size: 22px;
-            }
-            .footer-content {
-                margin-top: 50px;
-                display: flex;
-                justify-content: center;
-            }
-            .footer-content img {
-                max-width: 80px;
-                margin-left: 340px;
-            }
-            .footer-text {
-                font-size: 20px;
-                margin-left: 110px;
-            }
-        </style>
+            <style>
+                body {
+                    text-align: center;
+                    margin: 0;
+                    padding: 0;
+                    font-family: 'Poppins', sans-serif;
+                }
+                .certificate img {
+                    position: absolute;
+                    margin-top: -45px;
+                    width: 109%;
+                    margin-left: -45px;
+                    object-fit: cover;
+                    z-index: -1;
+                }
+                .subheading {
+                    margin-top: 240px;
+                    font-size: 20px;
+                }
+                .name {
+                    font-size: 80px;
+                    margin-top: 30px;
+                    text-decoration: underline;
+                    font-style: italic;
+                }
+                .details {
+                    font-size: 22px;
+                }
+                .footer-content {
+                    margin-top: 50px;
+                    display: flex;
+                    justify-content: center;
+                }
+                .footer-content img {
+                    max-width: 80px;
+                    margin-left: 340px;
+                }
+                .footer-text {
+                    font-size: 20px;
+                    margin-left: 110px;
+                }
+            </style>
         </head>
         <body>
             <div class='certificate'>
-                <img src='$bgImageBase64' alt='Background'>
+                <img src='$imagePath' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='$logoImageBase64' alt='Logo'>
+                        <img src='$logoPath' alt='Logo'>
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
@@ -130,24 +123,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </body>
         </html>
         ";
-
         try {
             // Generate the PDF
             $options = new Options();
             $options->set('defaultFont', 'Poppins');
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isPhpEnabled', true); // Allow PHP to be used in the HTML
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
 
-            // Define path to store PDF
-            $pdfDir = __DIR__ . '/tmp/';  // Use a directory inside your project
-            if (!is_dir($pdfDir)) {
-                mkdir($pdfDir, 0777, true);  // Ensure the directory exists
-            }
-            $pdfFilePath = $pdfDir . 'certificate_' . urlencode($name) . '.pdf';
+            // Save PDF to a temporary directory
+            $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf';
             file_put_contents($pdfFilePath, $dompdf->output());
-
         } catch (Exception $e) {
             error_log("PDF generation failed: " . $e->getMessage());
             $all_sent = false;
@@ -177,14 +166,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $all_sent = false;
         }
 
-        // Clean up the PDF file
-        if (file_exists($pdfFilePath)) {
-            unlink($pdfFilePath);
-        }
+        // Clean up the PDF
+        unlink($pdfFilePath);
     }
 
-    // Output success or failure
-    echo $all_sent ? 'Certificates sent successfully!' : 'Some certificates could not be sent.';
+    echo $all_sent ? 'success' : 'error';
     exit;
 }
 ?>
