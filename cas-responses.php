@@ -60,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     margin: 0;
                     padding: 0;
                     font-family: 'Poppins', sans-serif;
+                    background-image: url('https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png');
                 }
                 .certificate img {
                     position: absolute;
@@ -100,7 +101,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </head>
         <body>
             <div class='certificate'>
-                <img src='https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong> on <strong>$date</strong>.</p>
