@@ -45,30 +45,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Generate PDF for each participant
         $date = date("l, F j, Y");
 
-        // Absolute paths to the images (adjust for your project)
-        $imagePath = __DIR__ . '/images/cert-bg.png';
-        $logoPath = __DIR__ . '/images/logoicon.png';
+        // Define the path relative to the public directory
+        $imagePath = __DIR__ . '/CES/images/cert-bg.png';
+        $logoPath = __DIR__ . '/CES/images/logoicon.png';
 
-        // Convert images to base64 if the files exist
-        if (file_exists($imagePath)) {
-            $base64Image = 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath));
-        } else {
+        // Check if files exist before proceeding
+        if (!file_exists($imagePath)) {
             error_log("Image not found: " . $imagePath);
-            $base64Image = ''; // Fallback to empty if not found
         }
 
-        if (file_exists($logoPath)) {
-            $base64Logo = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
-        } else {
+        if (!file_exists($logoPath)) {
             error_log("Logo not found: " . $logoPath);
-            $base64Logo = ''; // Fallback to empty if not found
         }
+
 
         $html = "
         <html>
         <head>
-            <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
-            <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
+        <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
+        <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
             <style>
                 body {
                     text-align: center;
@@ -114,13 +109,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </head>
         <body>
             <div class='certificate'>
-                <img src='$base64Image' alt='Background'>
+                <img src='$imagePath' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='$base64Logo' alt='Logo'>
+                        <img src='$logoPath' alt='Logo'>
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
