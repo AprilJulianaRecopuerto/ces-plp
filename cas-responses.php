@@ -20,13 +20,14 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Database connection
-$servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username = "sh9sgtg12c8vyqoa";
-$password = "s3jzz232brki4nnv";
-$dbname = "szk9kdwhvpxy2g77";
-
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "certificate";
+$dbname_user_registration = "user_registration";
 $conn = new mysqli($servername, $username, $password, $dbname);
 
+$currentDepartment = mysqli_real_escape_string($conn, $currentDepartment);
 // Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -189,9 +190,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
 
         // Save the PDF to a file
         $pdfFileName = "certificate_" . urlencode($name) . ".pdf"; // Use a unique name
-        $pdfFilePath = "/tmp/$pdfFileName"; // Temporary directory on Heroku
+        $pdfFilePath = "certificates/$pdfFileName"; // Directory where the file is saved
         file_put_contents($pdfFilePath, $dompdf->output());
-        
+
         // Send Email with the certificate attached
         $mail = new PHPMailer(true);
         try {
@@ -228,13 +229,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     exit;
 }
 
-$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$un = "equ6v8i5llo3uhjm";
-$psd = "vkfaxm2are5bjc3q";
-$dbname_user_registration = "ylwrjgaks3fw5sdj";
-
 // Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+$conn_profile = new mysqli($servername, $username, $password, $dbname_user_registration);
+
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }

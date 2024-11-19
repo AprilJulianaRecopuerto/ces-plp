@@ -409,7 +409,6 @@ $conn->close();
                 justify-content: flex-end; /* Align buttons to the right */
                 margin-bottom: 20px; /* Space below the buttons */
                 margin-right: 20px;
-                margin-top: 110px;
             }
 
             .button-container button {
@@ -629,81 +628,14 @@ $conn->close();
             font-family: "Poppins", sans-serif !important;
         }
 
-        /* Chat styles */
-        .navbar .profile-container {
-                display: flex;
-                align-items: center;
-            }
 
-            .chat-icon {
-                font-size: 20px;
-                color: #333;
-                text-decoration: none;
-                position: relative; /* To position the badge correctly */
-                margin-right: 30px;
-                margin-top: 8px;
-                margin-left: -37px;
-            }
 
-            .notification-badge {
-                display: inline-block;
-                background-color: red; /* Change this to your preferred color */
-                color: white;
-                border-radius: 50%;
-                width: 20px; /* Width of the badge */
-                height: 20px; /* Height of the badge */
-                text-align: center;
-                font-weight: bold;
-                position: absolute; /* Position it relative to the chat icon */
-                top: -5px; /* Adjust as needed */
-                right: -10px; /* Adjust as needed */
-                font-size: 14px; /* Size of the exclamation point */
-            }
-
-            .pagination-info {
-                font-family: 'Poppins', sans-serif;
-                display: flex; 
-                justify-content: space-between; 
-                align-items: center; 
-                margin-top: 10px;"
-            }
-
-            .pagination-link {
-                font-family: 'Poppins', sans-serif;
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-right:15px !important;
-                border-radius: 5px;
-                font-size: 14px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                text-decoration: none;
-            }
-
-            .pagination-link:hover {
-                background-color: #45a049; /* Darker green on hover */
-            }
-
-            .pagination-text {
-                margin-right: 18px !important;
-            }
         </style>
     </head>
 
     <body>
         <nav class="navbar">
-            <h2>Responses</h2> 
-
-            <div class="profile-container">
-                <!-- Chat Icon with Notification Badge -->
-                <a href="chat.php" class="chat-icon" onclick="resetNotifications()">
-                    <i class="fa fa-comments"></i>
-                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
-                </a>
-            <div>
-
+            <h2>Dashboard</h2> 
             <div class="profile" id="profileDropdown">
                 <?php
                     // Check if a profile picture is set in the session
@@ -774,192 +706,142 @@ $conn->close();
             </ul>
         </div>
     
-        <div class="content-projectlist">
-            <div class="content">
-                <div class="button-container">
-                    <form method="POST" action = "">
-                        <button type="submit" name="send_certificates" id="sendCertificatesButton">Send Certificates to All Participants</button>
-                    </form>
+    <div class="content-projectlist">
+        
+        <div class="content">
+            
+             <h2>Responses</h2>
 
-                    <button id="toggle-button" onclick="toggleForm()">Open Event Form</button>
-                </div>
+    <div class="button-container">
+        <form method="POST" action = "">
+            <button type="submit" name="send_certificates" id="sendCertificatesButton">Send Certificates to All Participants</button>
+        </form>
 
-            <div class="table-container">
-                <table class="crud-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Event</th>
-                            <th>Department</th>
-                            <th>Rating</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body">
-                        <?php
-                        // Establish a connection to the database
-                        $conn = new mysqli("iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com", "sh9sgtg12c8vyqoa", "s3jzz232brki4nnv", "szk9kdwhvpxy2g77"); // Replace with actual DB name
+        <button id="toggle-button" onclick="toggleForm()">Open Event Form</button>
 
-                        // Check the connection
-                        if ($conn->connect_error) {
-                            die("Connection failed: " . $conn->connect_error);
-                        }
+    </div>
 
-                        // Pagination variables
-                        $limit = 5; // Number of records per page
-                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
-                        $offset = ($page - 1) * $limit; // Offset for SQL query
+    <div class="table-container">
+        <table class="crud-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Event</th>
+                    <th>Department</th>
+                    <th>Rating</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <?php
+                if ($result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+                        echo "<tr>
+                                <td>" . htmlspecialchars($row["name"]) . "</td>
+                                <td>" . htmlspecialchars($row["email"]) . "</td>
+                                <td>" . htmlspecialchars($row["event"]) . "</td>
+                                <td>" . htmlspecialchars($row["department"]) . "</td>
+                                <td>" . htmlspecialchars($row["rate"]) . "</td>
+                            </tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='6'>No records found</td></tr>";
+                }
+                ?>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-                        // Count total records
-                        $countSql = "SELECT COUNT(*) as total FROM submissions"; // Your table name
-                        $countResult = $conn->query($countSql);
 
-                        if ($countResult && $countResult->num_rows > 0) {
-                            $totalRecords = $countResult->fetch_assoc()['total'];
-                        } else {
-                            $totalRecords = 0; // Default value to avoid warnings
-                        }
 
-                        // Calculate total pages
-                        $totalPages = $totalRecords > 0 ? ceil($totalRecords / $limit) : 1; // Ensure at least 1 page
 
-                        // Ensure $page doesn't exceed $totalPages
-                        if ($page > $totalPages) {
-                            $page = $totalPages;
-                        }
+<script>
+                    
+// Display loading SweetAlert
+$(document).ready(function() {
+    $('form').submit(function (e) {
+        e.preventDefault(); // Prevent the form from submitting normally
 
-                        // Ensure $page isn't less than 1
-                        if ($page < 1) {
-                            $page = 1;
-                        }
+        // Show loading SweetAlert
+        Swal.fire({
+            title: 'Sending Certificates...',
+            text: 'Please wait while certificates are being sent.',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+            width: '500px'
+        });
 
-                        // Fetch the data for the current page with DESC order
-                        $sql = "SELECT name, email, event, department, rate FROM submissions ORDER BY id DESC LIMIT $limit OFFSET $offset"; // Your table name and column to order by
-                        $result = $conn->query($sql);
-
-                        if ($result->num_rows > 0) {
-                            while ($row = $result->fetch_assoc()) {
-                                echo "<tr>
-                                        <td>" . htmlspecialchars($row["name"]) . "</td>
-                                        <td>" . htmlspecialchars($row["email"]) . "</td>
-                                        <td>" . htmlspecialchars($row["event"]) . "</td>
-                                        <td>" . htmlspecialchars($row["department"]) . "</td>
-                                        <td>" . htmlspecialchars($row["rate"]) . "</td>
-                                    </tr>";
-                            }
-                        } else {
-                            echo "<tr><td colspan='6'>No records found</td></tr>";
-                        }
-                        ?>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination Section: Move it under the table -->
-            <div class="pagination-info">
-                <div>
-                    <p><?php echo "$totalRecords RECORDS FOUND"; ?></p>
-                </div>
-
-                <div class="page">
-                    <p>
-                        <?php if ($page > 1): ?>
-                            <a class="pagination-link" href="?page=<?php echo $page - 1; ?>">PREV</a>
-                        <?php endif; ?>
-
-                        <span class="pagination-text">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
-
-                        <?php if ($page < $totalPages): ?>
-                            <a class="pagination-link" href="?page=<?php echo $page + 1; ?>">NEXT</a>
-                        <?php endif; ?>
-                    </p>
-                </div>
-            </div>
-        </div>
-
-            <script>         
-            // Display loading SweetAlert
-            $(document).ready(function() {
-                $('form').submit(function (e) {
-                    e.preventDefault(); // Prevent the form from submitting normally
-
-                    // Show loading SweetAlert
+        // Send AJAX request to trigger PHP functionality
+        $.ajax({
+            url: '', // The same page, so leave the URL empty
+            type: 'POST',
+            data: { send_certificates: true },
+            success: function(response) {
+                if (response === 'success') {
                     Swal.fire({
-                        title: 'Sending Certificates...',
-                        text: 'Please wait while certificates are being sent.',
-                        allowOutsideClick: false,
-                        didOpen: () => Swal.showLoading(),
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'Certificates sent successfully.',
+                        confirmButtonColor: '#28a745',
                         width: '500px'
                     });
-
-                    // Send AJAX request to trigger PHP functionality
-                    $.ajax({
-                        url: '', // The same page, so leave the URL empty
-                        type: 'POST',
-                        data: { send_certificates: true },
-                        success: function(response) {
-                            if (response === 'success') {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Success!',
-                                    text: 'Certificates sent successfully.',
-                                    confirmButtonColor: '#28a745',
-                                    width: '500px'
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error!',
-                                    text: 'Something went wrong while sending certificates.',
-                                    confirmButtonColor: '#dc3545',
-                                    width: '500px'
-                                });
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            // Error: show error alert
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error!',
-                                text: 'Something went wrong while sending certificates.',
-                                confirmButtonColor: '#dc3545',
-                                width: '500px'
-                            });
-                        }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Something went wrong while sending certificates.',
+                        confirmButtonColor: '#dc3545',
+                        width: '500px'
                     });
-                });
-            });
-
-
-            function confirmLogout(event) {
-                event.preventDefault();
+                }
+            },
+            error: function(xhr, status, error) {
+                // Error: show error alert
                 Swal.fire({
-                    title: 'Are you sure?',
-                    text: "Do you really want to log out?",
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6', // Green confirm button
-                    cancelButtonColor: '#dc3545', // Red cancel button
-                    confirmButtonText: 'Yes, log me out',
-                    cancelButtonText: 'Cancel',
-                    customClass: {
-                        popup: 'swal-popup',
-                        confirmButton: 'swal-confirm',
-                        cancelButton: 'swal-cancel'
-                    },
-                    // Additional custom styles via CSS can be added here
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Pass action in the fetch call
-                        fetch('logout.php?action=logout')
-                            .then(response => response.text())
-                            .then(data => {
-                                console.log(data); // Log response for debugging
-                                window.location.href = 'roleaccount.php';
-                            })
-                            .catch(error => console.error('Error:', error));
-                    }
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Something went wrong while sending certificates.',
+                    confirmButtonColor: '#dc3545',
+                    width: '500px'
                 });
             }
+        });
+    });
+});
+
+
+function confirmLogout(event) {
+    event.preventDefault();
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you really want to log out?",
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6', // Green confirm button
+        cancelButtonColor: '#dc3545', // Red cancel button
+        confirmButtonText: 'Yes, log me out',
+        cancelButtonText: 'Cancel',
+        customClass: {
+            popup: 'swal-popup',
+            confirmButton: 'swal-confirm',
+            cancelButton: 'swal-cancel'
+        },
+        // Additional custom styles via CSS can be added here
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Pass action in the fetch call
+            fetch('logout.php?action=logout')
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data); // Log response for debugging
+                    window.location.href = 'roleaccount.php';
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    });
+}
+
+            
 
             document.getElementById('profileDropdown').addEventListener('click', function() {
             var dropdownMenu = document.querySelector('.dropdown-menu');
@@ -997,76 +879,78 @@ $conn->close();
             }
 
             document.addEventListener('DOMContentLoaded', function () {
-                const username = "<?php echo $_SESSION['username']; ?>"; // Get the username from PHP session
+        const username = "<?php echo $_SESSION['username']; ?>"; // Get the username from PHP session
 
-                // Function to log activity
-                function logActivity(buttonName) {
-                    const timestamp = new Date().toISOString(); // Get current timestamp
+        // Function to log activity
+        function logActivity(buttonName) {
+            const timestamp = new Date().toISOString(); // Get current timestamp
 
-                    fetch('log_activity.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            buttonFunction: buttonName // Updated to match the PHP variable
-                        }),
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'error') {
-                            console.error('Error logging activity:', data.message);
-                        } else {
-                            console.log('Activity logged successfully:', data);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error logging activity:', error);
-                    });
+            fetch('log_activity.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    buttonFunction: buttonName // Updated to match the PHP variable
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'error') {
+                    console.error('Error logging activity:', data.message);
+                } else {
+                    console.log('Activity logged successfully:', data);
                 }
-
-                // Add event listeners specifically to buttons and links
-                const trackableElements = document.querySelectorAll('button, a'); // Select all buttons and links
-                trackableElements.forEach(element => {
-                    element.addEventListener('click', function (event) {
-                        const buttonName = this.tagName === 'BUTTON' ? this.innerText.trim() || "Unnamed Button" : this.textContent.trim() || "Unnamed Link";
-                        logActivity(buttonName); // Log the button/link activity
-                    });
-                });
+            })
+            .catch(error => {
+                console.error('Error logging activity:', error);
             });
+        }
 
-            document.addEventListener('DOMContentLoaded', function() {
-            var toggleButton = document.getElementById("toggle-button");
-
-            // Preserve the button text based on initial state from PHP
-            var isFormOpen = <?php echo json_encode($showForm); ?>;
-            toggleButton.innerText = isFormOpen ? "Close Event Form" : "Open Event Form";
-
-            toggleButton.addEventListener("click", function() {
-                // Send AJAX request to update session variable
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", "toggle-form-session.php", true); // Send to PHP script
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === 4 && xhr.status === 200) {
-                        // Toggle the button text based on current state
-                        isFormOpen = !isFormOpen; // Update the local state
-                        toggleButton.innerText = isFormOpen ? "Close Event Form" : "Open Event Form";
-
-                        // Show SweetAlert feedback to the user
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Form Visibility Toggled',
-                            text: 'The event form visibility has been successfully toggled.',
-                            confirmButtonColor: '#3085d6'
-                        });
-                    }
-                };
-
-                xhr.send("toggleForm=true"); // Data to send
+        // Add event listeners specifically to buttons and links
+        const trackableElements = document.querySelectorAll('button, a'); // Select all buttons and links
+        trackableElements.forEach(element => {
+            element.addEventListener('click', function (event) {
+                const buttonName = this.tagName === 'BUTTON' ? this.innerText.trim() || "Unnamed Button" : this.textContent.trim() || "Unnamed Link";
+                logActivity(buttonName); // Log the button/link activity
             });
         });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+    var toggleButton = document.getElementById("toggle-button");
+
+    // Preserve the button text based on initial state from PHP
+    var isFormOpen = <?php echo json_encode($showForm); ?>;
+    toggleButton.innerText = isFormOpen ? "Close Event Form" : "Open Event Form";
+
+    toggleButton.addEventListener("click", function() {
+        // Send AJAX request to update session variable
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "toggle-form-session.php", true); // Send to PHP script
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                // Toggle the button text based on current state
+                isFormOpen = !isFormOpen; // Update the local state
+                toggleButton.innerText = isFormOpen ? "Close Event Form" : "Open Event Form";
+
+                // Show SweetAlert feedback to the user
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Form Visibility Toggled',
+                    text: 'The event form visibility has been successfully toggled.',
+                    confirmButtonColor: '#3085d6'
+                });
+            }
+        };
+
+        xhr.send("toggleForm=true"); // Data to send
+    });
+});
+
+
       </script>
     </body>
 </html>
