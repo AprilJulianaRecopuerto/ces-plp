@@ -124,7 +124,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $options->set('isPhpEnabled', true); // Ensure this is enabled for PHP functionality
             $options->set('isHtml5ParserEnabled', true);
             $options->set('isCssFloatEnabled', true); // Ensure floating is enabled
-            
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
