@@ -46,15 +46,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Hosted image URLs
         $bgImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
         $logoImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png';
-
+        
+        
         // Generate PDF for each participant
         $date = date("l, F j, Y");
-
+        
         $html = "
         <html>
         <head>
+        
+            <!-- Link Google Fonts directly -->
             <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
             <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
+        
             <style>
                 body { 
                     text-align: center;
@@ -62,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     padding: 0; 
                     font-family: 'Poppins', sans-serif;
                 }
-
+        
                 .certificate img {
                     position: absolute;
                     margin-top: -45px;
@@ -71,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     object-fit: cover;
                     z-index: -1;
                 }
-
+        
                 .subheading {
                     font-family: 'Poppins', sans-serif;
                     font-size: 20px;
@@ -81,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     margin-left: -195px;
                     letter-spacing: 0.5px;
                 }
-
+        
                 .name { 
                     font-family: 'Lilita One', sans-serif;
                     font-size: 80px;
@@ -89,11 +93,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     color: #333;
                     margin: 20px 0;
                     text-decoration: underline;
-                    font-style: italic;  
-                    text-transform: uppercase;
+                    font-style: italic;  /* Make it italic if cursive is not working */
+                    text-transform: uppercase; /* Convert text to uppercase */
                     margin-top: 30px;
                 }
-
+        
                 .details {
                     font-family: 'Poppins', sans-serif;
                     font-size: 22px; 
@@ -101,7 +105,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     line-height: 1.5;
                     margin-top: 20px;
                 }
-
+        
+                .date {
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 20px; 
+                    color: #888;
+                    margin-top: 30px;
+                }
+        
                 .footer {
                     font-family: 'Poppins', sans-serif;
                     font-size: 18px;
@@ -109,19 +120,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     text-align: center;
                     margin-top: 50px;
                 }
-
+        
                 .footer-content {
                     display: flex;
-                    justify-content: center;  
+                    justify-content: center;  /* Centers items horizontally */
+                
                 }
-
+        
                 .footer-content img {
                     margin-left: 340px;
-                    max-width: 80px;  
+                    max-width: 80px;  /* Adjust the size of the logo */
                     height: auto;
                     margin-top: -3px;
                 }
-
+        
                 .footer-text {
                     font-size: 20px;
                     margin-left: 110px;
@@ -145,12 +157,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </body>
         </html>
         ";
-
         try {
             // Generate the PDF
             $options = new Options();
             $options->set('isHtml5ParserEnabled', true);
-            $options->set('isRemoteEnabled', true); // Allow external resources
+            $options->set('isPhpEnabled', true); // Ensure this is enabled for PHP functionality
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isCssFloatEnabled', true); // Ensure floating is enabled
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
@@ -196,7 +209,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     echo $all_sent ? 'success' : 'error';
     exit;
 }
-
 
 $sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $un = "equ6v8i5llo3uhjm";
