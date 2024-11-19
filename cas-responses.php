@@ -47,13 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $bgImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
         $logoImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png';
 
-        // Fetch and encode images as Base64
-        $bgImageData = file_get_contents($bgImageURL);
-        $base64BgImage = 'data:image/png;base64,' . base64_encode($bgImageData);
-
-        $logoImageData = file_get_contents($logoImageURL);
-        $base64LogoImage = 'data:image/png;base64,' . base64_encode($logoImageData);
-
         // HTML for the certificate
         $date = date("l, F j, Y");
         $html = "
@@ -107,13 +100,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </head>
         <body>
             <div class='certificate'>
-                <img src='$base64BgImage' alt='Background'>
+                <img src='$bgImageURL' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='$base64LogoImage' alt='Logo'>
+                        <img src='$logoImageURL' alt='Logo'>
                         <p>Community Extension Services</p>
                     </div>
                 </div>
