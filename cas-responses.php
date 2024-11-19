@@ -28,6 +28,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Query to get submissions based on the department
 $sql = "SELECT name, email, event, rate, department FROM submissions WHERE department = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $currentDepartment);
@@ -37,6 +38,7 @@ $result = $stmt->get_result();
 // Handle form submission for sending certificates
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) {
     $all_sent = true;
+
     while ($row = $result->fetch_assoc()) {
         $name = $row['name'];
         $email = $row['email'];
@@ -47,6 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $bgImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
         $logoImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png';
 
+        // Function to convert image URL to Base64
+        function get_image_as_base64($url) {
+            $imageData = file_get_contents($url);
+            return 'data:image/png;base64,' . base64_encode($imageData);
+        }
+
         $bgImageBase64 = get_image_as_base64($bgImageURL);
         $logoImageBase64 = get_image_as_base64($logoImageURL);
         
@@ -56,91 +64,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $html = "
         <html>
         <head>
-        
-            <!-- Link Google Fonts directly -->
             <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
             <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
-        
             <style>
-                body { 
-                    text-align: center;
-                    margin: 0; 
-                    padding: 0; 
-                    font-family: 'Poppins', sans-serif;
-                }
-        
-                .certificate img {
-                    position: absolute;
-                    margin-top: -45px;
-                    width: 109%;
-                    margin-left: -45px;
-                    object-fit: cover;
-                    z-index: -1;
-                }
-        
-                .subheading {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 20px;
-                    color: #666;
-                    margin: 20px 0;
-                    margin-top: 240px;
-                    margin-left: -195px;
-                    letter-spacing: 0.5px;
-                }
-        
-                .name { 
-                    font-family: 'Lilita One', sans-serif;
-                    font-size: 80px;
-                    font-weight: bold;
-                    color: #333;
-                    margin: 20px 0;
-                    text-decoration: underline;
-                    font-style: italic;  /* Make it italic if cursive is not working */
-                    text-transform: uppercase; /* Convert text to uppercase */
-                    margin-top: 30px;
-                }
-        
-                .details {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 22px; 
-                    color: black;
-                    line-height: 1.5;
-                    margin-top: 20px;
-                }
-        
-                .date {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 20px; 
-                    color: #888;
-                    margin-top: 30px;
-                }
-        
-                .footer {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 18px;
-                    color: black;
-                    text-align: center;
-                    margin-top: 50px;
-                }
-        
-                .footer-content {
-                    display: flex;
-                    justify-content: center;  /* Centers items horizontally */
-                
-                }
-        
-                .footer-content img {
-                    margin-left: 340px;
-                    max-width: 80px;  /* Adjust the size of the logo */
-                    height: auto;
-                    margin-top: -3px;
-                }
-        
-                .footer-text {
-                    font-size: 20px;
-                    margin-left: 110px;
-                    font-weight: normal;
-                }
+                body { text-align: center; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+                .certificate img { position: absolute; margin-top: -45px; width: 109%; margin-left: -45px; object-fit: cover; z-index: -1; }
+                .subheading { font-family: 'Poppins', sans-serif; font-size: 20px; color: #666; margin: 20px 0; margin-top: 240px; margin-left: -195px; letter-spacing: 0.5px; }
+                .name { font-family: 'Lilita One', sans-serif; font-size: 80px; font-weight: bold; color: #333; margin: 20px 0; text-decoration: underline; font-style: italic; text-transform: uppercase; margin-top: 30px; }
+                .details { font-family: 'Poppins', sans-serif; font-size: 22px; color: black; line-height: 1.5; margin-top: 20px; }
+                .date { font-family: 'Poppins', sans-serif; font-size: 20px; color: #888; margin-top: 30px; }
+                .footer { font-family: 'Poppins', sans-serif; font-size: 18px; color: black; text-align: center; margin-top: 50px; }
+                .footer-content { display: flex; justify-content: center; }
+                .footer-content img { margin-left: 340px; max-width: 80px; height: auto; margin-top: -3px; }
+                .footer-text { font-size: 20px; margin-left: 110px; font-weight: normal; }
             </style>
         </head>
         <body>
@@ -153,12 +89,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     <div class='footer-content'>
                     <img src='$logoImageBase64' alt='Logo'>
                     <p class='footer-text'>Community Extension Services</p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
         </body>
-        </html>
-        ";
+        </html>";
+
         try {
             // Generate the PDF
             $options = new Options();
