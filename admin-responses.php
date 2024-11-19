@@ -46,9 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $date = date("l, F j, Y");
 
         // Define the path relative to the public directory
-        $imagePath = realpath(__DIR__ . 'CES/images/cert-bg.png');
-        $logoPath = realpath(__DIR__ . 'CES/images/logoicon.png');        
-
+        $imagePath = realpath(__DIR__ . '/CES/images/cert-bg.png');
+        $logoPath = realpath(__DIR__ . '/CES/images/logoicon.png');
+        
         // Check if files exist before proceeding
         if (!file_exists($imagePath)) {
             error_log("Image not found: " . $imagePath);
