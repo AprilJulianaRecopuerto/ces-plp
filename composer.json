@@ -1,5 +1,10 @@
 {
     "require": {
-        "phpmailer/phpmailer": "^6.9"
+        "phpmailer/phpmailer": "^6.9",
+        "dompdf/dompdf": "^3.0",
+        "masterminds/html5": "^2.9",
+        "dompdf/php-svg-lib": "^1.0",
+        "dompdf/php-font-lib": "^1.0",
+        "sabberworm/php-css-parser": "^8.7"
     }
 }
