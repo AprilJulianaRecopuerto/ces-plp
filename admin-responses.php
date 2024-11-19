@@ -45,28 +45,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Generate PDF for each participant
         $date = date("l, F j, Y");
 
-       $imagePath = realpath(__DIR__ . '/CES/images/cert-bg.png');
-    $logoPath = realpath(__DIR__ . '/CES/images/logoicon.png');
+        // Define the path relative to the public directory
+        $imagePath = __DIR__ . '/CES/images/cert-bg.png';
+        $logoPath = __DIR__ . '/CES/images/logoicon.png';
 
-        
         // Check if files exist before proceeding
         if (!file_exists($imagePath)) {
             error_log("Image not found: " . $imagePath);
         }
-        
+
         if (!file_exists($logoPath)) {
             error_log("Logo not found: " . $logoPath);
         }
-        
+
         // Convert images to Base64
         $base64Image = 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath));
         $base64Logo = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
-        
+
+
         $html = "
         <html>
         <head>
-            <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
-            <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
+        <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
+        <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
             <style>
                 body {
                     text-align: center;
