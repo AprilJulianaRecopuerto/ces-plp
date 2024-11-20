@@ -1,11 +1,24 @@
 <?php
-session_start(); // Start the session
+session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
     // Redirect to login page if the session variable is not set
     header("Location: roleaccount.php");
     exit;
+}
+
+// Database credentials for proj_list
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
+$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
+
+// Check connection
+if ($conn_proj_list->connect_error) {
+    die("Connection failed: " . $conn_proj_list->connect_error);
 }
 
 // Database credentials
@@ -34,6 +47,7 @@ if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }
 
+
 $uname = $_SESSION['uname'];
 $sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
 $stmt = $conn_profile->prepare($sql_profile);
@@ -48,110 +62,17 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
 
 $stmt->close();
 $conn_profile->close();
-
-// Database credentials for proj_list
-$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_proj = "zf8r3n4qqjyrfx7o";
-$password_proj = "su6qmqa0gxuerg98";
-$dbname_proj_list = "hpvs3ggjc4qfg9jp";
-
-$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
-
-// Check connection
-if ($conn_proj_list->connect_error) {
-    die("Connection failed: " . $conn_proj_list->connect_error);
-}
-
-// Ensure the ID is passed and valid
-if (isset($_GET['id'])) {
-    $project_id = $_GET['id']; // Retrieve the ID from the URL
-
-    // Use this ID to fetch the project details from the database or perform other actions
-    $sql = "SELECT * FROM cas WHERE id = ?";
-    $stmt = $conn_proj_list->prepare($sql);
-    $stmt->bind_param("i", $project_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows > 0) {
-        $project = $result->fetch_assoc();
-        // You can now use $project to display information about the selected project
-    } else {
-        echo "Project not found!";
-    }
-} else {
-    echo "No project ID provided.";
-}
-
-// Check if the form is submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Initialize and validate form data
-    $date = $_POST['date'] ?? '';
-    $name = $_POST['name'] ?? '';
-    $position = $_POST['position'] ?? '';
-    $college_name = $_POST['college_name'] ?? 'College of Arts and Science';
-
-    // Assign project_id to requi_sub
-    $requi_sub = $project_id; // Assuming the project ID is meant to be used as requi_sub
-
-    // Prepare to insert requisition data
-    $stmt = $conn->prepare("INSERT INTO cas_requisition (requi_sub, date, name, position, college_name) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("issss",  $requi_sub, $date, $name, $position, $college_name);
-
-    // Execute the statement for requisition
-    if ($stmt->execute()) {
-        // Get the last inserted requisition ID
-        $requisition_id = $conn->insert_id;
-
-        // Prepare to insert items associated with this requisition
-        $itemStmt = $conn->prepare("INSERT INTO cas_items (requisition_id, item_name, total_items, total_usage) VALUES (?, ?, ?, ?)");
-
-        // Loop through the items
-        if (isset($_POST['item']) && is_array($_POST['item'])) {
-            for ($i = 0; $i < count($_POST['item']); $i++) {
-                $item_name = $_POST['item'][$i] ?? '';
-                $total_items = $_POST['total_items'][$i] ?? 0;
-                $total_usage = $_POST['total_usage'][$i] ?? 0;
-
-                // Ensure that these values are not empty or invalid before executing
-                if (!empty($item_name) && $total_items >= 0 && $total_usage >= 0) {
-                    // Bind parameters and execute the item insertion statement
-                    $itemStmt->bind_param("isii", $requisition_id, $item_name, $total_items, $total_usage);
-
-                    // Execute the item insertion statement
-                    $itemStmt->execute(); // No echo needed here
-                } else {
-                    echo "Invalid data for item " . ($i + 1) . "<br>";
-                }
-
-            }
-        }
-
-        // Close the item statement
-        $itemStmt->close();
-
-        $_SESSION['success'] = "Requisition submitted successfully!";
-    } else {
-        $_SESSION['error'] = "Error submitting requisition.";
-        echo "Error: " . $stmt->error . "<br>";
-    }
-
-    // Close the requisition statement and connection
-    $stmt->close();
-    $conn->close();
-}
 ?>
 
-
 <!DOCTYPE html>
-<html lang="en">
+    <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+        
         <title>CES PLP</title>
 
-        <link rel="icon" href="images/icoon.png">
+        <link rel="icon" href="images/logoicon.png">
 
         <!-- SweetAlert CSS and JavaScript -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -167,6 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             body {
                 margin: 0;
                 background-color: #F6F5F5; /* Light gray background color */
+                font-family: 'Poppins', sans-serif;
             }
 
             .navbar {
@@ -383,31 +305,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 color: white; /* Change text color */
             }
 
-            .content-requisition {
-                margin-left: 340px; /* Align with the sidebar */
+            .content-resource {
+                margin-left: 320px; /* Align with the sidebar */
                 padding: 20px;
             }
-
-            .content-requisition h2 {
-                font-family: 'Poppins', sans-serif;
-                font-size: 28px; /* Adjust the font size as needed */
-                margin-bottom: 20px; /* Space below the heading */
-                color: black; /* Adjust text color */
-                margin-top: 110px;
-            }
-
-            .content-requisition p {
-                font-family: 'Poppins', sans-serif;
-                font-size: 16px;
-                font-style: Italic;
-                margin-top: 110px;
-                margin-left: 620px;
-                margin-bottom: 20px;
-            }
-
+            
             .form-container {
-                font-family: 'Poppins', sans-serif;
-                margin-left: -20px;
                 margin-top:110px;
                 background-color: #ffffff;
                 padding: 20px;
@@ -415,7 +318,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             }
 
-            .form-container h2 {
+            .form-container h3 {
                 margin-top: 0;
                 font-family: 'Poppins', sans-serif;
                 font-size: 24px;
@@ -427,13 +330,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             .form-group label {
-                font-family: 'Poppins', sans-serif;
                 display: block;
                 font-weight: bold;
                 margin-bottom: 5px;
             }
 
-            .form-group select, .form-group input[type="text"], .form-group input[type="date"], .form-group input[type="number"] {
+            .form-group select, .form-group input[type="text"], .form-group input[type="date"], 
+            .form-group input[type="time"], .form-group input[type="number"] {
                 width: 100%;
                 padding: 8px;
                 border: 1px solid #ddd;
@@ -441,7 +344,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 font-size: 16px;
                 box-sizing: border-box;
                 font-family: 'Poppins', sans-serif;
-                margin-bottom: 10px;
             }
 
             .form-group input::placeholder {
@@ -457,7 +359,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             .button-container {
                 display: flex;
                 justify-content: flex-end; /* Align buttons to the right */
-                margin-bottom: 20px; /* Space below the buttons */
+                margin-top: 20px; /* Space above the buttons */
             }
 
             .button-container button {
@@ -519,46 +421,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 outline: none; /* Remove default focus outline */
             }
 
-            .item-section {
-                border: 1px solid #ccc;
-                padding: 15px;
-                margin: 10px 0;
-            }
-
-            .remove-btn {
-                background-color: #e74c3c;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-
-            .remove-btn:hover {
-                background-color: #e74c1c;
-                color: white;
-            }
-
-            .add-btn {
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-            .add-btn:hover {
-                background-color: #45a049; /* Darker green on hover */
-            }
-
             .swal-popup {
                 font-family: "Poppins", sans-serif !important;
                 width: 400px;
@@ -604,12 +466,70 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 right: -10px; /* Adjust as needed */
                 font-size: 14px; /* Size of the exclamation point */
             }
+
+            .table-container {
+                width: 100%;
+                margin-left: -12px;
+                overflow-x: auto;
+                margin-top: 20px; /* Space above the table */
+            }
+
+            .crud-table {
+                margin-top: 110px;
+                width: 100%;
+                border-collapse: collapse;
+                font-family: 'Poppins', sans-serif;
+                background-color: #ffffff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .crud-table th, .crud-table td {
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+                white-space: nowrap; /* Prevent text from wrapping */
+            }
+
+            .crud-table th {
+                text-align: center; 
+                background-color: #4CAF50;
+                color: white;
+                height: 40px;
+                width: 14px; /* Set a fixed width for table headers */
+            }
+
+            .crud-table td {
+                height: 50px;
+                background-color: #fafafa;
+            }
+
+            .crud-table tr:hover {
+                background-color: #f1f1f1;
+            }
+
+            .add a {
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                text-decoration: none;
+                transition: background-color 0.3s;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .add a:hover {
+                background-color: #45a049; /* Darker green on hover */
+            }
         </style>
     </head>
 
     <body>
         <nav class="navbar">
-            <h2>Requisition (for Materials)</h2> 
+            <h2>All Projects in CAS</h2>
 
             <div class="profile-container">
                 <!-- Chat Icon with Notification Badge -->
@@ -689,92 +609,212 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </ul>
         </div>
 
-        <div class="content-requisition">
-            <div class="form-container">
+        <div class="content-resource">
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Project Title</th>
+                        <th>Semester</th>
+                        <th>Department</th>
+                        <th>Date of Event</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Fetch all projects from the cas table
+                    $sql = "SELECT * FROM cas";
+                    $result = $conn_proj_list->query($sql);
 
-                <div class="form-group">
-                    <label for="requi_sub">ID:</label>
-                    <input type="text"  id="requi_sub" name="project_id" value="<?= $project['id']; ?>" readonly>
-                </div>
+                    if ($result && $result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            $project_id = $row["id"];
 
-                <h2>Requisition Submission Form</h2>
-                
-                <form id="requisitionForm" action="" method="POST">
+                            // Check if the project_id already exists in the cas_tor table
+                            $check_sql = "SELECT * FROM cas_requisition WHERE requi_sub = ?";
+                            $check_stmt = $conn->prepare($check_sql);
+                            $check_stmt->bind_param("i", $project_id);
+                            $check_stmt->execute();
+                            $check_result = $check_stmt->get_result();
 
-                    <div class="form-group">
-                        <label for="date">Date:</label>
-                        <input type="date" id="date" name="date" required>
-                    </div>
+                            // If the project is already added in cas_tor, do not display it
+                            if ($check_result && $check_result->num_rows > 0) {
+                                continue; // Skip this project if it exists in cas_tor
+                            }
 
-                    <div class="form-group">
-                        <label for="name">Name:</label>
-                        <input type="text" id="name" name="name" placeholder="Enter your Name" required>
-                    </div>
+                            // If not already added, display the project
+                            echo "<tr>
+                                    <td>" . $project_id . "</td>
+                                    <td>" . $row["proj_title"] . "</td>
+                                    <td>" . $row["semester"] . "</td>
+                                    <td>" . $row["dept"] . "</td>
+                                    <td>" . $row["dateof_imple"] . "</td>
+                                    <td class='add'>
+                                        <a href='cas-add-requi.php?id=" . $project_id . "'>Add</a>
+                                    </td>
+                                </tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='6'>No records found</td></tr>";
+                    }
 
-                    <div class="form-group">
-                        <label for="position">Designation/Position:</label>
-                        <input type="text" id="position" name="position" placeholder="Enter Designation or Position" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="college_name">Office/College:</label>
-                        <input type="text" id="college_name" name="college_name" value="College of Arts and Science" placeholder="Enter College Name" required>
-                    </div>
-
-                    <h2>Item/s Requested</h2>
-                    <div id="itemContainer">
-                        <div class="item-section">
-                            <h3>Item 1</h3>
-
-                            <div class="form-group">
-                                <label for="item_1">Item Name:</label>
-                                <input type="text" id="item_1" name="item[]" placeholder="Enter Name of Item" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="total_items_1">Total Item Requested:</label>
-                                <input type="text" id="total_items_1" name="total_items[]" placeholder="Enter Total of Meals (e.g 500)" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="total_usage_1">Total Usage:</label>
-                                <input type="text" id="total_usage_1" name="total_usage[]" placeholder="Enter Total Usage (e.g 450)" required>
-                            </div>
-
-                            <button type="button" class="remove-btn" onclick="removeEvent(this)">Remove Item</button>
-                        </div>
-                    </div>
-
-                    <button type="button" class="add-btn" onclick="addItem()">Add Another Item</button><br><br>
-
-                    <div class="button-container">
-                        <button type="submit">Submit</button>
-                        <button type="reset">Reset</button>
-                    </div>
-                </form>
-            </div>
+                    $conn_proj_list->close();
+                    ?>
+                </tbody>
+            </table>
         </div>
 
         <script>
+            function updateBarangays() {
+            const district = document.getElementById('district').value;
+            const barangaySelect = document.getElementById('barangay');
 
-            // Set the current date in YYYY-MM-DD format
-            window.onload = function() {
-            var today = new Date();
-            var yyyy = today.getFullYear();
-            var mm = today.getMonth() + 1; // Months are zero-based
-            var dd = today.getDate();
+            // Clear existing options
+            barangaySelect.innerHTML = '';
 
-            // Add leading zero for single-digit day/month
-            if (mm < 10) mm = '0' + mm;
-            if (dd < 10) dd = '0' + dd;
+            let barangays = [];
 
-            // Format the date to match input type="date"
-            var formattedDate = yyyy + '-' + mm + '-' + dd;
+            if (district === 'District 1') {
+                barangays = [
+                    'Bagong Ilog', 'Bagong Katipunan', 'Bambang', 'Buting', 'Caniogan',
+                    'Kalawaan', 'Kapasigan', 'Kapitolyo', 'Malinao', 'Oranbo',
+                    'Palatiw', 'Pineda', 'Sagad', 'San Antonio', 'San Joaquin',
+                    'San Jose', 'San Nicolas', 'Sta. Cruz', 'Sta. Rosa', 'Sto. Tomas',
+                    'Sumilang', 'Ugong'
+                ];
+            } else if (district === 'District 2') {
+                barangays = [
+                    'Dela Paz', 'Manggahan', 'Maybunga', 'Pinagbuhatan', 'Rosario',
+                    'San Miguel', 'Sta. Lucia', 'Santolan'
+                ];
+            }
 
-            // Set the value of the date input field
-            document.getElementById('date').value = formattedDate;
-            };
-            
+            // Add new options
+            barangays.forEach(barangay => {
+                const option = document.createElement('option');
+                option.value = barangay;
+                option.textContent = barangay;
+                barangaySelect.appendChild(option);
+            });
+
+            // Add default option
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                defaultOption.textContent = 'Select Barangay';
+                barangaySelect.insertBefore(defaultOption, barangaySelect.firstChild);
+            }
+
+            // Initialize barangay options based on the default district (if necessary)
+            document.addEventListener('DOMContentLoaded', () => {
+                updateBarangays();
+            });
+
+            let entryCount = 1; // Tracks the number of entries
+            let totalBudgetValue = 0; // Holds the total budget from the first entry
+
+        function addEntry() {
+            entryCount++;
+            const entryContainer = document.getElementById('entryContainer');
+            const newEntrySection = document.createElement('div');
+            newEntrySection.className = 'entry-section';
+            newEntrySection.innerHTML = `
+                <h3>Entry ${entryCount}</h3>
+                <div class="form-group">
+                    <label for="event_title_${entryCount}">Event Title:</label>
+                    <input type="text" id="event_title_${entryCount}" name="event_title[]" placeholder="Enter Event Title" required>
+                </div>
+                <div class="form-group">
+                    <label for="total_budget_${entryCount}">Total Budget:</label>
+                    <input type="text" id="total_budget_${entryCount}" name="total_budget[]" value="${totalBudgetValue}" placeholder="Total Budget" readonly />
+                </div>
+                <div class="form-group">
+                    <label for="expenses_${entryCount}">Expenses:</label>
+                    <input type="text" id="expenses_${entryCount}" name="expenses[]" placeholder="Enter Total Expenses" required oninput="updateRemainingBudget(this.parentElement.parentElement)">
+                </div>
+                <div class="form-group">
+                    <label for="remaining_budget_${entryCount}">Remaining Budget:</label>
+                    <input type="text" id="remaining_budget_${entryCount}" name="remaining_budget[]" placeholder="Remaining Budget" readonly />
+                </div>
+                <button type="button" class="remove-btn" onclick="removeEntry(this)">Remove Entry</button>
+            `;
+            entryContainer.appendChild(newEntrySection);
+
+            // Set the total budget value for this entry based on the first entry's total budget
+            if (entryCount > 1) {
+                const firstBudgetInput = document.getElementById('total_budget_1');
+                newEntrySection.querySelector(`input[id^="total_budget_"]`).value = firstBudgetInput.value;
+                updateRemainingBudget(newEntrySection); // Call to update remaining budget when a new entry is added
+            }
+        }
+
+        function updateRemainingBudget(entrySection) {
+            const expensesInput = entrySection.querySelector('input[id^="expenses_"]');
+            const remainingInput = entrySection.querySelector('input[id^="remaining_budget_"]');
+            const firstBudgetInput = document.getElementById('total_budget_1');
+            const totalBudget = parseFloat(firstBudgetInput.value) || 0; // Get total budget for the first entry
+
+            // Calculate total expenses from all entries
+            const totalExpenses = getTotalExpenses();
+
+            // Calculate remaining budget
+            const remainingBudget = totalBudget - totalExpenses; // Subtract total expenses from total budget
+            remainingInput.value = remainingBudget.toFixed(2); // Update the remaining budget display
+        }
+
+        function getTotalExpenses() {
+            const expenseInputs = document.querySelectorAll('[id^="expenses_"]');
+            let totalExpenses = 0;
+            expenseInputs.forEach(input => {
+                totalExpenses += parseFloat(input.value) || 0; // Sum up all expenses
+            });
+            return totalExpenses;
+        }
+
+        function removeEntry(element) {
+            element.parentElement.remove();
+            updateRemainingBudget(); // Recalculate remaining budget after removing an entry
+        }
+
+            // Check if there is a success or error message
+            <?php if (isset($_SESSION['success'])): ?>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: '<?php echo $_SESSION['success']; ?>',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        popup: 'custom-swal-popup',
+                        title: 'custom-swal-title',
+                        confirmButton: 'custom-swal-confirm'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'cas-budget-utilization.php';
+                    }
+                });
+            <?php unset($_SESSION['success']); endif; ?>
+
+            <?php if (isset($_SESSION['error'])): ?>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: '<?php echo $_SESSION['error']; ?>',
+                    confirmButtonText: 'Try Again',
+                    customClass: {
+                        popup: 'custom-error-popup',
+                        title: 'custom-error-title',
+                        confirmButton: 'custom-error-confirm'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'cas-add-budget.php';
+                    }
+                });
+            <?php unset($_SESSION['error']); endif; ?>
+
             function confirmLogout(event) {
                 event.preventDefault();
                 Swal.fire({
@@ -804,7 +844,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     }
                 });
             }
-            
+
             // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
                 const dropdown = this.querySelector('.dropdown-menu');
@@ -821,66 +861,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
             });
 
-            let itemCount = 1;
-
-            function addItem() {
-                itemCount++;
-                const itemContainer = document.getElementById('itemContainer');
-                const newItemSection = document.createElement('div');
-                newItemSection.className = 'item-section';
-                newItemSection.innerHTML = `
-                    <h3>Item ${itemCount}</h3>
-
-                    <div class="form-group">
-                        <label for="item_${itemCount}">Item Name:</label>
-                        <input type="text" id="item_${itemCount}" name="item[]" placeholder="Enter Name of Item" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="total_items_${itemCount}">Total Item Requested:</label>
-                        <input type="text" id="total_items_${itemCount}" name="total_items[]" placeholder="Enter Total of Meals (e.g 500 meals)" >
-                    </div>
-
-                    <div class="form-group">
-                        <label for="total_usage_${itemCount}">Total Usage:</label>
-                        <input type="text" id="total_usage_${itemCount}" name="total_usage[]" placeholder="Enter Total Usage (e.g 450 meals)" >
-                    </div>
-
-                    <button type="button" class="remove-btn" onclick="removeItem(this)">Remove Item</button>
-                `;
-                itemContainer.appendChild(newItemSection);
-            }
-
-            function removeItem(element) {
-                element.parentElement.remove();
-            }
-
-            // Function to show success SweetAlert
-            function showSuccessAlert(message) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: message,
-                    confirmButtonColor: '#089451',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                            popup: 'custom-swal-popup',
-                            title: 'custom-swal-title',
-                            confirmButton: 'custom-swal-confirm'
-                        }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = "cas-requi.php"; // Redirect to the same page or desired page
-                    }
-                });
-            }
-
-            // Check for success message in session and show alert
-            <?php if (isset($_SESSION['success'])): ?>
-                showSuccessAlert('<?php echo addslashes($_SESSION['success']); ?>');
-                <?php unset($_SESSION['success']); ?> // Clear the message after displaying
-            <?php endif; ?>
-
+           
             function logAction(actionDescription) {
                 var xhr = new XMLHttpRequest();
                 xhr.open("POST", "college_logs.php", true);
@@ -935,7 +916,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             });
         });
 
-            document.addEventListener("DOMContentLoaded", () => {
+                document.addEventListener("DOMContentLoaded", () => {
                 function checkNotifications() {
                     fetch('cas-check_notifications.php')
                         .then(response => response.json())

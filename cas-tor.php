@@ -719,7 +719,7 @@ $conn_profile->close();
             }
             ?>
 
-<div class="data-details">
+            <div class="data-details">
                 <h3>Event Form Details</h3>
 
                 <div class="table-container">
@@ -761,6 +761,7 @@ $conn_profile->close();
                                         <td class='edit'>
                                             <a href='cas-edit-tor.php?id=" . $row["id"] . "'>EDIT</a>
                                             <button class='delete-button' data-id='" . $row["id"] . "'>DELETE</button>
+                                            <a href='cas-download-report.php?id=" . $row["id"] . "' class='download-button'>Download Report</a>
                                         </td>
                                     </tr>";
                                 }

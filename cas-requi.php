@@ -653,11 +653,11 @@ $conn_profile->close();
         </div>
 
         <div class="content-requi">
-                <div class="button-container">
-                     <button onclick="logAndRedirect('Add Requisition', 'cas-add-requi.php')">Requisition Form</button>
-                </div>
+            <div class="button-container">
+                    <button onclick="logAndRedirect('Add Requisition', 'cas-requi-list.php')">Requisition Form</button>
+            </div>
 
-                <?php
+            <?php
             // Database credentials
             $servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
             $username_resource = "dnr20srzjycb99tw";
@@ -673,141 +673,140 @@ $conn_profile->close();
             }
             ?>
 
-                <div class="data-details">
-                    <h3>Requisition Form Details</h3>
+            <div class="data-details">
+                <h3>Requisition Form Details</h3>
 
-                    <div class="table-container">
-                        <table class="crud-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Date</th>
-                                    <th>Name</th>
-                                    <th>Position</th>
-                                    <th>College Name</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                // Pagination variables for requisitions
-                                $limit = 5; // Number of records per page
-                                $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
-                                $offset = ($page - 1) * $limit; // Offset for SQL query
+                <div class="table-container">
+                    <table class="crud-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Position</th>
+                                <th>College Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            // Pagination variables for requisitions
+                            $limit = 5; // Number of records per page
+                            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
+                            $offset = ($page - 1) * $limit; // Offset for SQL query
 
-                                // Count total requisition records
-                                $countSql = "SELECT COUNT(*) as total FROM cas_requisition";
-                                $countResult = $conn->query($countSql);
-                                $totalRecords = $countResult->fetch_assoc()['total'];
-                                $totalPages = ceil($totalRecords / $limit); // Calculate total pages
+                            // Count total requisition records
+                            $countSql = "SELECT COUNT(*) as total FROM cas_requisition";
+                            $countResult = $conn->query($countSql);
+                            $totalRecords = $countResult->fetch_assoc()['total'];
+                            $totalPages = ceil($totalRecords / $limit); // Calculate total pages
 
-                                // Fetch paginated requisition details
-                                $requisitionSql = "SELECT * FROM cas_requisition ORDER BY requisition_id DESC LIMIT $limit OFFSET $offset";
-                                $resultRequisitions = $conn->query($requisitionSql);
+                            // Fetch paginated requisition details
+                            $requisitionSql = "SELECT * FROM cas_requisition ORDER BY requisition_id DESC LIMIT $limit OFFSET $offset";
+                            $resultRequisitions = $conn->query($requisitionSql);
 
-                                if ($resultRequisitions && $resultRequisitions->num_rows > 0) {
-                                    while ($row = $resultRequisitions->fetch_assoc()) {
-                                        echo "<tr>
-                                            <td>" . $row["requisition_id"] . "</td>
-                                            <td>" . $row["date"] . "</td>
-                                            <td>" . $row["name"] . "</td>
-                                            <td>" . $row["position"] . "</td>
-                                            <td>" . $row["college_name"] . "</td>
-                                            <td class='edit'>
-                                                <a href='cas-edit-requisition.php?requisition_id=" . $row["requisition_id"] . "'>EDIT</a>
-                                                <button class='delete-button' data-id='" . $row["requisition_id"] . "'>DELETE</button>
-                                            </td>
-                                        </tr>";
-                                    }
-                                } else {
-                                    echo "<tr><td colspan='6'>No requisitions found.</td></tr>";
+                            if ($resultRequisitions && $resultRequisitions->num_rows > 0) {
+                                while ($row = $resultRequisitions->fetch_assoc()) {
+                                    echo "<tr>
+                                        <td>" . $row["requisition_id"] . "</td>
+                                        <td>" . $row["date"] . "</td>
+                                        <td>" . $row["name"] . "</td>
+                                        <td>" . $row["position"] . "</td>
+                                        <td>" . $row["college_name"] . "</td>
+                                        <td class='edit'>
+                                            <a href='cas-edit-requisition.php?requisition_id=" . $row["requisition_id"] . "'>EDIT</a>
+                                            <button class='delete-button' data-id='" . $row["requisition_id"] . "'>DELETE</button>
+                                        </td>
+                                    </tr>";
                                 }
-                                ?>
-                            </tbody>
-                        </table>
-                    </div>
+                            } else {
+                                echo "<tr><td colspan='6'>No requisitions found.</td></tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
 
-                    <h3>Items for Requisitions</h3>
-                    <div class="table-container">
-                        <table class="crud-table">
-                            <thead>
-                                <tr>
-                                    <th>Requisition ID</th>
-                                    <th>Item Name</th>
-                                    <th>Total Items Requested</th>
-                                    <th>Total Usage</th>
-                                    <th>Utilization %</th>
-                               
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                // Pagination variables for requisitions
-                                $limit = 5; // Number of records per page
-                                $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
-                                $offset = ($page - 1) * $limit; // Offset for SQL query
+                <h3>Items for Requisitions</h3>
+                <div class="table-container">
+                    <table class="crud-table">
+                        <thead>
+                            <tr>
+                                <th>Requisition ID</th>
+                                <th>Item Name</th>
+                                <th>Total Items Requested</th>
+                                <th>Total Usage</th>
+                                <th>Utilization %</th>
+                            
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            // Pagination variables for requisitions
+                            $limit = 5; // Number of records per page
+                            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
+                            $offset = ($page - 1) * $limit; // Offset for SQL query
 
-                                // Fetch all items details (removing pagination for items)
-                                $itemsSql = "SELECT * FROM cas_items ORDER BY requisition_id DESC";
-                                $resultItems = $conn->query($itemsSql);
+                            // Fetch all items details (removing pagination for items)
+                            $itemsSql = "SELECT * FROM cas_items ORDER BY requisition_id DESC";
+                            $resultItems = $conn->query($itemsSql);
 
-                                if ($resultItems && $resultItems->num_rows > 0) {
-                                    $itemsData = [];
-                                    
-                                    // Group items by requisition_id
-                                    while ($row = $resultItems->fetch_assoc()) {
-                                        $itemsData[$row['requisition_id']][] = $row; // Grouping items by requisition_id
-                                    }
-
-                                    // Output rows with calculated rowspans for requisition_id
-                                    foreach ($itemsData as $requisitionId => $items) {
-                                        $firstRow = true; // Track the first row for requisition_id
-
-                                        foreach ($items as $index => $item) {
-                                            echo "<tr>";
-
-                                            // Display Requisition ID only once per unique requisition_id
-                                            if ($firstRow) {
-                                                echo "<td rowspan='" . count($items) . "'>" . $requisitionId . "</td>";
-                                                $firstRow = false; // Set to false after the first row
-                                            }
-
-                                            // Output remaining columns for the current item
-                                            echo "<td>" . htmlspecialchars($item["item_name"]) . "</td>
-                                                <td>" . htmlspecialchars($item["total_items"]) . "</td>
-                                                <td>" . htmlspecialchars($item["total_usage"]) . "</td>
-                                                <td>" . htmlspecialchars($item["utilization_percentage"]) . '%'. "</td>
-                                               
-                                                </tr>";
-                                        }
-                                    }
-                                } else {
-                                    echo "<tr><td colspan='4'>No items found.</td></tr>";
-                                }
-                                ?>
-
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="pagination-info">
-                        <div>
-                            <p><?php echo "$totalRecords RECORDS FOUND"; ?></p>
-                        </div>
-
-                        <div class="page">
-                            <p>
-                                <?php if ($page > 1): ?>
-                                    <a class="pagination-link" href="?page=<?php echo $page - 1; ?>">PREV</a>
-                                <?php endif; ?>
-
-                                <span class="pagination-text">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
+                            if ($resultItems && $resultItems->num_rows > 0) {
+                                $itemsData = [];
                                 
-                                <?php if ($page < $totalPages): ?>
-                                    <a class="pagination-link" href="?page=<?php echo $page + 1; ?>">NEXT</a>
-                                <?php endif; ?>
-                            </p>
-                        </div>
+                                // Group items by requisition_id
+                                while ($row = $resultItems->fetch_assoc()) {
+                                    $itemsData[$row['requisition_id']][] = $row; // Grouping items by requisition_id
+                                }
+
+                                // Output rows with calculated rowspans for requisition_id
+                                foreach ($itemsData as $requisitionId => $items) {
+                                    $firstRow = true; // Track the first row for requisition_id
+
+                                    foreach ($items as $index => $item) {
+                                        echo "<tr>";
+
+                                        // Display Requisition ID only once per unique requisition_id
+                                        if ($firstRow) {
+                                            echo "<td rowspan='" . count($items) . "'>" . $requisitionId . "</td>";
+                                            $firstRow = false; // Set to false after the first row
+                                        }
+
+                                        // Output remaining columns for the current item
+                                        echo "<td>" . htmlspecialchars($item["item_name"]) . "</td>
+                                            <td>" . htmlspecialchars($item["total_items"]) . "</td>
+                                            <td>" . htmlspecialchars($item["total_usage"]) . "</td>
+                                            <td>" . htmlspecialchars($item["utilization_percentage"]) . '%'. "</td>
+                                            
+                                            </tr>";
+                                    }
+                                }
+                            } else {
+                                echo "<tr><td colspan='4'>No items found.</td></tr>";
+                            }
+                            ?>
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-info">
+                    <div>
+                        <p><?php echo "$totalRecords RECORDS FOUND"; ?></p>
+                    </div>
+
+                    <div class="page">
+                        <p>
+                            <?php if ($page > 1): ?>
+                                <a class="pagination-link" href="?page=<?php echo $page - 1; ?>">PREV</a>
+                            <?php endif; ?>
+
+                            <span class="pagination-text">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
+                            
+                            <?php if ($page < $totalPages): ?>
+                                <a class="pagination-link" href="?page=<?php echo $page + 1; ?>">NEXT</a>
+                            <?php endif; ?>
+                        </p>
                     </div>
                 </div>
             </div>
