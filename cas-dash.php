@@ -1495,7 +1495,7 @@ $conn->close();
                 }
             });
 
-                function confirmLogout(event) {
+            function confirmLogout(event) {
                 event.preventDefault();
                 Swal.fire({
                     title: 'Are you sure?',

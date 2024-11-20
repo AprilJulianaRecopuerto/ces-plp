@@ -986,6 +986,12 @@ if ($result === false) {
                     });
                 });
 
+                 // Log clicks on the "Archive" link
+                 document.getElementById("archive").addEventListener("click", function(event) {
+                    event.preventDefault(); // Prevent default action to allow logging first
+                    logAndRedirect("Archive", "cas-archive.php");
+                });
+
             // Log clicks on the "Profile" link
             document.querySelector('.dropdown-menu a[href="cas-your-profile.php"]').addEventListener("click", function() {
                 logAction("Profile");
@@ -1205,62 +1211,6 @@ if ($result === false) {
                 showWarningAlert('<?php echo addslashes($_SESSION['warning']); ?>');
                 <?php unset($_SESSION['warning']); ?> // Clear the message after displaying
             <?php endif; ?>
-
-            function logAction(actionDescription) {
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", "college_logs.php", true);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                xhr.send("action=" + encodeURIComponent(actionDescription));
-            }
-
-            function logAndRedirect(actionDescription, url) {
-                logAction(actionDescription); // Log the action
-                setTimeout(function() {
-                    window.location.href = url; // Redirect after logging
-                }, 100); // Delay to ensure logging completes
-            }
-
-            // Add event listeners when the page is fully loaded
-            document.addEventListener("DOMContentLoaded", function() {
-                // Log clicks on main menu links
-                document.querySelectorAll(".menu > li > a").forEach(function(link) {
-                    link.addEventListener("click", function() {
-                        logAction(link.textContent.trim());
-                    });
-                });
-
-                // Handle dropdown button clicks
-                var dropdowns = document.getElementsByClassName("dropdown-btn");
-                for (let i = 0; i < dropdowns.length; i++) {
-                    dropdowns[i].addEventListener("click", function () {
-                        let dropdownContents = document.getElementsByClassName("dropdown-container");
-                        for (let j = 0; j < dropdownContents.length; j++) {
-                            dropdownContents[j].style.display = "none";
-                        }
-                        let dropdownContent = this.nextElementSibling;
-                        if (dropdownContent.style.display === "block") {
-                            dropdownContent.style.display = "none";
-                        } else {
-                            dropdownContent.style.display = "block";
-                        }
-                    });
-                }
-
-                // Log clicks on dropdown links
-                document.querySelectorAll(".dropdown-container a").forEach(function(link) {
-                    link.addEventListener("click", function(event) {
-                        event.stopPropagation();
-                        logAction(link.textContent.trim());
-                    });
-                });
-
-
-                // Log clicks on the "Archive" link
-                document.getElementById("archive").addEventListener("click", function(event) {
-                    event.preventDefault(); // Prevent default action to allow logging first
-                    logAndRedirect("Archive", "cas-archive.php");
-                });
-            });
 
             document.addEventListener("DOMContentLoaded", () => {
                 function checkNotifications() {
