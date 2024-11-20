@@ -746,15 +746,6 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 color: inherit;
             }
 
-            /* Style for the file item list */
-            .file-items {
-                list-style-type: none;
-                display: flex;
-                flex-wrap: wrap;
-                padding: 0;
-                margin: 0;
-            }
-
             .file-item {
                 width: 135px; /* Set consistent width for the item */
                 margin: 10px;
@@ -764,27 +755,26 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 border-radius: 8px;
                 background-color: #f4f4f4;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                overflow: hidden; /* Ensure content doesn't overflow */
+                overflow: hidden; /* Prevent content overflow */
             }
 
-            /* File box alignment to center contents */
             .file-box {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                justify-content: center;
+                justify-content: flex-start; /* Align items starting from the top */
                 padding: 10px;
                 text-align: center;
+                height: 180px; /* Ensure consistent height */
+                overflow: hidden; /* Prevent overflow */
             }
 
-
-            /* File image and icon shared styles */
             .file-image img,
             .file-icon img {
-                width: 100%; /* Set full width of the container */
-                height: 110px; /* Set a fixed height for consistency */
-                object-fit: cover; /* Maintain aspect ratio, cropping as necessary */
-                border-radius: 5px; /* Optional: add rounded corners */
+                width: 100%; /* Full width of the container */
+                height: 110px; /* Fixed height for images/icons */
+                object-fit: cover; /* Maintain aspect ratio, cropping as needed */
+                border-radius: 5px; /* Optional: rounded corners */
             }
 
             .file-name {
@@ -793,18 +783,13 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 color: #000;
                 font-weight: bold;
                 text-align: center;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                margin-top: 5px;
-                max-width: 100%; /* Match the container's width */
+                white-space: nowrap; /* Prevent text wrapping */
+                overflow: hidden; /* Hide overflow */
+                text-overflow: ellipsis; /* Show ellipsis for long text */
+                margin-top: 8px;
+                width: 100%; /* Full width of the parent container */
             }
 
-            /* File link to remove underline */
-            .file-link {
-                text-decoration: none;
-                color: inherit;
-            }
 
             /* Button styles */
             .btn-delete {
@@ -917,8 +902,8 @@ if ($subfolder_name && is_dir($subfolder_path)) {
             }
     </style>
 </head>
-<body>
 
+    <body>
         <nav class="navbar">
             <h2>Mode of Verification</h2> 
 
