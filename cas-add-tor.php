@@ -8,23 +8,27 @@ if (!isset($_SESSION['uname'])) {
 }
 
 // Database credentials
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "resource_utilization"; // Your database name
-$dbname_user_registration = "user_registration";
-
+$servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_resource = "dnr20srzjycb99tw";
+$password_resource = "ndfnpz4j74v8t0p7";
+$dbname_resource = "x8uwt594q5jy7a7o";
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
 
 // Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
 // Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername, $username, $password, $dbname_user_registration);
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }
@@ -44,6 +48,40 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
 $stmt->close();
 $conn_profile->close();
 
+// Database credentials for proj_list
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
+$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
+
+// Check connection
+if ($conn_proj_list->connect_error) {
+    die("Connection failed: " . $conn_proj_list->connect_error);
+}
+
+
+// Ensure the ID is passed and valid
+if (isset($_GET['id'])) {
+    $project_id = $_GET['id']; // Retrieve the ID from the URL
+
+    // Use this ID to fetch the project details from the database or perform other actions
+    $sql = "SELECT * FROM cas WHERE id = ?";
+    $stmt = $conn_proj_list->prepare($sql);
+    $stmt->bind_param("i", $project_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $project = $result->fetch_assoc();
+        // You can now use $project to display information about the selected project
+    } else {
+        echo "Project not found!";
+    }
+} else {
+    echo "No project ID provided.";
+}
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -53,9 +91,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $agency = $_POST['agency'];
     $date_of_delivery = $_POST['dateof_delivery'];
 
+    // Assign project_id to tor_sub
+    $tor_sub = $project_id; // Assuming the project ID is meant to be used as tor_sub
+
     // Insert into cas_tor
-    $stmt = $conn->prepare("INSERT INTO cas_tor (college_name, procurement_title, agency, date_of_delivery) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssss", $college_name, $procurement_title, $agency, $date_of_delivery);
+    $stmt = $conn->prepare("INSERT INTO cas_tor (tor_sub, college_name, procurement_title, agency, date_of_delivery) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("issss", $tor_sub, $college_name, $procurement_title, $agency, $date_of_delivery);
 
     if ($stmt->execute()) {
         // Get the last inserted ID for cas_tor
@@ -95,7 +136,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
         // Close food statement
         $food_stmt->close();
-   
 
         // Set success message in session
         $_SESSION['success'] = 'Events saved successfully.';
@@ -454,9 +494,8 @@ $conn->close();
             }
 
             .custom-swal-popup {
-                font-family: 'Poppins', sans-serif;
-                font-size: 16px; /* Increase the font size */
-                width: 400px !important; /* Set a larger width */
+                font-family: "Poppins", sans-serif !important;
+                width: 400px;
             }
 
             .custom-swal-confirm {
@@ -483,6 +522,11 @@ $conn->close();
             .custom-error-popup {
                 font-family: 'Poppins', sans-serif;
                 width: 400px !important; /* Set a larger width */
+            }
+
+            .custom-error-title {
+                font-family: 'Poppins', sans-serif;
+                color: #e74c3c; /* Custom title color for error */
             }
 
             .custom-error-confirm {
@@ -667,6 +711,11 @@ $conn->close();
         <div class="content-tor">
             <div class="form-container">
 
+                <div class="form-group">
+                    <label for="tor_sub">ID:</label>
+                    <input type="text"  id="tor_sub" name="project_id" value="<?= $project['id']; ?>" readonly>
+                </div>
+
                 <h2>Event Submission Form</h2>
                 <form id="eventForm" action="" method="POST">
                     <div class="form-group">
@@ -676,7 +725,7 @@ $conn->close();
 
                     <div class="form-group">
                         <label for="procurement_title">Procurement Title:</label>
-                        <input type="text" id="procurement_title" name="procurement_title" placeholder="Enter Procurement Title" required>
+                        <input type="text" id="procurement_title" name="procurement_title" value="<?= $project['proj_title']; ?>"  required>
                     </div>
 
                     <div class="form-group">

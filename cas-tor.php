@@ -700,7 +700,7 @@ $conn_profile->close();
 
         <div class="content-tor">
             <div class="button-container">
-                <button onclick="logAndRedirect('Add TOR','cas-add-tor.php')">TOR Form</button>
+                <button onclick="logAndRedirect('Add TOR','cas-add-resource.php')">TOR Form</button>
             </div>
 
             <?php
