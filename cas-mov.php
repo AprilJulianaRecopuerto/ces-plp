@@ -906,6 +906,22 @@ if ($result === false) {
                 });
             }
 
+            // Dropdown menu toggle
+            document.getElementById('profileDropdown').addEventListener('click', function() {
+                const dropdown = this.querySelector('.dropdown-menu');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close dropdown if clicked outside
+            window.addEventListener('click', function(event) {
+                if (!document.getElementById('profileDropdown').contains(event.target)) {
+                    const dropdown = document.querySelector('.dropdown-menu');
+                    if (dropdown) {
+                        dropdown.style.display = 'none';
+                    }
+                }
+            });
+
             function logAction(actionDescription) {
                 var xhr = new XMLHttpRequest();
                 xhr.open("POST", "college_logs.php", true);
@@ -966,274 +982,6 @@ if ($result === false) {
                 });
             });
 
-        document.addEventListener('DOMContentLoaded', function () {
-            var modal = document.getElementById("folderModal");
-            var btn = document.getElementById("createFolderBtn");
-            var cancelButton = document.getElementById("cancelButton");
-
-            btn.onclick = function() {
-                modal.style.display = "block";
-            };
-
-            cancelButton.onclick = function() {
-                modal.style.display = "none";
-            };
-        });
-
-            // JavaScript code for context menu actions
-            const contextMenu = document.getElementById('contextMenu');
-            const folderElements = document.querySelectorAll('.folder');
-
-            folderElements.forEach(folder => {
-                folder.addEventListener('contextmenu', function (event) {
-                    event.preventDefault();
-                    const folderName = folder.getAttribute('data-folder-name');
-
-                    // Position the context menu
-                    contextMenu.style.display = 'block';
-                    contextMenu.style.left = `${event.pageX}px`;
-                    contextMenu.style.top = `${event.pageY}px`;
-
-
-                    // Rename Folder action
-                    document.getElementById('renameFolder').onclick = function () {
-                        contextMenu.style.display = 'none'; // Hide context menu
-                        Swal.fire({
-                            title: 'Rename Folder',
-                            input: 'text',
-                            inputValue: folderName, // Pre-fill with current folder name
-                            inputPlaceholder: 'Enter new folder name',
-                            showCancelButton: true,
-                            confirmButtonText: 'Rename',
-                            cancelButtonText: 'Cancel',
-                            customClass: {
-                                popup: 'custom-swal-popup',
-                                title: 'custom-swal-title',
-                                input: 'custom-swal-input',
-                                confirmButton: 'custom-swal-confirm',
-                                cancelButton: 'custom-swal-cancel' // Custom class for the cancel button
-                            },
-                            preConfirm: (newName) => {
-                                if (!newName) {
-                                    Swal.showValidationMessage('Folder name cannot be empty');
-                                }
-                                return newName;
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                const newFolderName = result.value;
-
-                                // Create a hidden form for renaming the folder
-                                const form = document.createElement('form');
-                                form.method = 'POST';
-                                form.action = ''; // The same page
-
-                                const actionInput = document.createElement('input');
-                                actionInput.type = 'hidden';
-                                actionInput.name = 'action';
-                                actionInput.value = 'rename';
-
-                                const oldNameInput = document.createElement('input');
-                                oldNameInput.type = 'hidden';
-                                oldNameInput.name = 'old_folder_name';
-                                oldNameInput.value = folderName;
-
-                                const newNameInput = document.createElement('input');
-                                newNameInput.type = 'hidden';
-                                newNameInput.name = 'new_folder_name';
-                                newNameInput.value = newFolderName;
-
-                                form.appendChild(actionInput);
-                                form.appendChild(oldNameInput);
-                                form.appendChild(newNameInput);
-                                document.body.appendChild(form);
-                                form.submit(); // Submit the form
-                            }
-                        });
-                    };
-
-                    // Delete Folder action
-                    document.getElementById('deleteFolder').onclick = function () {
-                        contextMenu.style.display = 'none'; // Hide context menu
-                        Swal.fire({
-                            title: 'Delete Folder',
-                            text: Are you sure you want to delete "${folderName}"?,
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonText: 'Delete',
-                            cancelButtonText: 'Cancel',
-                            customClass: {
-                                popup: 'custom-swal-popup',
-                                title: 'custom-swal-title',
-                                confirmButton: 'custom-swal-confirm',
-                                cancelButton: 'custom-swal-cancel'
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                // Create a hidden form for deleting the folder
-                                const form = document.createElement('form');
-                                form.method = 'POST';
-                                form.action = ''; // The same page
-
-                                const actionInput = document.createElement('input');
-                                actionInput.type = 'hidden';
-                                actionInput.name = 'action';
-                                actionInput.value = 'delete';
-
-                                const nameInput = document.createElement('input');
-                                nameInput.type = 'hidden';
-                                nameInput.name = 'folder_name';
-                                nameInput.value = folderName;
-
-                                form.appendChild(actionInput);
-                                form.appendChild(nameInput);
-                                document.body.appendChild(form);
-                                form.submit(); // Submit the form
-                            }
-                        });
-                    };
-                });
-            });
-
-            // Hide context menu when clicking anywhere else
-            window.addEventListener('click', function () {
-                contextMenu.style.display = 'none';
-            });
-
-
-           // Function to show success SweetAlert
-            function showSuccessAlert(message) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: message,
-                    confirmButtonColor: '#089451',
-                    confirmButtonText: 'Continue',
-                    customClass: {
-                        popup: 'custom-swal-popup',
-                        title: 'custom-swal-title',
-                        confirmButton: 'custom-swal-confirm'
-                    }
-                }).then(() => {
-                    window.location.href = "cas-mov.php"; // Redirect to the desired page
-                });
-            }
-
-            // Function to show error SweetAlert
-            function showErrorAlert(message) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: message,
-                    confirmButtonColor: '#e74c3c',
-                    confirmButtonText: 'Try Again',
-                    customClass: {
-                        popup: 'custom-error-popup',
-                        title: 'custom-error-title',
-                        confirmButton: 'custom-error-confirm'
-                    }
-                });
-            }
-
-            // Function to show warning SweetAlert
-            function showWarningAlert(message) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Warning',
-                    text: message,
-                    confirmButtonText: 'Okay',
-                    customClass: {
-                        popup: 'custom-warning-popup',
-                        title: 'custom-warning-title',
-                        confirmButton: 'custom-warning-confirm'
-                    }
-                });
-            }
-
-            // Check for folder creation success message
-            <?php if (isset($_SESSION['folder_create_success'])): ?>
-                showSuccessAlert('<?php echo addslashes($_SESSION['folder_create_success']); ?>');
-                <?php unset($_SESSION['folder_create_success']); ?> // Clear the message
-            <?php endif; ?>
-
-            // Check for folder rename success message
-            <?php if (isset($_SESSION['folder_rename_success'])): ?>
-                showSuccessAlert('<?php echo addslashes($_SESSION['folder_rename_success']); ?>');
-                <?php unset($_SESSION['folder_rename_success']); ?> // Clear the message
-            <?php endif; ?>
-
-            // Check for folder deletion success message
-            <?php if (isset($_SESSION['folder_delete_success'])): ?>
-                showSuccessAlert('<?php echo addslashes($_SESSION['folder_delete_success']); ?>');
-                <?php unset($_SESSION['folder_delete_success']); ?> // Clear the message
-            <?php endif; ?>
-
-            // Check for error messages
-            <?php if (isset($_SESSION['folder_error'])): ?>
-                showErrorAlert('<?php echo addslashes($_SESSION['folder_error']); ?>');
-                <?php unset($_SESSION['folder_error']); ?> // Clear the message
-            <?php endif; ?>
-
-            // Check for warning message in session and show alert
-            <?php if (isset($_SESSION['warning'])): ?>
-                showWarningAlert('<?php echo addslashes($_SESSION['warning']); ?>');
-                <?php unset($_SESSION['warning']); ?> // Clear the message after displaying
-            <?php endif; ?>
-
-            document.addEventListener("DOMContentLoaded", () => {
-                function checkNotifications() {
-                    fetch('cas-check_notifications.php')
-                        .then(response => response.json())
-                        .then(data => {
-                            const chatNotification = document.getElementById('chatNotification');
-                            if (data.unread_count > 0) {
-                                chatNotification.style.display = 'inline-block';
-                            } else {
-                                chatNotification.style.display = 'none';
-                            }
-                        })
-                        .catch(error => console.error('Error checking notifications:', error));
-                }
-
-                // Check for notifications every 2 seconds
-                setInterval(checkNotifications, 2000);
-                checkNotifications(); // Initial check when page loads
-            });
-
-            document.getElementById('profileDropdown').addEventListener('click', function() {
-            var dropdownMenu = document.querySelector('.dropdown-menu');
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-            });
-
-            // Optional: Close the dropdown if clicking outside the profile area
-            window.onclick = function(event) {
-                if (!event.target.closest('#profileDropdown')) {
-                    var dropdownMenu = document.querySelector('.dropdown-menu');
-                    if (dropdownMenu.style.display === 'block') {
-                        dropdownMenu.style.display = 'none';
-                    }
-                }
-            };
-            
-            var dropdowns = document.getElementsByClassName("dropdown-btn");
-
-            for (let i = 0; i < dropdowns.length; i++) {
-                dropdowns[i].addEventListener("click", function () {
-                    // Close all dropdowns first
-                    let dropdownContents = document.getElementsByClassName("dropdown-container");
-                    for (let j = 0; j < dropdownContents.length; j++) {
-                        dropdownContents[j].style.display = "none";
-                    }
-
-                    // Toggle the clicked dropdown's visibility
-                    let dropdownContent = this.nextElementSibling;
-                    if (dropdownContent.style.display === "block") {
-                        dropdownContent.style.display = "none";
-                    } else {
-                        dropdownContent.style.display = "block";
-                    }
-                });
-            };
         </script>
     </body>
 </html>
