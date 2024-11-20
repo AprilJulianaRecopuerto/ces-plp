@@ -44,40 +44,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $event = $row['event'];
 
         // Hosted image URLs
-        $bgImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
+        $bgImageURL = '/CES/images/cert-bg.png';
         $logoImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png';
         
         // Generate PDF for each participant
         $date = date("l, F j, Y");
         
-        $mail = new PHPMailer(true);
-
-try {
-    // Server settings
-    $mail->isSMTP();
-    $mail->Host = 'smtp.example.com'; // Replace with your SMTP host
-    $mail->SMTPAuth = true;
-    $mail->Username = 'your_email@example.com'; // Replace with your email
-    $mail->Password = 'your_password'; // Replace with your email password
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port = 587;
-
-    // Sender and recipient
-    $mail->setFrom('your_email@example.com', 'Community Extension Services');
-    $mail->addAddress($recipientEmail, $recipientName); // Replace with recipient details
-
-    // Attach embedded image
-    $mail->AddEmbeddedImage('cert-bg.png', 'certBg', 'cert-bg.png'); // Ensure `cert-bg.png` is accessible
-
-    // Email content
-    $mail->isHTML(true);
-    $mail->Subject = 'Certificate of Participation';
-
-    $emailBody = "
-    <html>
+        $html = "
+        <html>
         <head>
+        
+            <!-- Link Google Fonts directly -->
             <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
             <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
+        
             <style>
                 body { 
                     text-align: center;
@@ -85,6 +65,7 @@ try {
                     padding: 0; 
                     font-family: 'Poppins', sans-serif;
                 }
+        
                 .certificate img {
                     position: absolute;
                     margin-top: -45px;
@@ -93,13 +74,17 @@ try {
                     object-fit: cover;
                     z-index: -1;
                 }
+        
                 .subheading {
+                    font-family: 'Poppins', sans-serif;
                     font-size: 20px;
                     color: #666;
                     margin: 20px 0;
                     margin-top: 240px;
+                    margin-left: -195px;
                     letter-spacing: 0.5px;
                 }
+        
                 .name { 
                     font-family: 'Lilita One', sans-serif;
                     font-size: 80px;
@@ -107,41 +92,60 @@ try {
                     color: #333;
                     margin: 20px 0;
                     text-decoration: underline;
-                    font-style: italic;
-                    text-transform: uppercase;
+                    font-style: italic;  /* Make it italic if cursive is not working */
+                    text-transform: uppercase; /* Convert text to uppercase */
                     margin-top: 30px;
                 }
+        
                 .details {
+                    font-family: 'Poppins', sans-serif;
                     font-size: 22px; 
                     color: black;
                     line-height: 1.5;
                     margin-top: 20px;
                 }
+        
+                .date {
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 20px; 
+                    color: #888;
+                    margin-top: 30px;
+                }
+        
+                .footer {
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 18px;
+                    color: black;
+                    text-align: center;
+                    margin-top: 50px;
+                }
+        
                 .footer-content {
                     display: flex;
-                    justify-content: center;
+                    justify-content: center;  /* Centers items horizontally */
+                
                 }
+        
                 .footer-content img {
-                    margin-left: 10px;
-                    max-width: 80px;
+                    margin-left: 340px;
+                    max-width: 80px;  /* Adjust the size of the logo */
                     height: auto;
                     margin-top: -3px;
                 }
+        
                 .footer-text {
                     font-size: 20px;
-                    margin-left: 10px;
+                    margin-left: 110px;
                     font-weight: normal;
                 }
             </style>
         </head>
         <body>
             <div class='certificate'>
-                <img src='cid:certBg' alt='Certificate Background'>
+                <img src='$bgImageURL' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
-                <p class='details'>
-                    Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.
-                </p>
+                <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
                         <img src='$logoImageURL' alt='Logo'>
@@ -150,16 +154,8 @@ try {
                 </div>
             </div>
         </body>
-    </html>";
-
-    $mail->Body = $emailBody;
-
-    // Send email
-    $mail->send();
-    echo 'Certificate email has been sent successfully.';
-} catch (Exception $e) {
-    echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-}
+        </html>
+        ";
         try {
             // Generate the PDF
             $options = new Options();
