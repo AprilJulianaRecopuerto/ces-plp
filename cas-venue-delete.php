@@ -1,15 +1,16 @@
 <?php
-$servername = "localhost"; // Your database server
-$username = "root"; // Your database username
-$password = ""; // Your database password
-$dbname = "resource_utilization"; // Your database name
+// Database credentials
+$servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_resource = "dnr20srzjycb99tw";
+$password_resource = "ndfnpz4j74v8t0p7";
+$dbname_resource = "x8uwt594q5jy7a7o";
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
 
 // Check connection
 if ($conn->connect_error) {
-    die(json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]));
+    die("Connection failed: " . $conn->connect_error);
 }
 
 // Check if reservation_id is provided for count check

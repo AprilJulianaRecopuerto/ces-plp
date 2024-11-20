@@ -9,22 +9,27 @@ if (!isset($_SESSION['uname'])) {
 }
 
 // Database credentials
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "resource_utilization"; // Your database name
-$dbname_user_registration = "user_registration";
+$servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_resource = "dnr20srzjycb99tw";
+$password_resource = "ndfnpz4j74v8t0p7";
+$dbname_resource = "x8uwt594q5jy7a7o";
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
 
 // Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
 // Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername, $username, $password, $dbname_user_registration);
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }
@@ -44,16 +49,53 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
 $stmt->close();
 $conn_profile->close();
 
+// Database credentials for proj_list
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
+$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
+
+// Check connection
+if ($conn_proj_list->connect_error) {
+    die("Connection failed: " . $conn_proj_list->connect_error);
+}
+
+// Ensure the ID is passed and valid
+if (isset($_GET['id'])) {
+    $project_id = $_GET['id']; // Retrieve the ID from the URL
+
+    // Use this ID to fetch the project details from the database or perform other actions
+    $sql = "SELECT * FROM cas WHERE id = ?";
+    $stmt = $conn_proj_list->prepare($sql);
+    $stmt->bind_param("i", $project_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $project = $result->fetch_assoc();
+        // You can now use $project to display information about the selected project
+    } else {
+        echo "Project not found!";
+    }
+} else {
+    echo "No project ID provided.";
+}
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Step 1: Insert into cas_reservation
-    $stmt = $conn->prepare("INSERT INTO cas_reservation (date_of_request, name, college_name, event_activity, event_date, time_of_event) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssss", $_POST['date'], $_POST['name'], $_POST['college_name'], $_POST['event'], $_POST['event_date'], $_POST['time_of_event']);
-    
+    // Step 1: Set venue_sub as the project ID
+    $venue_sub = $project_id;  // Make sure $project_id is valid
+
+    // Step 2: Insert into cas_reservation with venue_sub
+    $stmt = $conn->prepare("INSERT INTO cas_reservation (venue_sub, date_of_request, name, college_name, event_activity, event_date, time_of_event) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("issssss", $venue_sub, $_POST['date'], $_POST['name'], $_POST['college_name'], $_POST['event'], $_POST['event_date'], $_POST['time_of_event']);
+
     if ($stmt->execute()) {
         $reservation_id = $conn->insert_id;
 
-        // Step 2: Insert venue requests
+        // Step 3: Insert venue requests
         if (isset($_POST['venue_requests'])) {
             // Corrected the SQL statement to match your database schema
             $venue_stmt = $conn->prepare("INSERT INTO cas_venue_request (reservation_id, venue_name) VALUES (?, ?)");
@@ -87,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $venue_stmt->close(); // Close the venue statement after the loop
         }
 
-        // Step 3: Insert additional requests
+        // Step 4: Insert additional requests
         if (isset($_POST['additional_requests'])) {
             $request_stmt = $conn->prepare("INSERT INTO cas_addedrequest (reservation_id, additional_request, quantity) VALUES (?, ?, ?)");
             if (!$request_stmt) {
@@ -138,7 +180,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Close the database connection
 $conn->close();
 ?>
-
 
 
 <!DOCTYPE html>
@@ -475,9 +516,8 @@ $conn->close();
             }
 
             .custom-swal-popup {
-                font-family: 'Poppins', sans-serif;
-                font-size: 16px; /* Increase the font size */
-                width: 400px !important; /* Set a larger width */
+                font-family: "Poppins", sans-serif !important;
+                width: 400px;
             }
 
             .custom-swal-confirm {
@@ -504,6 +544,11 @@ $conn->close();
             .custom-error-popup {
                 font-family: 'Poppins', sans-serif;
                 width: 400px !important; /* Set a larger width */
+            }
+
+            .custom-error-title {
+                font-family: 'Poppins', sans-serif;
+                color: #e74c3c; /* Custom title color for error */
             }
 
             .custom-error-confirm {
@@ -633,7 +678,7 @@ $conn->close();
     </head>
 
     <body>
-    <nav class="navbar">
+        <nav class="navbar">
             <h2>Add Venue Details</h2> 
 
             <div class="profile-container">
@@ -717,6 +762,11 @@ $conn->close();
         <div class="content-venue">
             <div class="form-container">
 
+                <div class="form-group">
+                    <label for="requi_sub">ID:</label>
+                    <input type="text"  id="requi_sub" name="project_id" value="<?= $project['id']; ?>" readonly>
+                </div>
+
                 <h2>Facilities Reservation Form</h2>
                 
                 <form id="venueForm" action="" method="POST">
@@ -739,17 +789,17 @@ $conn->close();
 
                     <div class="form-group">
                         <label for="event">Event/Activity:</label>
-                        <input type="text" id="event" name="event" placeholder="Enter your Event/Activity Name" required >
+                        <input type="text" id="event" name="event"   value="<?= $project['proj_title']; ?>" required >
                     </div>
 
                     <div class="form-group">
                         <label for="event_date">Date of Event:</label>
-                        <input type="date" id="event_date" name="event_date" required>
+                        <input type="date" id="event_date" name="event_date" value="<?= $project['dateof_imple']; ?>" required>
                     </div>
 
                     <div class="form-group">
                         <label for="time_of_event">Time of Event:</label>
-                        <input type="text" id="time_of_event" name="time_of_event" placeholder="hh:mm AM/PM" required >
+                        <input type="text" id="time_of_event" name="time_of_event" value="<?= $project['time_from']; ?>" required >
                     </div>
 
                     <div class="form-group">
@@ -838,7 +888,25 @@ $conn->close();
         </div>
 
         <script>
-                function confirmLogout(event) {
+            // Set the current date in YYYY-MM-DD format
+            window.onload = function() {
+                var today = new Date();
+                var yyyy = today.getFullYear();
+                var mm = today.getMonth() + 1; // Months are zero-based
+                var dd = today.getDate();
+
+                // Add leading zero for single-digit day/month
+                if (mm < 10) mm = '0' + mm;
+                if (dd < 10) dd = '0' + dd;
+
+                // Format the date to match input type="date"
+                var formattedDate = yyyy + '-' + mm + '-' + dd;
+
+                // Set the value of the date input field
+                document.getElementById('date').value = formattedDate;
+            };
+
+            function confirmLogout(event) {
                 event.preventDefault();
                 Swal.fire({
                     title: 'Are you sure?',

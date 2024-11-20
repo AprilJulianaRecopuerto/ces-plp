@@ -35,6 +35,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Fetch the profile picture from the colleges table in user_registration database
 $sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $un = "equ6v8i5llo3uhjm";
 $psd = "vkfaxm2are5bjc3q";
@@ -62,6 +63,8 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
 $stmt->close();
 $conn_profile->close();
 ?>
+
+
 
 <!DOCTYPE html>
     <html lang="en">
@@ -609,60 +612,61 @@ $conn_profile->close();
         </div>
 
         <div class="content-resource">
-            <table class="crud-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Project Title</th>
-                        <th>Semester</th>
-                        <th>Department</th>
-                        <th>Date of Event</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    // Fetch all projects from the cas table
-                    $sql = "SELECT * FROM cas";
-                    $result = $conn_proj_list->query($sql);
+    <table class="crud-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Project Title</th>
+                <th>Semester</th>
+                <th>Department</th>
+                <th>Date of Event</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            // Fetch all projects from the cas table
+            $sql = "SELECT * FROM cas";
+            $result = $conn_proj_list->query($sql);
 
-                    if ($result && $result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            $project_id = $row["id"];
+            if ($result && $result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    $project_id = $row["id"];
 
-                            // Check if the project_id already exists in the cas_tor table
-                            $check_sql = "SELECT * FROM cas_requisition WHERE requi_sub = ?";
-                            $check_stmt = $conn->prepare($check_sql);
-                            $check_stmt->bind_param("i", $project_id);
-                            $check_stmt->execute();
-                            $check_result = $check_stmt->get_result();
+                    // Check if the project_id already exists in the cas_tor table
+                    $check_sql = "SELECT * FROM cas_reservation WHERE venue_sub = ?";
+                    $check_stmt = $conn->prepare($check_sql);
+                    $check_stmt->bind_param("i", $project_id);
+                    $check_stmt->execute();
+                    $check_result = $check_stmt->get_result();
 
-                            // If the project is already added in cas_tor, do not display it
-                            if ($check_result && $check_result->num_rows > 0) {
-                                continue; // Skip this project if it exists in cas_tor
-                            }
-
-                            // If not already added, display the project
-                            echo "<tr>
-                                    <td>" . $project_id . "</td>
-                                    <td>" . $row["proj_title"] . "</td>
-                                    <td>" . $row["semester"] . "</td>
-                                    <td>" . $row["dept"] . "</td>
-                                    <td>" . $row["dateof_imple"] . "</td>
-                                    <td class='add'>
-                                        <a href='cas-add-requi.php?id=" . $project_id . "'>Add</a>
-                                    </td>
-                                </tr>";
-                        }
-                    } else {
-                        echo "<tr><td colspan='6'>No records found</td></tr>";
+                    // If the project is already added in cas_tor, do not display it
+                    if ($check_result && $check_result->num_rows > 0) {
+                        continue; // Skip this project if it exists in cas_tor
                     }
 
-                    $conn_proj_list->close();
-                    ?>
-                </tbody>
-            </table>
-        </div>
+                    // If not already added, display the project
+                    echo "<tr>
+                            <td>" . $project_id . "</td>
+                            <td>" . $row["proj_title"] . "</td>
+                            <td>" . $row["semester"] . "</td>
+                            <td>" . $row["dept"] . "</td>
+                            <td>" . $row["dateof_imple"] . "</td>
+                            <td class='add'>
+                                <a href='cas-add-venue.php?id=" . $project_id . "'>Add</a>
+                            </td>
+                        </tr>";
+                }
+            } else {
+                echo "<tr><td colspan='6'>No records found</td></tr>";
+            }
+
+            $conn_proj_list->close();
+            ?>
+        </tbody>
+    </table>
+</div>
+
 
         <script>
             function updateBarangays() {

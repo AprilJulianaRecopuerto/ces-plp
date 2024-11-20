@@ -691,7 +691,7 @@ $conn_profile->close();
     </head>
 
     <body>
-    <nav class="navbar">
+        <nav class="navbar">
             <h2>Venue Details</h2> 
 
             <div class="profile-container">
@@ -774,7 +774,7 @@ $conn_profile->close();
 
         <div class="content-venue">
             <div class="button-container">
-               <button onclick="logAndRedirect('Add Venue', 'cas-add-venue.php')">Facilities Reservation Form</button>
+               <button onclick="logAndRedirect('Add Venue', 'cas-venue-list.php')">Facilities Reservation Form</button>
             </div>
 
             <?php
