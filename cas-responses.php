@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </head>
         <body>
             <?php
-            $mail->AddEmbeddedImage('path_to/cert-bg.png', 'certBg', 'cert-bg.png');
+            $mail->AddEmbeddedImage('images/cert-bg.png', 'certBg', 'cert-bg.png');
             $emailBody = '
             <div class='certificate'>
                 <img src='cid:certBg' alt='Background'>
