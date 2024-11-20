@@ -784,7 +784,7 @@ $conn_proj_list->close();
                 <!-- Dropdown for Task Management -->
                 <li><a href="cas-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="responses.php"><img src="images/setting.png">Responses</a></li>
+                <li><a href="responses.php"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
