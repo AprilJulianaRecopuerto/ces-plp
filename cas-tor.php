@@ -617,7 +617,7 @@ $conn_profile->close();
     </head>
 
     <body>
-    <nav class="navbar">
+        <nav class="navbar">
             <h2>Terms of Reference (for Food)</h2> 
 
             <div class="profile-container">
