@@ -44,12 +44,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $event = $row['event'];
 
        // Convert background image to base64
-$bgImagePath = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png'; // Update with actual path to your background image
+$bgImagePath = '/images/cert-bg.png'; // Update with actual path to your background image
 $bgImageData = base64_encode(file_get_contents($bgImagePath)); 
 $bgImageBase64 = 'data:image/png;base64,' . $bgImageData;
 
 // Convert logo image to base64
-$logoImagePath = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png'; // Update with actual path to your logo image
+$logoImagePath = '/images/logoicon.png'; // Update with actual path to your logo image
 $logoImageData = base64_encode(file_get_contents($logoImagePath)); 
 $logoImageBase64 = 'data:image/png;base64,' . $logoImageData;
 
