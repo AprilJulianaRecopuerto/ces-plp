@@ -425,8 +425,6 @@ if (!isset($_SESSION['username'])) {
                 right: -10px; /* Adjust as needed */
                 font-size: 14px; /* Size of the exclamation point */
             }
-
-           
         </style>
     </head>
 

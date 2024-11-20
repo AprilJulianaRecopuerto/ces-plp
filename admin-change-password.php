@@ -721,11 +721,13 @@ if (isset($_SESSION['alert_shown']) && $_SESSION['alert_shown']) {
         }
 
         .chat-icon {
-            margin-right: 15px;
             font-size: 20px;
             color: #333;
             text-decoration: none;
             position: relative; /* To position the badge correctly */
+            margin-right: 30px;
+            margin-top: 8px;
+            margin-left: -37px;
         }
 
         .notification-badge {
@@ -773,12 +775,15 @@ if (isset($_SESSION['alert_shown']) && $_SESSION['alert_shown']) {
 <body>
 <nav class="navbar">
     <h2>My Profile</h2> 
-	<div class="profile-container">
-	<!-- Chat Icon with Notification Badge -->
-	<a href="chat.php" class="chat-icon" onclick="resetNotifications()">
-		<i class="fa fa-comments"></i>
-		<span class="notification-badge" id="chatNotification" style="display: none;">!</span>
-	</a>
+
+	    <div class="profile-container">
+            <!-- Chat Icon with Notification Badge -->
+            <a href="chat.php" class="chat-icon" onclick="resetNotifications()">
+                <i class="fa fa-comments"></i>
+                <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+            </a>
+        <div>
+
 		<!-- Profile Section -->
 		<div class="profile" id="profileDropdown">
 			<?php

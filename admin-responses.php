@@ -681,7 +681,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
 
     <body>
         <nav class="navbar">
-            <h2>Dashboard</h2> 
+            <h2>Responses</h2> 
+            
             <div class="profile" id="profileDropdown">
                 <?php
                     // Check if a profile picture is set in the session
@@ -748,8 +749,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     <div class="content-projectlist">
         
         <div class="content">
-            
-             <h2>Responses</h2>
 
     <div class="button-container">
         <form method="POST" action = "">

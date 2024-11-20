@@ -660,12 +660,50 @@ $conn->close();
             font-family: "Poppins", sans-serif !important;
         }
 
+         /* Chat styles */
+         .navbar .profile-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-icon {
+            font-size: 20px;
+            color: #333;
+            text-decoration: none;
+            position: relative; /* To position the badge correctly */
+            margin-right: 30px;
+            margin-top: 8px;
+            margin-left: -37px;
+        }
+
+        .notification-badge {
+            display: inline-block;
+            background-color: red; /* Change this to your preferred color */
+            color: white;
+            border-radius: 50%;
+            width: 20px; /* Width of the badge */
+            height: 20px; /* Height of the badge */
+            text-align: center;
+            font-weight: bold;
+            position: absolute; /* Position it relative to the chat icon */
+            top: -5px; /* Adjust as needed */
+            right: -10px; /* Adjust as needed */
+            font-size: 14px; /* Size of the exclamation point */
+        }
     </style>
 </head>
 
     <body>
         <nav class="navbar">
             <h2>Edit Profile</h2> 
+
+            <div class="profile-container">
+                <!-- Chat Icon with Notification Badge -->
+                <a href="chat.php" class="chat-icon" onclick="resetNotifications()">
+                    <i class="fa fa-comments"></i>
+                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+                </a>
+            <div>
 
             <div class="profile" id="profileDropdown">
                 <?php
