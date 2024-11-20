@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $event = $row['event'];
 
        // Convert background image to base64
-$bgImagePath = '/images/cert-bg.png'; // Update with actual path to your background image
+$bgImagePath = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png'; // Update with actual path to your background image
 $bgImageData = base64_encode(file_get_contents($bgImagePath)); 
 $bgImageBase64 = 'data:image/png;base64,' . $bgImageData;
 
