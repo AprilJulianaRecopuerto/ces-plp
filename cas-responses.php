@@ -141,10 +141,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             </style>
         </head>
         <body>
-            $mail->AddEmbeddedImage('https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png', 'certBg', 'cert-bg.png');
-            $emailBody = '
             <div class='certificate'>
-                <img src='cid:certBg' alt='Background'>
+                <img src='https://pdao-06feec6aade2.herokuapp.com/images/PDAOLogo.png' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
@@ -154,8 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
-            </div>';
-            $mail->Body = $emailBody;
+            </div>
         </body>
         </html>
         ";
