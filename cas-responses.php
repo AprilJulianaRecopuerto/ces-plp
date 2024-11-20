@@ -47,12 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $bgImageURL = 'images/cert-bg.png'; // Use a local path
         $logoImageURL = 'images/logoicon.png'; // Use a local path
         
-        // Save image locally
-        file_put_contents($bgImageURL, file_get_contents('https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png'));
-        file_put_contents($logoImageURL, file_get_contents('https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png'));
-        
-        
-        
         // Generate PDF for each participant
         $date = date("l, F j, Y");
         
