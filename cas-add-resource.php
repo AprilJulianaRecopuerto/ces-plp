@@ -625,6 +625,9 @@ $conn_profile->close();
                     $sql = "SELECT * FROM cas";
                     $result = $conn_proj_list->query($sql);
 
+                    // Initialize a flag to check if any rows are displayed
+                    $has_records = false;
+
                     if ($result && $result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
                             $project_id = $row["id"];
@@ -636,7 +639,7 @@ $conn_profile->close();
                             $check_stmt->execute();
                             $check_result = $check_stmt->get_result();
 
-                            // If the project is already added in cas_tor, do not display it
+                            // If the project is already added in cas_tor, skip it
                             if ($check_result && $check_result->num_rows > 0) {
                                 continue; // Skip this project if it exists in cas_tor
                             }
@@ -652,8 +655,14 @@ $conn_profile->close();
                                         <a href='cas-add-tor.php?id=" . $project_id . "'>Add</a>
                                     </td>
                                 </tr>";
+
+                            // Set the flag to true since we displayed at least one record
+                            $has_records = true;
                         }
-                    } else {
+                    }
+
+                    // Display a fallback message if no records were displayed
+                    if (!$has_records) {
                         echo "<tr><td colspan='6'>No records found</td></tr>";
                     }
 
@@ -662,6 +671,7 @@ $conn_profile->close();
                 </tbody>
             </table>
         </div>
+
 
         <script>
             function updateBarangays() {
