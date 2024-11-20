@@ -719,7 +719,7 @@ $conn_profile->close();
             }
             ?>
 
-            <div class="data-details">
+<div class="data-details">
                 <h3>Event Form Details</h3>
 
                 <div class="table-container">
@@ -748,7 +748,7 @@ $conn_profile->close();
                             $totalPages = ceil($totalRecords / $limit); // Calculate total pages
 
                             // Fetch paginated event form details
-                            $eventFormSql = "SELECT * FROM cas_tor ORDER BY id DESC LIMIT $limit OFFSET $offset";
+                            $eventFormSql = "SELECT * FROM cas_tor ORDER BY id LIMIT $limit OFFSET $offset";
                             $resultEventForm = $conn->query($eventFormSql);
 
                             if ($resultEventForm && $resultEventForm->num_rows > 0) {
@@ -761,7 +761,6 @@ $conn_profile->close();
                                         <td class='edit'>
                                             <a href='cas-edit-tor.php?id=" . $row["id"] . "'>EDIT</a>
                                             <button class='delete-button' data-id='" . $row["id"] . "'>DELETE</button>
-                                            <a href='cas-download-report.php?id=" . $row["id"] . "' class='download-button'>Download Report</a>
                                         </td>
                                     </tr>";
                                 }
@@ -791,8 +790,7 @@ $conn_profile->close();
                         <tbody>
                             <?php
                             // Fetch event details
-                            $eventDetailsSql = "SELECT * FROM cas_food ORDER BY CAST(cas_tor_id AS SIGNED) DESC, event_date DESC";
-
+                            $eventDetailsSql = "SELECT * FROM cas_food ORDER BY cas_tor_id, event_date"; // Ensure the table name is correct
                             $resultEventDetails = $conn->query($eventDetailsSql);
 
                             if ($resultEventDetails && $resultEventDetails->num_rows > 0) {
