@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $event = $row['event'];
 
         // Hosted image URLs
-        $bgImageURL = 'images/cert-bg.png';
+        $bgImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
         $logoImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png';
         
         // Generate PDF for each participant
@@ -141,8 +141,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             </style>
         </head>
         <body>
+            <?php
+            $mail->AddEmbeddedImage('path_to/cert-bg.png', 'certBg', 'cert-bg.png');
+            $emailBody = '
             <div class='certificate'>
-                <img src='$bgImageURL' alt='Background'>
+                <img src='cid:certBg' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
@@ -152,7 +155,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
-            </div>
+            </div>';
+            $mail->Body = $emailBody;
+            ?>
         </body>
         </html>
         ";
