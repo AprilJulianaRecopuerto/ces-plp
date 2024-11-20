@@ -420,15 +420,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             .content {
                 margin-left: 340px;
                 padding: 20px;
-            }
+            }  
 
-        .content h2 {
-            font-family: 'Poppins', sans-serif;
-            font-size: 28px; /* Adjust the font size as needed */
-            margin-bottom: 20px; /* Space below the heading */
-            color: black; /* Adjust text color */
-            margin-top: 110px;
-        }   
             .custom-swal-popup {
                 font-family: "Poppins", sans-serif !important;
                 width: 400px;
@@ -458,6 +451,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             }
 
             .button-container button {
+                margin-top: 110px;
                 background-color: #4CAF50;
                 border: none;
                 color: white;
@@ -618,71 +612,107 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                 background-color: #d1ecf1 !important;
             }
 
-        .swal2-popup {
-            font-family: Arial, sans-serif;
-            border-radius: 8px;
-        }
+            .swal2-popup {
+                font-family: Arial, sans-serif;
+                border-radius: 8px;
+            }
 
-        .swal2-success .swal2-title, .swal2-error .swal2-title {
-            font-weight: bold;
-        }
+            .swal2-success .swal2-title, .swal2-error .swal2-title {
+                font-weight: bold;
+            }
 
-        .swal2-success {
-            background-color: #f4f7f6;
-            color: #4CAF50;
-        }
+            .swal2-success {
+                background-color: #f4f7f6;
+                color: #4CAF50;
+            }
 
-        .swal2-error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
+            .swal2-error {
+                background-color: #f8d7da;
+                color: #721c24;
+            }
 
-        #loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 9999;
-            text-align: center;
-            color: white;
-            font-size: 24px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+            #loading-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 9999;
+                text-align: center;
+                color: white;
+                font-size: 24px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
 
-        #loading-overlay.show {
-            display: flex;
-        }
+            #loading-overlay.show {
+                display: flex;
+            }
 
-      /* Custom Popup */
-      .swal-popup {
-            font-family: "Poppins", sans-serif !important;
-            width: 400px;
-        }
+            /* Custom Popup */
+            .swal-popup {
+                font-family: "Poppins", sans-serif !important;
+                width: 400px;
+            }
 
-        /* SweetAlert confirm button */
-        .swal-confirm {
-            font-family: "Poppins", sans-serif !important;
-        }
+            /* SweetAlert confirm button */
+            .swal-confirm {
+                font-family: "Poppins", sans-serif !important;
+            }
 
-        /* SweetAlert cancel button */
-        .swal-cancel {
-            font-family: "Poppins", sans-serif !important;
-        }
+            /* SweetAlert cancel button */
+            .swal-cancel {
+                font-family: "Poppins", sans-serif !important;
+            }
 
+            /* Chat styles */
+            .navbar .profile-container {
+                display: flex;
+                align-items: center;
+            }
 
+            .chat-icon {
+                font-size: 20px;
+                color: #333;
+                text-decoration: none;
+                position: relative; /* To position the badge correctly */
+                margin-right: 30px;
+                margin-top: 8px;
+                margin-left: -37px;
+            }
 
+            .notification-badge {
+                display: inline-block;
+                background-color: red; /* Change this to your preferred color */
+                color: white;
+                border-radius: 50%;
+                width: 20px; /* Width of the badge */
+                height: 20px; /* Height of the badge */
+                text-align: center;
+                font-weight: bold;
+                position: absolute; /* Position it relative to the chat icon */
+                top: -5px; /* Adjust as needed */
+                right: -10px; /* Adjust as needed */
+                font-size: 14px; /* Size of the exclamation point */
+            }
         </style>
     </head>
 
     <body>
         <nav class="navbar">
             <h2>Responses</h2> 
-            
+
+            <div class="profile-container">
+                <!-- Chat Icon with Notification Badge -->
+                <a href="chat.php" class="chat-icon" onclick="resetNotifications()">
+                    <i class="fa fa-comments"></i>
+                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+                </a>
+            <div>
+
             <div class="profile" id="profileDropdown">
                 <?php
                     // Check if a profile picture is set in the session

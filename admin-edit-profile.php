@@ -660,7 +660,7 @@ $conn->close();
             font-family: "Poppins", sans-serif !important;
         }
 
-         /* Chat styles */
+        /* Chat styles */
          .navbar .profile-container {
             display: flex;
             align-items: center;
