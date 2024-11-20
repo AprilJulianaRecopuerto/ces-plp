@@ -44,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $event = $row['event'];
 
         // Hosted image URLs
-        $bgImageURL = 'images/cert-bg.png'; // Use a local path
-        $logoImageURL = 'images/logoicon.png'; // Use a local path
+        $bgImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
+        $logoImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png';
         
         // Generate PDF for each participant
         $date = date("l, F j, Y");
@@ -934,16 +934,9 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
                 <li><a href="cas-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="cas-task.php">Upload Files</a>
-                    <a href="cas-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="cas-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
+                <li><a href="cas-responses.php" class="active"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">

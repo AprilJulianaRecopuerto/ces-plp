@@ -739,14 +739,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <li><a href="cba-budget-utilization.php" class="active"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="cba-task.php">Upload Files</a>
-                    <a href="cba-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="cas-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="cba-responses.php"><img src="images/feedback.png">Responses</a></li>
 
