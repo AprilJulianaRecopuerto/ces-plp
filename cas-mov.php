@@ -906,21 +906,41 @@ if ($result === false) {
                 });
             }
 
-            // Dropdown menu toggle
+           
             document.getElementById('profileDropdown').addEventListener('click', function() {
-                const dropdown = this.querySelector('.dropdown-menu');
-                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            var dropdownMenu = document.querySelector('.dropdown-menu');
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
             });
 
-            // Close dropdown if clicked outside
-            window.addEventListener('click', function(event) {
-                if (!document.getElementById('profileDropdown').contains(event.target)) {
-                    const dropdown = document.querySelector('.dropdown-menu');
-                    if (dropdown) {
-                        dropdown.style.display = 'none';
+            // Optional: Close the dropdown if clicking outside the profile area
+            window.onclick = function(event) {
+                if (!event.target.closest('#profileDropdown')) {
+                    var dropdownMenu = document.querySelector('.dropdown-menu');
+                    if (dropdownMenu.style.display === 'block') {
+                        dropdownMenu.style.display = 'none';
                     }
                 }
-            });
+            };
+            
+            var dropdowns = document.getElementsByClassName("dropdown-btn");
+
+            for (let i = 0; i < dropdowns.length; i++) {
+                dropdowns[i].addEventListener("click", function () {
+                    // Close all dropdowns first
+                    let dropdownContents = document.getElementsByClassName("dropdown-container");
+                    for (let j = 0; j < dropdownContents.length; j++) {
+                        dropdownContents[j].style.display = "none";
+                    }
+
+                    // Toggle the clicked dropdown's visibility
+                    let dropdownContent = this.nextElementSibling;
+                    if (dropdownContent.style.display === "block") {
+                        dropdownContent.style.display = "none";
+                    } else {
+                        dropdownContent.style.display = "block";
+                    }
+                });
+            };
 
             function logAction(actionDescription) {
                 var xhr = new XMLHttpRequest();
