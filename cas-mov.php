@@ -619,7 +619,7 @@ if ($result === false) {
                 border-radius: 5px; /* Rounded corners */
                 background-color: #f9f9f9; /* Background color */
                 width: 120px; /* Fixed width for folders */
-                height: 110px;
+                height: auto;
                 text-align: center; /* Center text */
             }
 

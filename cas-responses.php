@@ -47,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $bgImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
         $logoImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png';
         
-        
         // Generate PDF for each participant
         $date = date("l, F j, Y");
         
@@ -128,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                 }
         
                 .footer-content img {
-                    margin-left: 340px;
+                    margin-left: 340px; 
                     max-width: 80px;  /* Adjust the size of the logo */
                     height: auto;
                     margin-top: -3px;
