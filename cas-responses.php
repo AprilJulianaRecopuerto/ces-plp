@@ -8,6 +8,8 @@ if (!isset($_SESSION['uname'])) {
 }
 
 $currentDepartment = $_SESSION['department']; // Get the current department
+$showForm = isset($_SESSION['show_event_form']) && $_SESSION['show_event_form'];
+
 require 'vendor/autoload.php';
 
 use Dompdf\Dompdf;
@@ -26,7 +28,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT name, email, event, department FROM submissions WHERE department = ?";
+$sql = "SELECT name, email, event, rate, department FROM submissions WHERE department = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $currentDepartment);
 $stmt->execute();
@@ -35,79 +37,65 @@ $result = $stmt->get_result();
 // Handle form submission for sending certificates
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) {
     $all_sent = true;
-
     while ($row = $result->fetch_assoc()) {
         $name = $row['name'];
         $email = $row['email'];
         $department = $row['department'];
         $event = $row['event'];
 
-        // Hosted logo image URL
+        // Hosted image URLs for embedding
+        $bgImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
         $logoImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png';
-
-        // Local background image path
-        $bgImagePath = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
-
+        
         // Generate PDF for each participant
         $date = date("l, F j, Y");
         $html = "
         <html>
         <head>
+            <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
+            <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
             <style>
-                body {
-                    text-align: center;
-                    font-family: 'Poppins', sans-serif;
-                }
-                .certificate img {
-                    width: 100%;
-                    height: auto;
-                }
-                .subheading {
-                    font-size: 20px;
-                    color: #666;
-                    margin-top: 240px;
-                }
-                .name {
-                    font-size: 50px;
-                    font-weight: bold;
-                    text-transform: uppercase;
-                    margin: 20px 0;
-                }
-                .details {
-                    font-size: 18px;
-                    line-height: 1.5;
-                }
-                .footer-content {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-top: 30px;
-                }
-                .footer-content img {
-                    max-width: 50px;
-                    margin-right: 10px;
-                }
-                .footer-text {
-                    font-size: 18px;
-                }
+                body { text-align: center; font-family: 'Poppins', sans-serif; }
+                .certificate img { width: 100%; height: auto; position: absolute; z-index: -1; }
+                .subheading { margin-top: 240px; font-size: 20px; color: #666; }
+                .name { font-size: 80px; font-weight: bold; text-transform: uppercase; margin: 30px 0; }
+                .details { font-size: 22px; color: black; line-height: 1.5; margin-top: 20px; }
+                .footer { font-size: 18px; color: black; margin-top: 50px; }
+                .footer img { max-width: 80px; height: auto; }
             </style>
         </head>
         <body>
             <div class='certificate'>
-                <img src='cid:certBg' alt='Certificate Background'>
+                <img src='$bgImageURL' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
-                <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
+                <p class='details'>Who participated in \"$event\" hosted by $department on $date.</p>
                 <div class='footer'>
-                    <div class='footer-content'>
-                        <img src='$logoImageURL' alt='Logo'>
-                        <p class='footer-text'>Community Extension Services</p>
-                    </div>
+                    <img src='$logoImageURL' alt='Logo'>
+                    <p>Community Extension Services</p>
                 </div>
             </div>
         </body>
         </html>
         ";
+        
+        // Generate the PDF
+        try {
+            $options = new Options();
+            $options->set('isHtml5ParserEnabled', true);
+            $dompdf = new Dompdf($options);
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
+
+            // Save PDF temporarily
+            $pdfFilePath = sys_get_temp_dir() . '/certificate_' . urlencode($name) . '.pdf';
+            file_put_contents($pdfFilePath, $dompdf->output());
+        } catch (Exception $e) {
+            error_log("PDF generation failed: " . $e->getMessage());
+            $all_sent = false;
+            continue;
+        }
 
         // Send Email
         $mail = new PHPMailer(true);
@@ -116,32 +104,58 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
             $mail->Username = 'communityextensionservices1@gmail.com';
-            $mail->Password = 'ctpy rvsc tsiv fwix';
+            $mail->Password = 'ctpy rvsc tsiv fwix'; // Replace with App Password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
             $mail->setFrom('communityextensionservices1@gmail.com', 'Community Extension Services');
             $mail->addAddress($email);
             $mail->Subject = 'Your Certificate of Participation';
+            $mail->Body = 'Attached is your certificate of participation.';
 
-            // Embed background image
-            $mail->AddEmbeddedImage($bgImagePath, 'certBg', 'cert-bg.png');
+            // Embed images for email display
+            $mail->addEmbeddedImage($bgImageURL, 'bgImage');
+            $mail->addEmbeddedImage($logoImageURL, 'logoImage');
 
-            // Attach the email body with inline image
-            $mail->Body = $html;
-            $mail->isHTML(true);
+            // Attach PDF
+            $mail->addAttachment($pdfFilePath);
 
-            // Send the email
             $mail->send();
         } catch (Exception $e) {
             error_log("Email sending failed: " . $e->getMessage());
             $all_sent = false;
         }
+
+        // Cleanup
+        unlink($pdfFilePath);
     }
 
     // Return response
     echo $all_sent ? 'success' : 'error';
     exit;
+}
+
+// Fetch profile picture logic
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
+}
+
+$uname = $_SESSION['uname'];
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?";
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $uname);
+$stmt->execute();
+$result_profile = $stmt->get_result();
+
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture'];
 }
 ?>
 
