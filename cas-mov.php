@@ -158,7 +158,6 @@ if ($result === false) {
     // Query failed, show an error
     die("Error executing query: " . $conn_mov->error);
 }
-
 ?>
 
 
@@ -838,22 +837,7 @@ if ($result === false) {
         
         <div class="content-task">
             <div class="button-container">
-                <button id="createFolderBtn">Create Folder</button>
                 <a href="cas-archive.php" id="archive" class="archive-button">Archive</a>
-            </div>
-
-           <!-- Modal for folder creation -->
-            <div id="folderModal" class="modal" style="display: none;">
-                <div class="modal-content">
-                    <h2>Folder Name</h2>
-                    <p>Enter Event Name and Date of Event (e.g. Blood Letting 05-20-2024)</p>
-                    <form method="POST" action="">
-                        <input type="text" name="folder_name" id="folderName" placeholder="Enter Folder Name" required />
-                        <input type="hidden" name="action" value="create" /> <!-- Add this hidden input -->
-                        <button type="submit" class="btn btn-create">Create</button>
-                        <button type="button" id="cancelButton" class="btn btn-cancel">Cancel</button>
-                    </form>
-                </div>
             </div>
 
             <!-- Display error message -->
@@ -922,40 +906,21 @@ if ($result === false) {
                 });
             }
 
+            // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
-            var dropdownMenu = document.querySelector('.dropdown-menu');
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+                const dropdown = this.querySelector('.dropdown-menu');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
             });
 
-            // Optional: Close the dropdown if clicking outside the profile area
-            window.onclick = function(event) {
-                if (!event.target.closest('#profileDropdown')) {
-                    var dropdownMenu = document.querySelector('.dropdown-menu');
-                    if (dropdownMenu.style.display === 'block') {
-                        dropdownMenu.style.display = 'none';
+            // Close dropdown if clicked outside
+            window.addEventListener('click', function(event) {
+                if (!document.getElementById('profileDropdown').contains(event.target)) {
+                    const dropdown = document.querySelector('.dropdown-menu');
+                    if (dropdown) {
+                        dropdown.style.display = 'none';
                     }
                 }
-            };
-            
-            var dropdowns = document.getElementsByClassName("dropdown-btn");
-
-            for (let i = 0; i < dropdowns.length; i++) {
-                dropdowns[i].addEventListener("click", function () {
-                    // Close all dropdowns first
-                    let dropdownContents = document.getElementsByClassName("dropdown-container");
-                    for (let j = 0; j < dropdownContents.length; j++) {
-                        dropdownContents[j].style.display = "none";
-                    }
-
-                    // Toggle the clicked dropdown's visibility
-                    let dropdownContent = this.nextElementSibling;
-                    if (dropdownContent.style.display === "block") {
-                        dropdownContent.style.display = "none";
-                    } else {
-                        dropdownContent.style.display = "block";
-                    }
-                });
-            };
+            });
 
             function logAction(actionDescription) {
                 var xhr = new XMLHttpRequest();
@@ -964,12 +929,19 @@ if ($result === false) {
                 xhr.send("action=" + encodeURIComponent(actionDescription));
             }
 
+            function logAndRedirect(actionDescription, url) {
+                logAction(actionDescription); // Log the action
+                setTimeout(function() {
+                    window.location.href = url; // Redirect after logging
+                }, 100); // Delay to ensure logging completes
+            }
+
             // Add event listeners when the page is fully loaded
             document.addEventListener("DOMContentLoaded", function() {
                 // Log clicks on main menu links
                 document.querySelectorAll(".menu > li > a").forEach(function(link) {
                     link.addEventListener("click", function() {
-                        logAction(link.textContent.trim()); // Log the main menu link
+                        logAction(link.textContent.trim());
                     });
                 });
 
@@ -977,13 +949,10 @@ if ($result === false) {
                 var dropdowns = document.getElementsByClassName("dropdown-btn");
                 for (let i = 0; i < dropdowns.length; i++) {
                     dropdowns[i].addEventListener("click", function () {
-                        // Close all dropdowns first
                         let dropdownContents = document.getElementsByClassName("dropdown-container");
                         for (let j = 0; j < dropdownContents.length; j++) {
                             dropdownContents[j].style.display = "none";
                         }
-
-                        // Toggle the clicked dropdown's visibility
                         let dropdownContent = this.nextElementSibling;
                         if (dropdownContent.style.display === "block") {
                             dropdownContent.style.display = "none";
@@ -996,8 +965,8 @@ if ($result === false) {
                 // Log clicks on dropdown links
                 document.querySelectorAll(".dropdown-container a").forEach(function(link) {
                     link.addEventListener("click", function(event) {
-                        event.stopPropagation(); // Prevent click from closing the dropdown
-                        logAction(link.textContent.trim()); // Log the dropdown link
+                        event.stopPropagation();
+                        logAction(link.textContent.trim());
                     });
                 });
 

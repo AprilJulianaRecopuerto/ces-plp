@@ -1118,40 +1118,39 @@ if ($subfolder_name && is_dir($subfolder_path)) {
             <?php endif; ?>
         </div>
 
-<script>
+        <script>
+            let selectedFile = '';
+                function showContextMenu(event, file) {
+                    event.preventDefault();
+                    selectedFile = file;
+                    const contextMenu = document.getElementById('contextMenu');
+                    contextMenu.style.left = `${event.pageX}px`;
+                    contextMenu.style.top = `${event.pageY}px`;
+                    contextMenu.style.display = 'block';
+                }
 
-let selectedFile = '';
-    function showContextMenu(event, file) {
-        event.preventDefault();
-        selectedFile = file;
-        const contextMenu = document.getElementById('contextMenu');
-        contextMenu.style.left = `${event.pageX}px`;
-        contextMenu.style.top = `${event.pageY}px`;
-        contextMenu.style.display = 'block';
-    }
+                // Hide context menu on click outside
+                window.addEventListener('click', function() {
+                    document.getElementById('contextMenu').style.display = 'none';
+                });
 
-    // Hide context menu on click outside
-    window.addEventListener('click', function() {
-        document.getElementById('contextMenu').style.display = 'none';
-    });
+                function deleteFile() {
+                    // Submit the form to delete the file
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '';
 
-    function deleteFile() {
-        // Submit the form to delete the file
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '';
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'hidden';
+                    fileInput.name = 'delete_file';
+                    fileInput.value = selectedFile;
+                    form.appendChild(fileInput);
 
-        const fileInput = document.createElement('input');
-        fileInput.type = 'hidden';
-        fileInput.name = 'delete_file';
-        fileInput.value = selectedFile;
-        form.appendChild(fileInput);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
 
-        document.body.appendChild(form);
-        form.submit();
-    }
-
-  function confirmLogout(event) {
+            function confirmLogout(event) {
                 event.preventDefault();
                 Swal.fire({
                     title: 'Are you sure?',
@@ -1250,6 +1249,6 @@ let selectedFile = '';
                 logAction("Profile");
             });
         });
-</script>
+    </script>
 </body>
 </html>

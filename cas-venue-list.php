@@ -8,7 +8,6 @@ if (!isset($_SESSION['uname'])) {
     exit;
 }
 
-// Database credentials for proj_list
 $servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username_proj = "zf8r3n4qqjyrfx7o";
 $password_proj = "su6qmqa0gxuerg98";
@@ -35,7 +34,6 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch the profile picture from the colleges table in user_registration database
 $sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $un = "equ6v8i5llo3uhjm";
 $psd = "vkfaxm2are5bjc3q";
@@ -63,8 +61,6 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
 $stmt->close();
 $conn_profile->close();
 ?>
-
-
 
 <!DOCTYPE html>
     <html lang="en">
@@ -612,212 +608,71 @@ $conn_profile->close();
         </div>
 
         <div class="content-resource">
-    <table class="crud-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Project Title</th>
-                <th>Semester</th>
-                <th>Department</th>
-                <th>Date of Event</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            // Fetch all projects from the cas table
-            $sql = "SELECT * FROM cas";
-            $result = $conn_proj_list->query($sql);
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Project Title</th>
+                        <th>Semester</th>
+                        <th>Department</th>
+                        <th>Date of Event</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Fetch all projects from the cas table
+                    $sql = "SELECT * FROM cas";
+                    $result = $conn_proj_list->query($sql);
 
-            if ($result && $result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    $project_id = $row["id"];
+                    // Initialize a flag to check if any rows are displayed
+                    $has_records = false;
 
-                    // Check if the project_id already exists in the cas_tor table
-                    $check_sql = "SELECT * FROM cas_reservation WHERE venue_sub = ?";
-                    $check_stmt = $conn->prepare($check_sql);
-                    $check_stmt->bind_param("i", $project_id);
-                    $check_stmt->execute();
-                    $check_result = $check_stmt->get_result();
+                    if ($result && $result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            $project_id = $row["id"];
 
-                    // If the project is already added in cas_tor, do not display it
-                    if ($check_result && $check_result->num_rows > 0) {
-                        continue; // Skip this project if it exists in cas_tor
+                            // Check if the project_id already exists in the cas_tor table
+                            $check_sql = "SELECT * FROM cas_reservation WHERE venue_sub = ?";
+                            $check_stmt = $conn->prepare($check_sql);
+                            $check_stmt->bind_param("i", $project_id);
+                            $check_stmt->execute();
+                            $check_result = $check_stmt->get_result();
+
+                            // If the project is already added in cas_tor, skip it
+                            if ($check_result && $check_result->num_rows > 0) {
+                                continue; // Skip this project if it exists in cas_tor
+                            }
+
+                            // If not already added, display the project
+                            echo "<tr>
+                                    <td>" . $project_id . "</td>
+                                    <td>" . $row["proj_title"] . "</td>
+                                    <td>" . $row["semester"] . "</td>
+                                    <td>" . $row["dept"] . "</td>
+                                    <td>" . $row["dateof_imple"] . "</td>
+                                    <td class='add'>
+                                        <a href='cas-add-venue.php?id=" . $project_id . "'>Add</a>
+                                    </td>
+                                </tr>";
+
+                            // Set the flag to true since we displayed at least one record
+                            $has_records = true;
+                        }
                     }
 
-                    // If not already added, display the project
-                    echo "<tr>
-                            <td>" . $project_id . "</td>
-                            <td>" . $row["proj_title"] . "</td>
-                            <td>" . $row["semester"] . "</td>
-                            <td>" . $row["dept"] . "</td>
-                            <td>" . $row["dateof_imple"] . "</td>
-                            <td class='add'>
-                                <a href='cas-add-venue.php?id=" . $project_id . "'>Add</a>
-                            </td>
-                        </tr>";
-                }
-            } else {
-                echo "<tr><td colspan='6'>No records found</td></tr>";
-            }
+                    // Display a fallback message if no records were displayed
+                    if (!$has_records) {
+                        echo "<tr><td colspan='6'>No records found</td></tr>";
+                    }
 
-            $conn_proj_list->close();
-            ?>
-        </tbody>
-    </table>
-</div>
-
+                    $conn_proj_list->close();
+                    ?>
+                </tbody>
+            </table>
+        </div>
 
         <script>
-            function updateBarangays() {
-            const district = document.getElementById('district').value;
-            const barangaySelect = document.getElementById('barangay');
-
-            // Clear existing options
-            barangaySelect.innerHTML = '';
-
-            let barangays = [];
-
-            if (district === 'District 1') {
-                barangays = [
-                    'Bagong Ilog', 'Bagong Katipunan', 'Bambang', 'Buting', 'Caniogan',
-                    'Kalawaan', 'Kapasigan', 'Kapitolyo', 'Malinao', 'Oranbo',
-                    'Palatiw', 'Pineda', 'Sagad', 'San Antonio', 'San Joaquin',
-                    'San Jose', 'San Nicolas', 'Sta. Cruz', 'Sta. Rosa', 'Sto. Tomas',
-                    'Sumilang', 'Ugong'
-                ];
-            } else if (district === 'District 2') {
-                barangays = [
-                    'Dela Paz', 'Manggahan', 'Maybunga', 'Pinagbuhatan', 'Rosario',
-                    'San Miguel', 'Sta. Lucia', 'Santolan'
-                ];
-            }
-
-            // Add new options
-            barangays.forEach(barangay => {
-                const option = document.createElement('option');
-                option.value = barangay;
-                option.textContent = barangay;
-                barangaySelect.appendChild(option);
-            });
-
-            // Add default option
-                const defaultOption = document.createElement('option');
-                defaultOption.value = '';
-                defaultOption.disabled = true;
-                defaultOption.selected = true;
-                defaultOption.textContent = 'Select Barangay';
-                barangaySelect.insertBefore(defaultOption, barangaySelect.firstChild);
-            }
-
-            // Initialize barangay options based on the default district (if necessary)
-            document.addEventListener('DOMContentLoaded', () => {
-                updateBarangays();
-            });
-
-            let entryCount = 1; // Tracks the number of entries
-            let totalBudgetValue = 0; // Holds the total budget from the first entry
-
-        function addEntry() {
-            entryCount++;
-            const entryContainer = document.getElementById('entryContainer');
-            const newEntrySection = document.createElement('div');
-            newEntrySection.className = 'entry-section';
-            newEntrySection.innerHTML = `
-                <h3>Entry ${entryCount}</h3>
-                <div class="form-group">
-                    <label for="event_title_${entryCount}">Event Title:</label>
-                    <input type="text" id="event_title_${entryCount}" name="event_title[]" placeholder="Enter Event Title" required>
-                </div>
-                <div class="form-group">
-                    <label for="total_budget_${entryCount}">Total Budget:</label>
-                    <input type="text" id="total_budget_${entryCount}" name="total_budget[]" value="${totalBudgetValue}" placeholder="Total Budget" readonly />
-                </div>
-                <div class="form-group">
-                    <label for="expenses_${entryCount}">Expenses:</label>
-                    <input type="text" id="expenses_${entryCount}" name="expenses[]" placeholder="Enter Total Expenses" required oninput="updateRemainingBudget(this.parentElement.parentElement)">
-                </div>
-                <div class="form-group">
-                    <label for="remaining_budget_${entryCount}">Remaining Budget:</label>
-                    <input type="text" id="remaining_budget_${entryCount}" name="remaining_budget[]" placeholder="Remaining Budget" readonly />
-                </div>
-                <button type="button" class="remove-btn" onclick="removeEntry(this)">Remove Entry</button>
-            `;
-            entryContainer.appendChild(newEntrySection);
-
-            // Set the total budget value for this entry based on the first entry's total budget
-            if (entryCount > 1) {
-                const firstBudgetInput = document.getElementById('total_budget_1');
-                newEntrySection.querySelector(`input[id^="total_budget_"]`).value = firstBudgetInput.value;
-                updateRemainingBudget(newEntrySection); // Call to update remaining budget when a new entry is added
-            }
-        }
-
-        function updateRemainingBudget(entrySection) {
-            const expensesInput = entrySection.querySelector('input[id^="expenses_"]');
-            const remainingInput = entrySection.querySelector('input[id^="remaining_budget_"]');
-            const firstBudgetInput = document.getElementById('total_budget_1');
-            const totalBudget = parseFloat(firstBudgetInput.value) || 0; // Get total budget for the first entry
-
-            // Calculate total expenses from all entries
-            const totalExpenses = getTotalExpenses();
-
-            // Calculate remaining budget
-            const remainingBudget = totalBudget - totalExpenses; // Subtract total expenses from total budget
-            remainingInput.value = remainingBudget.toFixed(2); // Update the remaining budget display
-        }
-
-        function getTotalExpenses() {
-            const expenseInputs = document.querySelectorAll('[id^="expenses_"]');
-            let totalExpenses = 0;
-            expenseInputs.forEach(input => {
-                totalExpenses += parseFloat(input.value) || 0; // Sum up all expenses
-            });
-            return totalExpenses;
-        }
-
-        function removeEntry(element) {
-            element.parentElement.remove();
-            updateRemainingBudget(); // Recalculate remaining budget after removing an entry
-        }
-
-            // Check if there is a success or error message
-            <?php if (isset($_SESSION['success'])): ?>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: '<?php echo $_SESSION['success']; ?>',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        popup: 'custom-swal-popup',
-                        title: 'custom-swal-title',
-                        confirmButton: 'custom-swal-confirm'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = 'cas-budget-utilization.php';
-                    }
-                });
-            <?php unset($_SESSION['success']); endif; ?>
-
-            <?php if (isset($_SESSION['error'])): ?>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: '<?php echo $_SESSION['error']; ?>',
-                    confirmButtonText: 'Try Again',
-                    customClass: {
-                        popup: 'custom-error-popup',
-                        title: 'custom-error-title',
-                        confirmButton: 'custom-error-confirm'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = 'cas-add-budget.php';
-                    }
-                });
-            <?php unset($_SESSION['error']); endif; ?>
-
             function confirmLogout(event) {
                 event.preventDefault();
                 Swal.fire({
@@ -863,7 +718,6 @@ $conn_profile->close();
                     }
                 }
             });
-
            
             function logAction(actionDescription) {
                 var xhr = new XMLHttpRequest();
@@ -919,7 +773,7 @@ $conn_profile->close();
             });
         });
 
-                document.addEventListener("DOMContentLoaded", () => {
+            document.addEventListener("DOMContentLoaded", () => {
                 function checkNotifications() {
                     fetch('cas-check_notifications.php')
                         .then(response => response.json())
