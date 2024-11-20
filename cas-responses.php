@@ -8,8 +8,6 @@ if (!isset($_SESSION['uname'])) {
 }
 
 $currentDepartment = $_SESSION['department']; // Get the current department
-$showForm = isset($_SESSION['show_event_form']) && $_SESSION['show_event_form'];
-
 require 'vendor/autoload.php';
 
 use Dompdf\Dompdf;
@@ -28,7 +26,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT name, email, event, rate, department FROM submissions WHERE department = ?";
+$sql = "SELECT name, email, event, department FROM submissions WHERE department = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $currentDepartment);
 $stmt->execute();
@@ -37,112 +35,66 @@ $result = $stmt->get_result();
 // Handle form submission for sending certificates
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) {
     $all_sent = true;
+
     while ($row = $result->fetch_assoc()) {
         $name = $row['name'];
         $email = $row['email'];
         $department = $row['department'];
         $event = $row['event'];
 
-        // Hosted image URLs
-        $bgImageURL = '/CES/images/cert-bg.png';
+        // Hosted logo image URL
         $logoImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png';
-        
+
+        // Local background image path
+        $bgImagePath = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
+
         // Generate PDF for each participant
         $date = date("l, F j, Y");
-        
         $html = "
         <html>
         <head>
-        
-            <!-- Link Google Fonts directly -->
-            <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
-            <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
-        
             <style>
-                body { 
+                body {
                     text-align: center;
-                    margin: 0; 
-                    padding: 0; 
                     font-family: 'Poppins', sans-serif;
                 }
-        
                 .certificate img {
-                    position: absolute;
-                    margin-top: -45px;
-                    width: 109%;
-                    margin-left: -45px;
-                    object-fit: cover;
-                    z-index: -1;
+                    width: 100%;
+                    height: auto;
                 }
-        
                 .subheading {
-                    font-family: 'Poppins', sans-serif;
                     font-size: 20px;
                     color: #666;
-                    margin: 20px 0;
                     margin-top: 240px;
-                    margin-left: -195px;
-                    letter-spacing: 0.5px;
                 }
-        
-                .name { 
-                    font-family: 'Lilita One', sans-serif;
-                    font-size: 80px;
+                .name {
+                    font-size: 50px;
                     font-weight: bold;
-                    color: #333;
+                    text-transform: uppercase;
                     margin: 20px 0;
-                    text-decoration: underline;
-                    font-style: italic;  /* Make it italic if cursive is not working */
-                    text-transform: uppercase; /* Convert text to uppercase */
-                    margin-top: 30px;
                 }
-        
                 .details {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 22px; 
-                    color: black;
-                    line-height: 1.5;
-                    margin-top: 20px;
-                }
-        
-                .date {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 20px; 
-                    color: #888;
-                    margin-top: 30px;
-                }
-        
-                .footer {
-                    font-family: 'Poppins', sans-serif;
                     font-size: 18px;
-                    color: black;
-                    text-align: center;
-                    margin-top: 50px;
+                    line-height: 1.5;
                 }
-        
                 .footer-content {
                     display: flex;
-                    justify-content: center;  /* Centers items horizontally */
-                
+                    align-items: center;
+                    justify-content: center;
+                    margin-top: 30px;
                 }
-        
                 .footer-content img {
-                    margin-left: 340px;
-                    max-width: 80px;  /* Adjust the size of the logo */
-                    height: auto;
-                    margin-top: -3px;
+                    max-width: 50px;
+                    margin-right: 10px;
                 }
-        
                 .footer-text {
-                    font-size: 20px;
-                    margin-left: 110px;
-                    font-weight: normal;
+                    font-size: 18px;
                 }
             </style>
         </head>
         <body>
             <div class='certificate'>
-                <img src='$bgImageURL' alt='Background'>
+                <img src='cid:certBg' alt='Certificate Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
@@ -156,26 +108,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </body>
         </html>
         ";
-        try {
-            // Generate the PDF
-            $options = new Options();
-            $options->set('isHtml5ParserEnabled', true);
-            $options->set('isPhpEnabled', true); // Ensure this is enabled for PHP functionality
-            $options->set('isHtml5ParserEnabled', true);
-            $options->set('isCssFloatEnabled', true); // Ensure floating is enabled
-            $dompdf = new Dompdf($options);
-            $dompdf->loadHtml($html);
-            $dompdf->setPaper('A4', 'landscape');
-            $dompdf->render();
-
-            // Save PDF to a temporary directory
-            $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf';
-            file_put_contents($pdfFilePath, $dompdf->output());
-        } catch (Exception $e) {
-            error_log("PDF generation failed: " . $e->getMessage());
-            $all_sent = false;
-            continue;
-        }
 
         // Send Email
         $mail = new PHPMailer(true);
@@ -191,48 +123,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $mail->setFrom('communityextensionservices1@gmail.com', 'Community Extension Services');
             $mail->addAddress($email);
             $mail->Subject = 'Your Certificate of Participation';
-            $mail->Body = 'Attached is your certificate of participation.';
-            $mail->addAttachment($pdfFilePath);
 
+            // Embed background image
+            $mail->AddEmbeddedImage($bgImagePath, 'certBg', 'cert-bg.png');
+
+            // Attach the email body with inline image
+            $mail->Body = $html;
+            $mail->isHTML(true);
+
+            // Send the email
             $mail->send();
         } catch (Exception $e) {
+            error_log("Email sending failed: " . $e->getMessage());
             $all_sent = false;
-            break;
         }
-
-        // Cleanup PDF file
-        unlink($pdfFilePath);
     }
 
     // Return response
     echo $all_sent ? 'success' : 'error';
     exit;
 }
-
-$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$un = "equ6v8i5llo3uhjm";
-$psd = "vkfaxm2are5bjc3q";
-$dbname_user_registration = "ylwrjgaks3fw5sdj";
-
-// Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
-if ($conn_profile->connect_error) {
-    die("Connection failed: " . $conn_profile->connect_error);
-}
-
-$uname = $_SESSION['uname'];
-$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
-$stmt = $conn_profile->prepare($sql_profile);
-$stmt->bind_param("s", $uname);
-$stmt->execute();
-$result_profile = $stmt->get_result();
-
-$profilePicture = null;
-if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
-    $profilePicture = $row_profile['picture'];
-}
-
 ?>
+
 
 
 <!DOCTYPE html>
