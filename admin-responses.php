@@ -45,14 +45,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Generate PDF for each participant
         $date = date("l, F j, Y");
 
-        // Use absolute paths for Dompdf
-        $imagePath = __DIR__ . '/images/cert-bg.png';  // Background image
-        $logoPath = __DIR__ . '/images/logoicon.png';  // Logo image
+        // Paths for images
+        $bgImagePath = __DIR__ . '/images/cert-bg.png';  // Local path
+        $logoImagePath = __DIR__ . '/images/logoicon.png';
 
-        // Check if the images exist before proceeding
-        if (!file_exists($imagePath) || !file_exists($logoPath)) {
+        // Check if the images exist
+        if (!file_exists($bgImagePath) || !file_exists($logoImagePath)) {
             die('Error: One or more image files are missing.');
         }
+
+        // Encode images to base64
+        function encodeImageToBase64($filePath) {
+            if (!file_exists($filePath)) return false;
+            $fileData = file_get_contents($filePath);
+            return 'data:image/' . pathinfo($filePath, PATHINFO_EXTENSION) . ';base64,' . base64_encode($fileData);
+        }
+        $bgImageBase64 = encodeImageToBase64($bgImagePath);
+        $logoImageBase64 = encodeImageToBase64($logoImagePath);
 
         // HTML content for the certificate
         $html = "
@@ -66,17 +75,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     margin: 0;
                     padding: 0;
                     font-family: 'Poppins', sans-serif;
-                    background-image: url('file://$imagePath');
+                    background-image: url('$bgImageBase64');
                     background-size: cover;
                     background-repeat: no-repeat;
                 }
-                .certificate img {
-                    position: absolute;
-                    margin-top: -45px;
-                    width: 109%;
-                    margin-left: -45px;
-                    object-fit: cover;
-                    z-index: -1;
+                .certificate {
+                    position: relative;
+                    padding: 50px;
                 }
                 .subheading {
                     margin-top: 240px;
@@ -98,11 +103,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                 }
                 .footer-content img {
                     max-width: 80px;
-                    margin-left: 340px;
+                    margin-right: 10px;
                 }
                 .footer-text {
                     font-size: 20px;
-                    margin-left: 110px;
+                    margin-top: 15px;
                 }
             </style>
         </head>
@@ -110,10 +115,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             <div class='certificate'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
-                <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
+                <p class='details'>Who has participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='file://$logoPath' alt='Logo'>
+                        <img src='$logoImageBase64' alt='Logo'>
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
@@ -171,6 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     exit;
 }
 ?>
+
 
 
 
