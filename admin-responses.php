@@ -64,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     margin: 0;
                     padding: 0;
                     font-family: 'Poppins', sans-serif;
+                    background-image: url('https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png');
                 }
                 .certificate img {
                     position: absolute;
