@@ -7,7 +7,6 @@ use Dompdf\Options;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Database credentials
 $servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username = "sh9sgtg12c8vyqoa";
 $password = "s3jzz232brki4nnv";
@@ -45,23 +44,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Generate PDF for each participant
         $date = date("l, F j, Y");
 
-        // Paths for images
-        $bgImagePath = __DIR__ . '/images/cert-bg.png';  // Local path
-        $logoImagePath = __DIR__ . '/images/logoicon.png';
+        $imagePath = 'images/cert-bg.png';  // Background image
+        $logoPath = 'images/logoicon.png';  // Logo image
 
-        // Check if the images exist
-        if (!file_exists($bgImagePath) || !file_exists($logoImagePath)) {
+        // Check if the images exist before proceeding
+        if (!file_exists($imagePath) || !file_exists($logoPath)) {
             die('Error: One or more image files are missing.');
         }
-
-        // Encode images to base64
-        function encodeImageToBase64($filePath) {
-            if (!file_exists($filePath)) return false;
-            $fileData = file_get_contents($filePath);
-            return 'data:image/' . pathinfo($filePath, PATHINFO_EXTENSION) . ';base64,' . base64_encode($fileData);
-        }
-        $bgImageBase64 = encodeImageToBase64($bgImagePath);
-        $logoImageBase64 = encodeImageToBase64($logoImagePath);
 
         // HTML content for the certificate
         $html = "
@@ -75,13 +64,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     margin: 0;
                     padding: 0;
                     font-family: 'Poppins', sans-serif;
-                    background-image: url('$bgImageBase64');
-                    background-size: cover;
-                    background-repeat: no-repeat;
                 }
-                .certificate {
-                    position: relative;
-                    padding: 50px;
+                .certificate img {
+                    position: absolute;
+                    margin-top: -45px;
+                    width: 109%;
+                    margin-left: -45px;
+                    object-fit: cover;
+                    z-index: -1;
                 }
                 .subheading {
                     margin-top: 240px;
@@ -103,22 +93,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                 }
                 .footer-content img {
                     max-width: 80px;
-                    margin-right: 10px;
+                    margin-left: 340px;
                 }
                 .footer-text {
                     font-size: 20px;
-                    margin-top: 15px;
+                    margin-left: 110px;
                 }
             </style>
         </head>
         <body>
             <div class='certificate'>
+                <img src='$imagePath' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
-                <p class='details'>Who has participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
+                <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='$logoImageBase64' alt='Logo'>
+                        <img src='$logoPath' alt='Logo'>
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
@@ -126,18 +117,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </body>
         </html>
         ";
-
         try {
             // Generate the PDF
             $options = new Options();
-            $options->set('isRemoteEnabled', true);
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isPhpEnabled', true); // Ensure this is enabled for PHP functionality
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isCssFloatEnabled', true); // Ensure floating is enabled
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
 
             // Save PDF to a temporary directory
-            $pdfFilePath = sys_get_temp_dir() . '/certificate_' . urlencode($name) . '.pdf';
+            $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf';
             file_put_contents($pdfFilePath, $dompdf->output());
         } catch (Exception $e) {
             error_log("PDF generation failed: " . $e->getMessage());
@@ -152,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
             $mail->Username = 'communityextensionservices1@gmail.com';
-            $mail->Password = 'ctpy rvsc tsiv fwix'; // Use app password
+            $mail->Password = 'ctpy rvsc tsiv fwix';
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
@@ -176,7 +169,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     exit;
 }
 ?>
-
 
 
 
