@@ -782,7 +782,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         case 'College of Arts and Sciences':
                             redirectUrl = 'cas-dash.php';
                             break;
-                        case 'College of Business and Accountancy':
+                        case 'College of Business Administration':
                             redirectUrl = 'cba-dash.php';
                             break;
                         case 'College of Computer Studies':

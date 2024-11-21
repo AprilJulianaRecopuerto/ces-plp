@@ -531,12 +531,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     <select name="department" required class="dept">
                         <option value="" disabled selected>Department</option>
-                        <option value="College of Arts and Science">CAS</option>
-                        <option value="College of Administrator">CBA</option>
+                        <option value="College of Arts and Sciences">CAS</option>
+                        <option value="College of Business Administration">CBA</option>
                         <option value="College of Computer Studies">CCS</option>
                         <option value="College of Education">COED</option>
                         <option value="College of Engineering">COE</option>
-                        <option value="College of International Hospitality">CIHM</option>
+                        <option value="College of International Hospitality Management">CIHM</option>
                         <option value="College of Nursing">CON</option>
                     </select><br>
 
