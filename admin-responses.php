@@ -7,6 +7,7 @@ use Dompdf\Options;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+// Database credentials
 $servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username = "sh9sgtg12c8vyqoa";
 $password = "s3jzz232brki4nnv";
@@ -44,8 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Generate PDF for each participant
         $date = date("l, F j, Y");
 
-        $imagePath = 'images/cert-bg.png';  // Background image
-        $logoPath = 'images/logoicon.png';  // Logo image
+        // Use absolute paths for Dompdf
+        $imagePath = __DIR__ . '/images/cert-bg.png';  // Background image
+        $logoPath = __DIR__ . '/images/logoicon.png';  // Logo image
 
         // Check if the images exist before proceeding
         if (!file_exists($imagePath) || !file_exists($logoPath)) {
@@ -64,7 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     margin: 0;
                     padding: 0;
                     font-family: 'Poppins', sans-serif;
-                    background-image: url('https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png');
+                    background-image: url('file://$imagePath');
+                    background-size: cover;
+                    background-repeat: no-repeat;
                 }
                 .certificate img {
                     position: absolute;
@@ -104,13 +108,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </head>
         <body>
             <div class='certificate'>
-                <img src='$imagePath' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='$logoPath' alt='Logo'>
+                        <img src='file://$logoPath' alt='Logo'>
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
@@ -118,20 +121,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </body>
         </html>
         ";
+
         try {
             // Generate the PDF
             $options = new Options();
-            $options->set('isHtml5ParserEnabled', true);
-            $options->set('isPhpEnabled', true); // Ensure this is enabled for PHP functionality
-            $options->set('isHtml5ParserEnabled', true);
-            $options->set('isCssFloatEnabled', true); // Ensure floating is enabled
+            $options->set('isRemoteEnabled', true);
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
 
             // Save PDF to a temporary directory
-            $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf';
+            $pdfFilePath = sys_get_temp_dir() . '/certificate_' . urlencode($name) . '.pdf';
             file_put_contents($pdfFilePath, $dompdf->output());
         } catch (Exception $e) {
             error_log("PDF generation failed: " . $e->getMessage());
@@ -146,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
             $mail->Username = 'communityextensionservices1@gmail.com';
-            $mail->Password = 'ctpy rvsc tsiv fwix';
+            $mail->Password = 'ctpy rvsc tsiv fwix'; // Use app password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
@@ -170,6 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     exit;
 }
 ?>
+
 
 
 <!DOCTYPE html>
