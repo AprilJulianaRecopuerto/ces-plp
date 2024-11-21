@@ -172,7 +172,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
 ?>
 
 
-
 <!DOCTYPE html>
 <html lang="en">
     <head>
