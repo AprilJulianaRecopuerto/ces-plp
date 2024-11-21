@@ -166,26 +166,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
          ";
 
 
-        try {
+         try {
             // Generate the PDF
             $options = new Options();
             $options->set('isHtml5ParserEnabled', true);
             $options->set('isPhpEnabled', true); // Ensure this is enabled for PHP functionality
-            $options->set('isHtml5ParserEnabled', true);
             $options->set('isCssFloatEnabled', true); // Ensure floating is enabled
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
-
-            // Save PDF to a temporary directory
-            $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf';
+        
+            // Define directory for storing PDFs
+            $pdfDir = $_SERVER['DOCUMENT_ROOT'] . '/CES/certificates/';
+            if (!file_exists($pdfDir)) {
+                mkdir($pdfDir, 0777, true); // Create directory if it doesn't exist
+            }
+        
+            // Save the PDF to the directory
+            $pdfFileName = 'certificate_' . preg_replace('/[^A-Za-z0-9]/', '_', $name) . '.pdf';
+            $pdfFilePath = $pdfDir . $pdfFileName;
             file_put_contents($pdfFilePath, $dompdf->output());
+        
+            // Optionally log file save location
+            error_log("PDF saved to: $pdfFilePath");
+        
         } catch (Exception $e) {
             error_log("PDF generation failed: " . $e->getMessage());
             $all_sent = false;
             continue;
         }
+        
 
         // Send Email
         $mail = new PHPMailer(true);
