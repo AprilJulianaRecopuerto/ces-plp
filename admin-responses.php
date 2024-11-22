@@ -61,13 +61,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     padding: 0;
                     font-family: 'Poppins', sans-serif;
                 }
+                .certificate {
+                    position: relative; /* To ensure the background image can be positioned relative to this container */
+                    width: 100%;
+                    height: 100%;
+                    overflow: hidden; /* Prevent the image from overflowing */
+                }
                 .certificate img {
                     position: absolute;
-                    margin-top: -45px;
-                    width: 109%;
-                    margin-left: -45px;
-                    object-fit: cover;
-                    z-index: -1;
+                    top: 0;
+                    left: 0;
+                    width: 100%; /* Make the image cover the full width of the certificate */
+                    height: 100%; /* Ensure the image covers the entire height of the certificate */
+                    object-fit: cover; /* Keep the aspect ratio of the image intact while covering the area */
+                    z-index: -1; /* Send the image behind text content */
                 }
                 .subheading {
                     margin-top: 240px;
@@ -99,13 +106,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </head>
         <body>
             <div class='certificate'>
-                <img src='/cert-bg.png' alt='Background'>
+                <img src='https://ces-plp-d5e378ca4d4d.herokuapp.com/public/cert-bg.png' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='/logoicon.png' alt='Logo'>
+                        <img src='https://ces-plp-d5e378ca4d4d.herokuapp.com/public/logoicon.png' alt='Logo'>
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
