@@ -45,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $date = date("l, F j, Y");
 
         // Full URL path for images
-        $imagePath = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';  // Background image
-        $logoPath = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png';  // Logo image
+        $imagePath = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/public/cert-bg.png';  // Background image
+        $logoPath = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/public/logoicon.png';  // Logo image
 
         // HTML content for the certificate
         $html = "
@@ -164,7 +164,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     exit;
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
