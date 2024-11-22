@@ -64,8 +64,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     font-family: 'Poppins', sans-serif;
                 }
                 .certificate img {
-                    position: relative;
-                    margin-top: -60px;
+                    position: absolute;
+                    margin-top: -50px;
                     width: 100%;
                     margin-left: -45px;
                     object-fit: cover;
