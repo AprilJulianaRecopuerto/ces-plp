@@ -765,6 +765,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Show login success alert
             <?php if (isset($_SESSION['login_success']) && $_SESSION['login_success'] === true) : ?>
+                
+                sessionStorage.removeItem('loggedOut');
+
                 Swal.fire({
                     icon: 'success',
                 title: 'Success',
