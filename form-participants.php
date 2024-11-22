@@ -430,7 +430,7 @@ $conn->close();
             <a href="linkages-parts.php" class="nav-item">Linkages and Partners</a>
             <a href="programs-act.php" class="nav-item">Programs and Activities</a>
         </nav>
-        <button class="header-button">Event Form</button>
+        <button class="header-button">Evaluation Form</button>
     </header>
 
     <div class="banner1">
