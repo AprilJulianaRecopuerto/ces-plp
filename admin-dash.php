@@ -1173,6 +1173,11 @@ if (isset($_POST['delete_notification'])) {
                 border-color: white;  /* Change border color on focus */
                 outline: none;           /* Remove default outline */
             } 
+
+            .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
         </style>
     </head>
 
@@ -1617,7 +1622,43 @@ if (isset($_POST['delete_notification'])) {
 
         <script>
         
+    let inactivityTime = function () {
+        let time;
 
+        // List of events to reset the inactivity timer
+        window.onload = resetTimer;
+        document.onmousemove = resetTimer;
+        document.onkeypress = resetTimer;
+        document.onscroll = resetTimer;
+        document.onclick = resetTimer;
+
+        function logout() {
+            // SweetAlert2 popup styled similar to the standard alert
+            Swal.fire({
+                title: 'Session Expired',
+                text: 'You have been logged out due to inactivity.',
+                icon: 'warning',
+                confirmButtonText: 'OK',
+                width: '400px',   // Adjust width (close to native alert size)
+                heightAuto: false, // Prevent automatic height adjustment
+                customClass: {
+                    popup: 'smaller-alert' // Custom class for further styling if needed
+                }
+            }).then(() => {
+                // Redirect to logout or any desired action after clicking "OK"
+                window.location.href = 'loadingpage.php';  // Adjust to your logout route
+            });
+        }
+
+        function resetTimer() {
+            clearTimeout(time);
+            // Set the inactivity timeout to 5 minutes (300000 milliseconds)
+            time = setTimeout(logout, 100000);  // 5 minutes = 300000 ms
+        }
+    };
+
+    // Start the inactivity timeout function
+    inactivityTime();
 
              // Function to toggle the visibility of done tasks
              function toggleTasks() {
