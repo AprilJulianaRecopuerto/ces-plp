@@ -117,7 +117,6 @@ if (isset($_POST['delete_notification'])) {
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -135,9 +134,6 @@ if (isset($_POST['delete_notification'])) {
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  <!-- Include Chart.js -->
-
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -1040,9 +1036,9 @@ if (isset($_POST['delete_notification'])) {
 
             .edit-button {
                 font-family: 'Poppins', sans-serif;
-                right: 10px; /* Adjust to your preference for spacing */
+                right: 5px; /* Adjust to your preference for spacing */
                 padding: 5px 10px;
-                background-color: #00CF00;
+                background-color: #4CAF50;
                 color: white;
                 border: none;
                 border-radius: 5px;
@@ -1054,8 +1050,8 @@ if (isset($_POST['delete_notification'])) {
             }
 
             .cancel-button{
-            font-family: 'Poppins', sans-serif;
-                margin-left:10px;
+                font-family: 'Poppins', sans-serif;
+                margin-left:2px;
                 padding: 5px 10px;
                 background-color: #c0392b;
                 color: white;
@@ -1068,34 +1064,117 @@ if (isset($_POST['delete_notification'])) {
                 background-color: darkred;
             }
 
-        /* Modal styling */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 50%;
-            height: 100%;
-            overflow: auto;
-            padding-top: 60px;
-            margin-left:540px;
-            margin-top:50px;
-        }
+            /* Modal background overlay */
+            .modal-overlay {
+                display: none; /* Hidden by default */
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+                z-index: 1000; /* Make sure the modal content is above the overlay */
+            }
 
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%; /* Could be more or less, depending on screen size */
-        }
+            /* Modal styling */
+            .modal {
+                display: none; /* Hidden by default */
+                position: fixed;
+                z-index: 1; /* Make sure modal is on top of overlay */
+                left: 50%; /* Center modal horizontally */
+                top: 50%;  /* Center modal vertically */
+                transform: translate(-50%, -50%); /* Offset by 50% to achieve perfect centering */
+                width: 50%;
+                max-width: 600px; /* Optional, limit the width of the modal */
+                height: auto; /* Height will adjust based on content */
+                overflow: auto;
+                background-color: #fff; /* White background for the modal */
+                border-radius: 10px; /* Rounded corners for the modal */
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow for better visual effect */
+                z-index: 1000; /* Make sure the modal content is above the overlay */
+            }
 
-        button {
-            margin: 10px;
-        }
+            /* Modal content styling */
+            .modal-content {
+                background-color: #fefefe;
+                margin: 0 auto;
+                padding: 20px;
+                border: 1px solid #888;
+                border-radius: 10px; /* Rounded corners inside modal */
+            }
 
-            
+            /* Heading styling */
+            h4 {
+                font-family: 'Poppins', sans-serif; /* Ensure consistency in font */
+                margin-bottom: 20px;
+                margin-top: 5px;
+            }
+
+            #sendNotificationButton {
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 10px;
+                margin-left: 10px;
+                border-radius: 5px;
+                font-size: 14px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            #cancelModalButton {
+                background-color: #e74c3c;
+                border: none;
+                color: white;
+                padding: 10px 10px;
+                margin-left: 10px;
+                border-radius: 5px;
+                font-size: 14px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+                font-family: 'Poppins', sans-serif;
+            }
+
+
+            .delete-btn {
+                font-family: 'Poppins', sans-serif;
+                position: absolute;
+                right: 10px; /* Adjust to your preference for spacing */
+                transform: translateY(-50%); /* Vertically center the button */
+                padding: 5px 10px;
+                background-color: #e74c3c;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            .delete-btn:hover {
+                background-color: darkred;
+            }
+
+            /* Reusable class for editable input fields */
+            .editable-field {
+                font-family: 'Poppins', sans-serif; /* Set font family to Poppins */
+                border: 1px solid #ccc;             /* Light gray border */
+                border-radius: 4px;                 /* Slight rounded corners */
+                padding: 8px;                       /* Space inside the input */
+                background-color: white;          /* Light background for inputs */
+                transition: border-color 0.3s ease;  /* Smooth transition for border on focus */
+                font-size: 14px;                    /* Adjust font size */
+            }
+
+            /* Style when input fields are focused */
+            .editable-field:focus {
+                border-color: white;  /* Change border color on focus */
+                outline: none;           /* Remove default outline */
+            } 
+
+            .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
         </style>
     </head>
 
@@ -1150,7 +1229,7 @@ if (isset($_POST['delete_notification'])) {
                 <i class="fa fa-chevron-down dropdown-icon"></i>
                 
                 <div class="dropdown-menu">
-                    <a href="your-profile.php">Profile</a>
+                    <a href="admin-your-profile.php">Profile</a>
                     <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
                 </div>
             </div>
@@ -1180,14 +1259,7 @@ if (isset($_POST['delete_notification'])) {
                 <li><a href="admin-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="admin-task.php">Upload Files</a>
-                    <a href="admin-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="admin-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="admin-responses.php"><img src="images/feedback.png">Responses</a></li>
 
@@ -1500,46 +1572,49 @@ if (isset($_POST['delete_notification'])) {
             </div>
         </div>
 
-<!-- Modal for selecting colleges to notify -->
-<div id="collegeModal" class="modal">
-    <div class="modal-content">
-        <h4>Select Colleges to Notify</h4>
-        <form id="notifyForm">
-            <label>
-                <input type="checkbox" class="college-checkbox" value="CAS" />
-                <span>College of Arts and Sciences (CAS)</span>
-            </label><br>
-            <label>
-                <input type="checkbox" class="college-checkbox" value="CBA" />
-                <span>College of Business and Accountancy (CBA)</span>
-            </label><br>
-            <label>
-                <input type="checkbox" class="college-checkbox" value="CCS" />
-                <span>College of Computer Studies (CCS)</span>
-            </label><br>
-            <label>
-                <input type="checkbox" class="college-checkbox" value="COED" />
-                <span>College of Education (COED)</span>
-            </label><br>
-            <label>
-                <input type="checkbox" class="college-checkbox" value="COE" />
-                <span>College of Engineering (COE)</span>
-            </label><br>
-            <label>
-                <input type="checkbox" class="college-checkbox" value="CIHM" />
-                <span>College of International Hospitality Management (CIHM)</span>
-            </label><br>
-            <label>
-                <input type="checkbox" class="college-checkbox" value="CON" />
-                <span>College of Nursing (CON)</span>
-            </label><br><br>
-            <button type="submit" id="sendNotificationButton">Send Notification</button>
-            <button type="button" id="cancelModalButton">Cancel</button>
-        </form>
-    </div>
-</div>
+        <!-- Modal Overlay (semi-transparent background) -->
+            <div id="modalOverlay" class="modal-overlay"></div>
 
-
+            <!-- Modal for selecting colleges to notify -->
+            <div id="collegeModal" class="modal">
+                <div class="modal-content">
+                    <h4>Select Colleges to Notify</h4>
+                    <form id="notifyForm">
+                        <label>
+                            <input type="checkbox" class="college-checkbox" value="CAS" />
+                            <span>College of Arts and Sciences (CAS)</span>
+                        </label><br>
+                        <label>
+                            <input type="checkbox" class="college-checkbox" value="CBA" />
+                            <span>College of Business Admnistration (CBA)</span>
+                        </label><br>
+                        <label>
+                            <input type="checkbox" class="college-checkbox" value="CCS" />
+                            <span>College of Computer Studies (CCS)</span>
+                        </label><br>
+                        <label>
+                            <input type="checkbox" class="college-checkbox" value="COED" />
+                            <span>College of Education (COED)</span>
+                        </label><br>
+                        <label>
+                            <input type="checkbox" class="college-checkbox" value="COE" />
+                            <span>College of Engineering (COE)</span>
+                        </label><br>
+                        <label>
+                            <input type="checkbox" class="college-checkbox" value="CIHM" />
+                            <span>College of International Hospitality Management (CIHM)</span>
+                        </label><br>
+                        <label>
+                            <input type="checkbox" class="college-checkbox" value="CON" />
+                            <span>College of Nursing (CON)</span>
+                        </label><br><br>
+                    
+                        <button type="submit" id="sendNotificationButton">Send Notification</button>
+                        <button type="button" id="cancelModalButton">Cancel</button>
+                    </form>
+                </div>
+            </div>
+        </div>
 
         <script>
              // Function to toggle the visibility of done tasks
@@ -1699,156 +1774,156 @@ if (isset($_POST['delete_notification'])) {
             };
 
             function saveTask(id) {
-    const descElem = document.getElementById(`desc-${id}`);
-    const dueDateElem = document.getElementById(`due-${id}`);
-    
-    // Get the new description and due date values
-    const newDesc = document.getElementById(`edit-desc-${id}`).value;
-    const newDueDate = document.getElementById(`edit-due-${id}`).value || dueDateElem.textContent.replace('Due: ', ''); // Use original due date if no change
+                const descElem = document.getElementById(`desc-${id}`);
+                const dueDateElem = document.getElementById(`due-${id}`);
+                
+                // Get the new description and due date values
+                const newDesc = document.getElementById(`edit-desc-${id}`).value;
+                const newDueDate = document.getElementById(`edit-due-${id}`).value || dueDateElem.textContent.replace('Due: ', ''); // Use original due date if no change
 
-    if (!newDueDate) {
-        // If there is no due date, set it to the original due date to avoid null or empty values
-        newDueDate = dueDateElem.textContent.replace('Due: ', '');
-    }
-
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "admin-edit_task.php", true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-            const response = JSON.parse(xhr.responseText);
-            if (response.status === "success") {
-                // Update the task display with new values
-                document.getElementById(`desc-${id}`).textContent = newDesc;
-                document.getElementById(`due-${id}`).textContent = `Due: ${newDueDate}`;
-
-                // Show SweetAlert that the task has been saved
-                Swal.fire({
-                    title: 'Task Saved!',
-                    text: 'The task has been successfully updated.',
-                    icon: 'success',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        popup: 'custom-swal-popup',
-                        title: 'custom-swal-title',
-                        confirmButton: 'custom-swal-confirm'
-                    }
-                });
-
-                // Return button to "Edit" and remove Cancel button
-                const editButton = document.querySelector(`button[onclick="editTask(${id})"]`);
-                editButton.textContent = 'Edit';
-                editButton.onclick = () => editTask(id);
-
-                const cancelButton = document.querySelector('.cancel-button');
-                if (cancelButton) {
-                    cancelButton.remove();
+                if (!newDueDate) {
+                    // If there is no due date, set it to the original due date to avoid null or empty values
+                    newDueDate = dueDateElem.textContent.replace('Due: ', '');
                 }
-            } else {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Failed to update task.',
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        popup: 'custom-error-popup',
-                        title: 'custom-error-title',
-                        confirmButton: 'custom-error-confirm'
+
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "admin-edit_task.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.status === "success") {
+                            // Update the task display with new values
+                            document.getElementById(`desc-${id}`).textContent = newDesc;
+                            document.getElementById(`due-${id}`).textContent = `Due: ${newDueDate}`;
+
+                            // Show SweetAlert that the task has been saved
+                            Swal.fire({
+                                title: 'Task Saved!',
+                                text: 'The task has been successfully updated.',
+                                icon: 'success',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    popup: 'custom-swal-popup',
+                                    title: 'custom-swal-title',
+                                    confirmButton: 'custom-swal-confirm'
+                                }
+                            });
+
+                            // Return button to "Edit" and remove Cancel button
+                            const editButton = document.querySelector(`button[onclick="editTask(${id})"]`);
+                            editButton.textContent = 'Edit';
+                            editButton.onclick = () => editTask(id);
+
+                            const cancelButton = document.querySelector('.cancel-button');
+                            if (cancelButton) {
+                                cancelButton.remove();
+                            }
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Failed to update task.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    popup: 'custom-error-popup',
+                                    title: 'custom-error-title',
+                                    confirmButton: 'custom-error-confirm'
+                                }
+                            });
+                        }
                     }
+                };
+
+                xhr.send(`id=${encodeURIComponent(id)}&description=${encodeURIComponent(newDesc)}&due_date=${encodeURIComponent(newDueDate)}`);
+            }
+
+
+                        
+            // Show the modal when the 'Notify Selected Tasks' button is clicked
+            document.getElementById('notifyAllButton').addEventListener('click', function() {
+                const modal = document.getElementById('collegeModal');
+                modal.style.display = 'block';
+            });
+
+            // Close the modal if the 'Cancel' button is clicked
+            document.getElementById('cancelModalButton').addEventListener('click', function() {
+                const modal = document.getElementById('collegeModal');
+                modal.style.display = 'none';
+            });
+
+            // Handle the form submission to notify selected colleges
+            document.getElementById('notifyForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                const selectedColleges = [];
+                
+                // Get selected colleges
+                document.querySelectorAll('.college-checkbox:checked').forEach(function(checkbox) {
+                    selectedColleges.push(checkbox.value);
                 });
-            }
-        }
-    };
 
-    xhr.send(`id=${encodeURIComponent(id)}&description=${encodeURIComponent(newDesc)}&due_date=${encodeURIComponent(newDueDate)}`);
-}
+                const selectedTasks = [];
+                document.querySelectorAll('.task-checkbox:checked').forEach(function(checkbox) {
+                    selectedTasks.push(checkbox.getAttribute('data-id'));
+                });
 
+                if (selectedTasks.length === 0) {
+                    Swal.fire({
+                        title: 'No Tasks Selected',
+                        text: 'Please select at least one task to notify.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            title: 'custom-swal-title',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    });
+                    return;
+                }
 
-            
-// Show the modal when the 'Notify Selected Tasks' button is clicked
-document.getElementById('notifyAllButton').addEventListener('click', function() {
-    const modal = document.getElementById('collegeModal');
-    modal.style.display = 'block';
-});
+                // Send selected tasks and colleges to the server
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "admin-notify_colleges.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-// Close the modal if the 'Cancel' button is clicked
-document.getElementById('cancelModalButton').addEventListener('click', function() {
-    const modal = document.getElementById('collegeModal');
-    modal.style.display = 'none';
-});
-
-// Handle the form submission to notify selected colleges
-document.getElementById('notifyForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    const selectedColleges = [];
-    
-    // Get selected colleges
-    document.querySelectorAll('.college-checkbox:checked').forEach(function(checkbox) {
-        selectedColleges.push(checkbox.value);
-    });
-
-    const selectedTasks = [];
-    document.querySelectorAll('.task-checkbox:checked').forEach(function(checkbox) {
-        selectedTasks.push(checkbox.getAttribute('data-id'));
-    });
-
-    if (selectedTasks.length === 0) {
-        Swal.fire({
-            title: 'No Tasks Selected',
-            text: 'Please select at least one task to notify.',
-            icon: 'warning',
-            confirmButtonText: 'OK',
-            customClass: {
-                popup: 'custom-swal-popup',
-                title: 'custom-swal-title',
-                confirmButton: 'custom-swal-confirm'
-            }
-        });
-        return;
-    }
-
-    // Send selected tasks and colleges to the server
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "admin-notify_colleges.php", true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-            const response = JSON.parse(xhr.responseText);
-            if (response.status === "success") {
-                Swal.fire({
-                    title: 'Success',
-                    text: 'Notification sent to selected colleges.',
-                    icon: 'success',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        popup: 'custom-swal-popup',
-                        title: 'custom-swal-title',
-                        confirmButton: 'custom-swal-confirm'
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.status === "success") {
+                            Swal.fire({
+                                title: 'Success',
+                                text: 'Notification sent to selected colleges.',
+                                icon: 'success',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    popup: 'custom-swal-popup',
+                                    title: 'custom-swal-title',
+                                    confirmButton: 'custom-swal-confirm'
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Failed to send notification.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    popup: 'custom-error-popup',
+                                    title: 'custom-error-title',
+                                    confirmButton: 'custom-error-confirm'
+                                }
+                            });
+                        }
                     }
-                });
-            } else {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Failed to send notification.',
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        popup: 'custom-error-popup',
-                        title: 'custom-error-title',
-                        confirmButton: 'custom-error-confirm'
-                    }
-                });
-            }
-        }
-    };
+                };
 
-    xhr.send(`tasks=${JSON.stringify(selectedTasks)}&colleges=${JSON.stringify(selectedColleges)}`);
-    // Close the modal after sending
-    document.getElementById('collegeModal').style.display = 'none';
-});
+                xhr.send(`tasks=${JSON.stringify(selectedTasks)}&colleges=${JSON.stringify(selectedColleges)}`);
+                // Close the modal after sending
+                document.getElementById('collegeModal').style.display = 'none';
+            });
 
 
             });
