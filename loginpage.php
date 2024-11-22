@@ -830,6 +830,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Function to show success SweetAlert
             function showSuccessAlert() {
+                // Clear the loggedOut flag from sessionStorage when user successfully signs in
+                sessionStorage.removeItem('loggedOut');
+                
                 Swal.fire({
                     icon: 'success',
                     title: 'Success',
@@ -841,9 +844,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         confirmButton: 'custom-confirm'
                     }
                 }).then(() => {
-                    window.location.href = "admin-dash.php"; // Redirect to the dashboard or desired page
+                    // Redirect to the dashboard or desired page after the user confirms
+                    window.location.href = "admin-dash.php"; // Change this to the appropriate dashboard URL
                 });
             }
+
 
             // Function to show error SweetAlert
             function showErrorAlert(message) {
