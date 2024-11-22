@@ -1,12 +1,12 @@
 <?php
 // get_tasks.php
-$servername = "localhost";
-$username = "root"; // replace with your database username
-$password = ""; // replace with your database password
-$dbname = "admin_todo_list"; // replace with your database name
+$servername = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "t9riamok80kmok3h";
+$password = "lzh13ihy0axfny6d";
+$dbname = "g8ri1hhtsfx77ptb";
 
-// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
+
 
 // Check connection
 if ($conn->connect_error) {
