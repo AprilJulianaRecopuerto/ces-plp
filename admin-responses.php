@@ -61,12 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     padding: 0;
                     font-family: 'Poppins', sans-serif;
                 }
-                .certificate {
-                    position: relative; /* To ensure the background image can be positioned relative to this container */
-                    width: 100%;
-                    height: 100%;
-                    overflow: hidden; /* Prevent the image from overflowing */
-                }
                 .certificate img {
                     position: absolute;
                     top: 0;
