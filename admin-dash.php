@@ -1653,6 +1653,14 @@ if (isset($_POST['delete_notification'])) {
                         // Set sessionStorage to indicate user has been logged out
                         sessionStorage.setItem('loggedOut', 'true');
 
+                        // Push a new state into the history to prevent the user from going back
+                        window.history.pushState(null, '', window.location.href);
+
+                        // Listen to the back event and block it
+                        window.onpopstate = function () {
+                            window.history.pushState(null, '', window.location.href);
+                        };
+
                         // Redirect to loadingpage.php
                         window.location.replace('loadingpage.php');
                     });
@@ -1667,6 +1675,7 @@ if (isset($_POST['delete_notification'])) {
 
             // Start the inactivity timeout function
             inactivityTime();
+
 
 
 
