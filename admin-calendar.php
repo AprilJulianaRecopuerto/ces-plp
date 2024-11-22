@@ -517,7 +517,6 @@ $conn_proj_list->close();
             }
         </style>
     </head>
-
     <body>
         <!-- Navbar -->
         <nav class="navbar">
