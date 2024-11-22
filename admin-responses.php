@@ -99,17 +99,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </head>
         <body>
             <div class='certificate'>
-                <img src='https://ces-plp-d5e378ca4d4d.herokuapp.com/public/cert-bg.png' alt='Background'>
+                <!-- Use relative paths for images -->
+                <img src='/public/cert-bg.png' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='https://ces-plp-d5e378ca4d4d.herokuapp.com/public/logoicon.png' alt='Logo'>
+                        <img src='/public/logoicon.png' alt='Logo'>
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
             </div>
+
         </body>
         </html>
         ";
