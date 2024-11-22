@@ -2,11 +2,12 @@
 
 // Database credentials for proj_list
 $servername = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username = "t9riamok80kmok3h";
-$password = "lzh13ihy0axfny6d";
-$dbname = "g8ri1hhtsfx77ptb";
+$username_db = "t9riamok80kmok3h";
+$password_db = "lzh13ihy0axfny6d";
+$dbname_proj_list = "g8ri1hhtsfx77ptb";
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+// Create connection to proj_list database
+$conn = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
 
 // Check connection
 if ($conn->connect_error) {
@@ -63,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['tasks']) && isset($_PO
             }
         }
 
-        echo json_encode(["status" => "success", "message" => "Notification sent to selected colleges."]);
+        echo json_encode(['status' => 'success']);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'No tasks selected or no colleges specified']);
     }
