@@ -1622,43 +1622,51 @@ if (isset($_POST['delete_notification'])) {
 
         <script>
         
-    let inactivityTime = function () {
-        let time;
+        let inactivityTime = function () {
+    let time;
 
-        // List of events to reset the inactivity timer
-        window.onload = resetTimer;
-        document.onmousemove = resetTimer;
-        document.onkeypress = resetTimer;
-        document.onscroll = resetTimer;
-        document.onclick = resetTimer;
+    // List of events to reset the inactivity timer
+    window.onload = resetTimer;
+    document.onmousemove = resetTimer;
+    document.onkeypress = resetTimer;
+    document.onscroll = resetTimer;
+    document.onclick = resetTimer;
 
-        function logout() {
-            // SweetAlert2 popup styled similar to the standard alert
-            Swal.fire({
-                title: 'Session Expired',
-                text: 'You have been logged out due to inactivity.',
-                icon: 'warning',
-                confirmButtonText: 'OK',
-                width: '400px',   // Adjust width (close to native alert size)
-                heightAuto: false, // Prevent automatic height adjustment
-                customClass: {
-                    popup: 'smaller-alert' // Custom class for further styling if needed
-                }
-            }).then(() => {
-                // Redirect to logout or any desired action after clicking "OK"
-                window.location.href = 'loadingpage.php';  // Adjust to your logout route
-            });
-        }
+    function logout() {
+        // SweetAlert2 popup styled similar to the standard alert
+        Swal.fire({
+            title: 'Session Expired',
+            text: 'You have been logged out due to inactivity.',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            width: '400px',   // Adjust width (close to native alert size)
+            heightAuto: false, // Prevent automatic height adjustment
+            customClass: {
+                popup: 'smaller-alert' // Custom class for further styling if needed
+            }
+        }).then(() => {
+            // Redirect to loadingpage.php
+            window.location.href = 'loadingpage.php';
 
-        function resetTimer() {
-            clearTimeout(time);
-            // Set the inactivity timeout to 5 minutes (300000 milliseconds)
-            time = setTimeout(logout, 100000);  // 5 minutes = 300000 ms
-        }
-    };
+            // Manipulate the browser history to prevent going back
+            setTimeout(function () {
+                history.pushState(null, null, window.location.href); // Push the current state
+                history.back();  // Go back to prevent back navigation
+                history.forward(); // Go forward to the original page (to lock it)
+            }, 100);  // Timeout to allow redirection to happen before manipulating history
+        });
+    }
 
-    // Start the inactivity timeout function
-    inactivityTime();
+    function resetTimer() {
+        clearTimeout(time);
+        // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+        time = setTimeout(logout, 10000);  // 100 seconds = 100000 ms
+    }
+};
+
+// Start the inactivity timeout function
+inactivityTime();
+
 
              // Function to toggle the visibility of done tasks
              function toggleTasks() {
