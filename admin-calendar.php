@@ -521,7 +521,7 @@ $conn_proj_list->close();
     <body>
         <!-- Navbar -->
         <nav class="navbar">
-            <h2>Community Extesion Event Calendar</h2> 
+            <h2>Community Extension Event Calendar</h2> 
 
             <div class="profile-container">
                 <!-- Chat Icon with Notification Badge -->
