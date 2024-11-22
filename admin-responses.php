@@ -33,12 +33,6 @@ if (!$result || $result->num_rows === 0) {
     die("No data found");
 }
 
-// Function to convert image URL to Base64
-function imageToBase64($url) {
-    $imageData = file_get_contents($url);
-    return base64_encode($imageData);
-}
-
 // Handle form submission for sending certificates
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) {
     $all_sent = true;
@@ -52,13 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Generate PDF for each participant
         $date = date("l, F j, Y");
 
-        // Base64 encoded images
+        // Full URL path for images
         $imagePath = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/public/cert-bg.png';  // Background image
         $logoPath = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/public/logoicon.png';  // Logo image
-
-        // Convert images to Base64
-        $bgBase64 = imageToBase64($imagePath);
-        $logoBase64 = imageToBase64($logoPath);
 
         // HTML content for the certificate
         $html = "
@@ -111,18 +101,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </head>
         <body>
             <div class='certificate'>
-                <!-- Use Base64 images in the src -->
-                <img src='data:image/png;base64,$bgBase64' alt='Background'>
+                <!-- Use relative paths for images -->
+                <img src='/public/cert-bg.png' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='data:image/png;base64,$logoBase64' alt='Logo'>
+                        <img src='/public/logoicon.png' alt='Logo'>
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
             </div>
+
         </body>
         </html>
         ";

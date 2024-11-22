@@ -34,32 +34,6 @@ $stmt->bind_param("s", $currentDepartment);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Function to convert image to Base64 using cURL
-function imageToBase64($imageUrl) {
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $imageUrl);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    $imageData = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($httpCode === 200 && $imageData !== false) {
-        return 'data:image/' . pathinfo($imageUrl, PATHINFO_EXTENSION) . ';base64,' . base64_encode($imageData);
-    } else {
-        error_log("Failed to fetch image: $imageUrl, HTTP code: $httpCode");
-        return '';
-    }
-}
-
-// Hosted image URLs
-$bgImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
-$logoImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png';
-
-// Fetch images or use fallback
-$bgImageBase64 = imageToBase64($bgImageURL) ?: 'data:image/png;base64,' . base64_encode(file_get_contents('fallback_bg.png'));
-$logoImageBase64 = imageToBase64($logoImageURL) ?: 'data:image/png;base64,' . base64_encode(file_get_contents('fallback_logo.png'));
-
 // Handle form submission for sending certificates
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) {
     $all_sent = true;
@@ -69,44 +43,133 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $department = $row['department'];
         $event = $row['event'];
 
-        // Generate HTML for the certificate
+        // Hosted image URLs
+        $bgImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
+        $logoImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png';
+        
+        // Generate PDF for each participant
         $date = date("l, F j, Y");
+        
         $html = "
         <html>
         <head>
+        
+            <!-- Link Google Fonts directly -->
+            <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
+            <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
+        
             <style>
-                body { text-align: center; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
-                .certificate img { position: absolute; width: 100%; z-index: -1; }
-                .subheading { margin-top: 240px; font-size: 20px; }
-                .name { font-size: 80px; text-decoration: underline; }
-                .details { font-size: 22px; margin-top: 20px; }
-                .footer img { max-width: 80px; margin-top: 20px; }
+                body { 
+                    text-align: center;
+                    margin: 0; 
+                    padding: 0; 
+                    font-family: 'Poppins', sans-serif;
+                }
+        
+                .certificate img {
+                    position: absolute;
+                    margin-top: -45px;
+                    width: 109%;
+                    margin-left: -45px;
+                    object-fit: cover;
+                    z-index: -1;
+                }
+        
+                .subheading {
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 20px;
+                    color: #666;
+                    margin: 20px 0;
+                    margin-top: 240px;
+                    margin-left: -195px;
+                    letter-spacing: 0.5px;
+                }
+        
+                .name { 
+                    font-family: 'Lilita One', sans-serif;
+                    font-size: 80px;
+                    font-weight: bold;
+                    color: #333;
+                    margin: 20px 0;
+                    text-decoration: underline;
+                    font-style: italic;  /* Make it italic if cursive is not working */
+                    text-transform: uppercase; /* Convert text to uppercase */
+                    margin-top: 30px;
+                }
+        
+                .details {
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 22px; 
+                    color: black;
+                    line-height: 1.5;
+                    margin-top: 20px;
+                }
+        
+                .date {
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 20px; 
+                    color: #888;
+                    margin-top: 30px;
+                }
+        
+                .footer {
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 18px;
+                    color: black;
+                    text-align: center;
+                    margin-top: 50px;
+                }
+        
+                .footer-content {
+                    display: flex;
+                    justify-content: center;  /* Centers items horizontally */
+                
+                }
+        
+                .footer-content img {
+                    margin-left: 340px;
+                    max-width: 80px;  /* Adjust the size of the logo */
+                    height: auto;
+                    margin-top: -3px;
+                }
+        
+                .footer-text {
+                    font-size: 20px;
+                    margin-left: 110px;
+                    font-weight: normal;
+                }
             </style>
         </head>
         <body>
             <div class='certificate'>
-                <img src='$bgImageBase64' alt='Background'>
+                <img src='$bgImageURL' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
-                <p class='details'>Who participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong> on <strong>$date</strong>.</p>
-                <div class='footer'><img src='$logoImageBase64' alt='Logo'></div>
+                <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
+                <div class='footer'>
+                    <div class='footer-content'>
+                        <img src='$logoImageURL' alt='Logo'>
+                        <p class='footer-text'>Community Extension Services</p>
+                    </div>
+                </div>
             </div>
         </body>
-        </html>";
-
+        </html>
+        ";
         try {
-            // Generate PDF
+            // Generate the PDF
             $options = new Options();
             $options->set('isHtml5ParserEnabled', true);
-            $options->set('isRemoteEnabled', true); // Enable remote fetching for Dompdf
+            $options->set('isPhpEnabled', true); // Ensure this is enabled for PHP functionality
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isCssFloatEnabled', true); // Ensure floating is enabled
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
 
-            // Save PDF temporarily
-            $tempDir = sys_get_temp_dir();
-            $pdfFilePath = $tempDir . '/certificate_' . urlencode($name) . '.pdf';
+            // Save PDF to a temporary directory
+            $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf';
             file_put_contents($pdfFilePath, $dompdf->output());
         } catch (Exception $e) {
             error_log("PDF generation failed: " . $e->getMessage());
@@ -114,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             continue;
         }
 
-        // Send email with the certificate
+        // Send Email
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
@@ -133,14 +196,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
 
             $mail->send();
         } catch (Exception $e) {
-            error_log("Email sending failed: " . $e->getMessage());
             $all_sent = false;
-        } finally {
-            // Cleanup temporary PDF file
-            unlink($pdfFilePath);
+            break;
         }
+
+        // Cleanup PDF file
+        unlink($pdfFilePath);
     }
 
+    // Return response
     echo $all_sent ? 'success' : 'error';
     exit;
 }
