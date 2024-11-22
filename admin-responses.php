@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     z-index: -1;
                 }
                 .subheading {
-                    margin-top: 190px;
+                    margin-top: 50px;
                     font-size: 20px;
                 }
                 .name {
@@ -101,17 +101,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </head>
         <body>
             <div class='certificate'>
-                <img src='$imagePath' alt='Background'>
+                <!-- Use relative paths for images -->
+                <img src='/public/cert-bg.png' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='$logoPath' alt='Logo'>
+                        <img src='/public/logoicon.png' alt='Logo'>
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
             </div>
+
         </body>
         </html>
         ";
@@ -121,8 +123,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $options = new Options();
             $options->set('isHtml5ParserEnabled', true);
             $options->set('isPhpEnabled', true); // Ensure this is enabled for PHP functionality
-            $options->set('isRemoteEnabled', true); // Enable remote images
             $dompdf = new Dompdf($options);
+            $options = new Options();
+            $options->set('isRemoteEnabled',true);      
+            $dompdf = new Dompdf( $options );
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
@@ -167,7 +171,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     exit;
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
