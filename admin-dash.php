@@ -1622,7 +1622,7 @@ if (isset($_POST['delete_notification'])) {
 
         <script>
         
-        let inactivityTime = function () {
+let inactivityTime = function () {
     let time;
 
     // List of events to reset the inactivity timer
@@ -2258,7 +2258,7 @@ inactivityTime();
             // Fetch notification count every 3 seconds (5000 milliseconds)
             setInterval(fetchNotificationCount, 3000);
 
-            function confirmLogout(event) {
+function confirmLogout(event) {
     event.preventDefault();
     Swal.fire({
         title: 'Are you sure?',
