@@ -414,6 +414,14 @@ if (!isset($_SESSION['username'])) {
         <nav class="navbar">
             <h2>Colleges - Budget Allocation</h2> 
 
+            <div class="profile-container">
+                <!-- Chat Icon with Notification Badge -->
+                <a href="chat.php" class="chat-icon" onclick="resetNotifications()">
+                    <i class="fa fa-comments"></i>
+                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+                </a>
+            <div>
+
             <div class="profile" id="profileDropdown">
                 <?php
                     // Check if a profile picture is set in the session
@@ -431,7 +439,7 @@ if (!isset($_SESSION['username'])) {
 
                 <i class="fa fa-chevron-down dropdown-icon"></i>
                 <div class="dropdown-menu">
-                    <a href="cas-your-profile.php">Profile</a>
+                    <a href="admin-your-profile.php">Profile</a>
                     <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
                 </div>
             </div>

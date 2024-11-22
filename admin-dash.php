@@ -135,9 +135,6 @@ if (isset($_POST['delete_notification'])) {
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  <!-- Include Chart.js -->
 
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
-
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
         <style>
@@ -1589,7 +1586,7 @@ if (isset($_POST['delete_notification'])) {
                         </label><br>
                         <label>
                             <input type="checkbox" class="college-checkbox" value="CBA" />
-                            <span>College of Business and Accountancy (CBA)</span>
+                            <span>College of Business Admnistration (CBA)</span>
                         </label><br>
                         <label>
                             <input type="checkbox" class="college-checkbox" value="CCS" />
@@ -1895,62 +1892,68 @@ if (isset($_POST['delete_notification'])) {
                 }
 
 
-                            
-                // Show the modal and overlay when the 'Notify Selected Tasks' button is clicked
-                document.getElementById('notifyAllButton').addEventListener('click', function() {
-                    const modal = document.getElementById('collegeModal');
-                    const overlay = document.getElementById('modalOverlay');
-                    modal.style.display = 'block';
-                    overlay.style.display = 'block'; // Show the overlay
-                });
-
-                // Close the modal and overlay if the 'Cancel' button is clicked
-                document.getElementById('cancelModalButton').addEventListener('click', function() {
-                    const modal = document.getElementById('collegeModal');
-                    const overlay = document.getElementById('modalOverlay');
-                    modal.style.display = 'none';
-                    overlay.style.display = 'none'; // Hide the overlay
-                });
-                // Handle the form submission to notify selected colleges
-                document.getElementById('notifyForm').addEventListener('submit', function(event) {
-                    event.preventDefault();
-
-                    const selectedColleges = [];
-                    
-                    // Get selected colleges
-                    document.querySelectorAll('.college-checkbox:checked').forEach(function(checkbox) {
-                        selectedColleges.push(checkbox.value);
+                document.addEventListener("DOMContentLoaded", function() {
+                    // Show the modal and overlay when the 'Notify Selected Tasks' button is clicked
+                    document.getElementById('notifyAllButton').addEventListener('click', function() {
+                        const modal = document.getElementById('collegeModal');
+                        const overlay = document.getElementById('modalOverlay');
+                        modal.style.display = 'block';
+                        overlay.style.display = 'block'; // Show the overlay
                     });
 
-                    const selectedTasks = [];
-                    document.querySelectorAll('.task-checkbox:checked').forEach(function(checkbox) {
-                        selectedTasks.push(checkbox.getAttribute('data-id'));
+                    // Close the modal and overlay if the 'Cancel' button is clicked
+                    document.getElementById('cancelModalButton').addEventListener('click', function() {
+                        const modal = document.getElementById('collegeModal');
+                        const overlay = document.getElementById('modalOverlay');
+                        modal.style.display = 'none';
+                        overlay.style.display = 'none'; // Hide the overlay
                     });
 
-                    if (selectedTasks.length === 0) {
-                        Swal.fire({
-                            title: 'No Tasks Selected',
-                            text: 'Please select at least one task to notify.',
-                            icon: 'warning',
-                            confirmButtonText: 'OK',
-                            customClass: {
-                                popup: 'custom-swal-popup',
-                                title: 'custom-swal-title',
-                                confirmButton: 'custom-swal-confirm'
-                            }
+                    // Handle the form submission to notify selected colleges
+                    document.getElementById('notifyForm').addEventListener('submit', async function(event) {
+                        event.preventDefault();
+
+                        const selectedColleges = [];
+                        
+                        // Get selected colleges
+                        document.querySelectorAll('.college-checkbox:checked').forEach(function(checkbox) {
+                            selectedColleges.push(checkbox.value);
                         });
-                        return;
-                    }
 
-                    // Send selected tasks and colleges to the server
-                    const xhr = new XMLHttpRequest();
-                    xhr.open("POST", "admin-notify_colleges.php", true);
-                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                        const selectedTasks = [];
+                        document.querySelectorAll('.task-checkbox:checked').forEach(function(checkbox) {
+                            selectedTasks.push(checkbox.getAttribute('data-id'));
+                        });
 
-                    xhr.onreadystatechange = function() {
-                        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                            const response = JSON.parse(xhr.responseText);
-                            if (response.status === "success") {
+                        // Show alert if no tasks are selected
+                        if (selectedTasks.length === 0) {
+                            Swal.fire({
+                                title: 'No Tasks Selected',
+                                text: 'Please select at least one task to notify.',
+                                icon: 'warning',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    popup: 'custom-swal-popup',
+                                    title: 'custom-swal-title',
+                                    confirmButton: 'custom-swal-confirm'
+                                }
+                            });
+                            return;
+                        }
+
+                        // Send selected tasks and colleges to the server
+                        try {
+                            const response = await fetch("admin-notify_colleges.php", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/x-www-form-urlencoded"
+                                },
+                                body: `tasks=${JSON.stringify(selectedTasks)}&colleges=${JSON.stringify(selectedColleges)}`
+                            });
+
+                            const data = await response.json();
+                            if (data.status === "success") {
+                                // Show SweetAlert for success
                                 Swal.fire({
                                     title: 'Success',
                                     text: 'Notification sent to selected colleges.',
@@ -1962,7 +1965,12 @@ if (isset($_POST['delete_notification'])) {
                                         confirmButton: 'custom-swal-confirm'
                                     }
                                 });
+
+                                // Close modal after sending notification
+                                document.getElementById('collegeModal').style.display = 'none';
+                                document.getElementById('modalOverlay').style.display = 'none';
                             } else {
+                                // Show SweetAlert for error
                                 Swal.fire({
                                     title: 'Error',
                                     text: 'Failed to send notification.',
@@ -1975,14 +1983,23 @@ if (isset($_POST['delete_notification'])) {
                                     }
                                 });
                             }
+                        } catch (error) {
+                            console.error("Error notifying colleges:", error);
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'An error occurred while sending the notification.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    popup: 'custom-error-popup',
+                                    title: 'custom-error-title',
+                                    confirmButton: 'custom-error-confirm'
+                                }
+                            });
                         }
-                    };
-
-                    xhr.send(`tasks=${JSON.stringify(selectedTasks)}&colleges=${JSON.stringify(selectedColleges)}`);
-                    // Close the modal after sending
-                    document.getElementById('collegeModal').style.display = 'none';
+                    });
                 });
-            });
+
 
             // Data from PHP directly into JavaScript variables
             var projectCounts = <?php echo json_encode($projectCounts); ?>;
