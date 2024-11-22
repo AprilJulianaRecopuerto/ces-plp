@@ -117,6 +117,7 @@ if (isset($_POST['delete_notification'])) {
 }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -1066,117 +1067,34 @@ if (isset($_POST['delete_notification'])) {
             .cancel-button:hover {
                 background-color: darkred;
             }
-/* Modal background overlay */
-.modal-overlay {
-                display: none; /* Hidden by default */
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
-                z-index: 1000; /* Make sure the modal content is above the overlay */
-            }
 
-            /* Modal styling */
-            .modal {
-                display: none; /* Hidden by default */
-                position: fixed;
-                z-index: 1; /* Make sure modal is on top of overlay */
-                left: 50%; /* Center modal horizontally */
-                top: 50%;  /* Center modal vertically */
-                transform: translate(-50%, -50%); /* Offset by 50% to achieve perfect centering */
-                width: 50%;
-                max-width: 600px; /* Optional, limit the width of the modal */
-                height: auto; /* Height will adjust based on content */
-                overflow: auto;
-                background-color: #fff; /* White background for the modal */
-                border-radius: 10px; /* Rounded corners for the modal */
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow for better visual effect */
-                z-index: 1000; /* Make sure the modal content is above the overlay */
-            }
+/* Modal styling */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    overflow: auto;
+    padding-top: 60px;
+    margin-left:540px;
+    margin-top:50px;
+}
 
-            /* Modal content styling */
-            .modal-content {
-                background-color: #fefefe;
-                margin: 0 auto;
-                padding: 20px;
-                border: 1px solid #888;
-                border-radius: 10px; /* Rounded corners inside modal */
-            }
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
 
-            /* Heading styling */
-            h4 {
-                font-family: 'Poppins', sans-serif; /* Ensure consistency in font */
-                margin-bottom: 20px;
-                margin-top: 5px;
-            }
+button {
+    margin: 10px;
+}
 
-            #sendNotificationButton {
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 10px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 14px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-
-            #cancelModalButton {
-                background-color: #e74c3c;
-                border: none;
-                color: white;
-                padding: 10px 10px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 14px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-
-
-            .delete-btn {
-                font-family: 'Poppins', sans-serif;
-                position: absolute;
-                right: 10px; /* Adjust to your preference for spacing */
-                transform: translateY(-50%); /* Vertically center the button */
-                padding: 5px 10px;
-                background-color: #e74c3c;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-            }
-
-            .delete-btn:hover {
-                background-color: darkred;
-            }
-
-            /* Reusable class for editable input fields */
-            .editable-field {
-                font-family: 'Poppins', sans-serif; /* Set font family to Poppins */
-                border: 1px solid #ccc;             /* Light gray border */
-                border-radius: 4px;                 /* Slight rounded corners */
-                padding: 8px;                       /* Space inside the input */
-                background-color: white;          /* Light background for inputs */
-                transition: border-color 0.3s ease;  /* Smooth transition for border on focus */
-                font-size: 14px;                    /* Adjust font size */
-            }
-
-            /* Style when input fields are focused */
-            .editable-field:focus {
-                border-color: white;  /* Change border color on focus */
-                outline: none;           /* Remove default outline */
-            } 
-
-            .smaller-alert {
-            font-size: 14px; /* Adjust text size for a compact look */
-            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
-            }
             
         </style>
     </head>
@@ -1293,19 +1211,19 @@ if (isset($_POST['delete_notification'])) {
 						<div class="activities-details">
 							<div class="total-activities-count">
 								<?php
-								// Database credentials for proj_list
-                                $servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-                                $username_proj = "zf8r3n4qqjyrfx7o";
-                                $password_proj = "su6qmqa0gxuerg98";
-                                $dbname_proj_list = "hpvs3ggjc4qfg9jp";
+								// Database credentials
+								$servername = "localhost";
+								$username = "root";
+								$password = "";
+								$dbname = "proj_list";
 
-                                // Create connection to proj_list database
-                                $conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
+								// Create connection
+								$conn = new mysqli($servername, $username, $password, $dbname);
 
-                                // Check connection
-                                if ($conn_proj_list->connect_error) {
-                                    die("Connection failed: " . $conn_proj_list->connect_error);
-                                }
+								// Check connection
+								if ($conn->connect_error) {
+									die("Connection failed: " . $conn->connect_error);
+								}
 
 								// SQL query to count total activities across multiple tables
 								$sql = "
@@ -1318,7 +1236,7 @@ if (isset($_POST['delete_notification'])) {
 										SELECT COUNT(*) as total_count FROM cba
 									) as combined_counts
 								";
-								$result = $conn_proj_list->query($sql);
+								$result = $conn->query($sql);
 
 								if ($result && $result->num_rows > 0) {
 									$row = $result->fetch_assoc();
@@ -1327,7 +1245,7 @@ if (isset($_POST['delete_notification'])) {
 									echo "0";
 								}
 
-								$conn_proj_list->close();
+								$conn->close();
 								?>
 							</div>
 							<img src="images/total.png" alt="Up Icon">
@@ -1391,19 +1309,19 @@ if (isset($_POST['delete_notification'])) {
 
 				<canvas id="projectsChart"></canvas>
 				<?php
-				// Database credentials for proj_list
-                $servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-                $username_proj = "zf8r3n4qqjyrfx7o";
-                $password_proj = "su6qmqa0gxuerg98";
-                $dbname_proj_list = "hpvs3ggjc4qfg9jp";
+				// Database connection details
+				$host = 'localhost';  // or your host
+				$db = 'proj_list';     // database name
+				$user = 'root'; // database username
+				$pass = ''; // database password
 
-                // Create connection to proj_list database
-                $conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
+				// Create a connection to the database
+				$conn = new mysqli($host, $user, $pass, $db);
 
-                // Check connection
-                if ($conn_proj_list->connect_error) {
-                    die("Connection failed: " . $conn_proj_list->connect_error);
-                }
+				// Check if connection was successful
+				if ($conn->connect_error) {
+					die("Connection failed: " . $conn->connect_error);
+				}
 
 				// Initialize selected month and year as empty strings
 				$selectedMonth = '';
@@ -1433,7 +1351,7 @@ if (isset($_POST['delete_notification'])) {
 						$sql .= " AND YEAR(date_of_sub) = '$selectedYear'";
 					}
 
-					$result = $conn_proj_list->query($sql);
+					$result = $conn->query($sql);
 
 					if ($result->num_rows > 0) {
 						while ($row = $result->fetch_assoc()) {
@@ -1445,7 +1363,7 @@ if (isset($_POST['delete_notification'])) {
 				}
 
 				// Close the connection
-				$conn_proj_list->close();
+				$conn->close();
 				?>
 			</div>
 
@@ -1478,17 +1396,17 @@ if (isset($_POST['delete_notification'])) {
 
                 <?php
                 // Database connection details
-                $servername_todo = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-                $username_todo = "t9riamok80kmok3h";
-                $password_todo = "lzh13ihy0axfny6d";
-                $dbname_todo = "g8ri1hhtsfx77ptb"; // Database name
+                $servername = "localhost";
+                $username = "root";
+                $password = "";
+                $dbname = "admin_todo_list"; // Database name
 
                 // Create connection
-                $conn_todo = new mysqli($servername_todo, $username_todo, $password_todo, $dbname_todo);
+                $conn = new mysqli($servername, $username, $password, $dbname);
 
                 // Check connection
-                if ($conn_todo->connect_error) {
-                    die("Connection failed: " . $conn_todo->connect_error);
+                if ($conn->connect_error) {
+                    die("Connection failed: " . $conn->connect_error);
                 }
 
                 // Get the selected table from the form, default to cas_tasks if not set
@@ -1496,7 +1414,7 @@ if (isset($_POST['delete_notification'])) {
 
                 // Fetch tasks from the selected table
                 $sql = "SELECT * FROM $selectedTable";
-                $result = $conn_todo->query($sql);
+                $result = $conn->query($sql);
 
                 ?>
 
@@ -1559,7 +1477,7 @@ if (isset($_POST['delete_notification'])) {
 
                 <?php
                 // Close connection
-                $conn_todo->close();
+                $conn->close();
                 ?>
             </div>
 
@@ -1582,45 +1500,46 @@ if (isset($_POST['delete_notification'])) {
             </div>
         </div>
 
+<!-- Modal for selecting colleges to notify -->
+<div id="collegeModal" class="modal">
+    <div class="modal-content">
+        <h4>Select Colleges to Notify</h4>
+        <form id="notifyForm">
+            <label>
+                <input type="checkbox" class="college-checkbox" value="CAS" />
+                <span>College of Arts and Sciences (CAS)</span>
+            </label><br>
+            <label>
+                <input type="checkbox" class="college-checkbox" value="CBA" />
+                <span>College of Business and Accountancy (CBA)</span>
+            </label><br>
+            <label>
+                <input type="checkbox" class="college-checkbox" value="CCS" />
+                <span>College of Computer Studies (CCS)</span>
+            </label><br>
+            <label>
+                <input type="checkbox" class="college-checkbox" value="COED" />
+                <span>College of Education (COED)</span>
+            </label><br>
+            <label>
+                <input type="checkbox" class="college-checkbox" value="COE" />
+                <span>College of Engineering (COE)</span>
+            </label><br>
+            <label>
+                <input type="checkbox" class="college-checkbox" value="CIHM" />
+                <span>College of International Hospitality Management (CIHM)</span>
+            </label><br>
+            <label>
+                <input type="checkbox" class="college-checkbox" value="CON" />
+                <span>College of Nursing (CON)</span>
+            </label><br><br>
+            <button type="submit" id="sendNotificationButton">Send Notification</button>
+            <button type="button" id="cancelModalButton">Cancel</button>
+        </form>
+    </div>
+</div>
 
-        <!-- Modal for selecting colleges to notify -->
-        <div id="collegeModal" class="modal">
-            <div class="modal-content">
-                <h4>Select Colleges to Notify</h4>
-                <form id="notifyForm">
-                    <label>
-                        <input type="checkbox" class="college-checkbox" value="CAS" />
-                        <span>College of Arts and Sciences (CAS)</span>
-                    </label><br>
-                    <label>
-                        <input type="checkbox" class="college-checkbox" value="CBA" />
-                        <span>College of Business and Accountancy (CBA)</span>
-                    </label><br>
-                    <label>
-                        <input type="checkbox" class="college-checkbox" value="CCS" />
-                        <span>College of Computer Studies (CCS)</span>
-                    </label><br>
-                    <label>
-                        <input type="checkbox" class="college-checkbox" value="COED" />
-                        <span>College of Education (COED)</span>
-                    </label><br>
-                    <label>
-                        <input type="checkbox" class="college-checkbox" value="COE" />
-                        <span>College of Engineering (COE)</span>
-                    </label><br>
-                    <label>
-                        <input type="checkbox" class="college-checkbox" value="CIHM" />
-                        <span>College of International Hospitality Management (CIHM)</span>
-                    </label><br>
-                    <label>
-                        <input type="checkbox" class="college-checkbox" value="CON" />
-                        <span>College of Nursing (CON)</span>
-                    </label><br><br>
-                    <button type="submit" id="sendNotificationButton">Send Notification</button>
-                    <button type="button" id="cancelModalButton">Cancel</button>
-                </form>
-            </div>
-        </div>
+
 
         <script>
              // Function to toggle the visibility of done tasks
