@@ -63,12 +63,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                 }
                 .certificate img {
                     position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%; /* Make the image cover the full width of the certificate */
-                    height: 100%; /* Ensure the image covers the entire height of the certificate */
-                    object-fit: cover; /* Keep the aspect ratio of the image intact while covering the area */
-                    z-index: -1; /* Send the image behind text content */
+                    margin-top: -45px;
+                    width: 100%;
+                    margin-left: -45px;
+                    object-fit: cover;
+                    z-index: -1;
                 }
                 .subheading {
                     margin-top: 240px;
