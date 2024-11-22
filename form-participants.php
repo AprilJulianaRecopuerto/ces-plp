@@ -180,7 +180,7 @@ $conn->close();
             color: white;
             border: none;
             border-radius: 12px;
-            width: 130.7px;
+            width: 135.7px;
             height: 45.7px;
             margin-top: 20px;
             margin-right: 50px;
@@ -437,7 +437,7 @@ $conn->close();
         <img src="images/Admin (1).png" alt="Banner Image">
 
         <div class="container">
-            <h2>Event Form</h2>
+            <h2>Evaluation Form</h2>
 
         <form id="signupForm" action="" method="POST">
 

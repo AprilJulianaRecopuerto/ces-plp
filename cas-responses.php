@@ -953,7 +953,7 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
                     <a href="cas-mov.php">Mode of Verification</a>
                 </div>
 
-                <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
+                <li><a href="cas-responses.php" class="active"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
