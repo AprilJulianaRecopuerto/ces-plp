@@ -1576,103 +1576,101 @@ if (isset($_POST['delete_notification'])) {
         </div>
 
         <!-- Modal Overlay (semi-transparent background) -->
-<div id="modalOverlay" class="modal-overlay"></div>
+            <div id="modalOverlay" class="modal-overlay"></div>
 
-<!-- Modal for selecting colleges to notify -->
-<div id="collegeModal" class="modal">
-    <div class="modal-content">
-        <h4>Select Colleges to Notify</h4>
-        <form id="notifyForm">
-            <label>
-                <input type="checkbox" class="college-checkbox" value="CAS" />
-                <span>College of Arts and Sciences (CAS)</span>
-            </label><br>
-            <label>
-                <input type="checkbox" class="college-checkbox" value="CBA" />
-                <span>College of Business and Accountancy (CBA)</span>
-            </label><br>
-            <label>
-                <input type="checkbox" class="college-checkbox" value="CCS" />
-                <span>College of Computer Studies (CCS)</span>
-            </label><br>
-            <label>
-                <input type="checkbox" class="college-checkbox" value="COED" />
-                <span>College of Education (COED)</span>
-            </label><br>
-            <label>
-                <input type="checkbox" class="college-checkbox" value="COE" />
-                <span>College of Engineering (COE)</span>
-            </label><br>
-            <label>
-                <input type="checkbox" class="college-checkbox" value="CIHM" />
-                <span>College of International Hospitality Management (CIHM)</span>
-            </label><br>
-            <label>
-                <input type="checkbox" class="college-checkbox" value="CON" />
-                <span>College of Nursing (CON)</span>
-            </label><br><br>
-        
-            <button type="submit" id="sendNotificationButton">Send Notification</button>
-            <button type="button" id="cancelModalButton">Cancel</button>
-        </form>
-    </div>
-</div>
-
+            <!-- Modal for selecting colleges to notify -->
+            <div id="collegeModal" class="modal">
+                <div class="modal-content">
+                    <h4>Select Colleges to Notify</h4>
+                    <form id="notifyForm">
+                        <label>
+                            <input type="checkbox" class="college-checkbox" value="CAS" />
+                            <span>College of Arts and Sciences (CAS)</span>
+                        </label><br>
+                        <label>
+                            <input type="checkbox" class="college-checkbox" value="CBA" />
+                            <span>College of Business and Accountancy (CBA)</span>
+                        </label><br>
+                        <label>
+                            <input type="checkbox" class="college-checkbox" value="CCS" />
+                            <span>College of Computer Studies (CCS)</span>
+                        </label><br>
+                        <label>
+                            <input type="checkbox" class="college-checkbox" value="COED" />
+                            <span>College of Education (COED)</span>
+                        </label><br>
+                        <label>
+                            <input type="checkbox" class="college-checkbox" value="COE" />
+                            <span>College of Engineering (COE)</span>
+                        </label><br>
+                        <label>
+                            <input type="checkbox" class="college-checkbox" value="CIHM" />
+                            <span>College of International Hospitality Management (CIHM)</span>
+                        </label><br>
+                        <label>
+                            <input type="checkbox" class="college-checkbox" value="CON" />
+                            <span>College of Nursing (CON)</span>
+                        </label><br><br>
+                    
+                        <button type="submit" id="sendNotificationButton">Send Notification</button>
+                        <button type="button" id="cancelModalButton">Cancel</button>
+                    </form>
+                </div>
+            </div>
         </div>
 
-        <script>
-        
-let inactivityTime = function () {
-    let time;
+        <script>  
+            let inactivityTime = function () {
+                let time;
 
-    // List of events to reset the inactivity timer
-    window.onload = resetTimer;
-    document.onmousemove = resetTimer;
-    document.onkeypress = resetTimer;
-    document.onscroll = resetTimer;
-    document.onclick = resetTimer;
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
 
-    // If logged out due to inactivity, prevent user from accessing dashboard
-    if (sessionStorage.getItem('loggedOut') === 'true') {
-        // Ensure the user cannot access the page and is redirected
-        window.location.replace('loadingpage.php');
-    }
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
 
-    function logout() {
-        // SweetAlert2 popup styled similar to the standard alert
-        Swal.fire({
-            title: 'Session Expired',
-            text: 'You have been logged out due to inactivity.',
-            icon: 'warning',
-            confirmButtonText: 'OK',
-            width: '400px',   // Adjust width (close to native alert size)
-            heightAuto: false, // Prevent automatic height adjustment
-            customClass: {
-                popup: 'smaller-alert' // Custom class for further styling if needed
-            }
-        }).then(() => {
-            // Set sessionStorage to indicate user has been logged out due to inactivity
-            sessionStorage.setItem('loggedOut', 'true');
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'smaller-alert' // Custom class for further styling if needed
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
 
-            // Redirect to loadingpage.php
-            window.location.replace('loadingpage.php');
-        });
-    }
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
 
-    function resetTimer() {
-        clearTimeout(time);
-        // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-        time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
-    }
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+                }
 
-    // Check if the user is logged in and clear the loggedOut flag
-    if (sessionStorage.getItem('loggedOut') === 'false') {
-        sessionStorage.removeItem('loggedOut');
-    }
-};
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
+                }
+            };
 
-// Start the inactivity timeout function
-inactivityTime();
+            // Start the inactivity timeout function
+            inactivityTime();
 
              // Function to toggle the visibility of done tasks
              function toggleTasks() {

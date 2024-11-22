@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['tasks']) && isset($_PO
             }
         }
 
-        echo json_encode(['status' => 'success']);
+        echo json_encode(["status" => "success", "message" => "Notification sent to selected colleges."]);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'No tasks selected or no colleges specified']);
     }
