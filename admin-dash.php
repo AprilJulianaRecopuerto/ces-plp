@@ -1068,32 +1068,32 @@ if (isset($_POST['delete_notification'])) {
                 background-color: darkred;
             }
 
-/* Modal styling */
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 50%;
-    height: 100%;
-    overflow: auto;
-    padding-top: 60px;
-    margin-left:540px;
-    margin-top:50px;
-}
+        /* Modal styling */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            overflow: auto;
+            padding-top: 60px;
+            margin-left:540px;
+            margin-top:50px;
+        }
 
-.modal-content {
-    background-color: #fefefe;
-    margin: 5% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
-}
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
 
-button {
-    margin: 10px;
-}
+        button {
+            margin: 10px;
+        }
 
             
         </style>
@@ -1236,7 +1236,7 @@ button {
 										SELECT COUNT(*) as total_count FROM cba
 									) as combined_counts
 								";
-								$result = $conn->query($sql);
+								$result = $conn_proj_list->query($sql);
 
 								if ($result && $result->num_rows > 0) {
 									$row = $result->fetch_assoc();
@@ -1245,7 +1245,7 @@ button {
 									echo "0";
 								}
 
-								$conn->close();
+								$conn_proj_list->close();
 								?>
 							</div>
 							<img src="images/total.png" alt="Up Icon">
@@ -1351,7 +1351,7 @@ button {
 						$sql .= " AND YEAR(date_of_sub) = '$selectedYear'";
 					}
 
-					$result = $conn->query($sql);
+					$result = $conn_proj_list->query($sql);
 
 					if ($result->num_rows > 0) {
 						while ($row = $result->fetch_assoc()) {
@@ -1363,7 +1363,7 @@ button {
 				}
 
 				// Close the connection
-				$conn->close();
+				$conn_proj_list->close();
 				?>
 			</div>
 
@@ -1395,26 +1395,26 @@ button {
             <div class="tasks-container">
 
                 <?php
-                 // Database connection details
-                 $servername_todo = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-                 $username_todo = "t9riamok80kmok3h";
-                 $password_todo = "lzh13ihy0axfny6d";
-                 $dbname_todo = "g8ri1hhtsfx77ptb"; // Database name
- 
-                 // Create connection
-                 $conn_todo = new mysqli($servername_todo, $username_todo, $password_todo, $dbname_todo);
- 
-                 // Check connection
-                 if ($conn_todo->connect_error) {
-                     die("Connection failed: " . $conn_todo->connect_error);
-                 }
+                // Database connection details
+                $servername_todo = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                $username_todo = "t9riamok80kmok3h";
+                $password_todo = "lzh13ihy0axfny6d";
+                $dbname_todo = "g8ri1hhtsfx77ptb"; // Database name
+
+                // Create connection
+                $conn_todo = new mysqli($servername_todo, $username_todo, $password_todo, $dbname_todo);
+
+                // Check connection
+                if ($conn_todo->connect_error) {
+                    die("Connection failed: " . $conn_todo->connect_error);
+                }
 
                 // Get the selected table from the form, default to cas_tasks if not set
                 $selectedTable = isset($_POST['college']) ? $_POST['college'] : 'cas_tasks';
 
                 // Fetch tasks from the selected table
                 $sql = "SELECT * FROM $selectedTable";
-                $result = $conn->query($sql);
+                $result = $conn_todo->query($sql);
 
                 ?>
 
@@ -1477,7 +1477,7 @@ button {
 
                 <?php
                 // Close connection
-                $conn->close();
+                $conn_todo->close();
                 ?>
             </div>
 
