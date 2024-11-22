@@ -4,6 +4,7 @@
 $servername = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username_db = "t9riamok80kmok3h";
 $password_db = "lzh13ihy0axfny6d";
+
 $dbname_proj_list = "g8ri1hhtsfx77ptb";
 
 // Create connection to proj_list database

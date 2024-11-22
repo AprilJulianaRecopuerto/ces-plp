@@ -2256,52 +2256,50 @@ if (isset($_POST['delete_notification'])) {
             // Fetch notification count every 3 seconds (5000 milliseconds)
             setInterval(fetchNotificationCount, 3000);
 
-function confirmLogout(event) {
-    event.preventDefault();
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you really want to log out?",
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6', // Green confirm button
-        cancelButtonColor: '#dc3545', // Red cancel button
-        confirmButtonText: 'Yes, log me out',
-        cancelButtonText: 'Cancel',
-        customClass: {
-            popup: 'swal-popup',
-            confirmButton: 'swal-confirm',
-            cancelButton: 'swal-cancel'
-        },
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Execute the logout action (send a request to the server to log out)
-            fetch('logout.php?action=logout')
-                .then(response => response.text())
-                .then(data => {
-                    console.log(data); // Log response for debugging
+            function confirmLogout(event) {
+                event.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to log out?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
+                    confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
 
-                    // Redirect the user to the role account page after logout
-                    window.location.href = 'roleaccount.php';
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
 
-                    // Modify the history to prevent back navigation after logout
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
+                });
+            }
+
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
                     window.history.pushState(null, '', window.location.href);
-                    window.onpopstate = function () {
-                        window.history.pushState(null, '', window.location.href);
-                    };
-                })
-                .catch(error => console.error('Error:', error));
-        }
-    });
-}
-
-// This should only run when you're on a page where the user has logged out
-if (window.location.href !== 'roleaccount.php') {
-    window.history.pushState(null, '', window.location.href);
-    window.onpopstate = function () {
-        window.history.pushState(null, '', window.location.href);
-    };
-}
-
-
+                };
+            }
 
             document.getElementById('profileDropdown').addEventListener('click', function() {
             var dropdownMenu = document.querySelector('.dropdown-menu');
