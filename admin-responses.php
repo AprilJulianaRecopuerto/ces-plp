@@ -21,6 +21,8 @@ if ($conn->connect_error) {
     die("Database connection error");
 }
 
+define("DOMPDF_ENABLE_REMOTE", true);
+
 // Fetch data from the database
 $sql = "SELECT name, email, event, rate, department FROM submissions";
 $result = $conn->query($sql);
@@ -63,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                 }
                 .certificate img {
                     position: absolute;
-                    margin-top: -45px;
+                    margin-top: -35px;
                     width: 100%;
                     margin-left: -45px;
                     object-fit: cover;
@@ -100,13 +102,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         <body>
             <div class='certificate'>
                 <!-- Use relative paths for images -->
-                <img src='/images/cert-bg.png' alt='Background'>
+                <img src='/public/cert-bg.png' alt='Background'>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='/images/logoicon.png' alt='Logo'>
+                        <img src='/public/logoicon.png' alt='Logo'>
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
