@@ -1617,23 +1617,77 @@ if (isset($_POST['delete_notification'])) {
         </div>
 
         <script>
-             // Function to toggle the visibility of done tasks
-             function toggleTasks() {
-                var doneTasks = document.querySelectorAll('.done-task');
-                var pendingTasks = document.querySelectorAll('.pending-task');
+             let inactivityTime = function () {
+                let time;
 
-                // Toggle the visibility of done tasks
-                doneTasks.forEach(function(task) {
-                    task.style.display = task.style.display === 'none' ? '' : 'none';
-                });
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
 
-                // Button label change
-                var button = document.querySelector('button');
-                if (doneTasks[0].style.display === 'none') {
-                    button.textContent = 'Show Done Tasks';
-                } else {
-                    button.textContent = 'Hide Done Tasks';
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('roleaccount.php');
                 }
+
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
+                }
+            };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
+
+            // Function to toggle the visibility of done tasks
+            function toggleTasks() {
+            var doneTasks = document.querySelectorAll('.done-task');
+            var pendingTasks = document.querySelectorAll('.pending-task');
+
+            // Toggle the visibility of done tasks
+            doneTasks.forEach(function(task) {
+                task.style.display = task.style.display === 'none' ? '' : 'none';
+            });
+
+            // Button label change
+            var button = document.querySelector('button');
+            if (doneTasks[0].style.display === 'none') {
+                button.textContent = 'Show Done Tasks';
+            } else {
+                button.textContent = 'Hide Done Tasks';
+            }
             }
 
             document.addEventListener("DOMContentLoaded", function() {
@@ -1838,8 +1892,6 @@ if (isset($_POST['delete_notification'])) {
 
                 xhr.send(`id=${encodeURIComponent(id)}&description=${encodeURIComponent(newDesc)}&due_date=${encodeURIComponent(newDueDate)}`);
             }
-
-
                         
             // Show the modal when the 'Notify Selected Tasks' button is clicked
             document.getElementById('notifyAllButton').addEventListener('click', function() {

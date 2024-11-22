@@ -913,23 +913,18 @@ $conn->close();
             }
 
             table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    th, td {
-        padding: 8px 12px;
-        text-align: left;
-        border: 1px solid #ddd;
-    }
-    th {
-        background-color: #f4f4f4;
-    }
-    .smaller-alert {
-        font-size: 14px; /* Adjust text size for a compact look */
-        padding: 20px;   /* Adjust padding to mimic a smaller alert box */
-    }
+                width: 100%;
+                border-collapse: collapse;
+            }
+            th, td {
+                padding: 8px 12px;
+                text-align: left;
+                border: 1px solid #ddd;
+            }
 
-
+            th {
+                background-color: #f4f4f4;
+            }
         </style>
     </head>
 
@@ -1497,7 +1492,7 @@ $conn->close();
                 // If logged out due to inactivity, prevent user from accessing dashboard
                 if (sessionStorage.getItem('loggedOut') === 'true') {
                     // Ensure the user cannot access the page and is redirected
-                    window.location.replace('loadingpage.php');
+                    window.location.replace('roleaccount.php');
                 }
 
                 function logout() {
@@ -1510,7 +1505,8 @@ $conn->close();
                         width: '400px',   // Adjust width (close to native alert size)
                         heightAuto: false, // Prevent automatic height adjustment
                         customClass: {
-                            popup: 'smaller-alert' // Custom class for further styling if needed
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
                         }
                     }).then(() => {
                         // Set sessionStorage to indicate user has been logged out due to inactivity
