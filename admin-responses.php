@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                 }
                 .certificate img {
                     position: relative;
-                    margin-top: -35px;
+                    margin-top: -60px;
                     width: 100%;
                     margin-left: -45px;
                     object-fit: cover;
