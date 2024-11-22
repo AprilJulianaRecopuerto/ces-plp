@@ -120,11 +120,11 @@
         .header-button {
             font-family: 'Glacial Indifference', sans-serif;
             background-color: #089451;
-            font-size: 18.9px;
+            font-size: 17.9px;
             color: white;
             border: none;
             border-radius: 12px;
-            width: 130.7px;
+            width: 145.7px;
             height: 45.7px;
             margin-top: 20px;
             margin-right: 50px;
@@ -216,7 +216,7 @@
             <a href="programs-act.php" class="nav-item">Programs and Activities</a>
         </nav>
     
-        <button class="header-button">Event Form</button>
+        <button class="header-button">Evaluation Form</button>
     </header>
     
     
