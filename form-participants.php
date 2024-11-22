@@ -176,11 +176,11 @@ $conn->close();
         .header-button {
             font-family: 'Glacial Indifference', sans-serif;
             background-color: #089451;
-            font-size: 18.9px;
+            font-size: 17.9px;
             color: white;
             border: none;
             border-radius: 12px;
-            width: 135.7px;
+            width: 145.7px;
             height: 45.7px;
             margin-top: 20px;
             margin-right: 50px;
