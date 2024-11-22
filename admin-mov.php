@@ -473,6 +473,10 @@ foreach ($colleges as $college) {
                 font-size: 14px; /* Size of the exclamation point */
             }
            
+            .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
         </style>
     </head>
 
@@ -587,7 +591,7 @@ foreach ($colleges as $college) {
 
 
         <script>
-              function filterTable(college, collegeName) {
+    function filterTable(college, collegeName) {
     // Hide all folders initially
     const folders = document.querySelectorAll('.folder');
     folders.forEach(folder => {
@@ -609,27 +613,103 @@ window.onload = function() {
     filterTable('cas', 'Colleges of Arts and Science MOV'); // Change to whichever college you want to show initially
 };
 
-            function confirmLogout(event) {
-                event.preventDefault(); // Prevent the default link behavior
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "Do you really want to log out?",
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, log me out',
-                    customClass: {
-                        popup: 'custom-swal-popup',
-                        confirmButton: 'custom-swal-confirm',
-                        cancelButton: 'custom-swal-cancel'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = 'roleaccount.php'; // Redirect to the logout page
-                    }
-                });
-            }
+let inactivityTime = function () {
+    let time;
 
+    // List of events to reset the inactivity timer
+    window.onload = resetTimer;
+    document.onmousemove = resetTimer;
+    document.onkeypress = resetTimer;
+    document.onscroll = resetTimer;
+    document.onclick = resetTimer;
+
+    // If logged out due to inactivity, prevent user from accessing dashboard
+    if (sessionStorage.getItem('loggedOut') === 'true') {
+        // Ensure the user cannot access the page and is redirected
+        window.location.replace('loadingpage.php');
+    }
+
+    function logout() {
+        // SweetAlert2 popup styled similar to the standard alert
+        Swal.fire({
+            title: 'Session Expired',
+            text: 'You have been logged out due to inactivity.',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            width: '400px',   // Adjust width (close to native alert size)
+            heightAuto: false, // Prevent automatic height adjustment
+            customClass: {
+                popup: 'smaller-alert' // Custom class for further styling if needed
+            }
+        }).then(() => {
+            // Set sessionStorage to indicate user has been logged out due to inactivity
+            sessionStorage.setItem('loggedOut', 'true');
+
+            // Redirect to loadingpage.php
+            window.location.replace('loadingpage.php');
+        });
+    }
+
+    function resetTimer() {
+        clearTimeout(time);
+        // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+        time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+    }
+
+    // Check if the user is logged in and clear the loggedOut flag
+    if (sessionStorage.getItem('loggedOut') === 'false') {
+        sessionStorage.removeItem('loggedOut');
+    }
+};
+
+// Start the inactivity timeout function
+inactivityTime();
+
+
+ function confirmLogout(event) {
+    event.preventDefault();
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you really want to log out?",
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6', // Green confirm button
+        cancelButtonColor: '#dc3545', // Red cancel button
+        confirmButtonText: 'Yes, log me out',
+        cancelButtonText: 'Cancel',
+        customClass: {
+            popup: 'swal-popup',
+            confirmButton: 'swal-confirm',
+            cancelButton: 'swal-cancel'
+        },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Execute the logout action (send a request to the server to log out)
+            fetch('logout.php?action=logout')
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data); // Log response for debugging
+
+                    // Redirect the user to the role account page after logout
+                    window.location.href = 'roleaccount.php';
+
+                    // Modify the history to prevent back navigation after logout
+                    window.history.pushState(null, '', window.location.href);
+                    window.onpopstate = function () {
+                        window.history.pushState(null, '', window.location.href);
+                    };
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    });
+}
+
+// This should only run when you're on a page where the user has logged out
+if (window.location.href !== 'roleaccount.php') {
+    window.history.pushState(null, '', window.location.href);
+    window.onpopstate = function () {
+        window.history.pushState(null, '', window.location.href);
+    };
+}
             // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
                 const dropdown = this.querySelector('.dropdown-menu');
