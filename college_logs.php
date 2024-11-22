@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Manila'); // Change to your timezone
 session_start(); // Make sure the session is started to access $_SESSION
 
 function logUserActivity($username, $action) {
