@@ -1632,8 +1632,9 @@ if (isset($_POST['delete_notification'])) {
     document.onscroll = resetTimer;
     document.onclick = resetTimer;
 
-    // Prevent user from navigating back after logout
+    // If logged out due to inactivity, prevent user from accessing dashboard
     if (sessionStorage.getItem('loggedOut') === 'true') {
+        // Ensure the user cannot access the page and is redirected
         window.location.replace('loadingpage.php');
     }
 
@@ -1650,7 +1651,7 @@ if (isset($_POST['delete_notification'])) {
                 popup: 'smaller-alert' // Custom class for further styling if needed
             }
         }).then(() => {
-            // Set sessionStorage to indicate user has been logged out
+            // Set sessionStorage to indicate user has been logged out due to inactivity
             sessionStorage.setItem('loggedOut', 'true');
 
             // Redirect to loadingpage.php
@@ -1663,12 +1664,15 @@ if (isset($_POST['delete_notification'])) {
         // Set the inactivity timeout to 100 seconds (100000 milliseconds)
         time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
     }
+
+    // Check if the user is logged in and clear the loggedOut flag
+    if (sessionStorage.getItem('loggedOut') === 'false') {
+        sessionStorage.removeItem('loggedOut');
+    }
 };
 
 // Start the inactivity timeout function
 inactivityTime();
-
-
 
              // Function to toggle the visibility of done tasks
              function toggleTasks() {
