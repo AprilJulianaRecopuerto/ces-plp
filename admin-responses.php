@@ -44,13 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         // Generate PDF for each participant
         $date = date("l, F j, Y");
 
-        $imagePath = 'images/cert-bg.png';  // Background image
-        $logoPath = 'images/logoicon.png';  // Logo image
-
-        // Check if the images exist before proceeding
-        if (!file_exists($imagePath) || !file_exists($logoPath)) {
-            die('Error: One or more image files are missing.');
-        }
+        // Full URL path for images
+        $imagePath = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';  // Background image
+        $logoPath = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png';  // Logo image
 
         // HTML content for the certificate
         $html = "
@@ -117,13 +113,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </body>
         </html>
         ";
+
         try {
             // Generate the PDF
             $options = new Options();
             $options->set('isHtml5ParserEnabled', true);
             $options->set('isPhpEnabled', true); // Ensure this is enabled for PHP functionality
-            $options->set('isHtml5ParserEnabled', true);
-            $options->set('isCssFloatEnabled', true); // Ensure floating is enabled
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
@@ -169,7 +164,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     exit;
 }
 ?>
-
 
 
 <!DOCTYPE html>
