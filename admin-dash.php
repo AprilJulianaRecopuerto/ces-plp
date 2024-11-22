@@ -1622,59 +1622,65 @@ if (isset($_POST['delete_notification'])) {
 
         <script>
         
-            let inactivityTime = function () {
-                let time;
+let inactivityTime = function () {
+    let time;
 
-                // List of events to reset the inactivity timer
-                window.onload = resetTimer;
-                document.onmousemove = resetTimer;
-                document.onkeypress = resetTimer;
-                document.onscroll = resetTimer;
-                document.onclick = resetTimer;
+    // List of events to reset the inactivity timer
+    window.onload = resetTimer;
+    document.onmousemove = resetTimer;
+    document.onkeypress = resetTimer;
+    document.onscroll = resetTimer;
+    document.onclick = resetTimer;
 
-                // Prevent user from navigating back after logout
-                if (sessionStorage.getItem('loggedOut') === 'true') {
-                    window.location.replace('loadingpage.php');
-                }
+    // If logged out, prevent going back to previous page and redirect to loadingpage.php
+    if (sessionStorage.getItem('loggedOut') === 'true') {
+        window.location.replace('loadingpage.php');
+    }
 
-                function logout() {
-                    // SweetAlert2 popup styled similar to the standard alert
-                    Swal.fire({
-                        title: 'Session Expired',
-                        text: 'You have been logged out due to inactivity.',
-                        icon: 'warning',
-                        confirmButtonText: 'OK',
-                        width: '400px',   // Adjust width (close to native alert size)
-                        heightAuto: false, // Prevent automatic height adjustment
-                        customClass: {
-                            popup: 'smaller-alert' // Custom class for further styling if needed
-                        }
-                    }).then(() => {
-                        // Set sessionStorage to indicate user has been logged out
-                        sessionStorage.setItem('loggedOut', 'true');
+    function logout() {
+        // SweetAlert2 popup styled similar to the standard alert
+        Swal.fire({
+            title: 'Session Expired',
+            text: 'You have been logged out due to inactivity.',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            width: '400px',   // Adjust width (close to native alert size)
+            heightAuto: false, // Prevent automatic height adjustment
+            customClass: {
+                popup: 'smaller-alert' // Custom class for further styling if needed
+            }
+        }).then(() => {
+            // Set sessionStorage to indicate user has been logged out
+            sessionStorage.setItem('loggedOut', 'true');
 
-                        // Push a new state into the history to prevent the user from going back
-                        window.history.pushState(null, '', window.location.href);
+            // Push a new state to prevent going back to the previous page
+            window.history.pushState(null, '', window.location.href);
 
-                        // Listen to the back event and block it
-                        window.onpopstate = function () {
-                            window.history.pushState(null, '', window.location.href);
-                        };
-
-                        // Redirect to loadingpage.php
-                        window.location.replace('loadingpage.php');
-                    });
-                }
-
-                function resetTimer() {
-                    clearTimeout(time);
-                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
-                }
+            // Block the back navigation by replacing history state
+            window.onpopstate = function () {
+                window.history.pushState(null, '', window.location.href);
             };
 
-            // Start the inactivity timeout function
-            inactivityTime();
+            // Redirect to loadingpage.php
+            window.location.replace('loadingpage.php');
+        });
+    }
+
+    function resetTimer() {
+        clearTimeout(time);
+        // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+        time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+    }
+};
+
+// Check if the user is logged in (for example, by verifying a session variable or a specific cookie)
+if (sessionStorage.getItem('userLoggedIn') === 'true') {
+    // Only start inactivity timer if the user is logged in
+    inactivityTime();
+} else {
+    // If not logged in, redirect to the login page or any other appropriate action
+    window.location.replace('loginpage.php');
+}
 
 
 
