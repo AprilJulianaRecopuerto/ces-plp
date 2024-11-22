@@ -1,4 +1,6 @@
 <?php
+ini_set('memory_limit', '512M'); // Adjust as needed
+
 session_start();
 
 require 'vendor/autoload.php';
