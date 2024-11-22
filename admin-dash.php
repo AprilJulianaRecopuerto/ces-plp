@@ -1622,66 +1622,51 @@ if (isset($_POST['delete_notification'])) {
 
         <script>
         
-let inactivityTime = function () {
-    let time;
+            let inactivityTime = function () {
+                let time;
 
-    // List of events to reset the inactivity timer
-    window.onload = resetTimer;
-    document.onmousemove = resetTimer;
-    document.onkeypress = resetTimer;
-    document.onscroll = resetTimer;
-    document.onclick = resetTimer;
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
 
-    // If logged out, prevent going back to previous page and redirect to loadingpage.php
-    if (sessionStorage.getItem('loggedOut') === 'true') {
-        window.location.replace('loadingpage.php');
-    }
+                // Prevent user from navigating back after logout
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    window.location.replace('loadingpage.php');
+                }
 
-    function logout() {
-        // SweetAlert2 popup styled similar to the standard alert
-        Swal.fire({
-            title: 'Session Expired',
-            text: 'You have been logged out due to inactivity.',
-            icon: 'warning',
-            confirmButtonText: 'OK',
-            width: '400px',   // Adjust width (close to native alert size)
-            heightAuto: false, // Prevent automatic height adjustment
-            customClass: {
-                popup: 'smaller-alert' // Custom class for further styling if needed
-            }
-        }).then(() => {
-            // Set sessionStorage to indicate user has been logged out
-            sessionStorage.setItem('loggedOut', 'true');
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'smaller-alert' // Custom class for further styling if needed
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out
+                        sessionStorage.setItem('loggedOut', 'true');
 
-            // Push a new state to prevent going back to the previous page
-            window.history.pushState(null, '', window.location.href);
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
 
-            // Block the back navigation by replacing history state
-            window.onpopstate = function () {
-                window.history.pushState(null, '', window.location.href);
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+                }
             };
 
-            // Redirect to loadingpage.php
-            window.location.replace('loadingpage.php');
-        });
-    }
-
-    function resetTimer() {
-        clearTimeout(time);
-        // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-        time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
-    }
-};
-
-// Check if the user is logged in (for example, by verifying a session variable or a specific cookie)
-if (sessionStorage.getItem('userLoggedIn') === 'true') {
-    // Only start inactivity timer if the user is logged in
-    inactivityTime();
-} else {
-    // If not logged in, redirect to the login page or any other appropriate action
-    window.location.replace('loginpage.php');
-}
-
+            // Start the inactivity timeout function
+            inactivityTime();
 
 
 
@@ -2269,35 +2254,44 @@ if (sessionStorage.getItem('userLoggedIn') === 'true') {
             // Fetch notification count every 3 seconds (5000 milliseconds)
             setInterval(fetchNotificationCount, 3000);
 
-            function confirmLogout(event) {
-                event.preventDefault();
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "Do you really want to log out?",
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6', // Green confirm button
-                    cancelButtonColor: '#dc3545', // Red cancel button
-                    confirmButtonText: 'Yes, log me out',
-                    cancelButtonText: 'Cancel',
-                    customClass: {
-                        popup: 'swal-popup',
-                        confirmButton: 'swal-confirm',
-                        cancelButton: 'swal-cancel'
-                    },
-                    // Additional custom styles via CSS can be added here
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Pass action in the fetch call
-                        fetch('logout.php?action=logout')
-                            .then(response => response.text())
-                            .then(data => {
-                                console.log(data); // Log response for debugging
-                                window.location.href = 'roleaccount.php';
-                            })
-                            .catch(error => console.error('Error:', error));
-                    }
-                });
-            }
+    function confirmLogout(event) {
+    event.preventDefault();
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you really want to log out?",
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6', // Green confirm button
+        cancelButtonColor: '#dc3545', // Red cancel button
+        confirmButtonText: 'Yes, log me out',
+        cancelButtonText: 'Cancel',
+        customClass: {
+            popup: 'swal-popup',
+            confirmButton: 'swal-confirm',
+            cancelButton: 'swal-cancel'
+        },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Execute the logout action (send a request to the server to log out)
+            fetch('logout.php?action=logout')
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data); // Log response for debugging
+
+                    // Redirect the user to the role account page after logout
+                    window.location.href = 'roleaccount.php';
+
+                    // Modify the history to prevent back navigation
+                    // Push a new state to make sure the user can't go back
+                    window.history.pushState(null, '', window.location.href);
+                    window.onpopstate = function () {
+                        window.history.pushState(null, '', window.location.href);
+                    };
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    });
+}
+
 
             document.getElementById('profileDropdown').addEventListener('click', function() {
             var dropdownMenu = document.querySelector('.dropdown-menu');
