@@ -407,6 +407,19 @@ if (!isset($_SESSION['username'])) {
             font-size: 14px; /* Adjust text size for a compact look */
             padding: 20px;   /* Adjust padding to mimic a smaller alert box */
             }
+
+            .update-budget-btn {
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                margin-left: 10px;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+                font-family: 'Poppins', sans-serif;
+            }
         </style>
     </head>
 
