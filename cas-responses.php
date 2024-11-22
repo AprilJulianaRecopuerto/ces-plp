@@ -34,18 +34,31 @@ $stmt->bind_param("s", $currentDepartment);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Function to convert image to Base64
+// Function to convert image to Base64 using cURL
 function imageToBase64($imageUrl) {
-    $imageData = file_get_contents($imageUrl);
-    return 'data:image/' . pathinfo($imageUrl, PATHINFO_EXTENSION) . ';base64,' . base64_encode($imageData);
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $imageUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $imageData = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode === 200 && $imageData !== false) {
+        return 'data:image/' . pathinfo($imageUrl, PATHINFO_EXTENSION) . ';base64,' . base64_encode($imageData);
+    } else {
+        error_log("Failed to fetch image: $imageUrl, HTTP code: $httpCode");
+        return '';
+    }
 }
 
 // Hosted image URLs
 $bgImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
 $logoImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png';
 
-$bgImageBase64 = imageToBase64($bgImageURL);
-$logoImageBase64 = imageToBase64($logoImageURL);
+// Fetch images or use fallback
+$bgImageBase64 = imageToBase64($bgImageURL) ?: 'data:image/png;base64,' . base64_encode(file_get_contents('fallback_bg.png'));
+$logoImageBase64 = imageToBase64($logoImageURL) ?: 'data:image/png;base64,' . base64_encode(file_get_contents('fallback_logo.png'));
 
 // Handle form submission for sending certificates
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) {
@@ -85,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             // Generate PDF
             $options = new Options();
             $options->set('isHtml5ParserEnabled', true);
-            $options->set('isRemoteEnabled', false);
+            $options->set('isRemoteEnabled', true); // Enable remote fetching for Dompdf
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
@@ -131,7 +144,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     echo $all_sent ? 'success' : 'error';
     exit;
 }
-
 
 $sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $un = "equ6v8i5llo3uhjm";
