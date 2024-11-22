@@ -396,16 +396,19 @@ if (!isset($_SESSION['username'])) {
             }
            
             .allotted-budget{
+                font-family: 'Poppins', sans-serif;
                 font-size:20px;
             }
 
             .remaining-budget{
+                font-family: 'Poppins', sans-serif;
                 font-size:20px;
             }
             
             .smaller-alert {
-            font-size: 14px; /* Adjust text size for a compact look */
-            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+                font-family: 'Poppins', sans-serif;
+                font-size: 14px; /* Adjust text size for a compact look */
+                padding: 20px;   /* Adjust padding to mimic a smaller alert box */
             }
 
             .update-budget-btn {

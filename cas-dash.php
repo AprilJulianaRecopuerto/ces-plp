@@ -18,11 +18,6 @@ $username_db = "t9riamok80kmok3h";
 $password_db = "lzh13ihy0axfny6d";
 $dbname_proj_list = "g8ri1hhtsfx77ptb";//projlist
 
-$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$un = "equ6v8i5llo3uhjm";
-$psd = "vkfaxm2are5bjc3q";
-$dbname_user_registration = "ylwrjgaks3fw5sdj";
-
 // Create connection to proj_list database
 $conn = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
 
@@ -155,8 +150,13 @@ if ($result_due_date->num_rows > 0) {
     }
 }
 
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 // Fetch the profile picture from the colleges table in user_registration
 $conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }
@@ -1241,18 +1241,17 @@ $conn->close();
                         // Set the success message
                         $taskDoneMessage = 'Task Done: ' . htmlspecialchars($taskDescription);
 
-                        // Notify Admin in mov database
-                        $servername_mov = "localhost";
-                        $username_mov = "root";
-                        $password_mov = "";
-                        $dbname_mov = "mov";
+                        // Database credentials for 'mov' (notifications)
+                        $servername_mov = "arfo8ynm6olw6vpn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                        $username_mov = "tz8thfim1dq7l3rf";
+                        $password_mov = "wzt4gssgou2ofyo7";
+                        $dbname_mov = "uv1qyvm0b8oicg0v";
 
-                        // Create a new connection to the mov database
                         $conn_mov = new mysqli($servername_mov, $username_mov, $password_mov, $dbname_mov);
 
-                        // Check the mov connection
+                        // Check connection for 'mov'
                         if ($conn_mov->connect_error) {
-                            die("Connection to mov database failed: " . $conn_mov->connect_error);
+                            die("Connection to 'mov' database failed: " . $conn_mov->connect_error);
                         }
 
                         // Insert notification into mov database
