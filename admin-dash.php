@@ -1211,19 +1211,19 @@ button {
 						<div class="activities-details">
 							<div class="total-activities-count">
 								<?php
-								// Database credentials
-								$servername = "localhost";
-								$username = "root";
-								$password = "";
-								$dbname = "proj_list";
+								// Database credentials for proj_list
+                                $servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                                $username_proj = "zf8r3n4qqjyrfx7o";
+                                $password_proj = "su6qmqa0gxuerg98";
+                                $dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-								// Create connection
-								$conn = new mysqli($servername, $username, $password, $dbname);
+                                // Create connection to proj_list database
+                                $conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
-								// Check connection
-								if ($conn->connect_error) {
-									die("Connection failed: " . $conn->connect_error);
-								}
+                                // Check connection
+                                if ($conn_proj_list->connect_error) {
+                                    die("Connection failed: " . $conn_proj_list->connect_error);
+                                }
 
 								// SQL query to count total activities across multiple tables
 								$sql = "
@@ -1309,19 +1309,19 @@ button {
 
 				<canvas id="projectsChart"></canvas>
 				<?php
-				// Database connection details
-				$host = 'localhost';  // or your host
-				$db = 'proj_list';     // database name
-				$user = 'root'; // database username
-				$pass = ''; // database password
+				// Database credentials for proj_list
+                $servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                $username_proj = "zf8r3n4qqjyrfx7o";
+                $password_proj = "su6qmqa0gxuerg98";
+                $dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-				// Create a connection to the database
-				$conn = new mysqli($host, $user, $pass, $db);
+                // Create connection to proj_list database
+                $conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
-				// Check if connection was successful
-				if ($conn->connect_error) {
-					die("Connection failed: " . $conn->connect_error);
-				}
+                // Check connection
+                if ($conn_proj_list->connect_error) {
+                    die("Connection failed: " . $conn_proj_list->connect_error);
+                }
 
 				// Initialize selected month and year as empty strings
 				$selectedMonth = '';
@@ -1395,19 +1395,19 @@ button {
             <div class="tasks-container">
 
                 <?php
-                // Database connection details
-                $servername = "localhost";
-                $username = "root";
-                $password = "";
-                $dbname = "admin_todo_list"; // Database name
-
-                // Create connection
-                $conn = new mysqli($servername, $username, $password, $dbname);
-
-                // Check connection
-                if ($conn->connect_error) {
-                    die("Connection failed: " . $conn->connect_error);
-                }
+                 // Database connection details
+                 $servername_todo = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                 $username_todo = "t9riamok80kmok3h";
+                 $password_todo = "lzh13ihy0axfny6d";
+                 $dbname_todo = "g8ri1hhtsfx77ptb"; // Database name
+ 
+                 // Create connection
+                 $conn_todo = new mysqli($servername_todo, $username_todo, $password_todo, $dbname_todo);
+ 
+                 // Check connection
+                 if ($conn_todo->connect_error) {
+                     die("Connection failed: " . $conn_todo->connect_error);
+                 }
 
                 // Get the selected table from the form, default to cas_tasks if not set
                 $selectedTable = isset($_POST['college']) ? $_POST['college'] : 'cas_tasks';
