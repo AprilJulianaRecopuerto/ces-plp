@@ -126,7 +126,7 @@
             border-radius: 12px;
             width: 145.7px;
             height: 45.7px;
-            margin-top: 20px;
+            margin-top: 17px;
             margin-right: 50px;
             cursor: pointer;
         }
