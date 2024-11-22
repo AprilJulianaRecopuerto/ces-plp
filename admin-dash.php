@@ -1897,24 +1897,32 @@ if (isset($_POST['delete_notification'])) {
                                 title: 'Success',
                                 text: 'Notification sent to selected colleges.',
                                 icon: 'success',
-                                confirmButtonText: 'OK',
+                                timer: 2000, // Automatically close after 2 seconds
+                                showConfirmButton: false, // Hide the OK button
                                 customClass: {
                                     popup: 'custom-swal-popup',
                                     title: 'custom-swal-title',
                                     confirmButton: 'custom-swal-confirm'
                                 }
+                            }).then(() => {
+                                // After the timer expires, reload the page
+                                location.reload(); // Reload the page
                             });
                         } else {
                             Swal.fire({
                                 title: 'Error',
                                 text: 'Failed to send notification.',
                                 icon: 'error',
-                                confirmButtonText: 'OK',
+                                timer: 2000, // Automatically close after 2 seconds
+                                showConfirmButton: false, // Hide the OK button
                                 customClass: {
                                     popup: 'custom-error-popup',
                                     title: 'custom-error-title',
                                     confirmButton: 'custom-error-confirm'
                                 }
+                            }).then(() => {
+                                // After the timer expires, reload the page
+                                location.reload(); // Reload the page
                             });
                         }
                     }
@@ -1923,7 +1931,6 @@ if (isset($_POST['delete_notification'])) {
                 xhr.send(`tasks=${JSON.stringify(selectedTasks)}&colleges=${JSON.stringify(selectedColleges)}`);
                 // Close the modal after sending
                 document.getElementById('collegeModal').style.display = 'none';
-            });
 
 
             });

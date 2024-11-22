@@ -1222,119 +1222,105 @@ $conn->close();
                 $taskDescription = '';  // Variable to store task description
 
                 // Handle task marking as done
-                if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['task_id'])) {
-                    $task_id = $_POST['task_id'];
-
-                    // Fetch the task description before updating
-                    $stmt = $conn->prepare("SELECT task_description FROM cas_tasks WHERE id = ?");
-                    $stmt->bind_param("i", $task_id);
-                    $stmt->execute();
-                    $stmt->bind_result($taskDescription);
-                    $stmt->fetch();
-                    $stmt->close();
-
-                    // Update the task status to 'done'
-                    $stmt = $conn->prepare("UPDATE cas_tasks SET status = 'done' WHERE id = ?");
-                    $stmt->bind_param("i", $task_id);
-
-                    if ($stmt->execute()) {
-                        // Set the success message
-                        $taskDoneMessage = 'Task Done: ' . htmlspecialchars($taskDescription);
-
-                        // Database credentials for 'mov' (notifications)
-                        $servername_mov = "arfo8ynm6olw6vpn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-                        $username_mov = "tz8thfim1dq7l3rf";
-                        $password_mov = "wzt4gssgou2ofyo7";
-                        $dbname_mov = "uv1qyvm0b8oicg0v";
-
-                        $conn_mov = new mysqli($servername_mov, $username_mov, $password_mov, $dbname_mov);
-
-                        // Check connection for 'mov'
-                        if ($conn_mov->connect_error) {
-                            die("Connection to 'mov' database failed: " . $conn_mov->connect_error);
-                        }
-
-                        // Insert notification into mov database
-                        $insertNotification = $conn_mov->prepare("INSERT INTO notifications (project_name, department, notification_message, status, created_at) VALUES (?, 'College of Arts and Sciences', ?, 'unread', NOW())");
-                        $notificationMessage = "A new task has been submitted by College of Arts and Sciences.";
-                        $insertNotification->bind_param("ss", $taskDescription, $notificationMessage);
-                        $insertNotification->execute();
-                        $insertNotification->close();
-                        $conn_mov->close();
-
-                        // Show SweetAlert message
-                        echo "<script>
-                            Swal.fire({
-                                title: 'Task Done!',
-                                text: 'Successfully Submitted to Admin: " . htmlspecialchars($taskDescription) . "',
-                                icon: 'success',
-                                confirmButtonText: 'OK',
-                                customClass: {
-                                    popup: 'custom-swal-popup',
-                                    title: 'custom-swal-title',
-                                    confirmButton: 'custom-swal-confirm',
-                                    cancelButton: 'custom-swal-cancel'
-                                }
-                            }).then(() => {
-                                window.location.href = window.location.href;  // Reload the page after showing the message
-                            });
-                        </script>";
-                    } else {
-                        echo "<script>
-                            Swal.fire({
-                                title: 'Error',
-                                text: 'Error marking task as done: " . $stmt->error . "',
-                                icon: 'error',
-                                confirmButtonText: 'OK',
-                                customClass: {
-                                    popup: 'custom-error-popup',
-                                    title: 'custom-error-title',
-                                    confirmButton: 'custom-error-confirm',
-                                    cancelButton: 'custom-error-cancel'
-                                }
-                            });
-                        </script>";
+                if ($stmt->execute()) {
+                    // Set the success message
+                    $taskDoneMessage = 'Task Done: ' . htmlspecialchars($taskDescription);
+                
+                    // Database credentials for 'mov' (notifications)
+                    $servername_mov = "arfo8ynm6olw6vpn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                    $username_mov = "tz8thfim1dq7l3rf";
+                    $password_mov = "wzt4gssgou2ofyo7";
+                    $dbname_mov = "uv1qyvm0b8oicg0v";
+                
+                    $conn_mov = new mysqli($servername_mov, $username_mov, $password_mov, $dbname_mov);
+                
+                    // Check connection for 'mov'
+                    if ($conn_mov->connect_error) {
+                        die("Connection to 'mov' database failed: " . $conn_mov->connect_error);
                     }
-
-                    $stmt->close();
-                    exit(); // Prevent further processing after update
+                
+                    // Insert notification into mov database
+                    $insertNotification = $conn_mov->prepare("INSERT INTO notifications (project_name, department, notification_message, status, created_at) VALUES (?, 'College of Arts and Sciences', ?, 'unread', NOW())");
+                    $notificationMessage = "A new task has been submitted by College of Arts and Sciences.";
+                    $insertNotification->bind_param("ss", $taskDescription, $notificationMessage);
+                    $insertNotification->execute();
+                    $insertNotification->close();
+                    $conn_mov->close();
+                
+                    // Show SweetAlert message and reload after 2 seconds
+                    echo "<script>
+                        Swal.fire({
+                            title: 'Task Done!',
+                            text: 'Successfully Submitted to Admin: " . htmlspecialchars($taskDescription) . "',
+                            icon: 'success',
+                            timer: 2000, // Automatically close after 2 seconds
+                            showConfirmButton: false, // Hide the OK button
+                            customClass: {
+                                popup: 'custom-swal-popup',
+                                title: 'custom-swal-title',
+                                confirmButton: 'custom-swal-confirm',
+                                cancelButton: 'custom-swal-cancel'
+                            }
+                        }).then(() => {
+                            window.location.href = window.location.href;  // Reload the page after showing the message
+                        });
+                    </script>";
+                } else {
+                    echo "<script>
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Error marking task as done: " . $stmt->error . "',
+                            icon: 'error',
+                            timer: 2000, // Automatically close after 2 seconds
+                            showConfirmButton: false, // Hide the OK button
+                            customClass: {
+                                popup: 'custom-error-popup',
+                                title: 'custom-error-title',
+                                confirmButton: 'custom-error-confirm',
+                                cancelButton: 'custom-error-cancel'
+                            }
+                        });
+                    </script>";
                 }
-
+                
+                $stmt->close();
+                exit(); // Prevent further processing after update
+                
                 // SQL query to fetch tasks that are pending
                 $sql = "SELECT id, task_description, due_date FROM cas_tasks WHERE status = 'pending' ORDER BY created_at DESC";
                 $result = $conn->query($sql);
-
+                
                 // Check if there are tasks
                 if ($result->num_rows > 0) {
                     echo "<h3>To-Do List</h3>"; // Title for To-Do section
                     // Loop through tasks and display them with a "Done" button
                     while ($row = $result->fetch_assoc()) {
                         echo "<div class='task-item' style='margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start;'>";
-
+                
                         // Display task description
                         echo "<div style='flex-grow: 1;'>";
                         echo "<strong>" . htmlspecialchars($row['task_description']) . "</strong><br>";
-
+                
                         // Display due date
                         echo "<strong><label>Due: </label></strong><span>" . htmlspecialchars($row['due_date']) . "</span>";
                         echo "</div>"; // End task description and due date
-
+                
                         // Form to mark task as done
                         echo "<form method='POST' style='display:inline;' id='task-form-" . $row['id'] . "'>";
                         echo "<input type='hidden' name='task_id' value='" . $row['id'] . "'>";
                         echo "<button type='button' class='done-button' onclick='showConfirmation(" . $row['id'] . ");'>Done</button>";
                         echo "</form>";
-
+                
                         echo "</div><hr>";
                     }
                 } else {
                     echo "<p>No tasks found in To-Do List.</p>";
                 }
-
+                
                 // SQL query to fetch tasks that are done
                 $sql_done = "SELECT id, task_description, due_date FROM cas_tasks WHERE status = 'done' ORDER BY created_at DESC";
                 $result_done = $conn->query($sql_done);
-
+                
                 // Check if there are done tasks
                 if ($result_done->num_rows > 0) {
                     echo "<h3>Done Tasks</h3>"; // Title for Done section
@@ -1348,7 +1334,7 @@ $conn->close();
                 } else {
                     echo "<p>No tasks found in Done List.</p>";
                 }
-                $conn->close();
+                $conn->close();                
                 ?>
             </div>
 
