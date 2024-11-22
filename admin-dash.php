@@ -1616,59 +1616,7 @@ if (isset($_POST['delete_notification'])) {
             </div>
         </div>
 
-        <script>  
-            let inactivityTime = function () {
-                let time;
-
-                // List of events to reset the inactivity timer
-                window.onload = resetTimer;
-                document.onmousemove = resetTimer;
-                document.onkeypress = resetTimer;
-                document.onscroll = resetTimer;
-                document.onclick = resetTimer;
-
-                // If logged out due to inactivity, prevent user from accessing dashboard
-                if (sessionStorage.getItem('loggedOut') === 'true') {
-                    // Ensure the user cannot access the page and is redirected
-                    window.location.replace('loadingpage.php');
-                }
-
-                function logout() {
-                    // SweetAlert2 popup styled similar to the standard alert
-                    Swal.fire({
-                        title: 'Session Expired',
-                        text: 'You have been logged out due to inactivity.',
-                        icon: 'warning',
-                        confirmButtonText: 'OK',
-                        width: '400px',   // Adjust width (close to native alert size)
-                        heightAuto: false, // Prevent automatic height adjustment
-                        customClass: {
-                            popup: 'smaller-alert' // Custom class for further styling if needed
-                        }
-                    }).then(() => {
-                        // Set sessionStorage to indicate user has been logged out due to inactivity
-                        sessionStorage.setItem('loggedOut', 'true');
-
-                        // Redirect to loadingpage.php
-                        window.location.replace('loadingpage.php');
-                    });
-                }
-
-                function resetTimer() {
-                    clearTimeout(time);
-                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
-                }
-
-                // Check if the user is logged in and clear the loggedOut flag
-                if (sessionStorage.getItem('loggedOut') === 'false') {
-                    sessionStorage.removeItem('loggedOut');
-                }
-            };
-
-            // Start the inactivity timeout function
-            inactivityTime();
-
+        <script>
              // Function to toggle the visibility of done tasks
              function toggleTasks() {
                 var doneTasks = document.querySelectorAll('.done-task');
@@ -1802,8 +1750,8 @@ if (isset($_POST['delete_notification'])) {
                 const originalDueDate = dueDateElem.textContent.replace('Due: ', '');
 
                 // Turn description and due date into editable fields
-                descElem.innerHTML = `<input type="text" id="edit-desc-${id}" class="editable-field" value="${originalDesc}">`;
-                dueDateElem.innerHTML = `<input type="date" id="edit-due-${id}" class="editable-field" value="${originalDueDate}">`;
+                descElem.innerHTML = `<input type="text" id="edit-desc-${id}" value="${originalDesc}">`;
+                dueDateElem.innerHTML = `<input type="date" id="edit-due-${id}" value="${originalDueDate}">`;
 
                 // Replace the Edit button with Save and Cancel
                 const editButton = document.querySelector(`button[onclick="editTask(${id})"]`);
@@ -1826,158 +1774,158 @@ if (isset($_POST['delete_notification'])) {
             };
 
             function saveTask(id) {
-                    const descElem = document.getElementById(`desc-${id}`);
-                    const dueDateElem = document.getElementById(`due-${id}`);
-                    
-                    // Get the new description and due date values
-                    const newDesc = document.getElementById(`edit-desc-${id}`).value;
-                    const newDueDate = document.getElementById(`edit-due-${id}`).value || dueDateElem.textContent.replace('Due: ', ''); // Use original due date if no change
+                const descElem = document.getElementById(`desc-${id}`);
+                const dueDateElem = document.getElementById(`due-${id}`);
+                
+                // Get the new description and due date values
+                const newDesc = document.getElementById(`edit-desc-${id}`).value;
+                const newDueDate = document.getElementById(`edit-due-${id}`).value || dueDateElem.textContent.replace('Due: ', ''); // Use original due date if no change
 
-                    if (!newDueDate) {
-                        // If there is no due date, set it to the original due date to avoid null or empty values
-                        newDueDate = dueDateElem.textContent.replace('Due: ', '');
-                    }
-
-                    const xhr = new XMLHttpRequest();
-                    xhr.open("POST", "admin-edit_task.php", true);
-                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-                    xhr.onreadystatechange = function() {
-                        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                            const response = JSON.parse(xhr.responseText);
-                            if (response.status === "success") {
-                                // Update the task display with new values
-                                document.getElementById(`desc-${id}`).textContent = newDesc;
-                                document.getElementById(`due-${id}`).textContent = `Due: ${newDueDate}`;
-
-                                // Show SweetAlert that the task has been saved
-                                Swal.fire({
-                                    title: 'Task Saved!',
-                                    text: 'The task has been successfully updated.',
-                                    icon: 'success',
-                                    confirmButtonText: 'OK',
-                                    customClass: {
-                                        popup: 'custom-swal-popup',
-                                        title: 'custom-swal-title',
-                                        confirmButton: 'custom-swal-confirm'
-                                    }
-                                });
-
-                                // Return button to "Edit" and remove Cancel button
-                                const editButton = document.querySelector(`button[onclick="editTask(${id})"]`);
-                                editButton.textContent = 'Edit';
-                                editButton.onclick = () => editTask(id);
-
-                                const cancelButton = document.querySelector('.cancel-button');
-                                if (cancelButton) {
-                                    cancelButton.remove();
-                                }
-                            } else {
-                                Swal.fire({
-                                    title: 'Error',
-                                    text: 'Failed to update task.',
-                                    icon: 'error',
-                                    confirmButtonText: 'OK',
-                                    customClass: {
-                                        popup: 'custom-error-popup',
-                                        title: 'custom-error-title',
-                                        confirmButton: 'custom-error-confirm'
-                                    }
-                                });
-                            }
-                        }
-                    };
-
-                    xhr.send(`id=${encodeURIComponent(id)}&description=${encodeURIComponent(newDesc)}&due_date=${encodeURIComponent(newDueDate)}`);
+                if (!newDueDate) {
+                    // If there is no due date, set it to the original due date to avoid null or empty values
+                    newDueDate = dueDateElem.textContent.replace('Due: ', '');
                 }
 
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "admin-edit_task.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-                // Show the modal and overlay when the 'Notify Selected Tasks' button is clicked
-                document.getElementById('notifyAllButton').addEventListener('click', function() {
-                    const modal = document.getElementById('collegeModal');
-                    const overlay = document.getElementById('modalOverlay');
-                    modal.style.display = 'block';
-                    overlay.style.display = 'block'; // Show the overlay
-                });
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.status === "success") {
+                            // Update the task display with new values
+                            document.getElementById(`desc-${id}`).textContent = newDesc;
+                            document.getElementById(`due-${id}`).textContent = `Due: ${newDueDate}`;
 
-                // Close the modal and overlay if the 'Cancel' button is clicked
-                document.getElementById('cancelModalButton').addEventListener('click', function() {
-                    const modal = document.getElementById('collegeModal');
-                    const overlay = document.getElementById('modalOverlay');
-                    modal.style.display = 'none';
-                    overlay.style.display = 'none'; // Hide the overlay
-                });
-                // Handle the form submission to notify selected colleges
-                document.getElementById('notifyForm').addEventListener('submit', function(event) {
-                    event.preventDefault();
+                            // Show SweetAlert that the task has been saved
+                            Swal.fire({
+                                title: 'Task Saved!',
+                                text: 'The task has been successfully updated.',
+                                icon: 'success',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    popup: 'custom-swal-popup',
+                                    title: 'custom-swal-title',
+                                    confirmButton: 'custom-swal-confirm'
+                                }
+                            });
 
-                    const selectedColleges = [];
-                    
-                    // Get selected colleges
-                    document.querySelectorAll('.college-checkbox:checked').forEach(function(checkbox) {
-                        selectedColleges.push(checkbox.value);
-                    });
+                            // Return button to "Edit" and remove Cancel button
+                            const editButton = document.querySelector(`button[onclick="editTask(${id})"]`);
+                            editButton.textContent = 'Edit';
+                            editButton.onclick = () => editTask(id);
 
-                    const selectedTasks = [];
-                    document.querySelectorAll('.task-checkbox:checked').forEach(function(checkbox) {
-                        selectedTasks.push(checkbox.getAttribute('data-id'));
-                    });
-
-                    if (selectedTasks.length === 0) {
-                        Swal.fire({
-                            title: 'No Tasks Selected',
-                            text: 'Please select at least one task to notify.',
-                            icon: 'warning',
-                            confirmButtonText: 'OK',
-                            customClass: {
-                                popup: 'custom-swal-popup',
-                                title: 'custom-swal-title',
-                                confirmButton: 'custom-swal-confirm'
+                            const cancelButton = document.querySelector('.cancel-button');
+                            if (cancelButton) {
+                                cancelButton.remove();
                             }
-                        });
-                        return;
-                    }
-
-                    // Send selected tasks and colleges to the server
-                    const xhr = new XMLHttpRequest();
-                    xhr.open("POST", "admin-notify_colleges.php", true);
-                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-                    xhr.onreadystatechange = function() {
-                        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                            const response = JSON.parse(xhr.responseText);
-                            if (response.status === "success") {
-                                Swal.fire({
-                                    title: 'Success',
-                                    text: 'Notification sent to selected colleges.',
-                                    icon: 'success',
-                                    confirmButtonText: 'OK',
-                                    customClass: {
-                                        popup: 'custom-swal-popup',
-                                        title: 'custom-swal-title',
-                                        confirmButton: 'custom-swal-confirm'
-                                    }
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: 'Error',
-                                    text: 'Failed to send notification.',
-                                    icon: 'error',
-                                    confirmButtonText: 'OK',
-                                    customClass: {
-                                        popup: 'custom-error-popup',
-                                        title: 'custom-error-title',
-                                        confirmButton: 'custom-error-confirm'
-                                    }
-                                });
-                            }
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Failed to update task.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    popup: 'custom-error-popup',
+                                    title: 'custom-error-title',
+                                    confirmButton: 'custom-error-confirm'
+                                }
+                            });
                         }
-                    };
+                    }
+                };
 
-                    xhr.send(`tasks=${JSON.stringify(selectedTasks)}&colleges=${JSON.stringify(selectedColleges)}`);
-                    // Close the modal after sending
-                    document.getElementById('collegeModal').style.display = 'none';
+                xhr.send(`id=${encodeURIComponent(id)}&description=${encodeURIComponent(newDesc)}&due_date=${encodeURIComponent(newDueDate)}`);
+            }
+
+
+                        
+            // Show the modal when the 'Notify Selected Tasks' button is clicked
+            document.getElementById('notifyAllButton').addEventListener('click', function() {
+                const modal = document.getElementById('collegeModal');
+                modal.style.display = 'block';
+            });
+
+            // Close the modal if the 'Cancel' button is clicked
+            document.getElementById('cancelModalButton').addEventListener('click', function() {
+                const modal = document.getElementById('collegeModal');
+                modal.style.display = 'none';
+            });
+
+            // Handle the form submission to notify selected colleges
+            document.getElementById('notifyForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                const selectedColleges = [];
+                
+                // Get selected colleges
+                document.querySelectorAll('.college-checkbox:checked').forEach(function(checkbox) {
+                    selectedColleges.push(checkbox.value);
                 });
+
+                const selectedTasks = [];
+                document.querySelectorAll('.task-checkbox:checked').forEach(function(checkbox) {
+                    selectedTasks.push(checkbox.getAttribute('data-id'));
+                });
+
+                if (selectedTasks.length === 0) {
+                    Swal.fire({
+                        title: 'No Tasks Selected',
+                        text: 'Please select at least one task to notify.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            title: 'custom-swal-title',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    });
+                    return;
+                }
+
+                // Send selected tasks and colleges to the server
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "admin-notify_colleges.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.status === "success") {
+                            Swal.fire({
+                                title: 'Success',
+                                text: 'Notification sent to selected colleges.',
+                                icon: 'success',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    popup: 'custom-swal-popup',
+                                    title: 'custom-swal-title',
+                                    confirmButton: 'custom-swal-confirm'
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Failed to send notification.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    popup: 'custom-error-popup',
+                                    title: 'custom-error-title',
+                                    confirmButton: 'custom-error-confirm'
+                                }
+                            });
+                        }
+                    }
+                };
+
+                xhr.send(`tasks=${JSON.stringify(selectedTasks)}&colleges=${JSON.stringify(selectedColleges)}`);
+                // Close the modal after sending
+                document.getElementById('collegeModal').style.display = 'none';
+            });
+
+
             });
 
             // Data from PHP directly into JavaScript variables
@@ -2267,34 +2215,19 @@ if (isset($_POST['delete_notification'])) {
                         confirmButton: 'swal-confirm',
                         cancelButton: 'swal-cancel'
                     },
+                    // Additional custom styles via CSS can be added here
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Execute the logout action (send a request to the server to log out)
+                        // Pass action in the fetch call
                         fetch('logout.php?action=logout')
                             .then(response => response.text())
                             .then(data => {
                                 console.log(data); // Log response for debugging
-
-                                // Redirect the user to the role account page after logout
                                 window.location.href = 'roleaccount.php';
-
-                                // Modify the history to prevent back navigation after logout
-                                window.history.pushState(null, '', window.location.href);
-                                window.onpopstate = function () {
-                                    window.history.pushState(null, '', window.location.href);
-                                };
                             })
                             .catch(error => console.error('Error:', error));
                     }
                 });
-            }
-
-            // This should only run when you're on a page where the user has logged out
-            if (window.location.href !== 'roleaccount.php') {
-                window.history.pushState(null, '', window.location.href);
-                window.onpopstate = function () {
-                    window.history.pushState(null, '', window.location.href);
-                };
             }
 
             document.getElementById('profileDropdown').addEventListener('click', function() {
