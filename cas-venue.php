@@ -790,7 +790,6 @@ $conn_profile->close();
             }
             ?>
 
-
             <div class="data-details">
                 <!-- Table 1: Request Made By -->
                 <h3>Request Made By</h3>
@@ -936,8 +935,8 @@ $conn_profile->close();
         </div>
 
         <script>
-                let inactivityTime = function () {
-                let time;
+            let inactivityTime = function () {
+            let time;
 
                 // List of events to reset the inactivity timer
                 window.onload = resetTimer;
@@ -962,7 +961,8 @@ $conn_profile->close();
                         width: '400px',   // Adjust width (close to native alert size)
                         heightAuto: false, // Prevent automatic height adjustment
                         customClass: {
-                            popup: 'smaller-alert' // Custom class for further styling if needed
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
                         }
                     }).then(() => {
                         // Set sessionStorage to indicate user has been logged out due to inactivity

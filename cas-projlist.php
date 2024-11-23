@@ -733,7 +733,7 @@ $conn_profile->close();
 
             <ul class="menu">
                 <li><a href="cas-dash.php"><img src="images/home.png">Dashboard</a></li>
-                <li><a href="cas-projlist.php" class="active"><img src="images/project-list.png">Project List</a></li>
+                <li><a href="cas-projlist.php"><img src="images/project-list.png">Project List</a></li>
                 <li><a href="cas-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
 
                 <!-- Dropdown for Resource Utilization -->
@@ -750,7 +750,7 @@ $conn_profile->close();
                 <li><a href="cas-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <li><a href="cas-mov.php"><img src="images/task.png">Mode of Verification</a></li>
+                <li><a href="cas-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
 

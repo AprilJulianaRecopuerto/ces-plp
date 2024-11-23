@@ -865,8 +865,8 @@ $conn_profile->close();
         </div>
 
         <script>
-                let inactivityTime = function () {
-                let time;
+            let inactivityTime = function () {
+            let time;
 
                 // List of events to reset the inactivity timer
                 window.onload = resetTimer;
@@ -891,7 +891,8 @@ $conn_profile->close();
                         width: '400px',   // Adjust width (close to native alert size)
                         heightAuto: false, // Prevent automatic height adjustment
                         customClass: {
-                            popup: 'smaller-alert' // Custom class for further styling if needed
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
                         }
                     }).then(() => {
                         // Set sessionStorage to indicate user has been logged out due to inactivity
@@ -950,17 +951,17 @@ $conn_profile->close();
                                 };
                             })
                             .catch(error => console.error('Error:', error));
-                    }
-                });
-            }
+                        }
+                    });
+                }
 
-            // This should only run when you're on a page where the user has logged out
-            if (window.location.href !== 'roleaccount.php') {
-                window.history.pushState(null, '', window.location.href);
-                window.onpopstate = function () {
+                // This should only run when you're on a page where the user has logged out
+                if (window.location.href !== 'roleaccount.php') {
                     window.history.pushState(null, '', window.location.href);
-                };
-            }
+                    window.onpopstate = function () {
+                        window.history.pushState(null, '', window.location.href);
+                    };
+                }
 
                 // Dropdown menu toggle
                 document.getElementById('profileDropdown').addEventListener('click', function() {
@@ -1101,218 +1102,218 @@ $conn_profile->close();
                     });
                 }
 
-            document.addEventListener('DOMContentLoaded', function() {
-                const deleteButtons = document.querySelectorAll('.delete-button');
+                document.addEventListener('DOMContentLoaded', function() {
+                    const deleteButtons = document.querySelectorAll('.delete-button');
 
-                deleteButtons.forEach(button => {
-                    button.addEventListener('click', function() {
-                        const eventId = this.getAttribute('data-id');
+                    deleteButtons.forEach(button => {
+                        button.addEventListener('click', function() {
+                            const eventId = this.getAttribute('data-id');
 
-                        // AJAX request to check for multiple events with the same event_form_id
-                        fetch(`cas-delete-event.php?cas_tor_id=${eventId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.eventCount > 1) {
-                                // Multiple events found: ask if user wants to delete all or specify date
-                                Swal.fire({
-                                    title: 'Multiple Events Found',
-                                    text: 'Do you want to delete all?',
-                                    icon: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Yes, delete all',
-                                    cancelButtonText: 'No, enter specific date',
-                                    showDenyButton: true, // Enable additional cancel button
-                                    denyButtonText: 'Cancel', // Text for additional cancel button
-                                    background: '#f8f9fa',
-                                    customClass: {
-                                        popup: 'custom-event-popup',
-                                        title: 'custom-event-title',
-                                        confirmButton: 'custom-event-confirm',
-                                        cancelButton: 'custom-event-cancel',
-                                        denyButton: 'custom-event-deny' // Add styling class for deny button
-                                    }
-                                }).then(result => {
-                                    if (result.isConfirmed) {
-                                        // User chose to delete all
-                                        deleteEvent(eventId, 'all');
-                                    } else if (result.isDenied) {
-                                        // User clicked the additional cancel button
-                                        Swal.fire({
-                                            title: 'Action cancelled',
-                                            text: 'Your action has been cancelled.',
-                                            icon: 'info',
-                                            background: '#f8f9fa',
-                                            customClass: {
-                                                popup: 'custom-error-popup',
-                                                title: 'custom-error-title',
-                                                confirmButton: 'custom-swal-confirm'
-                                            }
-                                        });
-                                    } else if (result.dismiss === Swal.DismissReason.cancel) {
-                                        // User wants to specify a date
-                                        Swal.fire({
-                                            title: 'Enter Specific Date',
-                                            input: 'text',
-                                            inputLabel: 'Date (YYYY-MM-DD)',
-                                            showCancelButton: true,
-                                            background: '#f8f9fa',
-                                            customClass: {
-                                                popup: 'custom-swal-popup',
-                                                input: 'custom-swal-input',
-                                                title: 'custom-swal-title',
-                                                confirmButton: 'custom-swal-confirm',
-                                                cancelButton: 'custom-swal-cancel'
-                                            }
-                                        }).then(dateResult => {
-                                            if (dateResult.isConfirmed && dateResult.value) {
-                                                deleteEvent(eventId, dateResult.value);
-                                            } else if (dateResult.isDismissed) {
-                                                Swal.fire({
-                                                    title: 'Cancelled',
-                                                    text: 'No date was entered.',
-                                                    icon: 'info',
-                                                    background: '#f8f9fa',
-                                                    customClass: {
-                                                        popup: 'custom-error-popup',
-                                                        title: 'custom-error-title',
-                                                        confirmButton: 'custom-swal-confirm'
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
-                            } else {
-                                // Single event found: ask for confirmation to delete
-                                Swal.fire({
-                                    title: 'Are you sure?',
-                                    text: 'Do you really want to delete this?',
-                                    icon: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Yes, delete',
-                                    cancelButtonText: 'Cancel',
-                                    background: '#f8f9fa',
-                                    customClass: {
-                                        popup: 'custom-swal-popup',
-                                        title: 'custom-swal-title',
-                                        confirmButton: 'custom-swal-confirm',
-                                        cancelButton: 'custom-swal-cancel'
-                                    }
-                                }).then(result => {
-                                    if (result.isConfirmed) {
-                                        deleteEvent(eventId, 'single');
-                                    }
-                                });
-                            }
+                            // AJAX request to check for multiple events with the same event_form_id
+                            fetch(`cas-delete-event.php?cas_tor_id=${eventId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.eventCount > 1) {
+                                    // Multiple events found: ask if user wants to delete all or specify date
+                                    Swal.fire({
+                                        title: 'Multiple Events Found',
+                                        text: 'Do you want to delete all?',
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonText: 'Yes, delete all',
+                                        cancelButtonText: 'No, enter specific date',
+                                        showDenyButton: true, // Enable additional cancel button
+                                        denyButtonText: 'Cancel', // Text for additional cancel button
+                                        background: '#f8f9fa',
+                                        customClass: {
+                                            popup: 'custom-event-popup',
+                                            title: 'custom-event-title',
+                                            confirmButton: 'custom-event-confirm',
+                                            cancelButton: 'custom-event-cancel',
+                                            denyButton: 'custom-event-deny' // Add styling class for deny button
+                                        }
+                                    }).then(result => {
+                                        if (result.isConfirmed) {
+                                            // User chose to delete all
+                                            deleteEvent(eventId, 'all');
+                                        } else if (result.isDenied) {
+                                            // User clicked the additional cancel button
+                                            Swal.fire({
+                                                title: 'Action cancelled',
+                                                text: 'Your action has been cancelled.',
+                                                icon: 'info',
+                                                background: '#f8f9fa',
+                                                customClass: {
+                                                    popup: 'custom-error-popup',
+                                                    title: 'custom-error-title',
+                                                    confirmButton: 'custom-swal-confirm'
+                                                }
+                                            });
+                                        } else if (result.dismiss === Swal.DismissReason.cancel) {
+                                            // User wants to specify a date
+                                            Swal.fire({
+                                                title: 'Enter Specific Date',
+                                                input: 'text',
+                                                inputLabel: 'Date (YYYY-MM-DD)',
+                                                showCancelButton: true,
+                                                background: '#f8f9fa',
+                                                customClass: {
+                                                    popup: 'custom-swal-popup',
+                                                    input: 'custom-swal-input',
+                                                    title: 'custom-swal-title',
+                                                    confirmButton: 'custom-swal-confirm',
+                                                    cancelButton: 'custom-swal-cancel'
+                                                }
+                                            }).then(dateResult => {
+                                                if (dateResult.isConfirmed && dateResult.value) {
+                                                    deleteEvent(eventId, dateResult.value);
+                                                } else if (dateResult.isDismissed) {
+                                                    Swal.fire({
+                                                        title: 'Cancelled',
+                                                        text: 'No date was entered.',
+                                                        icon: 'info',
+                                                        background: '#f8f9fa',
+                                                        customClass: {
+                                                            popup: 'custom-error-popup',
+                                                            title: 'custom-error-title',
+                                                            confirmButton: 'custom-swal-confirm'
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    // Single event found: ask for confirmation to delete
+                                    Swal.fire({
+                                        title: 'Are you sure?',
+                                        text: 'Do you really want to delete this?',
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonText: 'Yes, delete',
+                                        cancelButtonText: 'Cancel',
+                                        background: '#f8f9fa',
+                                        customClass: {
+                                            popup: 'custom-swal-popup',
+                                            title: 'custom-swal-title',
+                                            confirmButton: 'custom-swal-confirm',
+                                            cancelButton: 'custom-swal-cancel'
+                                        }
+                                    }).then(result => {
+                                        if (result.isConfirmed) {
+                                            deleteEvent(eventId, 'single');
+                                        }
+                                    });
+                                }
+                            });
                         });
                     });
+
+                    // Function to handle deletion
+                    function deleteEvent(eventId, date) {
+                        fetch(`cas-delete-event.php?cas_tor_id=${eventId}&event_date=${date}`, {
+                            method: 'POST'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: 'The event has been deleted.',
+                            icon: 'success',
+                            customClass: {
+                                popup: 'custom-swal-popup',
+                                title: 'custom-swal-title',
+                                confirmButton: 'custom-swal-confirm'
+                            }
+                        }).then(() => location.reload()); // Reload page after deletion
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'An error occurred while deleting the event.',
+                            icon: 'error',
+                            customClass: {
+                                popup: 'custom-error-popup',
+                                title: 'custom-error-title'
+                            }
+                        });
+                    }
                 });
 
-                // Function to handle deletion
-                function deleteEvent(eventId, date) {
-                    fetch(`cas-delete-event.php?cas_tor_id=${eventId}&event_date=${date}`, {
-                        method: 'POST'
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        title: 'Deleted!',
-                        text: 'The event has been deleted.',
-                        icon: 'success',
-                        customClass: {
-                            popup: 'custom-swal-popup',
-                            title: 'custom-swal-title',
-                            confirmButton: 'custom-swal-confirm'
-                        }
-                    }).then(() => location.reload()); // Reload page after deletion
-                } else {
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'An error occurred while deleting the event.',
-                        icon: 'error',
-                        customClass: {
-                            popup: 'custom-error-popup',
-                            title: 'custom-error-title'
-                        }
-                    });
-                }
-            });
-
-                }
-            });
-
-            function logAction(actionDescription) {
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", "college_logs.php", true);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                xhr.send("action=" + encodeURIComponent(actionDescription));
-            }
-
-            function logAndRedirect(actionDescription, url) {
-                logAction(actionDescription); // Log the action
-                setTimeout(function() {
-                    window.location.href = url; // Redirect after logging
-                }, 100); // Delay to ensure logging completes
-            }
-
-            // Add event listeners when the page is fully loaded
-            document.addEventListener("DOMContentLoaded", function() {
-                // Log clicks on main menu links
-                document.querySelectorAll(".menu > li > a").forEach(function(link) {
-                    link.addEventListener("click", function() {
-                        logAction(link.textContent.trim());
-                    });
+                    }
                 });
 
-                // Handle dropdown button clicks
-                var dropdowns = document.getElementsByClassName("dropdown-btn");
-                for (let i = 0; i < dropdowns.length; i++) {
-                    dropdowns[i].addEventListener("click", function () {
-                        let dropdownContents = document.getElementsByClassName("dropdown-container");
-                        for (let j = 0; j < dropdownContents.length; j++) {
-                            dropdownContents[j].style.display = "none";
-                        }
-                        let dropdownContent = this.nextElementSibling;
-                        if (dropdownContent.style.display === "block") {
-                            dropdownContent.style.display = "none";
-                        } else {
-                            dropdownContent.style.display = "block";
-                        }
-                    });
+                function logAction(actionDescription) {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("POST", "college_logs.php", true);
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    xhr.send("action=" + encodeURIComponent(actionDescription));
                 }
 
-                // Log clicks on dropdown links
-                document.querySelectorAll(".dropdown-container a").forEach(function(link) {
+                function logAndRedirect(actionDescription, url) {
+                    logAction(actionDescription); // Log the action
+                    setTimeout(function() {
+                        window.location.href = url; // Redirect after logging
+                    }, 100); // Delay to ensure logging completes
+                }
+
+                // Add event listeners when the page is fully loaded
+                document.addEventListener("DOMContentLoaded", function() {
+                    // Log clicks on main menu links
+                    document.querySelectorAll(".menu > li > a").forEach(function(link) {
+                        link.addEventListener("click", function() {
+                            logAction(link.textContent.trim());
+                        });
+                    });
+
+                    // Handle dropdown button clicks
+                    var dropdowns = document.getElementsByClassName("dropdown-btn");
+                    for (let i = 0; i < dropdowns.length; i++) {
+                        dropdowns[i].addEventListener("click", function () {
+                            let dropdownContents = document.getElementsByClassName("dropdown-container");
+                            for (let j = 0; j < dropdownContents.length; j++) {
+                                dropdownContents[j].style.display = "none";
+                            }
+                            let dropdownContent = this.nextElementSibling;
+                            if (dropdownContent.style.display === "block") {
+                                dropdownContent.style.display = "none";
+                            } else {
+                                dropdownContent.style.display = "block";
+                            }
+                        });
+                    }
+
+                    // Log clicks on dropdown links
+                    document.querySelectorAll(".dropdown-container a").forEach(function(link) {
+                        link.addEventListener("click", function(event) {
+                            event.stopPropagation();
+                            logAction(link.textContent.trim());
+                        });
+                    });
+
+                    document.querySelectorAll("td.edit a").forEach(function(link) {
                     link.addEventListener("click", function(event) {
-                        event.stopPropagation();
-                        logAction(link.textContent.trim());
+                        event.preventDefault(); // Prevent the default action
+                        var url = this.href; // Get the URL from the href attribute
+                        logAndRedirect("Edit TOR", url); // Log the action and redirect
                     });
                 });
 
-                document.querySelectorAll("td.edit a").forEach(function(link) {
-                link.addEventListener("click", function(event) {
-                    event.preventDefault(); // Prevent the default action
-                    var url = this.href; // Get the URL from the href attribute
-                    logAndRedirect("Edit TOR", url); // Log the action and redirect
+                /// Log clicks on action buttons (Delete)
+                document.querySelectorAll(".delete-button").forEach(function(button) {
+                    button.addEventListener("click", function() {
+                        logAction("Delete TOR"); // Log deletion action
+                        // Additional logic for deletion can be added here if needed
+                    });
+                });
+
+                // Log clicks on the "Profile" link
+                document.querySelector('.dropdown-menu a[href="cas-your-profile.php"]').addEventListener("click", function() {
+                    logAction("Profile");
                 });
             });
 
-            /// Log clicks on action buttons (Delete)
-            document.querySelectorAll(".delete-button").forEach(function(button) {
-                button.addEventListener("click", function() {
-                    logAction("Delete TOR"); // Log deletion action
-                    // Additional logic for deletion can be added here if needed
-                });
-            });
-
-            // Log clicks on the "Profile" link
-            document.querySelector('.dropdown-menu a[href="cas-your-profile.php"]').addEventListener("click", function() {
-                logAction("Profile");
-            });
-        });
-
-        document.addEventListener("DOMContentLoaded", () => {
+            document.addEventListener("DOMContentLoaded", () => {
                 function checkNotifications() {
                     fetch('cas-check_notifications.php')
                         .then(response => response.json())

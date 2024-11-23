@@ -474,8 +474,8 @@ foreach ($colleges as $college) {
             }
            
             .smaller-alert {
-            font-size: 14px; /* Adjust text size for a compact look */
-            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+                font-size: 14px; /* Adjust text size for a compact look */
+                padding: 20px;   /* Adjust padding to mimic a smaller alert box */
             }
         </style>
     </head>
@@ -549,8 +549,8 @@ foreach ($colleges as $college) {
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="admin-login.php">Log In History</a>
-                    <a href="admin-activitylogs.php">Activity Logs</a>
+                    <a href="admin-history.php">Log In History</a>
+                    <a href="admin-logs.php">Activity Logs</a>
                 </div>
             </ul>
         </div>
@@ -591,125 +591,125 @@ foreach ($colleges as $college) {
 
 
         <script>
-    function filterTable(college, collegeName) {
-    // Hide all folders initially
-    const folders = document.querySelectorAll('.folder');
-    folders.forEach(folder => {
-        folder.style.display = 'none';
-    });
+            function filterTable(college, collegeName) {
+                // Hide all folders initially
+                const folders = document.querySelectorAll('.folder');
+                folders.forEach(folder => {
+                    folder.style.display = 'none';
+                });
 
-    // Show only the folders for the selected college
-    const filteredFolders = document.querySelectorAll(`.folder[data-college='${college}']`);
-    filteredFolders.forEach(folder => {
-        folder.style.display = 'block';
-    });
+                // Show only the folders for the selected college
+                const filteredFolders = document.querySelectorAll(`.folder[data-college='${college}']`);
+                filteredFolders.forEach(folder => {
+                    folder.style.display = 'block';
+                });
 
-    // Update the college title
-    document.getElementById('collegeTitle').textContent = collegeName;
-}
-
-// Optionally, show folders for the default college on page load
-window.onload = function() {
-    filterTable('cas', 'Colleges of Arts and Science MOV'); // Change to whichever college you want to show initially
-};
-
-let inactivityTime = function () {
-    let time;
-
-    // List of events to reset the inactivity timer
-    window.onload = resetTimer;
-    document.onmousemove = resetTimer;
-    document.onkeypress = resetTimer;
-    document.onscroll = resetTimer;
-    document.onclick = resetTimer;
-
-    // If logged out due to inactivity, prevent user from accessing dashboard
-    if (sessionStorage.getItem('loggedOut') === 'true') {
-        // Ensure the user cannot access the page and is redirected
-        window.location.replace('loadingpage.php');
-    }
-
-    function logout() {
-        // SweetAlert2 popup styled similar to the standard alert
-        Swal.fire({
-            title: 'Session Expired',
-            text: 'You have been logged out due to inactivity.',
-            icon: 'warning',
-            confirmButtonText: 'OK',
-            width: '400px',   // Adjust width (close to native alert size)
-            heightAuto: false, // Prevent automatic height adjustment
-            customClass: {
-                popup: 'smaller-alert' // Custom class for further styling if needed
+                // Update the college title
+                document.getElementById('collegeTitle').textContent = collegeName;
             }
-        }).then(() => {
-            // Set sessionStorage to indicate user has been logged out due to inactivity
-            sessionStorage.setItem('loggedOut', 'true');
 
-            // Redirect to loadingpage.php
-            window.location.replace('loadingpage.php');
-        });
-    }
+            // Optionally, show folders for the default college on page load
+            window.onload = function() {
+                filterTable('cas', 'Colleges of Arts and Science MOV'); // Change to whichever college you want to show initially
+            };
 
-    function resetTimer() {
-        clearTimeout(time);
-        // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-        time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
-    }
+            let inactivityTime = function () {
+            let time;
 
-    // Check if the user is logged in and clear the loggedOut flag
-    if (sessionStorage.getItem('loggedOut') === 'false') {
-        sessionStorage.removeItem('loggedOut');
-    }
-};
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
 
-// Start the inactivity timeout function
-inactivityTime();
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
 
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'smaller-alert' // Custom class for further styling if needed
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
 
- function confirmLogout(event) {
-    event.preventDefault();
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you really want to log out?",
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6', // Green confirm button
-        cancelButtonColor: '#dc3545', // Red cancel button
-        confirmButtonText: 'Yes, log me out',
-        cancelButtonText: 'Cancel',
-        customClass: {
-            popup: 'swal-popup',
-            confirmButton: 'swal-confirm',
-            cancelButton: 'swal-cancel'
-        },
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Execute the logout action (send a request to the server to log out)
-            fetch('logout.php?action=logout')
-                .then(response => response.text())
-                .then(data => {
-                    console.log(data); // Log response for debugging
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
 
-                    // Redirect the user to the role account page after logout
-                    window.location.href = 'roleaccount.php';
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+                }
 
-                    // Modify the history to prevent back navigation after logout
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
+                }
+            };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
+            function confirmLogout(event) {
+                event.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to log out?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
+                    confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
+                });
+            }
+
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
                     window.history.pushState(null, '', window.location.href);
-                    window.onpopstate = function () {
-                        window.history.pushState(null, '', window.location.href);
-                    };
-                })
-                .catch(error => console.error('Error:', error));
-        }
-    });
-}
+                };
+            }
 
-// This should only run when you're on a page where the user has logged out
-if (window.location.href !== 'roleaccount.php') {
-    window.history.pushState(null, '', window.location.href);
-    window.onpopstate = function () {
-        window.history.pushState(null, '', window.location.href);
-    };
-}
             // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
                 const dropdown = this.querySelector('.dropdown-menu');
@@ -726,19 +726,64 @@ if (window.location.href !== 'roleaccount.php') {
                 }
             });
 
-            var dropdown = document.getElementsByClassName("dropdown-btn");
-                var i;
+            var dropdowns = document.getElementsByClassName("dropdown-btn");
 
-                for (i = 0; i < dropdown.length; i++) {
-                dropdown[i].addEventListener("click", function() {
-                    var dropdownContent = this.nextElementSibling;
+            for (let i = 0; i < dropdowns.length; i++) {
+                dropdowns[i].addEventListener("click", function () {
+                    // Close all dropdowns first
+                    let dropdownContents = document.getElementsByClassName("dropdown-container");
+                    for (let j = 0; j < dropdownContents.length; j++) {
+                        dropdownContents[j].style.display = "none";
+                    }
+
+                    // Toggle the clicked dropdown's visibility
+                    let dropdownContent = this.nextElementSibling;
                     if (dropdownContent.style.display === "block") {
-                    dropdownContent.style.display = "none";
+                        dropdownContent.style.display = "none";
                     } else {
-                    dropdownContent.style.display = "block";
+                        dropdownContent.style.display = "block";
                     }
                 });
             }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                const username = "<?php echo $_SESSION['username']; ?>"; // Get the username from PHP session
+
+                // Function to log activity
+                function logActivity(buttonName) {
+                    const timestamp = new Date().toISOString(); // Get current timestamp
+
+                    fetch('log_activity.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            buttonFunction: buttonName // Updated to match the PHP variable
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'error') {
+                            console.error('Error logging activity:', data.message);
+                        } else {
+                            console.log('Activity logged successfully:', data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error logging activity:', error);
+                    });
+                }
+
+                // Add event listeners specifically to buttons and links
+                const trackableElements = document.querySelectorAll('button, a'); // Select all buttons and links
+                trackableElements.forEach(element => {
+                    element.addEventListener('click', function (event) {
+                        const buttonName = this.tagName === 'BUTTON' ? this.innerText.trim() || "Unnamed Button" : this.textContent.trim() || "Unnamed Link";
+                        logActivity(buttonName); // Log the button/link activity
+                    });
+                });
+            });
         </script>
     </body>
 </html>

@@ -739,25 +739,33 @@ $conn_proj_list->close();
         <nav class="navbar">
             <h2>Edit Project</h2> 
 
-            <div class="profile" id="profileDropdown">
-                <?php
-                    // Check if a profile picture is set in the session
-                    if (!empty($_SESSION['picture'])) {
-                        // Show the profile picture
-                        echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
-                    } else {
-                        // Get the first letter of the username for the placeholder
-                        $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
-                        echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
-                    }
-                ?>
+            <div class="profile-container">
+                <!-- Chat Icon with Notification Badge -->
+                <a href="cas-chat.php" class="chat-icon" onclick="resetNotifications()">
+                    <i class="fa fa-comments"></i>
+                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+                </a>
 
-                <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+                <div class="profile" id="profileDropdown">
+                    <?php
+                        // Check if a profile picture is set in the session
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
+                        } else {
+                            // Get the first letter of the username for the placeholder
+                            $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
+                            echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
+                        }
+                    ?>
 
-                <i class="fa fa-chevron-down dropdown-icon"></i>
-                <div class="dropdown-menu">
-                    <a href="cas-your-profile.php">Profile</a>
-                    <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+
+                    <i class="fa fa-chevron-down dropdown-icon"></i>
+                    <div class="dropdown-menu">
+                        <a href="cas-your-profile.php">Profile</a>
+                        <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -769,7 +777,7 @@ $conn_proj_list->close();
 
             <ul class="menu">
                 <li><a href="cas-dash.php"><img src="images/home.png">Dashboard</a></li>
-                <li><a href="cas-projlist.php" class="active"><img src="images/project-list.png">Project List</a></li>
+                <li><a href="cas-projlist.php"><img src="images/project-list.png">Project List</a></li>
                 <li><a href="cas-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
 
                 <!-- Dropdown for Resource Utilization -->
@@ -786,17 +794,17 @@ $conn_proj_list->close();
                 <li><a href="cas-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <li><a href="cas-mov.php"><img src="images/task.png">Mode of Verification</a></li>
+                <li><a href="cas-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="responses.php"><img src="images/feedback.png">Responses</a></li>
+                <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
-                    <img src="images/resource.png"> Audit Trails
+                    <img src="images/logs.png"> Audit Trails
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="cas-login.php">Log In History</a>
+                    <a href="cas-history.php">Log In History</a>
                     <a href="cas-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>
@@ -972,25 +980,25 @@ $conn_proj_list->close();
         </div>
 
         <script>
-                // JavaScript function to toggle visibility based on classification selection
-    function toggleOtherClassificationInput() {
-        var classification = document.getElementById('classification').value;
-        var otherClassificationGroup = document.getElementById('other_classification_group');
-        
-        // Show the "Others" input box if "Others" is selected, or if the classification is not one of the predefined ones
-        if (classification == 'Others' || !['Seminar', 'Workshop', 'Conference', 'Webinar', 'Training', 'Meeting', 'Symposium', 'Forum', 'Environment'].includes(classification)) {
-            otherClassificationGroup.style.display = 'block';
-        } else {
-            otherClassificationGroup.style.display = 'none';
-        }
-    }
+            // JavaScript function to toggle visibility based on classification selection
+            function toggleOtherClassificationInput() {
+                var classification = document.getElementById('classification').value;
+                var otherClassificationGroup = document.getElementById('other_classification_group');
+                
+                // Show the "Others" input box if "Others" is selected, or if the classification is not one of the predefined ones
+                if (classification == 'Others' || !['Seminar', 'Workshop', 'Conference', 'Webinar', 'Training', 'Meeting', 'Symposium', 'Forum', 'Environment'].includes(classification)) {
+                    otherClassificationGroup.style.display = 'block';
+                } else {
+                    otherClassificationGroup.style.display = 'none';
+                }
+            }
 
-    // Initialize on page load based on the selected classification
-    window.onload = function() {
-        toggleOtherClassificationInput();
-    };
-    
-    function toggleOthersInput() {
+            // Initialize on page load based on the selected classification
+            window.onload = function() {
+                toggleOtherClassificationInput();
+            };
+            
+            function toggleOthersInput() {
                 var leadPerson = document.getElementById('lead_person').value;
                 var othersInputGroup = document.getElementById('othersInputGroup');
 
@@ -1169,7 +1177,8 @@ $conn_proj_list->close();
                         width: '400px',   // Adjust width (close to native alert size)
                         heightAuto: false, // Prevent automatic height adjustment
                         customClass: {
-                            popup: 'smaller-alert' // Custom class for further styling if needed
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
                         }
                     }).then(() => {
                         // Set sessionStorage to indicate user has been logged out due to inactivity

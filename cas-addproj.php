@@ -674,7 +674,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <ul class="menu">
                 <li><a href="cas-dash.php"><img src="images/home.png">Dashboard</a></li>
-                <li><a href="cas-projlist.php" class="active"><img src="images/project-list.png">Project List</a></li>
+                <li><a href="cas-projlist.php"><img src="images/project-list.png">Project List</a></li>
                 <li><a href="cas-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
 
                 <!-- Dropdown for Resource Utilization -->
@@ -691,7 +691,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <li><a href="cas-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <li><a href="cas-mov.php"><img src="images/task.png">Mode of Verification</a></li>
+                <li><a href="cas-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
 
@@ -971,7 +971,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 });
             }
 
-
             // Function to show success SweetAlert
             let inactivityTime = function () {
                 let time;
@@ -999,7 +998,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         width: '400px',   // Adjust width (close to native alert size)
                         heightAuto: false, // Prevent automatic height adjustment
                         customClass: {
-                            popup: 'smaller-alert' // Custom class for further styling if needed
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
                         }
                     }).then(() => {
                         // Set sessionStorage to indicate user has been logged out due to inactivity
