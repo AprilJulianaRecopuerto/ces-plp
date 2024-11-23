@@ -1630,7 +1630,7 @@ if (isset($_POST['delete_notification'])) {
                 // If logged out due to inactivity, prevent user from accessing dashboard
                 if (sessionStorage.getItem('loggedOut') === 'true') {
                     // Ensure the user cannot access the page and is redirected
-                    window.location.replace('roleaccount.php');
+                    window.location.replace('loadingpage.php');
                 }
 
                 function logout() {

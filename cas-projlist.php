@@ -529,7 +529,13 @@ $conn_profile->close();
                 color: #666; /* Content text color */
             }
 
-            .custom-confirm-button {
+         
+            .custom-swal-popup {
+                font-family: 'Poppins', sans-serif;
+                width: 400px !important; /* Set a larger width */
+            }
+
+            .custom-swal-confirm {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
                 background-color: #089451;
@@ -540,32 +546,34 @@ $conn_profile->close();
                 outline: none !important; /* Remove default focus outline */
             }
 
-            .custom-cancel-button {
+            .custom-swal-cancel {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
+                background-color: #e74c3c;
+                color: #fff;
+                border-radius: 10px;
                 cursor: pointer;
-                background-color: #089451; /* Background color for the cancel button */
-                color: #fff; /* Text color for the cancel button */
-                border-radius: 10px; /* Rounded corners for the button */
+                outline: none; /* Remove default focus outline */
             }
 
-            /* Additional hover effect for buttons */
-            .custom-confirm-button:hover,
-            .custom-cancel-button:hover {
-                opacity: 0.9; /* Slightly fade on hover */
+            .custom-swal-input {
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
             }
 
-            .custom-swal-popup {
-                font-family: "Poppins", sans-serif !important;
-                width: 400px;
+            .custom-error-popup {
+                font-family: 'Poppins', sans-serif;
+                width: 400px !important; /* Set a larger width */
             }
 
-            .custom-swal-confirm {
-                font-family: "Poppins", sans-serif !important;
-            }
-
-            .custom-swal-cancel {
-                font-family: "Poppins", sans-serif !important;
+            .custom-error-confirm {
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #e74c3c;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none; /* Remove default focus outline */
             }
 
             .edit a {
@@ -996,7 +1004,7 @@ $conn_profile->close();
                 });
 
                 let inactivityTime = function () {
-            let time;
+                let time;
 
                 // List of events to reset the inactivity timer
                 window.onload = resetTimer;
@@ -1008,7 +1016,7 @@ $conn_profile->close();
                 // If logged out due to inactivity, prevent user from accessing dashboard
                 if (sessionStorage.getItem('loggedOut') === 'true') {
                     // Ensure the user cannot access the page and is redirected
-                    window.location.replace('roleaccount.php');
+                    window.location.replace('loadingpage.php');
                 }
 
                 function logout() {

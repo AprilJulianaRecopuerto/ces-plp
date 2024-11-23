@@ -715,7 +715,7 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 vertical-align: middle; /* Align image vertically with text */
             }
 
-            /* Folder List */
+            //* Folder List */
             .folder-list {
                 display: flex;
                 flex-wrap: wrap;
@@ -736,7 +736,6 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 border-radius: 5px; /* Rounded corners */
                 text-decoration: none;
                 color: #155724; /* Dark Green Text */
-            
                 font-family: "Glacial Indifference", sans-serif;
             }
 
@@ -746,8 +745,22 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 color: inherit;
             }
 
+            /* File List */
+            .file-list {
+                margin-top: 20px;
+            }
+
+            .file-items {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
             .file-item {
-                width: 135px; /* Set consistent width for the item */
+                width: 135px; /* Consistent width for each file item */
                 margin: 10px;
                 padding: 10px;
                 text-align: center;
@@ -765,15 +778,17 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 justify-content: flex-start; /* Align items starting from the top */
                 padding: 10px;
                 text-align: center;
-                height: 180px; /* Ensure consistent height */
-                overflow: hidden; /* Prevent overflow */
+                height: 180px; /* Consistent height */
+                gap: 10px; /* Space between file image/icon and name */
+                overflow: hidden;
             }
 
             .file-image img,
             .file-icon img {
                 width: 100%; /* Full width of the container */
-                height: 110px; /* Fixed height for images/icons */
-                object-fit: cover; /* Maintain aspect ratio, cropping as needed */
+                height: auto; /* Maintain aspect ratio */
+                max-height: 110px; /* Ensure image doesn't overflow container */
+                object-fit: cover; /* Crop the image if necessary */
                 border-radius: 5px; /* Optional: rounded corners */
             }
 
@@ -783,11 +798,13 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 color: #000;
                 font-weight: bold;
                 text-align: center;
-                white-space: nowrap; /* Prevent text wrapping */
-                overflow: hidden; /* Hide overflow */
-                text-overflow: ellipsis; /* Show ellipsis for long text */
+                white-space: normal; /* Allow text wrapping */
+                overflow: hidden; /* Prevent text overflow */
+                text-overflow: ellipsis; /* Add ellipsis if text overflows */
                 margin-top: 8px;
                 width: 100%; /* Full width of the parent container */
+                line-height: 1.2; /* Adjust line height */
+                max-height: 3.6em; /* Limit height to 3 lines */
             }
 
 
@@ -901,8 +918,8 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 font-family: 'Poppins', sans-serif;
             }
             .smaller-alert {
-            font-size: 14px; /* Adjust text size for a compact look */
-            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+                font-size: 14px; /* Adjust text size for a compact look */
+                padding: 20px;   /* Adjust padding to mimic a smaller alert box */
             }
     </style>
 </head>
