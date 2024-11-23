@@ -64,14 +64,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     .certificate {
         font-family: 'Poppins', sans-serif;
         position: relative;
-        width: 80%;
-        margin: 50px auto;
+        width: 100%; /* Full width */
         padding: 40px;
         background: white; /* Solid white background */
         border: 8px double #001d3d; /* Double border with dark blue color */
         border-radius: 20px; /* Rounded corners for the content */
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow for a 3D effect */
         overflow: hidden; /* Ensures the border radius is respected */
+        box-sizing: border-box; /* Makes sure the border and padding are within the width */
     }
 
     /* Apply styles for the text inside the certificate */
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
 
     .main-title {
         font-family: 'Poppins', sans-serif !important;
-        font-size: 40px;
+        font-size: 35px;
         font-weight: bold;
         color: #333;
         margin-top: -15px;
@@ -107,6 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         border-radius: 50px;
         display: inline-block;
         margin: 20px 0;
+        margin-top: -10px;
     }
 
     .name { 
@@ -154,7 +155,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         font-weight: normal;
     }
 </style>
-
 
         </head>
         <body>
