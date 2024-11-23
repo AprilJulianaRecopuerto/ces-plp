@@ -14,7 +14,3 @@ __pycache__/
 # Ignore other IDE specific files
 .vscode/
 .idea/git status
-
-# Ignore the movuploads directory
-movuploads/
-
