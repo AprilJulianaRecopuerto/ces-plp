@@ -62,15 +62,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     background-color: #f3f3f3;
                 }
         
-                .certificate {
+                    .certificate {
+                    font-family: 'Poppins', sans-serif;
                     position: relative;
                     width: 80%;
                     margin: 50px auto;
                     padding: 40px;
-                    background: white;
-                    border: 2px solid #ccc;
+                    background: white; /* Solid white background */
+                    border: 5px solid #007bff; /* Bold border with a bright color */
                     border-radius: 20px;
-                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow for a 3D effect */
+                    overflow: hidden; /* Ensures the border radius applies to the content as well */
+                }
+
+                .certificate:before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: linear-gradient(135deg, #f7faff 30%, transparent 30%) top left,
+                                linear-gradient(225deg, #f7faff 30%, transparent 30%) top right,
+                                linear-gradient(315deg, #f7faff 30%, transparent 30%) bottom right,
+                                linear-gradient(45deg, #f7faff 30%, transparent 30%) bottom left;
+                    background-repeat: no-repeat;
+                    background-size: 50% 50%;
+                    z-index: 0; /* Ensure the gradient is under the content */
                 }
 
                 .main-title, .participation {
@@ -83,7 +101,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     font-size: 28px;
                     font-weight: bold;
                     color: #333;
-                    margin-bottom: 10px;
                 }
         
                 .subheading {
@@ -180,6 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         try {
             // Generate the PDF
             $options = new Options();
+            $options->set('defaultFont', 'Poppins');
             $options->set('isHtml5ParserEnabled', true);
             $options->set('isPhpEnabled', true); // Ensure this is enabled for PHP functionality
             $options->set('isHtml5ParserEnabled', true);
