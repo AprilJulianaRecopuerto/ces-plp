@@ -53,125 +53,134 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
             <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
         
-            <style>
+           <style>
                 body { 
-                text-align: center;
-                margin: 0; 
-                padding: 0; 
-                font-family: 'Poppins', sans-serif;
-            }
+                    text-align: center;
+                    margin: 0; 
+                    padding: 0; 
+                    font-family: 'Poppins', sans-serif;
+                }
 
-            .certificate {
-                font-family: 'Poppins', sans-serif;
-                position: relative;
-                width: 80%;
-                margin: 50px auto;
-                padding: 40px;
-                background: white;
-                border-radius: 20px;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-                page-break-inside: avoid; /* Prevent certificate content from breaking across pages */
-                overflow: hidden; /* Ensures the gradient border is contained */
-            }
+                .certificate {
+                    font-family: 'Poppins', sans-serif;
+                    position: relative;
+                    width: 80%;
+                    margin: 50px auto;
+                    padding: 40px;
+                    background: white; /* Solid white background */
+                    border-radius: 20px; /* Rounded corners for the main content */
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow for a 3D effect */
+                    overflow: hidden; /* Ensures the gradient is contained within the border */
+                }
 
-            /* Gradient as border */
-            .certificate:before {
-                content: '';
-                position: absolute;
-                top: -10px; /* Adjust this to control how much of the gradient border shows */
-                left: -10px;
-                right: -10px;
-                bottom: -10px;
-                background: linear-gradient(135deg, #f7faff 30%, transparent 30%) top left,
-                            linear-gradient(225deg, #f7faff 30%, transparent 30%) top right,
-                            linear-gradient(315deg, #f7faff 30%, transparent 30%) bottom right,
-                            linear-gradient(45deg, #f7faff 30%, transparent 30%) bottom left;
-                background-repeat: no-repeat;
-                background-size: 50% 50%;
-                border-radius: 20px; /* Match the border-radius of the certificate */
-                z-index: -1; /* Ensure the gradient stays behind the content */
-            }
+                /* Apply wave border to all four corners */
+                .certificate:before,
+                .certificate:after {
+                    content: '';
+                    position: absolute;
+                    top: -20px;
+                    left: -20px;
+                    right: -20px;
+                    bottom: -20px;
+                    z-index: -1;
+                    background: linear-gradient(135deg, #00c6ff 0%, #007bff 100%); /* Blue gradient */
+                    border-radius: 50%;
+                    transform: scale(1.2); /* Slightly scale to make sure the wave covers the corners */
+                }
 
-            .main-title, .participation {
-                display: block;
-                text-align: center;
-            }
+                /* Customize the top-left wave */
+                .certificate:before {
+                    transform-origin: top left;
+                }
 
-            .main-title {
-                font-family: 'Poppins', sans-serif !important;
-                font-size: 35px;
-                font-weight: bold;
-                color: #333;
-                margin-top: -15px;
-            }
+                /* Customize the bottom-right wave */
+                .certificate:after {
+                    transform-origin: bottom right;
+                    transform: scale(1.2) rotate(180deg); /* Rotate the bottom-right corner wave */
+                }
 
-            .subheading {
-                font-family: 'Poppins', sans-serif !important;
-                font-size: 20px;
-                font-weight: bold;
-                color: #555;
-                margin: 10px 0 30px;
-                letter-spacing: 1px;
-                text-align: center;
-            }
+                .main-title, .participation {
+                    display: block;
+                    text-align: center;
+                }
 
-            .participation {
-                font-family: 'Poppins', sans-serif !important;
-                font-size: 24px;
-                color: white;
-                background: #003566;
-                padding: 10px 20px;
-                border-radius: 50px;
-                display: inline-block;
-                margin: 20px 0;
-                margin-top: 5px;
-            }
+                .main-title {
+                    font-family: 'Poppins', sans-serif !important;
+                    font-size: 35px;
+                    font-weight: bold;
+                    color: #333;
+                    margin-top: -15px;
+                }
 
-            .name { 
-                font-family: 'Lilita One', sans-serif;
-                font-size: 80px;
-                font-weight: bold;
-                color: #333;
-                margin: 20px 0;
-                text-decoration: underline;
-                font-style: italic;
-                text-transform: uppercase;
-            }
+                .subheading {
+                    font-family: 'Poppins', sans-serif !important;
+                    font-size: 20px;
+                    font-weight: bold;
+                    color: #555;
+                    margin: 10px 0 30px;
+                    letter-spacing: 1px;
+                    text-align: center;
+                    margin-bottom: 5px;
+                }
 
-            .details {
-                font-family: 'Poppins', sans-serif;
-                font-size: 22px; 
-                color: black;
-                line-height: 1.5;
-                margin-top: 20px;
-            }
+                .participation {
+                    font-family: 'Poppins', sans-serif !important;
+                    font-size: 24px;
+                    color: white;
+                    background: #003566;
+                    padding: 10px 20px;
+                    border-radius: 50px;
+                    display: inline-block;
+                    margin: 20px 0;
+                    margin-top: 5px;
+                }
 
-            .date {
-                font-family: 'Poppins', sans-serif;
-                font-size: 20px; 
-                color: #888;
-                margin-top: 30px;
-            }
+                .name { 
+                    font-family: 'Poppins', sans-serif !important;
+                    font-size: 80px;
+                    font-weight: bold;
+                    color: #333;
+                    margin: 20px 0;
+                    text-decoration: underline;
+                    font-style: italic;
+                    text-transform: uppercase;
+                }
 
-            .footer {
-                font-family: 'Poppins', sans-serif;
-                font-size: 18px;
-                color: black;
-                text-align: center;
-                margin-top: 50px;
-            }
+                .details {
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 22px; 
+                    color: black;
+                    line-height: 1.5;
+                    margin-top: 20px;
+                }
 
-            .footer-content {
-                display: flex;
-                justify-content: center;
-            }
+                .date {
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 20px; 
+                    color: #888;
+                    margin-top: 30px;
+                }
 
-            .footer-text {
-                font-size: 20px;
-                margin-left: 10px;
-                font-weight: normal;
-            }
+                .footer {
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 18px;
+                    color: black;
+                    text-align: center;
+                    margin-top: 50px;
+                }
+
+                .footer-content {
+                    display: flex;
+                    justify-content: center;
+                }
+
+                .footer-text {
+                    font-size: 20px;
+                    margin-left: 10px;
+                    font-weight: normal;
+                }
             </style>
+
         </head>
         <body>
             <div class='certificate'>
