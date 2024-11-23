@@ -59,10 +59,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     margin: 0; 
                     padding: 0; 
                     font-family: 'Poppins', sans-serif;
-                    background-color: #f3f3f3;
+                    page-break-before: always; /* Ensure content starts at top of page */
                 }
         
-                    .certificate {
+                .certificate {
                     font-family: 'Poppins', sans-serif;
                     position: relative;
                     width: 80%;
@@ -72,9 +72,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     border: 5px solid #007bff; /* Bold border with a bright color */
                     border-radius: 20px;
                     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow for a 3D effect */
-                    overflow: hidden; /* Ensures the border radius applies to the content as well */
+                    overflow: hidden; /* Ensures the border radius applies to the content */
+                    page-break-inside: avoid; /* Prevent breaking the certificate content */
                 }
-
+        
+                /* Gradient applied to the corners only */
                 .certificate:before {
                     content: '';
                     position: absolute;
@@ -88,24 +90,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                                 linear-gradient(45deg, #f7faff 30%, transparent 30%) bottom left;
                     background-repeat: no-repeat;
                     background-size: 50% 50%;
-                    z-index: 0; /* Ensure the gradient is under the content */
+                    z-index: -1; /* Ensures the gradient is behind the content */
                 }
-
+        
                 .main-title, .participation {
                     display: block;
                     text-align: center;
                 }
         
                 .main-title {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 28px;
+                    font-family: 'Poppins', sans-serif !important;
+                    font-size: 35px;
                     font-weight: bold;
                     color: #333;
+                    margin-top: -15px;
                 }
         
                 .subheading {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 24px;
+                    font-family: 'Poppins', sans-serif !important;
+                    font-size: 20px;
                     font-weight: bold;
                     color: #555;
                     margin: 10px 0 30px;
@@ -114,14 +117,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                 }
         
                 .participation {
-                    font-family: 'Poppins', sans-serif;
+                    font-family: 'Poppins', sans-serif !important;
                     font-size: 24px;
                     color: white;
-                    background: #007bff;
+                    background: #003566;
                     padding: 10px 20px;
                     border-radius: 50px;
                     display: inline-block;
                     margin: 20px 0;
+                    margin-top: -5px;
                 }
         
                 .name { 
@@ -163,16 +167,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     justify-content: center;
                 }
         
-                .footer-content img {
-                    max-width: 80px;
-                    height: auto;
-                    margin-top: -3px;
-                }
-        
                 .footer-text {
                     font-size: 20px;
                     margin-left: 10px;
                     font-weight: normal;
+                }
+        
+                @page {
+                    size: A4; /* Set page size to A4 */
+                    margin: 0; /* Remove default margins */
                 }
             </style>
         </head>
