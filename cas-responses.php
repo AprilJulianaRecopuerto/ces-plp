@@ -925,6 +925,7 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
             <div class="logo">
                 <img src="images/logo.png" alt="Logo">
             </div>
+
             <ul class="menu">
                 <li><a href="cas-dash.php"><img src="images/home.png">Dashboard</a></li>
                 <li><a href="cas-projlist.php"><img src="images/project-list.png">Project List</a></li>
@@ -941,19 +942,12 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
                     <a href="cas-venue.php">Venue</a>
                 </div>
 
-                <li><a href="cas-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
+                <li><a href="cas-budget-utilization.php" class="active"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="cas-task.php">Upload Files</a>
-                    <a href="cas-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="cas-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="cas-responses.php" class="active"><img src="images/feedback.png">Responses</a></li>
+                <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
@@ -989,92 +983,92 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
                             </tr>
                         </thead>
                         <tbody id="table-body">
-                <?php
-                // Pagination variables
-                $limit = 5; // Number of records per page
-                $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
-                $offset = ($page - 1) * $limit; // Offset for SQL query
-            
-                // Count total records for the current department
-                $countSql = "SELECT COUNT(*) as total FROM submissions WHERE department = ?";
-                $countStmt = $conn->prepare($countSql); // Prepare the query
-
-                // Bind the department parameter to the query
-                $countStmt->bind_param("s", $currentDepartment); 
-                $countStmt->execute(); // Execute the query
-
-                // Get the result of the query
-                $countResult = $countStmt->get_result(); // Fetch the result
-
-                // Fetch the total records from the result
-                $totalRecords = $countResult->fetch_assoc()['total']; 
-
-                // Calculate total pages for pagination
-                $totalPages = ceil($totalRecords / $limit); // Calculate total pages
-
-                // Prepare the SQL query to fetch records for the current department
-                $sql = "SELECT name, email, event, department, rate FROM submissions WHERE department = ? LIMIT $limit OFFSET $offset";
-
-
-                // Prepare the statement for fetching records
-                $stmt = $conn->prepare($sql); // Use prepare() for parameterized query
+                    <?php
+                    // Pagination variables
+                    $limit = 5; // Number of records per page
+                    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
+                    $offset = ($page - 1) * $limit; // Offset for SQL query
                 
-                if ($stmt === false) {
-                    // Check if the prepare query failed
-                    die('MySQL prepare error: ' . $conn->error);
-                }
+                    // Count total records for the current department
+                    $countSql = "SELECT COUNT(*) as total FROM submissions WHERE department = ?";
+                    $countStmt = $conn->prepare($countSql); // Prepare the query
 
-                // Bind the parameter for the department
-                $stmt->bind_param("s", $currentDepartment); // Bind the current department to the query
+                    // Bind the department parameter to the query
+                    $countStmt->bind_param("s", $currentDepartment); 
+                    $countStmt->execute(); // Execute the query
 
-                // Execute the query
-                $stmt->execute();
+                    // Get the result of the query
+                    $countResult = $countStmt->get_result(); // Fetch the result
 
-                // Get the result of the query
-                $result = $stmt->get_result();
+                    // Fetch the total records from the result
+                    $totalRecords = $countResult->fetch_assoc()['total']; 
 
-                // Check if there are results
-                if ($result->num_rows > 0) {
-                    // Loop through the rows and display them
-                    while ($row = $result->fetch_assoc()) {
-                        echo "<tr>
-                                <td>" . htmlspecialchars($row["name"]) . "</td>
-                                <td>" . htmlspecialchars($row["email"]) . "</td>
-                                <td>" . htmlspecialchars($row["event"]) . "</td>
-                                <td>" . htmlspecialchars($row["department"]) . "</td>
-                                <td>" . htmlspecialchars($row["rate"]) . "</td>
-                            </tr>";
+                    // Calculate total pages for pagination
+                    $totalPages = ceil($totalRecords / $limit); // Calculate total pages
+
+                    // Prepare the SQL query to fetch records for the current department
+                    $sql = "SELECT name, email, event, department, rate FROM submissions WHERE department = ? LIMIT $limit OFFSET $offset";
+
+
+                    // Prepare the statement for fetching records
+                    $stmt = $conn->prepare($sql); // Use prepare() for parameterized query
+                    
+                    if ($stmt === false) {
+                        // Check if the prepare query failed
+                        die('MySQL prepare error: ' . $conn->error);
                     }
-                } else {
-                    echo "<tr><td colspan='5'>No records found</td></tr>";
-                }
 
-                // Close the prepared statement
-                $stmt->close();
+                    // Bind the parameter for the department
+                    $stmt->bind_param("s", $currentDepartment); // Bind the current department to the query
 
-                // Close the connection
-                $conn->close();
-                ?>
-            </tbody>
-            </table>
+                    // Execute the query
+                    $stmt->execute();
 
-            <!-- Pagination Section: Move it under the table -->
-            <div class="pagination-info">
-                <div class="page">
-                    <p>
-                        <?php if ($page > 1): ?>
-                            <a class="pagination-link" href="?page=<?php echo $page - 1; ?>">PREV</a>
-                        <?php endif; ?>
+                    // Get the result of the query
+                    $result = $stmt->get_result();
 
-                        <span class="pagination-text">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
+                    // Check if there are results
+                    if ($result->num_rows > 0) {
+                        // Loop through the rows and display them
+                        while ($row = $result->fetch_assoc()) {
+                            echo "<tr>
+                                    <td>" . htmlspecialchars($row["name"]) . "</td>
+                                    <td>" . htmlspecialchars($row["email"]) . "</td>
+                                    <td>" . htmlspecialchars($row["event"]) . "</td>
+                                    <td>" . htmlspecialchars($row["department"]) . "</td>
+                                    <td>" . htmlspecialchars($row["rate"]) . "</td>
+                                </tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='5'>No records found</td></tr>";
+                    }
 
-                        <?php if ($page < $totalPages): ?>
-                            <a class="pagination-link" href="?page=<?php echo $page + 1; ?>">NEXT</a>
-                        <?php endif; ?>
-                    </p>
+                    // Close the prepared statement
+                    $stmt->close();
+
+                    // Close the connection
+                    $conn->close();
+                    ?>
+                </tbody>
+                </table>
+
+                <!-- Pagination Section: Move it under the table -->
+                <div class="pagination-info">
+                    <div class="page">
+                        <p>
+                            <?php if ($page > 1): ?>
+                                <a class="pagination-link" href="?page=<?php echo $page - 1; ?>">PREV</a>
+                            <?php endif; ?>
+
+                            <span class="pagination-text">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
+
+                            <?php if ($page < $totalPages): ?>
+                                <a class="pagination-link" href="?page=<?php echo $page + 1; ?>">NEXT</a>
+                            <?php endif; ?>
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
 
             <script>                   
             // Display loading SweetAlert
@@ -1159,7 +1153,8 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
                         width: '400px',   // Adjust width (close to native alert size)
                         heightAuto: false, // Prevent automatic height adjustment
                         customClass: {
-                            popup: 'smaller-alert' // Custom class for further styling if needed
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
                         }
                     }).then(() => {
                         // Set sessionStorage to indicate user has been logged out due to inactivity

@@ -471,10 +471,11 @@ $conn_profile->close();
             right: -10px; /* Adjust as needed */
             font-size: 14px; /* Size of the exclamation point */
         }
+        
         .smaller-alert {
             font-size: 14px; /* Adjust text size for a compact look */
             padding: 20px;   /* Adjust padding to mimic a smaller alert box */
-            }
+        }
     </style>
 </head>
 
@@ -558,18 +559,18 @@ $conn_profile->close();
             session_start(); // Start the session
 
             // Database connection details
-$servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username = "equ6v8i5llo3uhjm"; // replace with your database username
-$password = "vkfaxm2are5bjc3q"; // replace with your database password
-$dbname = "ylwrjgaks3fw5sdj";
+            $servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+            $username = "equ6v8i5llo3uhjm"; // replace with your database username
+            $password = "vkfaxm2are5bjc3q"; // replace with your database password
+            $dbname = "ylwrjgaks3fw5sdj";
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+            // Create connection
+            $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+            // Check connection
+            if ($conn->connect_error) {
+                die("Connection failed: " . $conn->connect_error);
+            }
 
             // Check if a user is logged in
             if (isset($_SESSION['uname'])) {
@@ -593,7 +594,7 @@ if ($conn->connect_error) {
                 $offset = ($page - 1) * $limit; // Offset for SQL query
 
                 // Fetch login and logout timestamps for the current user
-                $sql = "SELECT uname, ts, logout_ts FROM college_history WHERE uname = ? LIMIT ? OFFSET ?";
+                $sql = "SELECT uname, ts, logout_ts FROM college_history WHERE uname = ? ORDER BY ts DESC LIMIT ? OFFSET ?";
                 $stmt = $conn->prepare($sql);
                 $stmt->bind_param("sii", $currentUser, $limit, $offset); // Bind the parameters for LIMIT and OFFSET
                 $stmt->execute();
@@ -682,7 +683,7 @@ if ($conn->connect_error) {
             });
 
             let inactivityTime = function () {
-                let time;
+            let time;
 
                 // List of events to reset the inactivity timer
                 window.onload = resetTimer;
@@ -707,7 +708,8 @@ if ($conn->connect_error) {
                         width: '400px',   // Adjust width (close to native alert size)
                         heightAuto: false, // Prevent automatic height adjustment
                         customClass: {
-                            popup: 'smaller-alert' // Custom class for further styling if needed
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
                         }
                     }).then(() => {
                         // Set sessionStorage to indicate user has been logged out due to inactivity

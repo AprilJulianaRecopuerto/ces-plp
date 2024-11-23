@@ -752,59 +752,57 @@ $conn_profile->close();
         </div>
 
         <div class="content-budget">
+            <h1 style="margin-top: 120px; margin-bottom: -150px; font-family: Poppins, sans-serif;">
+                Allotted budget: ₱<?php echo number_format($allottedBudget, 2); ?>
+            </h1>
 
-<h1 style="margin-top: 120px; margin-bottom: -150px; font-family: Poppins, sans-serif;">
-    Allotted budget: ₱<?php echo number_format($allottedBudget, 2); ?>
-</h1>
+            <div class="button-container">
+                <button onclick="logAndRedirect('Add Budget', 'cas-add-budget.php')">Add Budget</button>
+            </div>
 
-<div class="button-container">
-    <button onclick="logAndRedirect('Add Budget', 'cas-add-budget.php')">Add Budget</button>
-</div>
+            <!-- New Budget Table -->
+            <h2 style="font-family: Poppins, sans-serif;">CAS Budget Details</h2>
+            <div class="table-container">
+                <table class="crud-table">
+                    <thead>
+                        <tr>
+                            <th>Details ID</th>
+                            <th>Project Title</th>
+                            <th>Lead Person</th>
+                            <th>Semester</th>
+                            <th>Expenses</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        // Display budget data from cas_budget table
+                        if ($resultBudget && $resultBudget->num_rows > 0) {
+                            while ($budget = $resultBudget->fetch_assoc()) {
+                                echo "<tr>";
+                                echo "<td>" . htmlspecialchars($budget["details_id"]) . "</td>";
+                                echo "<td>" . htmlspecialchars($budget["proj_title"]) . "</td>";
+                                echo "<td>" . htmlspecialchars($budget["lead_person"]) . "</td>";
+                                echo "<td>" . htmlspecialchars($budget["semester"]) . "</td>";
+                                echo "<td>" . htmlspecialchars($budget["expenses"]) . "</td>";
+                                echo "</tr>";
+                            }
+                        } else {
+                            echo "<tr><td colspan='5'>No budget records found.</td></tr>";
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
 
-<!-- New Budget Table -->
-<h2 style="font-family: Poppins, sans-serif;">CAS Budget Details</h2>
-<div class="table-container">
-    <table class="crud-table">
-        <thead>
-            <tr>
-                <th>Details ID</th>
-                <th>Project Title</th>
-                <th>Lead Person</th>
-                <th>Semester</th>
-                <th>Expenses</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            // Display budget data from cas_budget table
-            if ($resultBudget && $resultBudget->num_rows > 0) {
-                while ($budget = $resultBudget->fetch_assoc()) {
-                    echo "<tr>";
-                    echo "<td>" . htmlspecialchars($budget["details_id"]) . "</td>";
-                    echo "<td>" . htmlspecialchars($budget["proj_title"]) . "</td>";
-                    echo "<td>" . htmlspecialchars($budget["lead_person"]) . "</td>";
-                    echo "<td>" . htmlspecialchars($budget["semester"]) . "</td>";
-                    echo "<td>" . htmlspecialchars($budget["expenses"]) . "</td>";
-                    echo "</tr>";
-                }
-            } else {
-                echo "<tr><td colspan='5'>No budget records found.</td></tr>";
-            }
-            ?>
-        </tbody>
-    </table>
-</div>
+            <h2 style="margin-bottom: -150px; font-family: Poppins, sans-serif;">
+                Remaining budget: ₱<?php echo number_format($remainingBudget, 2); ?>
+            </h2>
+        </div>
 
-<h2 style="margin-bottom: -150px; font-family: Poppins, sans-serif;">
-    Remaining budget: ₱<?php echo number_format($remainingBudget, 2); ?>
-</h2>
-</div>
-
-<script>
-
-// Listen for changes in the expenses input fields
-let inactivityTime = function () {
-                let time;
+        <script>
+            // Listen for changes in the expenses input fields
+            let inactivityTime = function () {
+            let time;
 
                 // List of events to reset the inactivity timer
                 window.onload = resetTimer;
@@ -829,7 +827,8 @@ let inactivityTime = function () {
                         width: '400px',   // Adjust width (close to native alert size)
                         heightAuto: false, // Prevent automatic height adjustment
                         customClass: {
-                            popup: 'smaller-alert' // Custom class for further styling if needed
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
                         }
                     }).then(() => {
                         // Set sessionStorage to indicate user has been logged out due to inactivity
@@ -972,11 +971,11 @@ let inactivityTime = function () {
                 });
             });
 
-            // Log clicks on the "Profile" link
-            document.querySelector('.dropdown-menu a[href="cas-your-profile.php"]').addEventListener("click", function() {
-                logAction("Profile");
+                // Log clicks on the "Profile" link
+                document.querySelector('.dropdown-menu a[href="cas-your-profile.php"]').addEventListener("click", function() {
+                    logAction("Profile");
+                });
             });
-        });
 
             document.addEventListener("DOMContentLoaded", () => {
                 function checkNotifications() {
