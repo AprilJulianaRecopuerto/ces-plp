@@ -64,8 +64,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     .certificate {
         font-family: 'Poppins', sans-serif;
         position: relative;
-        width: 100%; /* Full width */
-        padding: 40px;
+        width: 80%; /* Full width */
+        height: 50px;
+        padding: 50px;
         background: white; /* Solid white background */
         border: 8px double #001d3d; /* Double border with dark blue color */
         border-radius: 20px; /* Rounded corners for the content */
@@ -82,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
 
     .main-title {
         font-family: 'Poppins', sans-serif !important;
-        font-size: 35px;
+        font-size: 55px;
         font-weight: bold;
         color: #333;
         margin-top: -15px;
@@ -100,14 +101,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
 
     .participation {
         font-family: 'Poppins', sans-serif !important;
-        font-size: 24px;
+        font-size: 28px;
         color: white;
         background: #003566;
         padding: 10px 20px;
         border-radius: 50px;
         display: inline-block;
         margin: 20px 0;
-        margin-top: -10px;
+        margin-top: -15px;
     }
 
     .name { 
@@ -126,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         font-size: 22px; 
         color: black;
         line-height: 1.5;
-        margin-top: 20px;
+        margin-top: 22px;
     }
 
     .date {
