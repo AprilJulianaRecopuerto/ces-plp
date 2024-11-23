@@ -732,10 +732,10 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 text-align: center;
                 border: 1px solid #ddd;
                 border-radius: 8px;
-                background-color: #f4f4f4;
+                background-color: #f9f9f9;
                 overflow: hidden;
                 text-decoration: none !important; /* Remove underline from links */
-                color: inherit;        /* Inherit text color */
+                color: inherit; /* Inherit text color */
             }
 
             /* Folder Icon */
@@ -766,7 +766,7 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 color: #000;
                 text-align: center;
                 text-decoration: none;
-                line-height: 1.2;             /* Adjust line height for readability */
+                line-height: 1.2;            /* Adjust line height for readability */
                 margin-top: 8px;              /* Space between the icon and text */
             }
 
