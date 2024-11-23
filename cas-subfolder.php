@@ -717,7 +717,7 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 20px;
-                margin-bottom: 10px;
+                margin-bottom: 5px;
             }
 
             /* Folder Item */
@@ -726,7 +726,7 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                width: 135px; /* Consistent width for each folder */
+                width: 140px; /* Consistent width for each folder */
                 margin: 10px;
                 padding: 10px;
                 text-align: center;
@@ -767,7 +767,6 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 text-align: center;
                 text-decoration: none;
                 line-height: 1.2;            /* Adjust line height for readability */
-                margin-top: 8px;              /* Space between the icon and text */
             }
 
             /* Style for the file item list */

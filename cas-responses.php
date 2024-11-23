@@ -42,10 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $email = $row['email'];
         $department = $row['department'];
         $event = $row['event'];
-
-        // Hosted image URLs
-        $bgImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/cert-bg.png';
-        $logoImageURL = 'https://ces-plp-d5e378ca4d4d.herokuapp.com/images/logoicon.png';
         
         // Generate PDF for each participant
         $date = date("l, F j, Y");
@@ -53,7 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         $html = "
         <html>
         <head>
-        
             <!-- Link Google Fonts directly -->
             <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
             <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
@@ -64,25 +59,52 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     margin: 0; 
                     padding: 0; 
                     font-family: 'Poppins', sans-serif;
+                    background-color: #f3f3f3;
                 }
         
-                .certificate img {
-                    position: absolute;
-                    margin-top: -45px;
-                    width: 109%;
-                    margin-left: -45px;
-                    object-fit: cover;
-                    z-index: -1;
+                .certificate {
+                    position: relative;
+                    width: 80%;
+                    margin: 50px auto;
+                    padding: 40px;
+                    background: white;
+                    border: 2px solid #ccc;
+                    border-radius: 20px;
+                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                }
+
+                .main-title, .participation {
+                    display: block;
+                    text-align: center;
+                }
+        
+                .main-title {
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 28px;
+                    font-weight: bold;
+                    color: #333;
+                    margin-bottom: 10px;
                 }
         
                 .subheading {
                     font-family: 'Poppins', sans-serif;
-                    font-size: 20px;
-                    color: #666;
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #555;
+                    margin: 10px 0 30px;
+                    letter-spacing: 1px;
+                    text-align: center;
+                }
+        
+                .participation {
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 24px;
+                    color: white;
+                    background: #007bff;
+                    padding: 10px 20px;
+                    border-radius: 50px;
+                    display: inline-block;
                     margin: 20px 0;
-                    margin-top: 240px;
-                    margin-left: -195px;
-                    letter-spacing: 0.5px;
                 }
         
                 .name { 
@@ -92,9 +114,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     color: #333;
                     margin: 20px 0;
                     text-decoration: underline;
-                    font-style: italic;  /* Make it italic if cursive is not working */
-                    text-transform: uppercase; /* Convert text to uppercase */
-                    margin-top: 30px;
+                    font-style: italic;
+                    text-transform: uppercase;
                 }
         
                 .details {
@@ -122,33 +143,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         
                 .footer-content {
                     display: flex;
-                    justify-content: center;  /* Centers items horizontally */
-                
+                    justify-content: center;
                 }
         
                 .footer-content img {
-                    margin-left: 340px;
-                    max-width: 80px;  /* Adjust the size of the logo */
+                    max-width: 80px;
                     height: auto;
                     margin-top: -3px;
                 }
         
                 .footer-text {
                     font-size: 20px;
-                    margin-left: 110px;
+                    margin-left: 10px;
                     font-weight: normal;
                 }
             </style>
         </head>
         <body>
             <div class='certificate'>
-                <img src='$bgImageURL' alt='Background'>
+                <p class='main-title'>CERTIFICATE OF</p>
+                <p class='participation'>PARTICIPATION</p>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
                 <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
                     <div class='footer-content'>
-                        <img src='$logoImageURL' alt='Logo'>
                         <p class='footer-text'>Community Extension Services</p>
                     </div>
                 </div>
@@ -156,6 +175,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         </body>
         </html>
         ";
+        
+
         try {
             // Generate the PDF
             $options = new Options();
