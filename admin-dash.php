@@ -1617,8 +1617,8 @@ if (isset($_POST['delete_notification'])) {
         </div>
 
         <script>
-             let inactivityTime = function () {
-                let time;
+            let inactivityTime = function () {
+            let time;
 
                 // List of events to reset the inactivity timer
                 window.onload = resetTimer;
@@ -1669,7 +1669,6 @@ if (isset($_POST['delete_notification'])) {
 
             // Start the inactivity timeout function
             inactivityTime();
-
 
             // Function to toggle the visibility of done tasks
             function toggleTasks() {
@@ -1825,9 +1824,8 @@ if (isset($_POST['delete_notification'])) {
                     cancelButton.remove();
                 };
                 editButton.after(cancelButton);
-            };
-            };
-        )};
+            }
+        });
 
             function saveTask(id) {
                 const descElem = document.getElementById(`desc-${id}`);
