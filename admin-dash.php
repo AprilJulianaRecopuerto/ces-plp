@@ -1826,6 +1826,8 @@ if (isset($_POST['delete_notification'])) {
                 };
                 editButton.after(cancelButton);
             };
+            };
+        )};
 
             function saveTask(id) {
                 const descElem = document.getElementById(`desc-${id}`);
@@ -1910,7 +1912,6 @@ if (isset($_POST['delete_notification'])) {
                 event.preventDefault();
 
                 const selectedColleges = [];
-                
                 
                 // Get selected colleges
                 document.querySelectorAll('.college-checkbox:checked').forEach(function(checkbox) {
