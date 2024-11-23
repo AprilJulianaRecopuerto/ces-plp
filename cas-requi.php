@@ -713,6 +713,7 @@ $conn_profile->close();
                                         <td class='edit'>
                                             <a href='cas-edit-requisition.php?requisition_id=" . $row["requisition_id"] . "'>EDIT</a>
                                             <button class='delete-button' data-id='" . $row["requisition_id"] . "'>DELETE</button>
+                                             <a href='cas-requi-download.php?id=" . $row["id"] . "' class='download-button'>Download Report</a>
                                         </td>
                                     </tr>";
                                 }
