@@ -745,67 +745,73 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 color: inherit;
             }
 
-            /* File List */
-            .file-list {
-                margin-top: 20px;
-            }
+           /* File List */
+.file-list {
+    margin-top: 20px;
+}
 
-            .file-items {
-                display: flex; /* Display items in a row */
-                flex-wrap: wrap; /* Allow wrapping to the next row */
-                gap: 20px; /* Space between files */
-                list-style: none;
-                padding: 0;
-                margin: 0;
-            }
+.file-items {
+    display: flex; /* Display items in a row */
+    flex-wrap: wrap; /* Allow wrapping to the next row */
+    gap: 20px; /* Space between files */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
 
-            .file-item {
-                width: 135px; /* Consistent width for each file item */
-                margin: 10px;
-                padding: 10px;
-                text-align: center;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                background-color: #f4f4f4;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                overflow: hidden; /* Prevent content overflow */
-            }
+.file-item {
+    width: 135px; /* Consistent width for each file item */
+    margin: 10px;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f4f4f4;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Prevent content overflow */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-            .file-box {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: flex-start;
-                    padding: 10px;
-                    text-align: center;
-                    gap: 10px; /* Space between the image/icon and file name */
-                    height: auto; /* Allow dynamic height for the content */
-                    overflow: hidden;
-                }
+.file-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Align items starting from the top */
+    padding: 10px;
+    text-align: center;
+    height: auto; /* Allow for dynamic height */
+    gap: 10px; /* Space between file image/icon and name */
+    width: 100%; /* Ensures the container uses full available width */
+    overflow: hidden;
+}
 
+.file-image img,
+.file-icon img {
+    width: 100%; /* Full width of the container */
+    height: auto; /* Maintain aspect ratio */
+    max-height: 110px; /* Ensure image doesn't overflow container */
+    object-fit: cover; /* Crop the image if necessary */
+    border-radius: 5px; /* Optional: rounded corners */
+}
 
-            .file-image img,
-            .file-icon img {
-                width: 100%; /* Full width of the container */
-                height: auto; /* Maintain aspect ratio */
-                max-height: 110px; /* Ensure image doesn't overflow container */
-                object-fit: cover; /* Crop the image if necessary */
-                border-radius: 5px; /* Optional: rounded corners */
-            }
+/* File name style */
+.file-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: #000;
+    font-weight: bold;
+    text-align: center;
+    word-wrap: break-word; /* Force words to wrap */
+    white-space: normal; /* Allows text to wrap */
+    overflow: hidden; /* Hide overflow content */
+    margin-top: 8px;
+    width: 100%; /* Full width of the parent container */
+    line-height: 1.2; /* Adjust line height for better readability */
+    display: block; /* Ensure it behaves as a block-level element */
+}
 
-            .file-name {
-                font-family: 'Poppins', sans-serif;
-                font-size: 14px;
-                color: #000;
-                font-weight: bold;
-                text-align: center;
-                word-wrap: break-word; /* Break words if necessary */
-                overflow: hidden; /* Prevent overflow */
-                white-space: normal; /* Allow text to wrap */
-                margin-top: 8px;
-                width: 100%; /* Full width of the parent container */
-                line-height: 1.2; /* Adjust line height */
-            }
 
             /* Context Menu */
             .context-menu {
