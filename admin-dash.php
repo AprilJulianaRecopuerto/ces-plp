@@ -1911,6 +1911,7 @@ if (isset($_POST['delete_notification'])) {
 
                 const selectedColleges = [];
                 
+                
                 // Get selected colleges
                 document.querySelectorAll('.college-checkbox:checked').forEach(function(checkbox) {
                     selectedColleges.push(checkbox.value);
