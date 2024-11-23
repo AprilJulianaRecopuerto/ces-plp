@@ -13,24 +13,30 @@ use PHPMailer\PHPMailer\Exception;
 
 // Load Composer's autoloader
 require 'vendor/autoload.php';
-// Database credentials
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "proj_list";
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+// Database credentials
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
+// Create connection to proj_list database
+$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
 // Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($conn_proj_list->connect_error) {
+    die("Connection failed: " . $conn_proj_list->connect_error);
 }
 
-$dbname_mov = "mov"; // For notifications
-$conn_mov = new mysqli($servername, $username, $password, $dbname_mov);
+// Database credentials for 'mov' (notifications)
+$servername_mov = "arfo8ynm6olw6vpn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_mov = "tz8thfim1dq7l3rf";
+$password_mov = "wzt4gssgou2ofyo7";
+$dbname_mov = "uv1qyvm0b8oicg0v";
 
-// Check connection for mov database
+$conn_mov = new mysqli($servername_mov, $username_mov, $password_mov, $dbname_mov);
+
+// Check connection for 'mov'
 if ($conn_mov->connect_error) {
     die("Connection to 'mov' database failed: " . $conn_mov->connect_error);
 }
@@ -44,10 +50,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $date_of_sub = $_POST['date_of_sub'];
     $semester = $_POST['semester'];
     $lead_person = $_POST['lead_person'];
+     // If "Others" is selected, capture the value from the custom input
+     if ($lead_person == 'Others') {
+        $lead_person = $_POST['other_lead_person'];
+    }
     $dept = $_POST['dept'];
     $implementor = $_POST['implementor'];
+    $attendees = $_POST['attendees'];
     $proj_title = $_POST['proj_title'];
-    $classification = $_POST['classification'];
+
+    $sdg = $_POST['sdg'];
+     // If "Others" is selected, capture the value from the custom input
+     if ($sdg == 'Others') {
+        $sdg = $_POST['other_classification'];
+    }
+
     $specific_activity = $_POST['specific_activity'];
     $dateof_imple = $_POST['dateof_imple'];
     $time_from = $_POST['time_from'];
@@ -59,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $status = $_POST['status'];
 
     // Prepare and bind to retrieve the current project data
-    $stmt = $conn->prepare("SELECT * FROM cba WHERE id = ?");
+    $stmt = $conn_proj_list->prepare("SELECT * FROM cba WHERE id = ?");
     $stmt->bind_param("i", $projectId);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -72,8 +89,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $currentProject['lead_person'] === $lead_person &&
         $currentProject['dept'] === $dept &&
         $currentProject['implementor'] === $implementor &&
+        $currentProject['attendees'] === $attendees &&
         $currentProject['proj_title'] === $proj_title &&
-        $currentProject['classification'] === $classification &&
+        $currentProject['sdg'] === $sdg &&
         $currentProject['specific_activity'] === $specific_activity &&
         $currentProject['dateof_imple'] === $dateof_imple &&
         $currentProject['time_from'] === $time_from &&
@@ -91,14 +109,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Prepare and bind the update statement
-    $stmt = $conn->prepare("UPDATE cba SET 
+    $stmt = $conn_proj_list->prepare("UPDATE cba SET 
         date_of_sub=?, 
         semester=?, 
         lead_person=?, 
         dept=?, 
         implementor=?, 
+        attendees=?, 
         proj_title=?, 
-        classification=?, 
+        sdg=?, 
         specific_activity=?, 
         dateof_imple=?, 
         time_from=?, 
@@ -111,11 +130,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     WHERE id=?");
 
     if ($stmt === false) {
-        die("Prepare failed: " . $conn->error);
+        die("Prepare failed: " . $conn_proj_list->error);
     }
 
     // Adjust the type definition string to include all parameters
-    $stmt->bind_param('ssssssssssssssssi', $date_of_sub, $semester, $lead_person, $dept, $implementor, $proj_title, $classification, $specific_activity, $dateof_imple, $time_from, $time_to, $district, $barangay, $beneficiary, $duration, $status, $projectId);
+    $stmt->bind_param('sssssssssssssssssi', $date_of_sub, $semester, $lead_person, $dept, $implementor, $attendees, $proj_title, $sdg, $specific_activity, $dateof_imple, $time_from, $time_to, $district, $barangay, $beneficiary, $duration, $status, $projectId);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = 'Project updated successfully.';
@@ -141,13 +160,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($implementor !== $currentProject['implementor']) {
             $notification_message .= "Implementor changed from '{$currentProject['implementor']}' to '$implementor'. ";
         }
+
+        if ($attendees !== $currentProject['attendees']) {
+            $notification_message .= "Number of Participant changed from '{$currentProject['attendees']}' to '$attendees'. ";
+        }
         
         if ($proj_title !== $currentProject['proj_title']) {
             $notification_message .= "Project Title changed from '{$currentProject['proj_title']}' to '$proj_title'. ";
         }
         
-        if ($classification !== $currentProject['classification']) {
-            $notification_message .= "Classification changed from '{$currentProject['classification']}' to '$classification'. ";
+        if ($sdg !== $currentProject['sdg']) {
+            $notification_message .= "Sustainable Development Goals changed from '{$currentProject['classification']}' to '$sdg'. ";
         }
         
         if ($specific_activity !== $currentProject['specific_activity']) {
@@ -203,8 +226,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         
         // Database connection to fetch admin email (user_registration database)
-        $user_dbname = "user_registration"; // For user data
-        $conn_users = new mysqli($servername, $username, $password, $user_dbname);
+        $servername_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+        $username_ur = "equ6v8i5llo3uhjm"; // replace with your database username
+        $password_ur = "vkfaxm2are5bjc3q"; // replace with your database password
+        $user_dbname = "ylwrjgaks3fw5sdj"; // For user data
+
+        $conn_users = new mysqli($servername_ur, $username_ur, $password_ur, $user_dbname);
 
         if ($conn_users->connect_error) {
             die("Connection to 'user_registration' database failed: " . $conn_users->connect_error);
@@ -268,10 +295,10 @@ if (isset($_GET['id'])) {
     $projectId = intval($_GET['id']);
 
     // Prepare and bind
-    $stmt = $conn->prepare("SELECT * FROM cba WHERE id = ?");
+    $stmt = $conn_proj_list->prepare("SELECT * FROM cba WHERE id = ?");
 
     if ($stmt === false) {
-        die("Prepare failed: " . $conn->error);
+        die("Prepare failed: " . $conn_proj_list->error);
     }
 
     $stmt->bind_param("i", $projectId);
@@ -292,7 +319,7 @@ if (isset($_GET['id'])) {
 }
 
 $stmt->close();
-$conn->close();
+$conn_proj_list->close();
 ?>
 
 <!DOCTYPE html>
@@ -687,7 +714,6 @@ $conn->close();
                 cursor: pointer;
                 outline: none; /* Remove default focus outline */
             }
-
             .swal-popup {
                 font-family: "Poppins", sans-serif !important;
                 width: 400px;
@@ -702,6 +728,10 @@ $conn->close();
             .swal-cancel {
                 font-family: "Poppins", sans-serif !important;
             }
+            .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
         </style>
     </head>
 
@@ -709,25 +739,33 @@ $conn->close();
         <nav class="navbar">
             <h2>Edit Project</h2> 
 
-            <div class="profile" id="profileDropdown">
-                <?php
-                    // Check if a profile picture is set in the session
-                    if (!empty($_SESSION['picture'])) {
-                        // Show the profile picture
-                        echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
-                    } else {
-                        // Get the first letter of the username for the placeholder
-                        $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
-                        echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
-                    }
-                ?>
+            <div class="profile-container">
+                <!-- Chat Icon with Notification Badge -->
+                <a href="cba-chat.php" class="chat-icon" onclick="resetNotifications()">
+                    <i class="fa fa-comments"></i>
+                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+                </a>
 
-                <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+                <div class="profile" id="profileDropdown">
+                    <?php
+                        // Check if a profile picture is set in the session
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
+                        } else {
+                            // Get the first letter of the username for the placeholder
+                            $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
+                            echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
+                        }
+                    ?>
 
-                <i class="fa fa-chevron-down dropdown-icon"></i>
-                <div class="dropdown-menu">
-                    <a href="cba-your-profile.php">Profile</a>
-                    <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+
+                    <i class="fa fa-chevron-down dropdown-icon"></i>
+                    <div class="dropdown-menu">
+                        <a href="cba-your-profile.php">Profile</a>
+                        <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -738,8 +776,8 @@ $conn->close();
             </div>
 
             <ul class="menu">
-                <li><a href="cba-dash.php" class="active"><img src="images/home.png">Dashboard</a></li>
-                <li><a href="cba-projlist.php"><img src="images/project-list.png">Project List</a></li>
+                <li><a href="cba-dash.php"><img src="images/home.png">Dashboard</a></li>
+                <li><a href="cba-projlist.php" class="active"><img src="images/project-list.png">Project List</a></li>
                 <li><a href="cba-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
 
                 <!-- Dropdown for Resource Utilization -->
@@ -756,14 +794,7 @@ $conn->close();
                 <li><a href="cba-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="cba-task.php">Upload Files</a>
-                    <a href="cba-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="cba-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="cba-responses.php"><img src="images/feedback.png">Responses</a></li>
 
@@ -783,7 +814,7 @@ $conn->close();
             <div class="form-container">
                 <h3>Edit Project</h3>
 
-                <form action="cba-editproj.php" method="POST">
+                <form action="" method="POST">
 
                     <div class="form-group">
                         <label for="id">Project ID:</label>
@@ -807,8 +838,17 @@ $conn->close();
 
                     <div class="form-group">
                         <label for="lead_person">Lead Person:</label>
-                        <input type="text" name="lead_person" value="<?php echo htmlspecialchars($project['lead_person']); ?>" required>
+                        <select name="lead_person" id="lead_person" required onchange="toggleOthersInput()">
+                            <option value="CBA Coordinator" <?php echo ($project['lead_person'] == 'CBA Coordinator') ? 'selected' : ''; ?>>CBA Coordinator</option>
+                            <option value="Others" <?php echo ($project['lead_person'] != 'CBA Coordinator') ? 'selected' : ''; ?>>Others (Please specify)</option>
+                        </select>
                     </div>
+
+                    <!-- Conditional input field for "Others" -->
+                    <div class="form-group" id="othersInputGroup" style="display: <?php echo ($project['lead_person'] != 'CBA Coordinator') ? 'block' : 'none'; ?>;">
+                        <input type="text" name="other_lead_person" id="other_lead_person" value="<?php echo htmlspecialchars($project['lead_person'] != 'CBA Coordinator' ? $project['lead_person'] : ''); ?>">
+                    </div>
+
 
                     <div class="form-group">
                         <label for="dept">Department:</label>
@@ -825,13 +865,52 @@ $conn->close();
                     </div>
 
                     <div class="form-group">
+                        <label for="attendees">Target Number of Attendees:</label>
+                        <input type="text" name="attendees" value="<?php echo htmlspecialchars($project['attendees']); ?>" required>
+                    </div>
+
+                    <div class="form-group">
                         <label for="proj_title">Project Title:</label>
                         <input type="text" name="proj_title" value="<?php echo htmlspecialchars($project['proj_title']); ?>" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="classification">Classification:</label>
-                        <input type="text" name="classification" value="<?php echo htmlspecialchars($project['classification']); ?>" required>
+                        <label for="sdg">Sustainable Development Goals</label>
+                        <select id="sdg" name="sdg" onchange="toggleOtherClassificationInput()" required>
+                            <option value="SDG 1: No Poverty" <?php echo ($project['sdg'] == 'SDG 1: No Poverty') ? 'selected' : ''; ?>>SDG 1: No Poverty</option>
+                            <option value="SDG 2: Zero Hunger" <?php echo ($project['sdg'] == 'WorkSDG 2: Zero Hungershop') ? 'selected' : ''; ?>>SDG 2: Zero Hunger</option>
+                            <option value="SDG 3: Good Health and Well-being" <?php echo ($project['sdg'] == 'SDG 3: Good Health and Well-being') ? 'selected' : ''; ?>>SDG 3: Good Health and Well-being</option>
+                            <option value="SDG 4: Quality Education" <?php echo ($project['sdg'] == 'SDG 4: Quality Education') ? 'selected' : ''; ?>>SDG 4: Quality Education</option>
+                            <option value="SDG 5: Gender Equality" <?php echo ($project['sdg'] == 'SDG 5: Gender Equality') ? 'selected' : ''; ?>>SDG 5: Gender Equality</option>
+                            <option value="SDG 6: Clean Water and Sanitation" <?php echo ($project['sdg'] == 'SDG 6: Clean Water and Sanitation') ? 'selected' : ''; ?>>SDG 6: Clean Water and Sanitation</option>
+                            <option value="SDG 7: Affordable and Clean Energy" <?php echo ($project['sdg'] == 'SDG 7: Affordable and Clean Energy') ? 'selected' : ''; ?>>SDG 7: Affordable and Clean Energy</option>
+                            <option value="SDG 8: Decent Work and Economic Growth" <?php echo ($project['sdg'] == 'SDG 8: Decent Work and Economic Growth') ? 'selected' : ''; ?>>SDG 8: Decent Work and Economic Growth</option>
+                            <option value="SDG 9: Industry, Innovation, and Infrastructure" <?php echo ($project['sdg'] == 'SDG 9: Industry, Innovation, and Infrastructure') ? 'selected' : ''; ?>>SDG 9: Industry, Innovation, and Infrastructure</option>
+                            <option value="SDG 10: Reduced Inequalities" <?php echo ($project['sdg'] == 'SDG 10: Reduced Inequalities') ? 'selected' : ''; ?>>SDG 10: Reduced Inequalities</option>
+                            <option value="SDG 11: Sustainable Cities and Communities" <?php echo ($project['sdg'] == 'SDG 11: Sustainable Cities and Communities') ? 'selected' : ''; ?>>SDG 11: Sustainable Cities and Communities</option>
+                            <option value="SDG 12: Responsible Consumption and Production" <?php echo ($project['sdg'] == 'SDG 12: Responsible Consumption and Production') ? 'selected' : ''; ?>>SDG 12: Responsible Consumption and Production</option>
+                            <option value="SDG 13: Climate Action" <?php echo ($project['sdg'] == 'SDG 13: Climate Action') ? 'selected' : ''; ?>>SDG 13: Climate Action</option>
+                            <option value="SDG 14: Life Below Water" <?php echo ($project['sdg'] == 'SDG 14: Life Below Water') ? 'selected' : ''; ?>>SDG 14: Life Below Water</option>
+                            <option value="SDG 15: Life on Land" <?php echo ($project['sdg'] == 'SDG 15: Life on Land') ? 'selected' : ''; ?>>SDG 15: Life on Land</option>
+                            <option value="SDG 16: Peace, Justice, and Strong Institutions" <?php echo ($project['sdg'] == 'SDG 16: Peace, Justice, and Strong Institutions') ? 'selected' : ''; ?>>SDG 16: Peace, Justice, and Strong Institutions</option>
+                            <option value="SDG 17: Partnerships for the Goals" <?php echo ($project['sdg'] == 'SDG 17: Partnerships for the Goals') ? 'selected' : ''; ?>>SDG 17: Partnerships for the Goals</option>
+
+                            <option value="Others" <?php echo !in_array($project['sdg'], ['SDG 1: No Poverty', 'SDG 2: Zero Hunger', 'SDG 3: Good Health and Well-being', 'SDG 4: Quality Education', 'SDG 5: Gender Equality', 
+                            'SDG 6: Clean Water and Sanitation', 'SDG 7: Affordable and Clean Energy', 'SDG 8: Decent Work and Economic Growth', 'SDG 9: Industry, Innovation, and Infrastructure', 'SDG 10: Reduced Inequalities', 
+                            'SDG 11: Sustainable Cities and Communities', 'SDG 12: Responsible Consumption and Production', 'SDG 13: Climate Action', 'SDG 14: Life Below Water', 'SDG 15: Life on Land', 'SDG 16: Peace, Justice, and Strong Institutions', 'SDG 17: Partnerships for the Goals']) ? 'selected' : ''; ?>>Others (Please specify)</option>
+                        </select>
+                    </div>
+
+                    <!-- Conditional input field for "Others" -->
+                    <div class="form-group" id="other_classification_group" style="display: <?php echo ($project['sdg'] == 'Others' || !in_array($project['sdg'], 
+                    ['SDG 1: No Poverty', 'SDG 2: Zero Hunger', 'SDG 3: Good Health and Well-being', 'SDG 4: Quality Education', 'SDG 5: Gender Equality', 'SDG 6: Clean Water and Sanitation', 'SDG 7: Affordable and Clean Energy', 'SDG 8: Decent Work and Economic Growth', 'SDG 9: Industry, Innovation, and Infrastructure', 
+                    'SDG 10: Reduced Inequalities', 'SDG 11: Sustainable Cities and Communities', 'SDG 12: Responsible Consumption and Production', 'SDG 13: Climate Action', 'SDG 14: Life Below Water', 'SDG 15: Life on Land', 'SDG 16: Peace, Justice, and Strong Institutions', 'SDG 17: Partnerships for the Goals'])) ? 'block' : 'none'; ?>;">
+                        
+                        <input type="text" id="other_classification" name="other_classification" placeholder="Enter Sustainable Development Goals" 
+                            value="<?php echo ($project['sdg'] != 'Others' && !in_array($project['sdg'], ['SDG 1: No Poverty', 'SDG 2: Zero Hunger', 'SDG 3: Good Health and Well-being', 'SDG 4: Quality Education', 'SDG 5: Gender Equality', 
+                            'SDG 6: Clean Water and Sanitation', 'SDG 7: Affordable and Clean Energy', 'SDG 8: Decent Work and Economic Growth', 
+                            'SDG 9: Industry, Innovation, and Infrastructure', 'SDG 10: Reduced Inequalities', 'SDG 11: Sustainable Cities and Communities', 'SDG 12: Responsible Consumption and Production', 'SDG 13: Climate Action', 
+                            'SDG 14: Life Below Water', 'SDG 15: Life on Land', 'SDG 16: Peace, Justice, and Strong Institutions', 'SDG 17: Partnerships for the Goals'])) ? htmlspecialchars($project['sdg']) : ''; ?>">
                     </div>
 
                     <div class="form-group">
@@ -901,6 +980,40 @@ $conn->close();
         </div>
 
         <script>
+            // JavaScript function to toggle visibility based on classification selection
+            function toggleOtherClassificationInput() {
+                var classification = document.getElementById('classification').value;
+                var otherClassificationGroup = document.getElementById('other_classification_group');
+                
+                // Show the "Others" input box if "Others" is selected, or if the classification is not one of the predefined ones
+                if (classification == 'Others' || !['Seminar', 'Workshop', 'Conference', 'Webinar', 'Training', 'Meeting', 'Symposium', 'Forum', 'Environment'].includes(classification)) {
+                    otherClassificationGroup.style.display = 'block';
+                } else {
+                    otherClassificationGroup.style.display = 'none';
+                }
+            }
+
+            // Initialize on page load based on the selected classification
+            window.onload = function() {
+                toggleOtherClassificationInput();
+            };
+            
+            function toggleOthersInput() {
+                var leadPerson = document.getElementById('lead_person').value;
+                var othersInputGroup = document.getElementById('othersInputGroup');
+
+                if (leadPerson == 'Others') {
+                    othersInputGroup.style.display = 'block';
+                } else {
+                    othersInputGroup.style.display = 'none';
+                }
+            }
+
+            // Call the function on page load to handle the initial state
+            window.onload = function() {
+                toggleOthersInput();
+            };
+
             // Function to update barangays based on the selected district
             function updateBarangays(selectedBarangay = '') {
                 const district = document.getElementById('district').value;
@@ -1038,35 +1151,103 @@ $conn->close();
                 <?php endif; ?>
             });
 
+            let inactivityTime = function () {
+                let time;
+
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
+
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
+
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
+                }
+            };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
             function confirmLogout(event) {
-        event.preventDefault();
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Do you really want to log out?",
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6', // Green confirm button
-            cancelButtonColor: '#dc3545', // Red cancel button
-            confirmButtonText: 'Yes, log me out',
-            cancelButtonText: 'Cancel',
-            customClass: {
-                popup: 'swal-popup',
-                confirmButton: 'swal-confirm',
-                cancelButton: 'swal-cancel'
-            },
-            // Additional custom styles via CSS can be added here
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Pass action in the fetch call
-                fetch('college-logout.php?action=logout')
-                    .then(response => response.text())
-                    .then(data => {
-                        console.log(data); // Log response for debugging
-                        window.location.href = 'roleaccount.php';
-                    })
-                    .catch(error => console.error('Error:', error));
+                event.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to log out?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
+                    confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('college-logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
+                });
             }
-        });
-    }
+
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, '', window.location.href);
+                };
+            }
 
             document.getElementById('profileDropdown').addEventListener('click', function() {
             var dropdownMenu = document.querySelector('.dropdown-menu');

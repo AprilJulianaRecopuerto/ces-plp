@@ -1659,7 +1659,7 @@ $conn->close();
             // Set an interval to check for due tasks every minute (60000 milliseconds)
             setInterval(function() {
                 // AJAX call to check for due tasks
-                fetch('check_due_tasks.php') // Path to the PHP script that checks for due tasks
+                fetch('cba-check_due_tasks.php') // Path to the PHP script that checks for due tasks
                     .then(response => response.json()) // Assume the PHP script returns a JSON response
                     .then(data => {
                         if (data.status === 'success') {
