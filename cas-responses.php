@@ -64,8 +64,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
     .certificate {
         font-family: 'Poppins', sans-serif;
         position: relative;
-        width: 80%; /* Full width */
-        height: 50px;
+        width: 90%; /* Full width */
+        height: 80%;
         padding: 50px;
         background: white; /* Solid white background */
         border: 8px double #001d3d; /* Double border with dark blue color */
