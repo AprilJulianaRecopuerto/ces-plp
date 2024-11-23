@@ -759,7 +759,7 @@ if ($result === false) {
                 right: -10px; /* Adjust as needed */
                 font-size: 14px; /* Size of the exclamation point */
             }
-            
+
             .smaller-alert {
                 font-size: 14px; /* Adjust text size for a compact look */
                 padding: 20px;   /* Adjust padding to mimic a smaller alert box */
@@ -871,14 +871,6 @@ if ($result === false) {
                         echo "<div>No folders created yet.</div>";
                     }
                 ?>
-            </div>
-
-            <!-- Context Menu -->
-            <div id="contextMenu" class="context-menu" style="display: none;">
-                <ul>
-                    <li id="renameFolder">Rename Folder</li>
-                    <li id="deleteFolder">Delete Folder</li>
-                </ul>
             </div>
         </div>
 
