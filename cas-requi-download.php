@@ -107,6 +107,7 @@ if (isset($_GET['id'])) {
             <table class='crud-table'>
                 <thead>
                     <tr>
+                        <th>Requisition ID</th>
                         <th>Item Name</th>
                         <th>Total Items Requested</th>
                         <th>Total Usage</th>
@@ -116,16 +117,30 @@ if (isset($_GET['id'])) {
                 <tbody>";
 
         if ($resultItems && $resultItems->num_rows > 0) {
+            // Group items by requisition_id
+            $itemsData = [];
             while ($item = $resultItems->fetch_assoc()) {
-                $html .= "<tr>
-                    <td>" . htmlspecialchars($item["item_name"]) . "</td>
-                    <td>" . htmlspecialchars($item["total_items"]) . "</td>
-                    <td>" . htmlspecialchars($item["total_usage"]) . "</td>
-                    <td>" . htmlspecialchars($item["utilization_percentage"]) . "%</td>
-                </tr>";
+                $itemsData[$item['requisition_id']][] = $item;
+            }
+
+            // Generate table rows with grouped data
+            foreach ($itemsData as $requisitionId => $items) {
+                $firstRow = true;
+                foreach ($items as $item) {
+                    $html .= "<tr>";
+                    if ($firstRow) {
+                        $html .= "<td rowspan='" . count($items) . "'>" . $requisitionId . "</td>";
+                        $firstRow = false;
+                    }
+                    $html .= "<td>" . htmlspecialchars($item["item_name"]) . "</td>
+                            <td>" . htmlspecialchars($item["total_items"]) . "</td>
+                            <td>" . htmlspecialchars($item["total_usage"]) . "</td>
+                            <td>" . htmlspecialchars($item["utilization_percentage"]) . "%</td>
+                        </tr>";
+                }
             }
         } else {
-            $html .= "<tr><td colspan='4'>No items found for this requisition.</td></tr>";
+            $html .= "<tr><td colspan='5'>No items found for this requisition.</td></tr>";
         }
 
         $html .= "</tbody></table></div>";

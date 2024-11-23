@@ -38,35 +38,58 @@ if (isset($_GET['id'])) {
 
         // HTML content for the PDF
         $html = "
+        <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
+
         <style>
             body {
-                font-family: Arial, sans-serif;
-                font-size: 12px;
+                font-family: 'Poppins', sans-serif;
+                font-size: 14px;
             }
+
             h3 {
-                text-align: center;
-            }
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin: 20px 0;
-            }
-            table, th, td {
-                border: 1px solid #ddd;
-            }
-            th, td {
-                padding: 8px;
                 text-align: left;
             }
-            th {
-                background-color: #f2f2f2;
-            }
-            .logo {
+
+            .table-container {
                 text-align: center;
-                margin-bottom: 20px;
+                width: 100%;               /* Full width of the parent */
+                overflow-x: auto;         /* Allow horizontal scrolling if needed */
+                margin: 20px auto;        /* Center the container with space above */
+                /* Removed margin-left settings */
             }
-            .logo img {
-                width: 150px; /* Adjust width as needed */
+
+            .crud-table {
+                width: 100%;              /* Full width of the container */
+                border-collapse: collapse; /* Collapse borders for a cleaner look */
+                font-family: 'Poppins', sans-serif;
+                background-color: #ffffff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                border-radius: 10px;
+            }
+
+            .crud-table th, .crud-table td {
+                text-align: center;
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+                white-space: nowrap; /* Prevent text from wrapping */
+            }
+
+            .crud-table th {
+                text-align: center;
+                background-color: #4CAF50;
+                color: white;
+                height: 30px;
+            }
+
+            .crud-table td {
+                text-align: center;
+                height: 50px;
+                background-color: #fafafa;
+            }
+
+            .crud-table tr:hover {
+                background-color: #f1f1f1;
             }
         </style>
 
@@ -76,29 +99,32 @@ if (isset($_GET['id'])) {
         // Output Event Form details for the selected ID
         if ($resultEventForm && $resultEventForm->num_rows > 0) {
             while ($row = $resultEventForm->fetch_assoc()) {
-                $html .= "<table>
+                $html .= "<div class='table-container'>
+                <table class='crud-table'>
                     <tr><th>Department</th><td>" . $row["college_name"] . "</td></tr>
                     <tr><th>Procurement Title</th><td>" . $row["procurement_title"] . "</td></tr>
                     <tr><th>Agency</th><td>" . $row["agency"] . "</td></tr>
                     <tr><th>Date of Delivery</th><td>" . $row["date_of_delivery"] . "</td></tr>
-                </table>";
+                </table>
+            </div>";
             }
         }
 
         $html .= "<h3>Event Details</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Event Date</th>
-                    <th>Event Title</th>
-                    <th>Food Category</th>
-                    <th>Menu</th>
-                    <th>Total Meal Requested</th>
-                    <th>Total Usage of Meal</th>
-                    <th>Utilization %</th>
-                </tr>
-            </thead>
+        <div class='table-container'>
+            <table class='crud-table'>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Event Date</th>
+                        <th>Event Title</th>
+                        <th>Food Category</th>
+                        <th>Menu</th>
+                        <th>Total Meal Requested</th>
+                        <th>Total Usage of Meal</th>
+                        <th>Utilization %</th>
+                    </tr>
+                </thead>
             <tbody>";
 
         // Loop through the organized event data to output rows with merged cells for the ID and Event Date
@@ -142,6 +168,7 @@ if (isset($_GET['id'])) {
         ob_end_clean(); // Clean output buffer to prevent any unwanted output
 
         $options = new Options();
+        $options->set('defaultFont', 'Poppins');
         $options->set('isHtml5ParserEnabled', true);
         $options->set('isImageEnabled', true);
 
