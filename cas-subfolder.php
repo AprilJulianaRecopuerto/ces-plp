@@ -775,13 +775,14 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                justify-content: flex-start; /* Align items starting from the top */
+                justify-content: flex-start;
                 padding: 10px;
                 text-align: center;
-                height: 180px; /* Consistent height */
-                gap: 10px; /* Space between file image/icon and name */
+                gap: 10px; /* Space between the image/icon and file name */
+                height: auto; /* Allow dynamic height for the content */
                 overflow: hidden;
             }
+
 
             .file-image img,
             .file-icon img {
