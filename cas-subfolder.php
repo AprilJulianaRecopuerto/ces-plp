@@ -720,7 +720,7 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 20px;
-                margin-bottom: 15px;
+                margin-bottom: px;
             }
 
             /* Folder Item */
@@ -732,12 +732,13 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 width: 135px; /* Consistent width for each folder */
                 margin: 10px;
                 padding: 10px;
-                text-align: center !important;
-                border: 1px solid #ccc; /* Optional border */
-                border-radius: 5px; /* Rounded corners */
-                background-color: #f9f9f9; /* Background color */
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                text-align: center;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                background-color: #f4f4f4;
                 overflow: hidden;
+                text-decoration: none !important; /* Remove underline from links */
+                color: inherit;        /* Inherit text color */
             }
 
             /* Folder Icon */
@@ -750,8 +751,8 @@ if ($subfolder_name && is_dir($subfolder_path)) {
             }
 
             .folder-icon img {
-                max-width: 80%; /* Adjust icon size */
-                max-height: 100%;
+                width: 50px; /* Set a fixed width for icons */
+                height: 45px; /* Set a fixed height for icons */
                 object-fit: contain; /* Ensure the image fits well within the icon container */
             }
 
