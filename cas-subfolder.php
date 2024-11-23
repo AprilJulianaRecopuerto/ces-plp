@@ -715,7 +715,7 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 vertical-align: middle; /* Align image vertically with text */
             }
 
-            //* Folder List */
+            /* Folder List */
             .folder-list {
                 display: flex;
                 flex-wrap: wrap;
@@ -736,6 +736,7 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 border-radius: 5px; /* Rounded corners */
                 text-decoration: none;
                 color: #155724; /* Dark Green Text */
+    
                 font-family: "Glacial Indifference", sans-serif;
             }
 
@@ -745,22 +746,8 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 color: inherit;
             }
 
-            /* File List */
-            .file-list {
-                margin-top: 20px;
-            }
-
-            .file-items {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 20px;
-                list-style: none;
-                padding: 0;
-                margin: 0;
-            }
-
             .file-item {
-                width: 135px; /* Consistent width for each file item */
+                width: 135px; /* Set consistent width for the item */
                 margin: 10px;
                 padding: 10px;
                 text-align: center;
@@ -775,38 +762,35 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                justify-content: flex-start; /* Align items starting from the top */
+                justify-content: flex-start;
                 padding: 10px;
                 text-align: center;
-                height: 180px; /* Consistent height */
-                gap: 10px; /* Space between file image/icon and name */
+                height: 180px;
                 overflow: hidden;
             }
 
             .file-image img,
             .file-icon img {
                 width: 100%; /* Full width of the container */
-                height: auto; /* Maintain aspect ratio */
-                max-height: 110px; /* Ensure image doesn't overflow container */
-                object-fit: cover; /* Crop the image if necessary */
+                height: 110px; /* Fixed height for images/icons */
+                object-fit: cover; /* Maintain aspect ratio, cropping as needed */
                 border-radius: 5px; /* Optional: rounded corners */
             }
 
-            .file-name {
+           .file-name {
                 font-family: 'Poppins', sans-serif;
                 font-size: 14px;
                 color: #000;
                 font-weight: bold;
                 text-align: center;
-                white-space: normal; /* Allow text wrapping */
-                overflow: hidden; /* Prevent text overflow */
-                text-overflow: ellipsis; /* Add ellipsis if text overflows */
+                word-wrap: break-word;
+                white-space: normal;
+                overflow: hidden;
+                text-overflow: ellipsis;
                 margin-top: 8px;
-                width: 100%; /* Full width of the parent container */
-                line-height: 1.2; /* Adjust line height */
-                max-height: 3.6em; /* Limit height to 3 lines */
+                max-width: 100%; /* Ensures it fits the container */
+                line-height: 1.2;
             }
-
 
             /* Button styles */
             .btn-delete {
