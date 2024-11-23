@@ -716,129 +716,120 @@ if ($subfolder_name && is_dir($subfolder_path)) {
             }
 
            /* Folder List */
-.folder-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin-bottom: 20px;
-}
+            .folder-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                margin-bottom: 20px;
+            }
 
-/* Folder Item */
-.folder-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 135px; /* Consistent width for each folder */
-    margin: 10px;
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #f4f4f4;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
+            /* Folder Item */
+            .folder-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 135px; /* Consistent width for each folder */
+                margin: 10px;
+                padding: 10px;
+                text-align: center;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                background-color: #f4f4f4;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
 
-/* Folder Icon */
-.folder-icon {
-    width: 100%;
-    height: 110px; /* Adjust height for the icon */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+            /* Folder Icon */
+            .folder-icon {
+                width: 100%;
+                height: 110px; /* Adjust height for the icon */
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
 
-.folder-icon img {
-    max-width: 80%; /* Adjust icon size */
-    max-height: 100%;
-    object-fit: contain; /* Ensure the image fits well within the icon container */
-}
+            .folder-icon img {
+                max-width: 80%; /* Adjust icon size */
+                max-height: 100%;
+                object-fit: contain; /* Ensure the image fits well within the icon container */
+            }
 
-/* Style for span containing file name */
-.folder-item span {
-    display: block;               /* Make the span take up the full width of the container */
-    width: 100%;                  /* Full width of the parent */
-    word-wrap: break-word;        /* Allow breaking long words */
-    white-space: normal;          /* Allow text to wrap */
-    overflow: hidden;             /* Prevent overflow */
-    text-overflow: ellipsis;      /* Show ellipsis if text is too long */
-    font-family: 'Poppins', sans-serif;
-    font-size: 14px;
-    color: #000;
-    font-weight: bold;
-    text-align: center;
-    line-height: 1.2;             /* Adjust line height for readability */
-    margin-top: 8px;              /* Space between the icon and text */
-}
+            /* Style for span containing file name */
+            .folder-item span {
+                display: block;               /* Make the span take up the full width of the container */
+                width: 100%;                  /* Full width of the parent */
+                word-wrap: break-word;        /* Allow breaking long words */
+                white-space: normal;          /* Allow text to wrap */
+                overflow: hidden;             /* Prevent overflow */
+                text-overflow: ellipsis;      /* Show ellipsis if text is too long */
+                font-family: 'Poppins', sans-serif;
+                font-size: 14px;
+                color: #000;
+                font-weight: bold;
+                text-align: center;
+                line-height: 1.2;             /* Adjust line height for readability */
+                margin-top: 8px;              /* Space between the icon and text */
+            }
+
+ /* Style for the file item list */
+ .file-items {
+                list-style-type: none;
+                display: flex;
+                flex-wrap: wrap;
+                padding: 0;
+                margin: 0;
+            }
+
+            .file-item {
+                width: 135px; /* Set consistent width for the item */
+                margin: 10px;
+                padding: 10px;
+                text-align: center;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                background-color: #f4f4f4;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                overflow: hidden; /* Ensure content doesn't overflow */
+            }
+
+            /* File box alignment to center contents */
+            .file-box {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 10px;
+                text-align: center;
+            }
 
 
-           /* File List */
-.file-list {
-    margin-top: 20px;
-}
+            /* File image and icon shared styles */
+            .file-image img,
+            .file-icon img {
+                width: 100%; /* Set full width of the container */
+                height: 110px; /* Set a fixed height for consistency */
+                object-fit: cover; /* Maintain aspect ratio, cropping as necessary */
+                border-radius: 5px; /* Optional: add rounded corners */
+            }
 
-.file-items {
-    display: flex; /* Display items in a row */
-    flex-wrap: wrap; /* Allow wrapping to the next row */
-    gap: 20px; /* Space between files */
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
+            .file-name {
+                font-family: 'Poppins', sans-serif;
+                font-size: 14px;
+                color: #000;
+                font-weight: bold;
+                text-align: center;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin-top: 5px;
+                max-width: 100%; /* Match the container's width */
+            }
 
-.file-item {
-    width: 135px; /* Consistent width for each file item */
-    margin: 10px;
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #f4f4f4;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden; /* Prevent content overflow */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.file-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start; /* Align items starting from the top */
-    padding: 10px;
-    text-align: center;
-    height: auto; /* Allow for dynamic height */
-    gap: 10px; /* Space between file image/icon and name */
-    width: 100%; /* Ensures the container uses full available width */
-    overflow: hidden;
-}
-
-.file-image img,
-.file-icon img {
-    width: 100%; /* Full width of the container */
-    height: auto; /* Maintain aspect ratio */
-    max-height: 110px; /* Ensure image doesn't overflow container */
-    object-fit: cover; /* Crop the image if necessary */
-    border-radius: 5px; /* Optional: rounded corners */
-}
-
-/* File name style */
-.file-name {
-    font-family: 'Poppins', sans-serif;
-    font-size: 14px;
-    color: #000;
-    font-weight: bold;
-    text-align: center;
-    word-wrap: break-word; /* Force words to wrap */
-    white-space: normal; /* Allows text to wrap */
-    overflow: hidden; /* Hide overflow content */
-    margin-top: 8px;
-    width: 100%; /* Full width of the parent container */
-    line-height: 1.2; /* Adjust line height for better readability */
-    display: block; /* Ensure it behaves as a block-level element */
-}
-
+            /* File link to remove underline */
+            .file-link {
+                text-decoration: none;
+                color: inherit;
+            }
 
             /* Context Menu */
             .context-menu {
