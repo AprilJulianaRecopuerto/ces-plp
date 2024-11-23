@@ -3,7 +3,8 @@ session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
-    header("Location: collegelogin.php");
+    // Redirect to login page if the session variable is not set
+    header("Location: roleaccount.php");
     exit;
 }
 
@@ -12,168 +13,49 @@ use PHPMailer\PHPMailer\Exception;
 
 // Load Composer's autoloader
 require 'vendor/autoload.php';
-// Database connection
-$db_host = "localhost";
-$db_user = "root";
-$db_pass = "";
-$db_name = "budget_utilization";
 
-$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
+// Database credentials for proj_list and user_registration databases
+$servername = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_db = "zf8r3n4qqjyrfx7o"; // MySQL username (e.g., root for local development)
+$password_db = "su6qmqa0gxuerg98"; // MySQL password (e.g., empty for local development)
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// Create connection to the proj_list database
+$conn_proj_list = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
+
+// Check connection for the proj_list database
+if ($conn_proj_list->connect_error) {
+    die("Connection failed: " . $conn_proj_list->connect_error);
 }
 
-// Check if the form is submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Initialize and validate form data
-    $semester = $_POST['semester'] ?? '';
-    $district = $_POST['district'] ?? '';
-    $barangay = $_POST['barangay'] ?? '';
-    $event_titles = $_POST['event_title'] ?? [];
-    $total_budgets = $_POST['total_budget'] ?? [];
-    $expenses = $_POST['expenses'] ?? [];
+$sn_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_ur = "equ6v8i5llo3uhjm"; // MySQL username (e.g., root for local development)
+$pass_ur = "vkfaxm2are5bjc3q"; // MySQL password (e.g., empty for local development)
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
-    // Prepare to insert into cba_details table
-    $detailsStmt = $conn->prepare("INSERT INTO cba_details (semester, district, barangay) VALUES (?, ?, ?)");
-    if (!$detailsStmt) {
-        die("Prepare failed: " . $conn->error);
-    }
-    $detailsStmt->bind_param("sss", $semester, $district, $barangay);
 
-    // Execute the statement for cba_details
-    if ($detailsStmt->execute()) {
-        // Get the last inserted details ID
-        $details_id = $conn->insert_id;
-
-        // Loop through the event titles, total budgets, and expenses arrays
-        foreach ($event_titles as $index => $event_title) {
-            $total_budget = isset($total_budgets[$index]) ? floatval($total_budgets[$index]) : 0;
-            $expense = isset($expenses[$index]) ? floatval($expenses[$index]) : 0;
-
-            // Calculate the total expenses for the current details_id (sum of all expenses)
-            $total_expenses_query = $conn->prepare("SELECT SUM(expenses) AS total_expenses FROM cba_budget WHERE details_id = ?");
-            $total_expenses_query->bind_param("i", $details_id);
-            $total_expenses_query->execute();
-            $total_expenses_result = $total_expenses_query->get_result();
-            $total_expenses_row = $total_expenses_result->fetch_assoc();
-            $total_expenses = $total_expenses_row['total_expenses'] ?? 0;
-
-            // Add the current expense to the total expenses
-            $total_expenses += $expense;
-
-            // Calculate the remaining budget after all expenses (including current)
-            $remaining_budget = $total_budget - $total_expenses;
-
-            // Prepare to insert into cba_budget table
-            $budgetStmt = $conn->prepare("INSERT INTO cba_budget (details_id, event_title, total_budget, expenses, remaining_budget) VALUES (?, ?, ?, ?, ?)");
-            if (!$budgetStmt) {
-                die("Prepare failed: " . $conn->error);
-            }
-            // Insert the current event budget entry into cba_budget table
-            $budgetStmt->bind_param("isddi", $details_id, $event_title, $total_budget, $expense, $remaining_budget);
-            if (!$budgetStmt->execute()) {
-                $_SESSION['error'] = "Error submitting budget entry: " . $budgetStmt->error;
-            }
-
-            // Close the budget statement after each entry
-            $budgetStmt->close();
-        }
-
-        $_SESSION['success'] = "Budget entry submitted successfully!";
-        
-        $dbname_mov = "mov"; // For notifications
-        $conn_mov = new mysqli($db_host, $db_user, $db_pass, $dbname_mov);
-
-        if ($conn_mov->connect_error) {
-            die("Connection to 'mov' database failed: " . $conn_mov->connect_error);
-        }
-
-        // Prepare the notification message
-        $notification_message = "A new budget entry has been submitted for project: $event_title, $district, $barangay, by College of Business and Accountancy.";
-
-        // Insert notification into the notifications table in 'mov' database
-        $notification_sql = "INSERT INTO notifications (project_name, notification_message) 
-        VALUES ('$event_title', '$notification_message')";
-
-        if ($conn_mov->query($notification_sql) === TRUE) {
-            // Now send an email notification to the admin (Head Coordinator)
-
-            // Database connection to fetch admin email (user_registration database)
-            $user_dbname = "user_registration"; // For user data
-            $conn_users = new mysqli($db_host, $db_user, $db_pass, $user_dbname);
-
-            if ($conn_users->connect_error) {
-                die("Connection to 'user_registration' database failed: " . $conn_users->connect_error);
-            }
-
-            // Fetch the admin email
-            $user_sql = "SELECT email FROM users WHERE roles = 'Head Coordinator' LIMIT 1";
-            $result = $conn_users->query($user_sql);
-
-            if ($result->num_rows > 0) {
-                $row = $result->fetch_assoc();
-                $recipientEmail = $row['email'];
-
-                // Send email using PHPMailer
-                require 'vendor/autoload.php';
-                $mail = new PHPMailer(true);
-
-                try {
-                    // Server settings
-                    $mail->isSMTP();                                            // Send using SMTP
-                    $mail->Host       = 'smtp.gmail.com';                         // Set the SMTP server to send through
-                    $mail->SMTPAuth   = true;                                     // Enable SMTP authentication
-                    $mail->Username   = 'communityextensionservices1@gmail.com'; // SMTP username
-                    $mail->Password   = 'ctpy rvsc tsiv fwix';                    // SMTP password
-                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;          // Enable TLS encryption
-                    $mail->Port       = 587;                                     // TCP port to connect to
-
-                    // Recipients
-                    $mail->setFrom('communityextensionservices1@gmail.com', 'PLP CES');
-                    $mail->addAddress($recipientEmail); // Add the admin email fetched from the database
-
-                    // Content
-                    $mail->isHTML(true);                                   // Set email format to HTML
-                    $mail->Subject = 'New Budget Entry Notification';
-                    $mail->Body    = "A new budget entry has been submitted for project: <strong>$event_title, $district, $barangay</strong>.<br><br>Best regards,<br>PLP CES";
-
-                    $mail->send();
-                } catch (Exception $e) {
-                    $_SESSION['error'] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-                    header("Location: cba-add-budget.php");
-                    exit;
-                }
-            } else {
-                $_SESSION['error'] = "No admin user found for email notification.";
-                header("Location: cba-add-budget.php");
-                exit;
-            }
-
-            // Close the user database connection
-            $conn_users->close();
-        } else {
-            $_SESSION['error'] = "Error inserting notification: " . $conn_mov->error;
-            header("Location: cba-add-budget.php");
-            exit;
-        }
-
-        // Close the notifications connection
-        $conn_mov->close();
-
-    } else {
-        $_SESSION['error'] = "Error submitting details: " . $detailsStmt->error;
-    }
-
-    // Close the details statement and connection
-    $detailsStmt->close();
-    $conn->close();
-
-    // Redirect or display a success/error message
-    header("Location: cba-add-budget.php"); // Adjust this to your needs
-    exit();
+// Fetch the profile picture from the colleges table in user_registration
+$conn_profile = new mysqli($sn_ur, $username_ur, $pass_ur, $dbname_user_registration);  
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
 }
+
+$uname = $_SESSION['uname'];
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $uname);
+$stmt->execute();
+$result_profile = $stmt->get_result();
+
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
+}
+
+$stmt->close();
+$conn_profile->close();
 ?>
+
 
 <!DOCTYPE html>
     <html lang="en">
@@ -504,11 +386,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 width: 400px !important; /* Set a larger width */
             }
 
-            .custom-swal-title {
-                font-family: 'Poppins', sans-serif;
-                color: #3085d6; /* Custom title color */
-            }
-
             .custom-swal-confirm {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
@@ -535,11 +412,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 width: 400px !important; /* Set a larger width */
             }
 
-            .custom-error-title {
-                font-family: 'Poppins', sans-serif;
-                color: #e74c3c; /* Custom title color for error */
-            }
-
             .custom-error-confirm {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
@@ -548,88 +420,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 border-radius: 10px;
                 cursor: pointer;
                 outline: none; /* Remove default focus outline */
-            }
-
-            .form-text.text-muted {
-                font-size: 0.875rem; /* Adjust the font size */
-                color: #6c757d; /* Bootstrap's muted color */
-                margin-top: 0.25rem; /* Space above the text */
-            }
-
-            input[type="file"] {
-                font-family: 'Poppins', sans-serif;
-                display: block;
-                width: 100%;
-                height: 38px;
-                margin-top: 5px;
-                padding: 0;
-                border: 1px solid #ced4da;
-                border-radius: 4px;
-                font-size: 16px;
-                color: #495057;
-                background-color: #fff;
-                background-clip: padding-box;
-                transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-            }
-
-            input[type="file"]::file-selector-button {
-                font-family: 'Poppins', sans-serif;
-                width: 120px;
-                padding: 6px 12px;
-                margin-right: 10px;
-                background-color: #3085d6; /* Custom background color */
-                color: white;
-                border: 1px solid #3085d6;;
-                border-radius: 4px;
-                cursor: pointer;
-            }
-
-            input[type="file"]::file-selector-button:hover {
-                background-color: #2579a8;
-            }
-
-            .form-group {
-                margin-bottom: 15px;
-            }
-
-            .form-text {
-                margin-top: 5px;
-                font-size: 0.875em;
-                color: #6c757d;
-            }
-
-            .remove-btn {
-                background-color: #e74c3c;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-bottom:10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-
-            .remove-btn:hover {
-                background-color: #e74c1c;
-                color: white;
-            }
-
-            .add-btn {
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-            .add-btn:hover {
-                background-color: #45a049; /* Darker green on hover */
             }
 
             .swal-popup {
@@ -677,6 +467,66 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 right: -10px; /* Adjust as needed */
                 font-size: 14px; /* Size of the exclamation point */
             }
+
+            .table-container {
+                width: 100%;
+                margin-left: -12px;
+                overflow-x: auto;
+                margin-top: 20px; /* Space above the table */
+            }
+
+            .crud-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-family: 'Poppins', sans-serif;
+                background-color: #ffffff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .crud-table th, .crud-table td {
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+                white-space: nowrap; /* Prevent text from wrapping */
+            }
+
+            .crud-table th {
+                text-align: center; 
+                background-color: #4CAF50;
+                color: white;
+                height: 40px;
+                width: 14px; /* Set a fixed width for table headers */
+            }
+
+            .crud-table td {
+                height: 50px;
+                background-color: #fafafa;
+            }
+
+            .crud-table tr:hover {
+                background-color: #f1f1f1;
+            }
+
+            .add-button {
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .add-button:hover {
+                background-color: #45a049; /* Darker green on hover */
+            }
+            .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
         </style>
     </head>
 
@@ -694,9 +544,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="profile" id="profileDropdown">
                     <?php
                         // Check if a profile picture is set in the session
-                        if (!empty($_SESSION['picture'])) {
-                            // Show the profile picture
-                            echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
                         } else {
                             // Get the first letter of the username for the placeholder
                             $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
@@ -739,7 +589,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <li><a href="cba-budget-utilization.php" class="active"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <li><a href="cas-mov.php"><img src="images/task.png">Mode of Verification</a></li>
+                <li><a href="cba-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="cba-responses.php"><img src="images/feedback.png">Responses</a></li>
 
@@ -756,67 +606,159 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
 
         <div class="content-budget">
-            <div class="form-container">
-                <h3>Budget Submission Form</h3>
+            <h2>All Projects in cba</h2>
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Project Title</th>
+                        <th>Lead Person</th>
+                        <th>Semester</th>
+                        <th>Date of Submission</th>
+                        <th>Date of Implementation</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
 
-                <form id="budgetForm" action="" method="POST">
-                    <div class="form-group">
-                        <label for="semester">Semester:</label>
-                        <select id="semester" name="semester" required>
-                            <option value="" disabled selected>Select Semester</option>
-                            <option value="1st">1st Semester</option>
-                            <option value="2nd">2nd Semester</option>
-                        </select>
-                    </div>
+                <tbody>
+                    <?php
+                    $projectsSqlModal = "SELECT id, proj_title, lead_person, semester, date_of_sub, dateof_imple FROM cba ORDER BY id";
+                        
+                    $resultProjectsModal = $conn_proj_list->query($projectsSqlModal);
 
-                    <div class="form-group">
-                        <label for="district">District:</label>
-                        <select id="district" name="district" onchange="updateBarangays()" required>
-                            <option value="" disabled selected>Select District</option>
-                            <option value="District 1">District 1</option>
-                            <option value="District 2">District 2</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="barangay">Barangay:</label>
-                        <select id="barangay" name="barangay" required>
-                            <option value="" disabled selected>Select Barangay</option>
-                        </select>
-                    </div>
-
-                    <h3>Budget Details</h3>
-                    <div id="entryContainer">
-                        <div class="entry-section">
-                            <h4>Entry 1</h4>
-                            <div class="form-group">
-                                <label for="event_title_1">Event Title:</label>
-                                <input type="text" id="event_title_1" name="event_title[]" placeholder="Enter Event Title" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="total_budget_1">Total Budget:</label>
-                                <input type="number" id="total_budget_1" name="total_budget[]" placeholder="Total Budget" required oninput="updateTotalBudget()" />
-                            </div>
-
-                            <div class="form-group">
-                                <label for="expenses_1">Expenses:</label>
-                                <input type="number" id="expenses_1" name="expenses[]" placeholder="Enter Total Expenses" required oninput="updateRemainingBudget(this.parentElement.parentElement)" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="button" class="add-btn" onclick="addEntry()">Add Another Entry</button><br><br>
-
-                    <div class="button-container">
-                        <button type="submit">Submit</button>
-                        <button type="reset">Reset</button>
-                    </div>
-                </form>
-            </div>
+                    if ($resultProjectsModal && $resultProjectsModal->num_rows > 0) {
+                        while ($project = $resultProjectsModal->fetch_assoc()) {
+                            echo "<tr>";
+                            echo "<td id='proj_id_" . $project["id"] . "'>" . htmlspecialchars($project["id"]) . "</td>";
+                            echo "<td id='proj_title_" . $project["id"] . "'>" . htmlspecialchars($project["proj_title"]) . "</td>";
+                            echo "<td id='lead_person_" . $project["id"] . "'>" . htmlspecialchars($project["lead_person"]) . "</td>";
+                            echo "<td id='semester_" . $project["id"] . "'>" . htmlspecialchars($project["semester"]) . "</td>";
+                            echo "<td>" . htmlspecialchars($project["date_of_sub"]) . "</td>";
+                            echo "<td>" . htmlspecialchars($project["dateof_imple"]) . "</td>";
+                            echo "<td><button class='add-button' onclick='addProjectToBudget(" . $project["id"] . ")'>Add</button></td>";
+                            echo "</tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='7'>No projects found.</td></tr>";
+                    }
+                    ?>
+                </tbody>
+            </table>
         </div>
 
         <script>
+            function addProjectToBudget(projectId) {
+                var projTitle = document.getElementById("proj_title_" + projectId).innerText;
+                var leadPerson = document.getElementById("lead_person_" + projectId).innerText;
+                var semester = document.getElementById("semester_" + projectId).innerText;
+                var expenses = 0; 
+                var totalBudget = 40000; 
+
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "cba-add_to_budget.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        alert(xhr.responseText);
+                    }
+                };
+
+                var data = "projectId=" + projectId + "&projTitle=" + encodeURIComponent(projTitle) +
+                        "&leadPerson=" + encodeURIComponent(leadPerson) +
+                        "&semester=" + encodeURIComponent(semester) +
+                        "&expenses=" + expenses +
+                        "&totalBudget=" + totalBudget;
+
+                xhr.send(data);
+            }
+            function addProjectToBudget(projectId) {
+    var projTitle = document.getElementById("proj_title_" + projectId).innerText;
+    var leadPerson = document.getElementById("lead_person_" + projectId).innerText;
+    var semester = document.getElementById("semester_" + projectId).innerText;
+
+    // Use SweetAlert for inputting expenses
+    Swal.fire({
+        title: 'Enter the expenses for the new project:',
+        input: 'text',
+        inputPlaceholder: 'Enter expenses here...',
+        showCancelButton: true,
+        confirmButtonText: 'Submit',
+        cancelButtonText: 'Cancel',
+        preConfirm: (value) => {
+            if (!value || isNaN(value) || value <= 0) {
+                Swal.showValidationMessage('Please enter a valid amount for the expenses');
+            }
+            return value;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var expenses = parseFloat(result.value);
+
+            // Check if the new expense exceeds the allotted budget
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "cba-check_budget_limit.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var response = xhr.responseText.split('|');
+                    if (response[0] === "error") {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Budget Exceeded!',
+                            text: response[1],
+                            showConfirmButton: true
+                        });
+                    } else if (response[0] === "success") {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Budget Check Passed!',
+                            text: response[1],
+                            showConfirmButton: true
+                        }).then(() => {
+                            // Proceed to add project to budget
+                            var xhrAdd = new XMLHttpRequest();
+                            xhrAdd.open("POST", "cba-add_to_budget.php", true);
+                            xhrAdd.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            xhrAdd.onreadystatechange = function () {
+                                if (xhrAdd.readyState == 4 && xhrAdd.status == 200) {
+                                    if (xhrAdd.responseText === "success") {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Project successfully added!',
+                                            showConfirmButton: false,
+                                            timer: 1500
+                                        }).then(function() {
+                                            window.location.href = 'cba-budget-utilization.php';
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error!',
+                                            text: xhrAdd.responseText,
+                                            showConfirmButton: true
+                                        });
+                                    }
+                                }
+                            };
+
+                            var data = "projectId=" + projectId +
+                                       "&projTitle=" + encodeURIComponent(projTitle) +
+                                       "&leadPerson=" + encodeURIComponent(leadPerson) +
+                                       "&semester=" + encodeURIComponent(semester) +
+                                       "&expenses=" + encodeURIComponent(expenses);
+                            xhrAdd.send(data);
+                        });
+                    }
+                }
+            };
+
+            var checkBudgetData = "newExpense=" + expenses;
+            xhr.send(checkBudgetData);
+        }
+    });
+}
+
+
             function updateBarangays() {
             const district = document.getElementById('district').value;
             const barangaySelect = document.getElementById('barangay');
@@ -966,63 +908,152 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 });
             <?php unset($_SESSION['error']); endif; ?>
 
-            function confirmLogout(event) {
-        event.preventDefault();
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Do you really want to log out?",
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6', // Green confirm button
-            cancelButtonColor: '#dc3545', // Red cancel button
-            confirmButtonText: 'Yes, log me out',
-            cancelButtonText: 'Cancel',
-            customClass: {
-                popup: 'swal-popup',
-                confirmButton: 'swal-confirm',
-                cancelButton: 'swal-cancel'
-            },
-            // Additional custom styles via CSS can be added here
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Pass action in the fetch call
-                fetch('college-logout.php?action=logout')
-                    .then(response => response.text())
-                    .then(data => {
-                        console.log(data); // Log response for debugging
-                        window.location.href = 'roleaccount.php';
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
-        });
-    }
+            let inactivityTime = function () {
+            let time;
 
-            document.getElementById('profileDropdown').addEventListener('click', function() {
-            var dropdownMenu = document.querySelector('.dropdown-menu');
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-            });
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
 
-            // Optional: Close the dropdown if clicking outside the profile area
-            window.onclick = function(event) {
-                if (!event.target.closest('#profileDropdown')) {
-                    var dropdownMenu = document.querySelector('.dropdown-menu');
-                    if (dropdownMenu.style.display === 'block') {
-                        dropdownMenu.style.display = 'none';
-                    }
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
+
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
                 }
             };
 
-           
-            var dropdowns = document.getElementsByClassName("dropdown-btn");
+            // Start the inactivity timeout function
+            inactivityTime();
 
+            function confirmLogout(event) {
+                event.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to log out?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
+                    confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('college-logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
+                });
+            }
+
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, '', window.location.href);
+                };
+            }
+            
+            // Dropdown menu toggle
+            document.getElementById('profileDropdown').addEventListener('click', function() {
+                const dropdown = this.querySelector('.dropdown-menu');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close dropdown if clicked outside
+            window.addEventListener('click', function(event) {
+                if (!document.getElementById('profileDropdown').contains(event.target)) {
+                    const dropdown = document.querySelector('.dropdown-menu');
+                    if (dropdown) {
+                        dropdown.style.display = 'none';
+                    }
+                }
+            });
+
+           
+            function logAction(actionDescription) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "college_logs.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.send("action=" + encodeURIComponent(actionDescription));
+            }
+
+            function logAndRedirect(actionDescription, url) {
+                logAction(actionDescription); // Log the action
+                setTimeout(function() {
+                    window.location.href = url; // Redirect after logging
+                }, 100); // Delay to ensure logging completes
+            }
+
+            // Add event listeners when the page is fully loaded
+            document.addEventListener("DOMContentLoaded", function() {
+                // Log clicks on main menu links
+                document.querySelectorAll(".menu > li > a").forEach(function(link) {
+                    link.addEventListener("click", function() {
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+                // Handle dropdown button clicks
+                var dropdowns = document.getElementsByClassName("dropdown-btn");
                 for (let i = 0; i < dropdowns.length; i++) {
                     dropdowns[i].addEventListener("click", function () {
-                        // Close all dropdowns first
                         let dropdownContents = document.getElementsByClassName("dropdown-container");
                         for (let j = 0; j < dropdownContents.length; j++) {
                             dropdownContents[j].style.display = "none";
                         }
-
-                        // Toggle the clicked dropdown's visibility
                         let dropdownContent = this.nextElementSibling;
                         if (dropdownContent.style.display === "block") {
                             dropdownContent.style.display = "none";
@@ -1031,6 +1062,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         }
                     });
                 }
+
+                // Log clicks on dropdown links
+                document.querySelectorAll(".dropdown-container a").forEach(function(link) {
+                    link.addEventListener("click", function(event) {
+                        event.stopPropagation();
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+            // Log clicks on the "Profile" link
+            document.querySelector('.dropdown-menu a[href="cba-your-profile.php"]').addEventListener("click", function() {
+                logAction("Profile");
+            });
+        });
+
+                document.addEventListener("DOMContentLoaded", () => {
+                function checkNotifications() {
+                    fetch('cba-check_notifications.php')
+                        .then(response => response.json())
+                        .then(data => {
+                            const chatNotification = document.getElementById('chatNotification');
+                            if (data.unread_count > 0) {
+                                chatNotification.style.display = 'inline-block';
+                            } else {
+                                chatNotification.style.display = 'none';
+                            }
+                        })
+                        .catch(error => console.error('Error checking notifications:', error));
+                }
+
+                // Check for notifications every 2 seconds
+                setInterval(checkNotifications, 2000);
+                checkNotifications(); // Initial check when page loads
+            });
         </script>
     </body>
 </html>
