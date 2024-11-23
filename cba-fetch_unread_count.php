@@ -1,38 +1,25 @@
 <?php
-// Connect to the database
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "admin_todo_list";
+// Database credentials
+$servername = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "t9riamok80kmok3h";
+$password = "lzh13ihy0axfny6d";
+$dbname = "g8ri1hhtsfx77ptb";
 
+// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// Initialize unread count
+$unreadCount = 0;
+
+// Query to count unread notifications
+$query = "SELECT COUNT(*) as count FROM cba_notifications WHERE cba_status = 'unread'";
+$result = $conn->query($query);
+
+if ($result && $row = $result->fetch_assoc()) {
+    $unreadCount = $row['count'];
 }
 
+echo json_encode(['unreadCount' => $unreadCount]);
 
-// Get the last fetch timestamp or set it to a default (e.g., 24 hours ago) if this is the first fetch
-$last_fetch_time = isset($_GET['last_fetch_time']) ? $_GET['last_fetch_time'] : date('Y-m-d H:i:s', strtotime('-24 hours'));
-
-// Query to fetch new notifications after the last fetch time
-$query = "SELECT * FROM cba_notifications WHERE created_at > ? ORDER BY created_at DESC";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("s", $last_fetch_time);
-$stmt->execute();
-$result = $stmt->get_result();
-
-// Fetch all notifications
-$notifications = [];
-while ($row = $result->fetch_assoc()) {
-    $notifications[] = $row;
-}
-
-// Return notifications as a JSON response
-echo json_encode(['notifications' => $notifications]);
-
-// Close the database connection
-$stmt->close();
 $conn->close();
 ?>
