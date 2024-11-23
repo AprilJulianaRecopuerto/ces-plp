@@ -1,13 +1,14 @@
 <?php
 session_start();
 
-$servername = "localhost"; // Database server
-$db_username = "root"; // Database username (change as needed)
-$db_password = ""; // Database password (change as needed)
-$dbname = "user_registration"; // Database name
+// Database connection details
+$servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "equ6v8i5llo3uhjm"; // replace with your database username
+$password = "vkfaxm2are5bjc3q"; // replace with your database password
+$dbname = "ylwrjgaks3fw5sdj";
 
 // Create connection
-$conn = new mysqli($servername, $db_username, $db_password, $dbname);
+$conn = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
 if ($conn->connect_error) {
@@ -38,8 +39,6 @@ if ($result->num_rows > 0) {
     $db_password_hash = $row['password']; // Store the password hash
 } else {
     $_SESSION['error'] = 'User not found.';
-    header("Location: cba-change-password.php");
-    exit;
 }
 
 // Handle Change Password
@@ -569,20 +568,57 @@ if (isset($_SESSION['alert_shown']) && $_SESSION['alert_shown']) {
             font-size:15px; 
             margin-left: 5px;
         }
+
         .swal-popup {
-                font-family: "Poppins", sans-serif !important;
-                width: 400px;
-            }
+            font-family: "Poppins", sans-serif !important;
+            width: 400px;
+        }
 
-            /* SweetAlert confirm button */
-            .swal-confirm {
-                font-family: "Poppins", sans-serif !important;
-            }
+        /* SweetAlert confirm button */
+        .swal-confirm {
+            font-family: "Poppins", sans-serif !important;
+        }
 
-            /* SweetAlert cancel button */
-            .swal-cancel {
-                font-family: "Poppins", sans-serif !important;
-            }
+        /* SweetAlert cancel button */
+        .swal-cancel {
+            font-family: "Poppins", sans-serif !important;
+        }
+
+         /* Chat styles */
+         .navbar .profile-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-icon {
+            font-size: 20px;
+            color: #333;
+            text-decoration: none;
+            position: relative; /* To position the badge correctly */
+            margin-right: 30px;
+            margin-top: 8px;
+            margin-left: -37px;
+        }
+
+        .notification-badge {
+            display: inline-block;
+            background-color: red; /* Change this to your preferred color */
+            color: white;
+            border-radius: 50%;
+            width: 20px; /* Width of the badge */
+            height: 20px; /* Height of the badge */
+            text-align: center;
+            font-weight: bold;
+            position: absolute; /* Position it relative to the chat icon */
+            top: -5px; /* Adjust as needed */
+            right: -10px; /* Adjust as needed */
+            font-size: 14px; /* Size of the exclamation point */
+        }
+
+        .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+        }
     </style>
 </head>
 
@@ -590,25 +626,33 @@ if (isset($_SESSION['alert_shown']) && $_SESSION['alert_shown']) {
         <nav class="navbar">
             <h2>Change Password</h2> 
 
-            <div class="profile" id="profileDropdown">
-                <?php
-                    // Check if a profile picture is set in the session
-                    if (!empty($_SESSION['picture'])) {
-                        // Show the profile picture
-                        echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
-                    } else {
-                        // Get the first letter of the username for the placeholder
-                        $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
-                        echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
-                    }
-                ?>
+            <div class="profile-container">
+                <!-- Chat Icon with Notification Badge -->
+                <a href="cba-chat.php" class="chat-icon" onclick="resetNotifications()">
+                    <i class="fa fa-comments"></i>
+                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+                </a>
 
-                <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+                <div class="profile" id="profileDropdown">
+                    <?php
+                        // Check if a profile picture is set in the session
+                        if (!empty($_SESSION['picture'])) {
+                            // Show the profile picture
+                            echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
+                        } else {
+                            // Get the first letter of the username for the placeholder
+                            $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
+                            echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
+                        }
+                    ?>
 
-                <i class="fa fa-chevron-down dropdown-icon"></i>
-                <div class="dropdown-menu">
-                    <a href="cba-your-profile.php">Profile</a>
-                    <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+
+                    <i class="fa fa-chevron-down dropdown-icon"></i>
+                    <div class="dropdown-menu">
+                        <a href="cba-your-profile.php">Profile</a>
+                        <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -619,7 +663,7 @@ if (isset($_SESSION['alert_shown']) && $_SESSION['alert_shown']) {
             </div>
 
             <ul class="menu">
-                <li><a href="cba-dash.php" class="active"><img src="images/home.png">Dashboard</a></li>
+                <li><a href="cba-dash.php"><img src="images/home.png">Dashboard</a></li>
                 <li><a href="cba-projlist.php"><img src="images/project-list.png">Project List</a></li>
                 <li><a href="cba-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
 
@@ -637,24 +681,17 @@ if (isset($_SESSION['alert_shown']) && $_SESSION['alert_shown']) {
                 <li><a href="cba-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="cba-task.php">Upload Files</a>
-                    <a href="cba-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="cba-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="cba-responses.php"><img src="images/feedback.png">Responses</a></li>
+                <li><a href="responses.php"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
-                    <img src="images/logs.png"> Audit Trails
+                    <img src="images/resource.png"> Audit Trails
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="cba-history.php">Log In History</a>
+                    <a href="cba-login.php">Log In History</a>
                     <a href="cba-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>
@@ -707,71 +744,178 @@ if (isset($_SESSION['alert_shown']) && $_SESSION['alert_shown']) {
         </div>
 
         <script>
-            document.getElementById('profileDropdown').addEventListener('click', function() {
-                var dropdownMenu = document.querySelector('.dropdown-menu');
-                dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+             // Dropdown menu toggle
+             document.getElementById('profileDropdown').addEventListener('click', function() {
+                const dropdown = this.querySelector('.dropdown-menu');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
             });
 
-            // Optional: Close the dropdown if clicking outside the profile area
-            window.onclick = function(event) {
-                if (!event.target.closest('#profileDropdown')) {
-                    var dropdownMenu = document.querySelector('.dropdown-menu');
-                    if (dropdownMenu.style.display === 'block') {
-                        dropdownMenu.style.display = 'none';
+            // Close dropdown if clicked outside
+            window.addEventListener('click', function(event) {
+                if (!document.getElementById('profileDropdown').contains(event.target)) {
+                    const dropdown = document.querySelector('.dropdown-menu');
+                    if (dropdown) {
+                        dropdown.style.display = 'none';
                     }
+                }
+            });
+
+            let inactivityTime = function () {
+            let time;
+
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
+
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
+
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
                 }
             };
 
+            // Start the inactivity timeout function
+            inactivityTime();
+
             function confirmLogout(event) {
-        event.preventDefault();
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Do you really want to log out?",
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6', // Green confirm button
-            cancelButtonColor: '#dc3545', // Red cancel button
-            confirmButtonText: 'Yes, log me out',
-            cancelButtonText: 'Cancel',
-            customClass: {
-                popup: 'swal-popup',
-                confirmButton: 'swal-confirm',
-                cancelButton: 'swal-cancel'
-            },
-            // Additional custom styles via CSS can be added here
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Pass action in the fetch call
-                fetch('college-logout.php?action=logout')
-                    .then(response => response.text())
-                    .then(data => {
-                        console.log(data); // Log response for debugging
-                        window.location.href = 'roleaccount.php';
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
-        });
-    }
+                event.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to log out?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
+                    confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('college-logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
 
-            var dropdowns = document.getElementsByClassName("dropdown-btn");
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
 
-            for (let i = 0; i < dropdowns.length; i++) {
-                dropdowns[i].addEventListener("click", function () {
-                    // Close all dropdowns first
-                    let dropdownContents = document.getElementsByClassName("dropdown-container");
-                    for (let j = 0; j < dropdownContents.length; j++) {
-                        dropdownContents[j].style.display = "none";
-                    }
-
-                    // Toggle the clicked dropdown's visibility
-                    let dropdownContent = this.nextElementSibling;
-                    if (dropdownContent.style.display === "block") {
-                        dropdownContent.style.display = "none";
-                    } else {
-                        dropdownContent.style.display = "block";
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
                     }
                 });
             }
 
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, '', window.location.href);
+                };
+            }
+
+            function logAction(actionDescription) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "college_logs.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.send("action=" + encodeURIComponent(actionDescription));
+            }
+
+            function logAndRedirect(actionDescription, url) {
+                logAction(actionDescription); // Log the action
+                setTimeout(function() {
+                    window.location.href = url; // Redirect after logging
+                }, 100); // Delay to ensure logging completes
+            }
+
+            // Add event listeners when the page is fully loaded
+            document.addEventListener("DOMContentLoaded", function() {
+                // Log clicks on main menu links
+                document.querySelectorAll(".menu > li > a").forEach(function(link) {
+                    link.addEventListener("click", function() {
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+                // Handle dropdown button clicks
+                var dropdowns = document.getElementsByClassName("dropdown-btn");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].addEventListener("click", function () {
+                        let dropdownContents = document.getElementsByClassName("dropdown-container");
+                        for (let j = 0; j < dropdownContents.length; j++) {
+                            dropdownContents[j].style.display = "none";
+                        }
+                        let dropdownContent = this.nextElementSibling;
+                        if (dropdownContent.style.display === "block") {
+                            dropdownContent.style.display = "none";
+                        } else {
+                            dropdownContent.style.display = "block";
+                        }
+                    });
+                }
+
+                // Log clicks on dropdown links
+                document.querySelectorAll(".dropdown-container a").forEach(function(link) {
+                    link.addEventListener("click", function(event) {
+                        event.stopPropagation();
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+                 // Log clicks on the "Change Password" button inside the form
+                document.querySelector('.button-container button[type="submit"]').addEventListener("click", function() {
+                    logAction("Change Password Button");
+                });
+
+                // Log clicks on the "Profile" link
+                document.querySelector('.dropdown-menu a[href="cba-your-profile.php"]').addEventListener("click", function() {
+                    logAction("Profile");
+                });
+            });
 
             // Check for success message and display SweetAlert if present
             <?php if (isset($_SESSION['success'])): ?>
@@ -921,6 +1065,28 @@ if (isset($_SESSION['alert_shown']) && $_SESSION['alert_shown']) {
                 // Display the strength message
                 strengthMessage.textContent = 'Password Strength: ' + strength;
             }
+
+            
+
+            document.addEventListener("DOMContentLoaded", () => {
+                function checkNotifications() {
+                    fetch('cba-check_notifications.php')
+                        .then(response => response.json())
+                        .then(data => {
+                            const chatNotification = document.getElementById('chatNotification');
+                            if (data.unread_count > 0) {
+                                chatNotification.style.display = 'inline-block';
+                            } else {
+                                chatNotification.style.display = 'none';
+                            }
+                        })
+                        .catch(error => console.error('Error checking notifications:', error));
+                }
+
+                // Check for notifications every 2 seconds
+                setInterval(checkNotifications, 2000);
+                checkNotifications(); // Initial check when page loads
+            });
         </script>
     </body>
 </html>

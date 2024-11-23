@@ -1,11 +1,14 @@
 <?php
 
 date_default_timezone_set('Asia/Manila');
+
 session_start(); // Start the session at the very top of the file
-$servername = "localhost";
-$username_db = "root";
-$password_db = "";
-$dbname_proj_list = "admin_todo_list";
+
+// Database connection details
+$servername = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_db = "t9riamok80kmok3h";
+$password_db = "lzh13ihy0axfny6d";
+$dbname_proj_list = "g8ri1hhtsfx77ptb";  // Database for tasks
 
 // Create connection to proj_list database
 $conn = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
@@ -20,7 +23,6 @@ use PHPMailer\PHPMailer\Exception;
 
 // Load Composer's autoloader
 require 'vendor/autoload.php';
-
 
 
 $sql = "SELECT id, task_description, created_at, cba_status FROM cba_notifications ORDER BY created_at DESC";
@@ -96,7 +98,7 @@ if ($result_due_date->num_rows > 0) {
             if (!empty($notificationMessage)) {
                 // Insert notification for the user with 'unread' status
                 $insertNotification = $conn->prepare("INSERT INTO cba_notifications (department, task_description, cba_status, created_at) VALUES (?, ?, 'unread', NOW())");
-                $department = 'CAS'; // Set department explicitly (or dynamically if needed)
+                $department = 'CBA'; // Set department explicitly (or dynamically if needed)
                 $insertNotification->bind_param("ss", $department, $notificationMessage);
                 $insertNotification->execute();
                 $insertNotification->close();
@@ -105,8 +107,12 @@ if ($result_due_date->num_rows > 0) {
                 // Add the task ID to the notified tasks session array to prevent future notifications
             $_SESSION['notified_tasks'][] = $taskId;
 
-            $user_dbname = "user_registration"; // For user data
-            $conn_users = new mysqli($servername, $username_db, $password_db, $user_dbname);
+            $servername_ur= "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+            $username_ur = "equ6v8i5llo3uhjm";
+            $password_ur = "vkfaxm2are5bjc3q";
+            $dbname_user_registration = "ylwrjgaks3fw5sdj";
+
+            $conn_users = new mysqli($servername_ur, $username_ur, $password_ur, $dbname_user_registration);
     
             if ($conn_users->connect_error) {
                 die("Connection to 'user_registration' database failed: " . $conn_users->connect_error);

@@ -1,41 +1,38 @@
 <?php
-session_start(); // Make sure to start the session
+session_start(); // Start the session
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
     // Redirect to login page if the session variable is not set
-    header("Location: loginpage.php");
+    header("Location: roleaccount.php");
     exit;
 }
 
-// Database credentials
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "budget_utilization";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) { // Use $conn here
-    die("Connection failed: " . $conn->connect_error); // Use $conn here
-}
+// Database credentials for proj_list and user_registration databases
+$servername = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_db = "zf8r3n4qqjyrfx7o";
+$password_db = "su6qmqa0gxuerg98"; 
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
 
-// Database credentials for user_registration
-$dbname_user_registration = "user_registration";
+// Database credentials for proj_list and user_registration databases
+$servername_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_ur = "equ6v8i5llo3uhjm"; 
+$password_ur = "vkfaxm2are5bjc3q"; 
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
-// Create connection to user_registration database
-$conn_user_registration = new mysqli($servername, $username, $password, $dbname_user_registration);
 
-// Check connection
-if ($conn_user_registration->connect_error) {
-    die("Connection failed: " . $conn_user_registration->connect_error);
+// Create connection to the proj_list database
+$conn_proj_list = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
+
+// Check connection for the proj_list database
+if ($conn_proj_list->connect_error) {
+    die("Connection failed: " . $conn_proj_list->connect_error);
 }
 
 // Fetch the department name from user_registration
-$username = $_SESSION['uname'];
+$username = $_SESSION['uname']; // Retrieve the username from session
+$conn_user_registration = new mysqli($servername_ur, $username_ur, $password_ur, $dbname_user_registration);
 $sql = "SELECT department FROM colleges WHERE uname = ?";
 $stmt = $conn_user_registration->prepare($sql);
 $stmt->bind_param("s", $username);
@@ -45,9 +42,80 @@ $stmt->fetch();
 $stmt->close();
 $conn_user_registration->close();
 
+// Sanitize the department name before using it
 $departmentName = htmlspecialchars($departmentName);
 
+// Fetch the profile picture from the colleges table in user_registration
+$conn_profile = new mysqli($servername_ur, $username_ur, $password_ur, $dbname_user_registration);
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
+}
+
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?";
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$result_profile = $stmt->get_result();
+
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture'];
+}
+
+// Database credentials for proj_list and user_registration databases
+$servername_bu = "alv4v3hlsipxnujn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_bu = "ctk6gpo1v7sapq1l"; // MySQL username (e.g., root for local development)
+$password_bu = "u1cgfgry8lu5rliz"; // MySQL password (e.g., empty for local development)
+$dbname_budget_utilization = "oshzbyiasuos5kn4";
+$conn_budget_utilization = new mysqli($servername_bu, $username_bu, $password_bu, $dbname_budget_utilization);
+
+// Check connection for the budget_utilization database
+if ($conn_budget_utilization->connect_error) {
+    die("Connection failed: " . $conn_budget_utilization->connect_error);
+}
+
+// Fetch budget details from the cba_budget table
+$budgetSql = "SELECT details_id, proj_title, lead_person, semester, expenses, remaining_budget, total_budget FROM cba_budget ORDER BY details_id";
+$resultBudget = $conn_budget_utilization->query($budgetSql);
+
+
+$conn_budget_allotment = new mysqli($servername_bu, $username_bu, $password_bu, $dbname_budget_utilization);
+
+// Check connection for the allotted_budget table
+if ($conn_budget_allotment->connect_error) {
+    die("Connection failed: " . $conn_budget_allotment->connect_error);
+}
+
+// Fetch the allotted budget for cba (you can also dynamically change this for other departments)
+$sql_allotted_budget = "SELECT allotted_budget FROM allotted_budget WHERE department_name = 'cba'";
+$result_allotted_budget = $conn_budget_allotment->query($sql_allotted_budget);
+
+$allottedBudget = 0;  // Default if not found
+if ($result_allotted_budget && $result_allotted_budget->num_rows > 0) {
+    $row = $result_allotted_budget->fetch_assoc();
+    $allottedBudget = $row['allotted_budget'];
+}
+
+// Fetch total expenses from the cba_budget table
+$sql_expenses = "SELECT SUM(expenses) AS total_expenses FROM cba_budget";
+$result_expenses = $conn_budget_allotment->query($sql_expenses);
+
+$totalExpenses = 0;  // Default if no expenses are found
+if ($result_expenses && $row_expenses = $result_expenses->fetch_assoc()) {
+    $totalExpenses = $row_expenses['total_expenses'];
+}
+
+// Calculate the remaining budget
+$remainingBudget = $allottedBudget - $totalExpenses;
+
+// Close the connection for allotted_budget table
+$conn_budget_allotment->close();
+$conn_budget_utilization->close();
+
+$stmt->close();
+$conn_profile->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -64,6 +132,9 @@ $departmentName = htmlspecialchars($departmentName);
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+        <!-- Include SweetAlert CDN in your HTML -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
         <style>
@@ -389,10 +460,6 @@ $departmentName = htmlspecialchars($departmentName);
                 width: 400px !important; /* Set a larger width */
             }
 
-            .custom-swal-title {
-                font-family: 'Poppins', sans-serif;
-                color: #3085d6; /* Custom title color */
-            }
 
             .custom-swal-confirm {
                 font-family: 'Poppins', sans-serif;
@@ -425,11 +492,6 @@ $departmentName = htmlspecialchars($departmentName);
                 width: 400px !important; /* Set a larger width */
             }
 
-            .custom-error-title {
-                font-family: 'Poppins', sans-serif;
-                color: #e74c3c; /* Custom title color for error */
-            }
-
             .custom-error-confirm {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
@@ -447,13 +509,6 @@ $departmentName = htmlspecialchars($departmentName);
                 border-radius: 8px; /* Rounded corners */
                 padding: 15px; /* Padding inside the popup */
                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-            }
-
-            .custom-event-title {
-                font-family: 'Poppins', sans-serif;
-                color: #343a40; /* Dark color for the title */
-                font-size: 1.5em; /* Font size for the title */
-                margin-bottom: 10px; /* Spacing below the title */
             }
 
             .custom-event-confirm {
@@ -605,6 +660,16 @@ $departmentName = htmlspecialchars($departmentName);
                 right: -10px; /* Adjust as needed */
                 font-size: 14px; /* Size of the exclamation point */
             }
+
+           .expense-input {
+                font-family: 'Poppins', sans-serif;
+                font-size: 15px; /* Size of the exclamation point */
+            
+           }
+           .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
             
         </style>
     </head>
@@ -612,7 +677,7 @@ $departmentName = htmlspecialchars($departmentName);
     <body>
         <nav class="navbar">
             <h2>
-                <span style="color: yellow; font-size: 28px;"><?php echo htmlspecialchars($departmentName); ?></span> Budget
+                <span style="color: purple; font-size: 28px;"><?php echo htmlspecialchars($departmentName); ?></span> Budget
             </h2>
 
             <div class="profile-container">
@@ -623,11 +688,11 @@ $departmentName = htmlspecialchars($departmentName);
                 </a>
 
                 <div class="profile" id="profileDropdown">
-                <?php
+                    <?php
                         // Check if a profile picture is set in the session
-                        if (!empty($_SESSION['picture'])) {
-                            // Show the profile picture
-                            echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
                         } else {
                             // Get the first letter of the username for the placeholder
                             $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
@@ -670,14 +735,7 @@ $departmentName = htmlspecialchars($departmentName);
                 <li><a href="cba-budget-utilization.php" class="active"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="cba-task.php">Upload Files</a>
-                    <a href="cba-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="cba-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="cba-responses.php"><img src="images/feedback.png">Responses</a></li>
 
@@ -694,342 +752,168 @@ $departmentName = htmlspecialchars($departmentName);
         </div>
 
         <div class="content-budget">
+            <h1 style="margin-top: 120px; margin-bottom: -150px; font-family: Poppins, sans-serif;">
+                Allotted budget: ₱<?php echo number_format($allottedBudget, 2); ?>
+            </h1>
+
             <div class="button-container">
-                <button onclick="logAndRedirect('Add Budget','cba-add-budget.php')">Add Budget</button>
+                <button onclick="logAndRedirect('Add Budget', 'cba-add-budget.php')">Add Budget</button>
             </div>
 
-            <div class="data-details">
-                <h2>Budget Details</h2>
-                <div class="table-container">
-                    <table class="crud-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Semester</th>
-                                <th>District</th>
-                                <th>Barangay</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            // Pagination variables for cba_details
-                            $limit = 5; // Number of records per page
-                            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
-                            $offset = ($page - 1) * $limit; // Offset for SQL query
-
-                            // Count total cba_details records
-                            $countSql = "SELECT COUNT(*) as total FROM cba_details";
-                            $countResult = $conn->query($countSql);
-                            $totalRecords = $countResult->fetch_assoc()['total'];
-                            $totalPages = ceil($totalRecords / $limit); // Calculate total pages
-
-                            // Fetch paginated cba_details
-                            $detailsSql = "SELECT * FROM cba_details ORDER BY id LIMIT $limit OFFSET $offset";
-                            $resultDetails = $conn->query($detailsSql);
-
-                            if ($resultDetails && $resultDetails->num_rows > 0) {
-                                while ($row = $resultDetails->fetch_assoc()) {
-                                    echo "<tr>
-                                        <td>" . htmlspecialchars($row["id"]) . "</td>
-                                        <td>" . htmlspecialchars($row["semester"]) . "</td>
-                                        <td>" . htmlspecialchars($row["district"]) . "</td>
-                                        <td>" . htmlspecialchars($row["barangay"]) . "</td>
-                                        <td class='edit'>
-                                            <a href='cba-edit-budget.php?id=" . $row["id"] . "'>EDIT</a>
-                                            <button class='delete-button' data-id='" . $row["id"] . "'>DELETE</button>
-                                        </td>
-                                    </tr>";
-                                }
-                            } else {
-                                echo "<tr><td colspan='5'>No details found.</td></tr>";
+            <!-- New Budget Table -->
+            <h2 style="font-family: Poppins, sans-serif;">CBA Budget Details</h2>
+            <div class="table-container">
+                <table class="crud-table">
+                    <thead>
+                        <tr>
+                            <th>Details ID</th>
+                            <th>Project Title</th>
+                            <th>Lead Person</th>
+                            <th>Semester</th>
+                            <th>Expenses</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        // Display budget data from cba_budget table
+                        if ($resultBudget && $resultBudget->num_rows > 0) {
+                            while ($budget = $resultBudget->fetch_assoc()) {
+                                echo "<tr>";
+                                echo "<td>" . htmlspecialchars($budget["details_id"]) . "</td>";
+                                echo "<td>" . htmlspecialchars($budget["proj_title"]) . "</td>";
+                                echo "<td>" . htmlspecialchars($budget["lead_person"]) . "</td>";
+                                echo "<td>" . htmlspecialchars($budget["semester"]) . "</td>";
+                                echo "<td>" . htmlspecialchars($budget["expenses"]) . "</td>";
+                                echo "</tr>";
                             }
-                            ?>
-                        </tbody>
-                    </table>
-                </div>
-                <br>
-                <div class="table-container">
-                    <table class="crud-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Event Title</th>
-                                <th>Total Budget</th>
-                                <th>Expenses</th>
-                                <th>Remaining Budget</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            // Fetch all budget items (removing pagination for items)
-                            $itemsSql = "SELECT * FROM cba_budget ORDER BY details_id"; // Removed LIMIT and OFFSET for items
-                            $resultItems = $conn->query($itemsSql);
-
-                            if ($resultItems && $resultItems->num_rows > 0) {
-                                $itemsData = [];
-                                
-                                // Group items by details_id
-                                while ($row = $resultItems->fetch_assoc()) {
-                                    $itemsData[$row['details_id']][] = $row; // Grouping items by details_id
-                                }
-
-                                // Output rows with calculated rowspans for details_id
-                                foreach ($itemsData as $detailsId => $items) {
-                                    $firstRow = true; // Track the first row for details_id
-
-                                    foreach ($items as $index => $item) {
-                                        echo "<tr>";
-
-                                        // Display Details ID only once per unique details_id
-                                        if ($firstRow) {
-                                            echo "<td rowspan='" . count($items) . "'>" . htmlspecialchars($detailsId) . "</td>";
-                                            $firstRow = false; // Set to false after the first row
-                                        }
-
-                                        // Output remaining columns for the current item
-                                        echo "<td>" . htmlspecialchars($item["event_title"]) . "</td>
-                                        
-                                            <td>" . htmlspecialchars($item["total_budget"]) . "</td>
-                                            <td>" . htmlspecialchars($item["expenses"]) . "</td>
-                                            <td>" . htmlspecialchars($item["remaining_budget"]) . "</td>
-                                            </tr>";
-                                    }
-                                }
-                            } else {
-                                echo "<tr><td colspan='5'>No budget items found.</td></tr>";
-                            }
-                            ?>
-                        </tbody>
-                    </table>
-                </div>
+                        } else {
+                            echo "<tr><td colspan='5'>No budget records found.</td></tr>";
+                        }
+                        ?>
+                    </tbody>
+                </table>
             </div>
 
-                <div class="pagination-info">
-                    <div>
-                        <p><?php echo "$totalRecords RECORDS FOUND"; ?></p>
-                    </div>
-
-                    <div class="page">
-                        <p>
-                            <?php if ($page > 1): ?>
-                                <a class="pagination-link" href="?page=<?php echo $page - 1; ?>">PREV</a>
-                            <?php endif; ?>
-
-                            <span class="pagination-text">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
-                            
-                            <?php if ($page < $totalPages): ?>
-                                <a class="pagination-link" href="?page=<?php echo $page + 1; ?>">NEXT</a>
-                            <?php endif; ?>
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <h2 style="margin-bottom: -150px; font-family: Poppins, sans-serif;">
+                Remaining budget: ₱<?php echo number_format($remainingBudget, 2); ?>
+            </h2>
         </div>
 
         <script>
-           document.addEventListener("DOMContentLoaded", function () {
-                // Select all delete buttons with the class 'delete-button'
-                const deleteButtons = document.querySelectorAll(".delete-button");
+            // Listen for changes in the expenses input fields
+            let inactivityTime = function () {
+            let time;
 
-                deleteButtons.forEach(button => {
-                    button.addEventListener("click", function () {
-                        const detailsId = this.getAttribute("data-id");
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
 
-                        // Check if multiple events are associated with this details ID
-                        fetch('cba-budget-delete.php', {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({ id: detailsId, action: 'count' })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.count > 1) {
-                                // Multiple events found: Prompt user to delete all or specify a title
-                                Swal.fire({
-                                    title: "Multiple Events Found",
-                                    text: "Do you want to delete all events associated with this ID?",
-                                    icon: "warning",
-                                    showCancelButton: true,
-                                    confirmButtonText: "Yes, delete all",
-                                    cancelButtonText: "Cancel", // This now simply cancels the dialog
-                                    showDenyButton: true,
-                                    denyButtonText: "No, enter specific Event Title", // This prompts for a specific title
-                                    customClass: {
-                                        popup: 'custom-event-popup',
-                                        title: 'custom-event-title',
-                                        confirmButton: 'custom-event-confirm',
-                                        cancelButton: 'custom-event-cancel',
-                                        denyButton: 'custom-event-deny'
-                                    }
-                                }).then(result => {
-                                    if (result.isConfirmed) {
-                                        // Delete all events
-                                        deleteBudget(detailsId, 'all');
-                                    } else if (result.dismiss === Swal.DismissReason.cancel) {
-                                        // Close the dialog without further action
-                                        return; // Do nothing on cancel
-                                    } else if (result.isDenied) {
-                                        // Ask for a specific event title to delete
-                                        Swal.fire({
-                                            title: 'Enter Specific Event Title',
-                                            input: 'text',
-                                            inputLabel: 'Event Title',
-                                            inputPlaceholder: 'Enter the specific event title',
-                                            showCancelButton: true,
-                                            background: '#f8f9fa',
-                                            customClass: {
-                                                popup: 'custom-swal-popup',
-                                                input: 'custom-swal-input',
-                                                title: 'custom-swal-title',
-                                                confirmButton: 'custom-swal-confirm',
-                                                cancelButton: 'custom-swal-cancel'
-                                            }
-                                        }).then(titleResult => {
-                                            if (titleResult.isConfirmed && titleResult.value) {
-                                                deleteBudget(detailsId, 'specific', titleResult.value);
-                                            }
-                                        });
-                                    }
-                                });
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
 
-                                } else {
-                                // Only one event found; confirm delete for single event
-                                Swal.fire({
-                                    title: 'Are you sure?',
-                                    text: 'Do you really want to delete this single event?',
-                                    icon: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Yes, delete',
-                                    cancelButtonText: 'Cancel',
-                                    background: '#f8f9fa',
-                                    customClass: {
-                                        popup: 'custom-swal-popup',
-                                        title: 'custom-swal-title',
-                                        confirmButton: 'custom-swal-confirm',
-                                        cancelButton: 'custom-swal-cancel'
-                                    }
-                                }).then(result => {
-                                    if (result.isConfirmed) {
-                                        deleteBudget(detailsId, 'single');
-                                    }
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            console.error("Error fetching event count:", error);
-                            Swal.fire({
-                                title: 'Error',
-                                text: 'Unable to proceed with delete action.',
-                                icon: 'error',
-                                background: '#f8f9fa',
-                                customClass: {
-                                    popup: 'custom-error-popup',
-                                    title: 'custom-error-title'
-                                }
-                            });
-                        });
-                    });
-                });
-
-                // Function to handle the deletion
-                function deleteBudget(detailsId, action, eventTitle = null) {
-                    fetch('cba-budget-delete.php', {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({ id: detailsId, action: action, event_title: eventTitle })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                title: 'Deleted!',
-                                text: 'The budget record has been deleted.',
-                                icon: 'success',
-                                background: '#f8f9fa',
-                                customClass: {
-                                    popup: 'custom-swal-popup',
-                                    title: 'custom-swal-title',
-                                    confirmButton: 'custom-swal-confirm'
-                                }
-                            }).then(() => location.reload()); // Reload page after deletion
-                        } else {
-                            Swal.fire({
-                                title: 'Error',
-                                text: 'An error occurred while deleting the record: ' + (data.message || 'Unknown error.'),
-                                icon: 'error',
-                                background: '#f8f9fa',
-                                customClass: {
-                                    popup: 'custom-error-popup',
-                                    title: 'custom-error-title'
-                                }
-                            });
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
                         }
-                    })
-                    .catch(error => {
-                        console.error("Error deleting budget:", error);
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'An error occurred while deleting the record.',
-                            icon: 'error',
-                            background: '#f8f9fa',
-                            customClass: {
-                                popup: 'custom-error-popup',
-                                title: 'custom-error-title'
-                            }
-                        });
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
                     });
                 }
-            });
 
-        function confirmLogout(event) {
-        event.preventDefault();
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Do you really want to log out?",
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6', // Green confirm button
-            cancelButtonColor: '#dc3545', // Red cancel button
-            confirmButtonText: 'Yes, log me out',
-            cancelButtonText: 'Cancel',
-            customClass: {
-                popup: 'swal-popup',
-                confirmButton: 'swal-confirm',
-                cancelButton: 'swal-cancel'
-            },
-            // Additional custom styles via CSS can be added here
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Pass action in the fetch call
-                fetch('college-logout.php?action=logout')
-                    .then(response => response.text())
-                    .then(data => {
-                        console.log(data); // Log response for debugging
-                        window.location.href = 'roleaccount.php';
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
-        });
-    }
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                }
 
-            document.getElementById('profileDropdown').addEventListener('click', function() {
-            var dropdownMenu = document.querySelector('.dropdown-menu');
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-            });
-
-            // Optional: Close the dropdown if clicking outside the profile area
-            window.onclick = function(event) {
-                if (!event.target.closest('#profileDropdown')) {
-                    var dropdownMenu = document.querySelector('.dropdown-menu');
-                    if (dropdownMenu.style.display === 'block') {
-                        dropdownMenu.style.display = 'none';
-                    }
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
                 }
             };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
+            function confirmLogout(event) {
+                event.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to log out?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
+                    confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('college-logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
+                });
+            }
+
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, '', window.location.href);
+                };
+            }
+
+            // Dropdown menu toggle
+            document.getElementById('profileDropdown').addEventListener('click', function() {
+                const dropdown = this.querySelector('.dropdown-menu');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close dropdown if clicked outside
+            window.addEventListener('click', function(event) {
+                if (!document.getElementById('profileDropdown').contains(event.target)) {
+                    const dropdown = document.querySelector('.dropdown-menu');
+                    if (dropdown) {
+                        dropdown.style.display = 'none';
+                    }
+                }
+            });
             
             function logAction(actionDescription) {
                 var xhr = new XMLHttpRequest();
@@ -1087,14 +971,31 @@ $departmentName = htmlspecialchars($departmentName);
                 });
             });
 
-            // Log clicks on action buttons (Delete)
-            document.querySelectorAll(".delete-button").forEach(function(button) {
-                button.addEventListener("click", function() {
-                    logAction("Delete Budget"); // Log deletion action
-                    // Additional logic for deletion can be added here if needed
+                // Log clicks on the "Profile" link
+                document.querySelector('.dropdown-menu a[href="cba-your-profile.php"]').addEventListener("click", function() {
+                    logAction("Profile");
                 });
             });
-        });
+
+            document.addEventListener("DOMContentLoaded", () => {
+                function checkNotifications() {
+                    fetch('cba-check_notifications.php')
+                        .then(response => response.json())
+                        .then(data => {
+                            const chatNotification = document.getElementById('chatNotification');
+                            if (data.unread_count > 0) {
+                                chatNotification.style.display = 'inline-block';
+                            } else {
+                                chatNotification.style.display = 'none';
+                            }
+                        })
+                        .catch(error => console.error('Error checking notifications:', error));
+                }
+
+                // Check for notifications every 2 seconds
+                setInterval(checkNotifications, 2000);
+                checkNotifications(); // Initial check when page loads
+            });
         </script>
     </body>
 </html>
