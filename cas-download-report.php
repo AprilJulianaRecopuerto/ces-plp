@@ -59,7 +59,7 @@ if (isset($_GET['id'])) {
             }
 
             .crud-table {
-                width: 100%;              /* Full width of the container */
+                width: 80%;              /* Full width of the container */
                 border-collapse: collapse; /* Collapse borders for a cleaner look */
                 font-family: 'Poppins', sans-serif;
                 background-color: #ffffff;
@@ -80,7 +80,6 @@ if (isset($_GET['id'])) {
                 background-color: #4CAF50;
                 color: white;
                 height: 30px;
-                width: 40px;
             }
 
             .crud-table td {

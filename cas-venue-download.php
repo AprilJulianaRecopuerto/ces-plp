@@ -109,6 +109,7 @@ if (isset($_GET['id'])) {
                 <table class='crud-table'>
                     <thead>
                         <tr>
+                            <th>Reservation ID</th>
                             <th>Venue Name</th>
                         </tr>
                     </thead>
@@ -148,6 +149,7 @@ if (isset($_GET['id'])) {
                 <table class='crud-table'>
                     <thead>
                         <tr>
+                            <th>Reservation ID</th>
                             <th>Request Name</th>
                             <th>Quantity</th>
                         </tr>
