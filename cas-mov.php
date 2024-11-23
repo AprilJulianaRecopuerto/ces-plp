@@ -72,7 +72,7 @@ if ($result_proj->num_rows > 0) {
             // Create the folder in the filesystem
             if (mkdir($folder_path, 0777, true)) {
                 // Define the subfolders to be created
-                $subfolders = ['PROGRAM - COLLOQUIUM', 'PROFILE OF PRESENTERS', 'PRESENTERS', 'PRESENTATION PER PRESENTER', 'POST EVALUATION SURVEY/FEEDBACK', 'PHOTOS', 'CERTIFICATE', 'ATTENDANCE'];
+                $subfolders = ['Program - Colloquium', 'Profile of Presenters', 'Presenters', 'Presentation per Presented', 'Post Evaluation Survey/Feedback', 'Photos', 'Certificate', 'Attendance'];
 
                 // Create each subfolder inside the main folder
                 foreach ($subfolders as $subfolder) {

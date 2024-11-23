@@ -736,7 +736,6 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 border-radius: 5px; /* Rounded corners */
                 text-decoration: none;
                 color: #155724; /* Dark Green Text */
-    
                 font-family: "Glacial Indifference", sans-serif;
             }
 
@@ -746,8 +745,22 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 color: inherit;
             }
 
+            /* File List */
+            .file-list {
+                margin-top: 20px;
+            }
+
+            .file-items {
+                display: flex; /* Display items in a row */
+                flex-wrap: wrap; /* Allow wrapping to the next row */
+                gap: 20px; /* Space between files */
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
             .file-item {
-                width: 135px; /* Set consistent width for the item */
+                width: 135px; /* Consistent width for each file item */
                 margin: 10px;
                 padding: 10px;
                 text-align: center;
@@ -762,45 +775,46 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                justify-content: flex-start;
+                justify-content: flex-start; /* Align items starting from the top */
                 padding: 10px;
                 text-align: center;
-                height: 180px;
+                height: 180px; /* Consistent height */
+                gap: 10px; /* Space between file image/icon and name */
                 overflow: hidden;
             }
 
             .file-image img,
             .file-icon img {
                 width: 100%; /* Full width of the container */
-                height: 110px; /* Fixed height for images/icons */
-                object-fit: cover; /* Maintain aspect ratio, cropping as needed */
+                height: auto; /* Maintain aspect ratio */
+                max-height: 110px; /* Ensure image doesn't overflow container */
+                object-fit: cover; /* Crop the image if necessary */
                 border-radius: 5px; /* Optional: rounded corners */
             }
 
-           .file-name {
+            .file-name {
                 font-family: 'Poppins', sans-serif;
                 font-size: 14px;
                 color: #000;
                 font-weight: bold;
                 text-align: center;
-                word-wrap: break-word;
-                white-space: normal;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                white-space: nowrap; /* Prevent text wrapping */
+                overflow: hidden; /* Hide overflow */
+                text-overflow: ellipsis; /* Add ellipsis if text overflows */
                 margin-top: 8px;
-                max-width: 100%; /* Ensures it fits the container */
-                line-height: 1.2;
+                width: 100%; /* Full width of the parent container */
+                line-height: 1.2; /* Adjust line height */
             }
 
-            /* Button styles */
-            .btn-delete {
-                background-color: #ff4d4d;
-                color: white;
-                border: none;
-                padding: 5px 10px;
-                font-size: 12px;
-                cursor: pointer;
-                border-radius: 3px;
+            /* Context Menu */
+            .context-menu {
+                position: absolute;
+                background: #fff;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                padding: 10px;
+                z-index: 1000;
             }
 
             .btn-delete:hover {
