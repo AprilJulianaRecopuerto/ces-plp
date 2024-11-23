@@ -74,7 +74,7 @@ if ($result_proj->num_rows > 0) {
             // Create the folder in the filesystem
             if (mkdir($folder_path, 0777, true)) {
                 // Define the subfolders to be created
-                $subfolders = ['Program - Colloquium', 'Profile of Presenters', 'Presenters', 'Presentation per Presented', 'Post Evaluation Survey/Feedback', 'Photos', 'Certificate', 'Attendance'];
+                $subfolders = ['Program - Colloquium', 'Profile of Presenters', 'Presenters', 'Presentation per Presented', 'Post Evaluation Survey or Feedback', 'Photos', 'Certificate', 'Attendance'];
 
                 // Create each subfolder inside the main folder
                 foreach ($subfolders as $subfolder) {
@@ -123,7 +123,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     // Create the folder in the filesystem
     if (mkdir($folder_path, 0777, true)) {
         // Define subfolders
-        $subfolders = ['Program - Colloquium', 'Profile of Presenters', 'Presenters', 'Presentation per Presented', 'Post Evaluation Survey/Feedback', 'Photos', 'Certificate', 'Attendance'];
+        $subfolders = ['Program - Colloquium', 'Profile of Presenters', 'Presenters', 'Presentation per Presented', 'Post Evaluation Survey or Feedback', 'Photos', 'Certificate', 'Attendance'];
         foreach ($subfolders as $subfolder) {
             $subfolder_path = $folder_path . '/' . $subfolder;
             if (!mkdir($subfolder_path, 0777, true)) {

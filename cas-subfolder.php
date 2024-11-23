@@ -717,7 +717,7 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 20px;
-                margin-bottom: px;
+                margin-bottom: 10px;
             }
 
             /* Folder Item */
@@ -1112,7 +1112,7 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                                         $file_preview = '<img src="' . htmlspecialchars($subfolder_path . '/' . $file) . '" alt="Image preview" class="file-preview">';
                                     } elseif ($file_extension === 'pdf') {
                                         // PDF file, display PDF image instead of icon
-                                        $file_icon = '<img src="images/pdf.png.png" alt="PDF Icon" class="file-icon">';
+                                        $file_icon = '<img src="images/pdf.png" alt="PDF Icon" class="file-icon">';
                                     } else {
                                         // Default file icon for other types
                                         $file_icon = '<i class="fas fa-file"></i>';
