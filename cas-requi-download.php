@@ -32,10 +32,12 @@ if (isset($_GET['id'])) {
     if ($resultRequisition && $resultRequisition->num_rows > 0) {
         // Start building the PDF HTML content
         $html = "
+         <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
+
         <style>
             body {
                 font-family: 'Poppins', sans-serif;
-                font-size: 13px;
+                font-size: 14px;
             }
 
             h3 {
@@ -71,7 +73,7 @@ if (isset($_GET['id'])) {
                 text-align: center;
                 background-color: #4CAF50;
                 color: white;
-                height: 40px;
+                height: 30px;
             }
 
             .crud-table td {
@@ -132,6 +134,7 @@ if (isset($_GET['id'])) {
         ob_end_clean();
 
         $options = new Options();
+        $options->set('defaultFont', 'Poppins');
         $options->set('isHtml5ParserEnabled', true);
         $options->set('isImageEnabled', true);
 
