@@ -80,7 +80,7 @@ if (isset($_GET['id'])) {
                 background-color: #4CAF50;
                 color: white;
                 height: 30px;
-                width: 70px;
+                width: 40px;
             }
 
             .crud-table td {

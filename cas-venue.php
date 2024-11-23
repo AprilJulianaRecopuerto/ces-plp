@@ -826,6 +826,7 @@ $conn_profile->close();
                                     <td class='edit'>
                                         <a href='cas-edit-venue.php?id=" . $row["id"] . "'>EDIT</a>
                                         <button class='delete-button' data-id='" . $row["id"] . "'>DELETE</button>
+                                        <a href='cas-venue-download.php?id=" . $row["id"] . "' class='download-button'>Download Report</a>
                                     </td>
                                 </tr>";
                             }
