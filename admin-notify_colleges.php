@@ -64,35 +64,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['tasks'])) {
                 $notificationStmt->execute();
 
                 // Add a notification for the task
-                $notificationQuery = "INSERT INTO ccs_notifications (task_description, cba_status, created_at) 
+                $notificationQuery = "INSERT INTO ccs_notifications (task_description, ccs_status, created_at) 
                                         VALUES (?, 'unread', NOW())";
                 $notificationStmt = $conn->prepare($notificationQuery);
                 $notificationStmt->bind_param("s", $task['task_description']);
                 $notificationStmt->execute();
 
                 // Add a notification for the task
-                $notificationQuery = "INSERT INTO coed_notifications (task_description, cba_status, created_at) 
+                $notificationQuery = "INSERT INTO coed_notifications (task_description, coed_status, created_at) 
                                         VALUES (?, 'unread', NOW())";
                 $notificationStmt = $conn->prepare($notificationQuery);
                 $notificationStmt->bind_param("s", $task['task_description']);
                 $notificationStmt->execute();
 
                 // Add a notification for the task
-                $notificationQuery = "INSERT INTO coe_notifications (task_description, cba_status, created_at) 
+                $notificationQuery = "INSERT INTO coe_notifications (task_description, coe_status, created_at) 
                                         VALUES (?, 'unread', NOW())";
                 $notificationStmt = $conn->prepare($notificationQuery);
                 $notificationStmt->bind_param("s", $task['task_description']);
                 $notificationStmt->execute();
 
                 // Add a notification for the task
-                $notificationQuery = "INSERT INTO cihm_notifications (task_description, cba_status, created_at) 
+                $notificationQuery = "INSERT INTO cihm_notifications (task_description, cihm_status, created_at) 
                                         VALUES (?, 'unread', NOW())";
                 $notificationStmt = $conn->prepare($notificationQuery);
                 $notificationStmt->bind_param("s", $task['task_description']);
                 $notificationStmt->execute();
 
                 // Add a notification for the task
-                $notificationQuery = "INSERT INTO con_notifications (task_description, cba_status, created_at) 
+                $notificationQuery = "INSERT INTO con_notifications (task_description, con_status, created_at) 
                                         VALUES (?, 'unread', NOW())";
                 $notificationStmt = $conn->prepare($notificationQuery);
                 $notificationStmt->bind_param("s", $task['task_description']);
