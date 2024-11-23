@@ -1501,7 +1501,7 @@ $conn->close();
             });
 
             let inactivityTime = function () {
-                let time;
+            let time;
 
                 // List of events to reset the inactivity timer
                 window.onload = resetTimer;
@@ -1541,7 +1541,7 @@ $conn->close();
                 function resetTimer() {
                     clearTimeout(time);
                     // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
                 }
 
                 // Check if the user is logged in and clear the loggedOut flag

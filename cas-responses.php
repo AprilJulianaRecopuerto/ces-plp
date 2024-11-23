@@ -1168,7 +1168,7 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
                 function resetTimer() {
                     clearTimeout(time);
                     // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
                 }
 
                 // Check if the user is logged in and clear the loggedOut flag
