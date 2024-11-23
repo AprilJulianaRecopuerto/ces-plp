@@ -330,6 +330,7 @@ $conn_profile->close();
             .crud-table tr:hover {
                 background-color: #f1f1f1;
             }
+            
             .button-container {
                 display: flex;
                 justify-content: left; /* Align buttons to the right */

@@ -34,26 +34,54 @@ if (isset($_GET['id'])) {
         $html = "
         <style>
             body {
-                font-family: Arial, sans-serif;
-                font-size: 12px;
+                font-family: 'Poppins', sans-serif;
+                font-size: 13px;
             }
+
             h3 {
-                text-align: center;
-            }
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin: 20px 0;
-            }
-            table, th, td {
-                border: 1px solid #ddd;
-            }
-            th, td {
-                padding: 8px;
                 text-align: left;
             }
-            th {
-                background-color: #f2f2f2;
+
+            .table-container {
+                text-align: center;
+                width: 100%;               /* Full width of the parent */
+                overflow-x: auto;         /* Allow horizontal scrolling if needed */
+                margin: 20px auto;        /* Center the container with space above */
+                /* Removed margin-left settings */
+            }
+
+            .crud-table {
+                width: 100%;              /* Full width of the container */
+                border-collapse: collapse; /* Collapse borders for a cleaner look */
+                font-family: 'Poppins', sans-serif;
+                background-color: #ffffff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                border-radius: 10px;
+            }
+
+            .crud-table th, .crud-table td {
+                text-align: center;
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+                white-space: nowrap; /* Prevent text from wrapping */
+            }
+
+            .crud-table th {
+                text-align: center;
+                background-color: #4CAF50;
+                color: white;
+                height: 40px;
+            }
+
+            .crud-table td {
+                text-align: center;
+                height: 50px;
+                background-color: #fafafa;
+            }
+
+            .crud-table tr:hover {
+                background-color: #f1f1f1;
             }
         </style>
 
@@ -61,27 +89,29 @@ if (isset($_GET['id'])) {
 
         // Output requisition details
         while ($row = $resultRequisition->fetch_assoc()) {
-            $html .= "<table>
-                <tr><th>ID</th><td>" . $row["requisition_id"] . "</td></tr>
-                <tr><th>Date</th><td>" . $row["date"] . "</td></tr>
-                <tr><th>Name</th><td>" . $row["name"] . "</td></tr>
-                <tr><th>Position</th><td>" . $row["position"] . "</td></tr>
-                <tr><th>College Name</th><td>" . $row["college_name"] . "</td></tr>
-            </table>";
+            $html .= "<div class='table-container'>
+                <table class='crud-table'>
+                    <tr><th>Date</th><td>" . $row["date"] . "</td></tr>
+                    <tr><th>Name</th><td>" . $row["name"] . "</td></tr>
+                    <tr><th>Position</th><td>" . $row["position"] . "</td></tr>
+                    <tr><th>College Name</th><td>" . $row["college_name"] . "</td></tr>
+                </table>
+            </div>";
         }
 
         // Add items details
         $html .= "<h3>Items for Requisition</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Item Name</th>
-                    <th>Total Items Requested</th>
-                    <th>Total Usage</th>
-                    <th>Utilization %</th>
-                </tr>
-            </thead>
-            <tbody>";
+        <div class='table-container'>
+            <table class='crud-table'>
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Total Items Requested</th>
+                        <th>Total Usage</th>
+                        <th>Utilization %</th>
+                    </tr>
+                </thead>
+                <tbody>";
 
         if ($resultItems && $resultItems->num_rows > 0) {
             while ($item = $resultItems->fetch_assoc()) {
@@ -96,7 +126,7 @@ if (isset($_GET['id'])) {
             $html .= "<tr><td colspan='4'>No items found for this requisition.</td></tr>";
         }
 
-        $html .= "</tbody></table>";
+        $html .= "</tbody></table></div>";
 
         // Generate the PDF
         ob_end_clean();

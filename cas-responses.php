@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         font-family: 'Poppins', sans-serif;
         position: relative;
         width: 90%; /* Full width */
-        height: 80%;
+        height: 85%;
         padding: 50px;
         background: white; /* Solid white background */
         border: 8px double #001d3d; /* Double border with dark blue color */
@@ -108,14 +108,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         border-radius: 50px;
         display: inline-block;
         margin: 20px 0;
-        margin-top: -15px;
+        margin-top: -20px;
     }
 
     .name { 
         font-family: 'Lilita One', sans-serif;
-        font-size: 80px;
+        font-size: 85px;
         font-weight: bold;
-        color: #333;
+        color: black;
         margin: 20px 0;
         text-decoration: underline;
         font-style: italic;
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         font-size: 18px;
         color: black;
         text-align: center;
-        margin-top: 50px;
+        margin-top: 70px;
     }
 
     .footer-content {
