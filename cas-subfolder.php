@@ -720,7 +720,7 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 20px;
-                margin-bottom: 20px;
+                margin-bottom: 15px;
             }
 
             /* Folder Item */
@@ -766,8 +766,8 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 font-family: 'Poppins', sans-serif !important;
                 font-size: 14px;
                 color: #000;
-                font-weight: bold;
                 text-align: center;
+                text-decoration: none;
                 line-height: 1.2;             /* Adjust line height for readability */
                 margin-top: 8px;              /* Space between the icon and text */
             }
