@@ -725,16 +725,17 @@ if ($subfolder_name && is_dir($subfolder_path)) {
 
             /* Folder Item */
             .folder-item {
+                font-family: 'Poppins', sans-serif !important;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 width: 135px; /* Consistent width for each folder */
                 margin: 10px;
                 padding: 10px;
-                text-align: center;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                background-color: #f4f4f4;
+                text-align: center !important;
+                border: 1px solid #ccc; /* Optional border */
+                border-radius: 5px; /* Rounded corners */
+                background-color: #f9f9f9; /* Background color */
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                 overflow: hidden;
             }
@@ -762,7 +763,7 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 white-space: normal;          /* Allow text to wrap */
                 overflow: hidden;             /* Prevent overflow */
                 text-overflow: ellipsis;      /* Show ellipsis if text is too long */
-                font-family: 'Poppins', sans-serif;
+                font-family: 'Poppins', sans-serif !important;
                 font-size: 14px;
                 color: #000;
                 font-weight: bold;
@@ -771,8 +772,8 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 margin-top: 8px;              /* Space between the icon and text */
             }
 
- /* Style for the file item list */
- .file-items {
+            /* Style for the file item list */
+            .file-items {
                 list-style-type: none;
                 display: flex;
                 flex-wrap: wrap;
@@ -801,7 +802,6 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 padding: 10px;
                 text-align: center;
             }
-
 
             /* File image and icon shared styles */
             .file-image img,
