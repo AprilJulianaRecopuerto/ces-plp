@@ -715,35 +715,62 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 vertical-align: middle; /* Align image vertically with text */
             }
 
-            /* Folder List */
-            .folder-list {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 20px;
-                margin-bottom: 20px;
-            }
+           /* Folder List */
+.folder-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+}
 
-            .folder-item {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-                padding: 10px;
-                width: 120px;
-                height: 100px;
-                background-color: #f9f9f9; /* Light Green */
-                border: 1px solid #ccc; /* Optional border */
-                border-radius: 5px; /* Rounded corners */
-                text-decoration: none;
-                color: #155724; /* Dark Green Text */
-                font-family: "Glacial Indifference", sans-serif;
-            }
+/* Folder Item */
+.folder-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 135px; /* Consistent width for each folder */
+    margin: 10px;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f4f4f4;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
 
-            .folder-item i {
-                font-size: 36px;
-                margin-bottom: 10px;
-                color: inherit;
-            }
+/* Folder Icon */
+.folder-icon {
+    width: 100%;
+    height: 110px; /* Adjust height for the icon */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.folder-icon img {
+    max-width: 80%; /* Adjust icon size */
+    max-height: 100%;
+    object-fit: contain; /* Ensure the image fits well within the icon container */
+}
+
+/* Style for span containing file name */
+.folder-item span {
+    display: block;               /* Make the span take up the full width of the container */
+    width: 100%;                  /* Full width of the parent */
+    word-wrap: break-word;        /* Allow breaking long words */
+    white-space: normal;          /* Allow text to wrap */
+    overflow: hidden;             /* Prevent overflow */
+    text-overflow: ellipsis;      /* Show ellipsis if text is too long */
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: #000;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.2;             /* Adjust line height for readability */
+    margin-top: 8px;              /* Space between the icon and text */
+}
+
 
            /* File List */
 .file-list {
