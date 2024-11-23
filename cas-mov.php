@@ -9,11 +9,10 @@ if (!isset($_SESSION['uname'])) {
 }
 
 // Database credentials
-$servername = "wp433upk59nnhpoh.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_db = "wbepy9iso2pubu7f";
-$password_db = "l0a6y3bl2x7lfiyy";
-$dbname_mov = "qlajsw6auv4giknn";
-
+$servername = "l7cup2om0gngra77.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_db = "gv5xdrzqyrg1qyvs";
+$password_db = "uv4wrt6zlfqzrpni";
+$dbname_mov = "tcbjgh4zgu5wj4bo";
 
 $servername_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username_ur = "equ6v8i5llo3uhjm"; 
@@ -27,6 +26,7 @@ $dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
 // Create connection to the database
 $conn_mov = new mysqli($servername, $username_db, $password_db, $dbname_mov);
+
 $conn_proj = new mysqli($servername_pl, $username_pl, $password_pl, $dbname_proj_list); // Connection to proj_list database
 
 // Check connection
@@ -121,7 +121,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     // Create the folder in the filesystem
     if (mkdir($folder_path, 0777, true)) {
         // Define subfolders
-        $subfolders = ['PROGRAM - COLLOQUIUM', 'PROFILE OF PRESENTERS', 'PRESENTERS', 'PRESENTATION PER PRESENTER', 'POST EVALUATION SURVEY/FEEDBACK', 'PHOTOS', 'CERTIFICATE', 'ATTENDANCE'];
+        $subfolders = ['Program - Colloquium', 'Profile of Presenters', 'Presenters', 'Presentation per Presented', 'Post Evaluation Survey/Feedback', 'Photos', 'Certificate', 'Attendance'];
         foreach ($subfolders as $subfolder) {
             $subfolder_path = $folder_path . '/' . $subfolder;
             if (!mkdir($subfolder_path, 0777, true)) {
