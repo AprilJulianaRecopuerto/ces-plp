@@ -594,13 +594,10 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 width: 50px; /* Set a fixed width for icons */
                 height: 50px; /* Set a fixed height for icons */
                 margin-bottom: 15px; /* Space between icon and folder name */
-                
             }
 
-            .folder-link {
-                text-decoration: none; /* Remove underline from link */
-                color: inherit; /* Inherit color from parent */
-                transition: transform 0.2s; /* Smooth scaling effect */
+            .folder-icon:hover {
+                transform: scale(1.05); /* Scale up slightly on hover */
             }
 
 
@@ -743,8 +740,8 @@ if ($subfolder_name && is_dir($subfolder_path)) {
 
             /* Folder Icon */
             .folder-icon {
-                width: 100%;
-                height: 110px; /* Adjust height for the icon */
+                width: 120px; /* Fixed width for folders */
+                height: auto;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -765,7 +762,7 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 overflow: hidden;             /* Prevent overflow */
                 text-overflow: ellipsis;      /* Show ellipsis if text is too long */
                 font-family: 'Poppins', sans-serif !important;
-                font-size: 14px;
+                font-size: 16px;
                 color: #000;
                 text-align: center;
                 text-decoration: none;
