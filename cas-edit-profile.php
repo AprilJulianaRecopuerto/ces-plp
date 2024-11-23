@@ -666,10 +666,11 @@ $conn->close();
             right: -10px; /* Adjust as needed */
             font-size: 14px; /* Size of the exclamation point */
         }
+
         .smaller-alert {
             font-size: 14px; /* Adjust text size for a compact look */
             padding: 20px;   /* Adjust padding to mimic a smaller alert box */
-            }
+        }
     </style>
 </head>
 
@@ -732,7 +733,7 @@ $conn->close();
                 <li><a href="cas-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <li><a href="cas-mov.php"><img src="images/task.png">Mode of Verification</a></li>
+                <li><a href="cas-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
 
@@ -794,8 +795,8 @@ $conn->close();
         </div>
 
         <script>
-                let inactivityTime = function () {
-                let time;
+            let inactivityTime = function () {
+            let time;
 
                 // List of events to reset the inactivity timer
                 window.onload = resetTimer;
@@ -820,7 +821,8 @@ $conn->close();
                         width: '400px',   // Adjust width (close to native alert size)
                         heightAuto: false, // Prevent automatic height adjustment
                         customClass: {
-                            popup: 'smaller-alert' // Custom class for further styling if needed
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
                         }
                     }).then(() => {
                         // Set sessionStorage to indicate user has been logged out due to inactivity

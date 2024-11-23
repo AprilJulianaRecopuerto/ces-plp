@@ -614,10 +614,11 @@ if (isset($_SESSION['alert_shown']) && $_SESSION['alert_shown']) {
             right: -10px; /* Adjust as needed */
             font-size: 14px; /* Size of the exclamation point */
         }
+
         .smaller-alert {
             font-size: 14px; /* Adjust text size for a compact look */
             padding: 20px;   /* Adjust padding to mimic a smaller alert box */
-            }
+        }
     </style>
 </head>
 
@@ -760,7 +761,7 @@ if (isset($_SESSION['alert_shown']) && $_SESSION['alert_shown']) {
             });
 
             let inactivityTime = function () {
-                let time;
+            let time;
 
                 // List of events to reset the inactivity timer
                 window.onload = resetTimer;
@@ -785,7 +786,8 @@ if (isset($_SESSION['alert_shown']) && $_SESSION['alert_shown']) {
                         width: '400px',   // Adjust width (close to native alert size)
                         heightAuto: false, // Prevent automatic height adjustment
                         customClass: {
-                            popup: 'smaller-alert' // Custom class for further styling if needed
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
                         }
                     }).then(() => {
                         // Set sessionStorage to indicate user has been logged out due to inactivity

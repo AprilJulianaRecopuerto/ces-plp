@@ -522,164 +522,158 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
         </nav>
             
-            <div class="sidebar">
-                <div class="logo">
-                    <img src="images/logo.png" alt="Logo">
+        <div class="sidebar">
+            <div class="logo">
+                <img src="images/logo.png" alt="Logo">
+            </div>
+
+            <ul class="menu">
+                <li><a href="cas-dash.php"><img src="images/home.png">Dashboard</a></li>
+                <li><a href="cas-projlist.php"><img src="images/project-list.png">Project List</a></li>
+                <li><a href="cas-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
+
+                <!-- Dropdown for Resource Utilization -->
+                <button class="dropdown-btn">
+                    <img src="images/resource.png"> Resource Utilization
+                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
+                </button>
+                <div class="dropdown-container">
+                    <a href="cas-tor.php">Term of Reference</a>
+                    <a href="cas-requi.php">Requisition</a>
+                    <a href="cas-venue.php">Venue</a>
                 </div>
 
-                <ul class="menu">
-                    <li><a href="cas-dash.php"><img src="images/home.png">Dashboard</a></li>
-                    <li><a href="cas-projlist.php"><img src="images/project-list.png">Project List</a></li>
-                    <li><a href="cas-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
+                <li><a href="cas-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
-                    <!-- Dropdown for Resource Utilization -->
-                    <button class="dropdown-btn">
-                        <img src="images/resource.png"> Resource Utilization
-                        <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                    </button>
-                    <div class="dropdown-container">
-                        <a href="cas-tor.php">Term of Reference</a>
-                        <a href="cas-requi.php">Requisition</a>
-                        <a href="cas-venue.php">Venue</a>
-                    </div>
+                <!-- Dropdown for Task Management -->
+                <li><a href="cas-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
 
-                    <li><a href="cas-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
+                <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
 
-                    <!-- Dropdown for Task Management -->
-                    <button class="dropdown-btn">
-                        <img src="images/task.png">Task Management
-                        <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                    </button>
-                    <div class="dropdown-container">
-                        <a href="cas-task.php">Upload Files</a>
-                        <a href="cas-mov.php">Mode of Verification</a>
-                    </div>
+                <!-- Dropdown for Audit Trails -->
+                <button class="dropdown-btn">
+                    <img src="images/logs.png"> Audit Trails
+                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
+                </button>
+                <div class="dropdown-container">
+                    <a href="cas-history.php">Log In History</a>
+                    <a href="cas-activitylogs.php">Activity Logs</a>
+                </div>
+            </ul>
+        </div>
+    
+        <div class="content-projectlist">
+            <div class="content">
+                <div class="table-container">
+                    <table class="crud-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Functions</th>
+                                <th>Time Stamp</th>
+                            </tr>
+                        </thead>
+                        
+                        <tbody id="table-body">
+                            <?php
+                            // Check if the user is logged in
+                            if (isset($_SESSION['uname'])) {
+                                $loggedInUser = $_SESSION['uname'];
 
-                    <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
+                                // Database connection details
+                                $servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                                $username = "equ6v8i5llo3uhjm"; // replace with your database username
+                                $password = "vkfaxm2are5bjc3q"; // replace with your database password
+                                $dbname = "ylwrjgaks3fw5sdj";
 
-                    <!-- Dropdown for Audit Trails -->
-                    <button class="dropdown-btn">
-                        <img src="images/logs.png"> Audit Trails
-                        <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                    </button>
-                    <div class="dropdown-container">
-                        <a href="cas-history.php">Log In History</a>
-                        <a href="cas-activitylogs.php">Activity Logs</a>
-                    </div>
-                </ul>
-            </div>
-     
-            <div class="content-projectlist">
-    <div class="content">
-        <div class="table-container">
-            <table class="crud-table">
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Functions</th>
-                        <th>Time Stamp</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <?php
-                    // Check if the user is logged in
-                    if (isset($_SESSION['uname'])) {
-                        $loggedInUser = $_SESSION['uname'];
+                                // Create connection
+                                $conn = new mysqli($servername, $username, $password, $dbname);
 
-                        // Database connection details
-                        $servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-                        $username = "equ6v8i5llo3uhjm"; // replace with your database username
-                        $password = "vkfaxm2are5bjc3q"; // replace with your database password
-                        $dbname = "ylwrjgaks3fw5sdj";
+                                // Check connection
+                                if ($conn->connect_error) {
+                                    die("Connection failed: " . $conn->connect_error);
+                                }
 
-                        // Create connection
-                        $conn = new mysqli($servername, $username, $password, $dbname);
+                                // Pagination variables
+                                $limit = 5; // Number of records per page
 
-                        // Check connection
-                        if ($conn->connect_error) {
-                            die("Connection failed: " . $conn->connect_error);
-                        }
+                                // Count total records
+                                $countSql = "SELECT COUNT(*) as total FROM colleges_actlogs WHERE uname = ?";
+                                $countStmt = $conn->prepare($countSql);
+                                $countStmt->bind_param("s", $loggedInUser);
+                                $countStmt->execute();
+                                $countResult = $countStmt->get_result();
+                                $totalRecords = $countResult->fetch_assoc()['total'];
+                                $totalPages = ceil($totalRecords / $limit); // Calculate total pages
 
-                        // Pagination variables
-                        $limit = 5; // Number of records per page
+                                // Set the page to the last page if no page parameter is provided
+                                $page = isset($_GET['page']) ? (int)$_GET['page'] : $totalPages;
 
-                        // Count total records
-                        $countSql = "SELECT COUNT(*) as total FROM colleges_actlogs WHERE uname = ?";
-                        $countStmt = $conn->prepare($countSql);
-                        $countStmt->bind_param("s", $loggedInUser);
-                        $countStmt->execute();
-                        $countResult = $countStmt->get_result();
-                        $totalRecords = $countResult->fetch_assoc()['total'];
-                        $totalPages = ceil($totalRecords / $limit); // Calculate total pages
+                                // Ensure the page number is within valid bounds
+                                $page = max(1, min($page, $totalPages)); // Clamp the page number between 1 and totalPages
 
-                        // Set the page to the last page if no page parameter is provided
-                        $page = isset($_GET['page']) ? (int)$_GET['page'] : $totalPages;
+                                $offset = ($page - 1) * $limit; // Offset for SQL query
 
-                        // Ensure the page number is within valid bounds
-                        $page = max(1, min($page, $totalPages)); // Clamp the page number between 1 and totalPages
+                                // Fetch logs for the logged-in user
+                                $sql = "SELECT uname, action, timestamp FROM colleges_actlogs WHERE uname = ? ORDER BY uname DESC LIMIT $limit OFFSET $offset";
 
-                        $offset = ($page - 1) * $limit; // Offset for SQL query
+                                $stmt = $conn->prepare($sql);
+                                $stmt->bind_param("s", $loggedInUser);
+                                $stmt->execute();
+                                $result = $stmt->get_result();
 
-                        // Fetch logs for the logged-in user
-                        $sql = "SELECT uname, action, timestamp FROM colleges_actlogs WHERE uname = ? ORDER BY uname DESC LIMIT $limit OFFSET $offset";
+                                // Check if there are results
+                                if ($result->num_rows > 0) {
+                                    // Output data of each row
+                                    while ($row = $result->fetch_assoc()) {
+                                        echo "<tr>
+                                                <td>" . htmlspecialchars($row["uname"]) . "</td>
+                                                <td>" . htmlspecialchars($row["action"]) . "</td>
+                                                <td>" . htmlspecialchars($row["timestamp"]) . "</td>
+                                            </tr>";
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='3'>No activity found for the current user.</td></tr>";
+                                }
 
-                        $stmt = $conn->prepare($sql);
-                        $stmt->bind_param("s", $loggedInUser);
-                        $stmt->execute();
-                        $result = $stmt->get_result();
-
-                        // Check if there are results
-                        if ($result->num_rows > 0) {
-                            // Output data of each row
-                            while ($row = $result->fetch_assoc()) {
-                                echo "<tr>
-                                        <td>" . htmlspecialchars($row["uname"]) . "</td>
-                                        <td>" . htmlspecialchars($row["action"]) . "</td>
-                                        <td>" . htmlspecialchars($row["timestamp"]) . "</td>
-                                    </tr>";
+                                // Close the statement and connection
+                                $stmt->close();
+                                $conn->close();
+                            } else {
+                                echo "<tr><td colspan='3'>User not logged in.</td></tr>";
                             }
-                        } else {
-                            echo "<tr><td colspan='3'>No activity found for the current user.</td></tr>";
-                        }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
 
-                        // Close the statement and connection
-                        $stmt->close();
-                        $conn->close();
-                    } else {
-                        echo "<tr><td colspan='3'>User not logged in.</td></tr>";
-                    }
-                    ?>
-                </tbody>
-            </table>
-        </div>
+                <!-- Pagination Section: Move it under the table -->
+                <div class="pagination-info">
+                    <div>
+                        <p><?php echo "$totalRecords RECORDS FOUND"; ?></p>
+                    </div>
 
-        <!-- Pagination Section: Move it under the table -->
-        <div class="pagination-info">
-            <div>
-                <p><?php echo "$totalRecords RECORDS FOUND"; ?></p>
-            </div>
+                    <div class="page">
+                        <p>
+                            <?php if ($page > 1): ?>
+                                <a class="pagination-link" href="?page=<?php echo $page - 1; ?>">PREV</a>
+                            <?php endif; ?>
 
-            <div class="page">
-                <p>
-                    <?php if ($page > 1): ?>
-                        <a class="pagination-link" href="?page=<?php echo $page - 1; ?>">PREV</a>
-                    <?php endif; ?>
+                            <span class="pagination-text">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
 
-                    <span class="pagination-text">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
-
-                    <?php if ($page < $totalPages): ?>
-                        <a class="pagination-link" href="?page=<?php echo $page + 1; ?>">NEXT</a>
-                    <?php endif; ?>
-                </p>
+                            <?php if ($page < $totalPages): ?>
+                                <a class="pagination-link" href="?page=<?php echo $page + 1; ?>">NEXT</a>
+                            <?php endif; ?>
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
 
         <script>
-                let inactivityTime = function () {
-                let time;
+            let inactivityTime = function () {
+            let time;
 
                 // List of events to reset the inactivity timer
                 window.onload = resetTimer;
@@ -704,7 +698,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         width: '400px',   // Adjust width (close to native alert size)
                         heightAuto: false, // Prevent automatic height adjustment
                         customClass: {
-                            popup: 'smaller-alert' // Custom class for further styling if needed
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
                         }
                     }).then(() => {
                         // Set sessionStorage to indicate user has been logged out due to inactivity
@@ -866,4 +861,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             });
         </script>
     </body>
-    </html>
+</html>
