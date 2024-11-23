@@ -14,7 +14,7 @@ if ($conn->connect_error) {
 }
 
 // Update all unread messages to mark them as read
-$sql = "UPDATE sent_messages SET cas_read = 1 WHERE cas_read = 0";
+$sql = "UPDATE sent_messages SET cba_read = 1 WHERE cba_read = 0";
 if ($conn->query($sql) === TRUE) {
     echo json_encode(['status' => 'success']);
 } else {
