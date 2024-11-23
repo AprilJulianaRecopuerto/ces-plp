@@ -86,7 +86,6 @@ if (isset($_GET['id'])) {
         while ($row = $resultReservation->fetch_assoc()) {
             $html .= "<div class='table-container'>
                 <table class='crud-table'>
-                    <tr><th>Reservation ID</th><td>" . $row["id"] . "</td></tr>
                     <tr><th>Name</th><td>" . $row["name"] . "</td></tr>
                     <tr><th>Date of Request</th><td>" . $row["date_of_request"] . "</td></tr>
                     <tr><th>Event Activity</th><td>" . $row["event_activity"] . "</td></tr>
@@ -110,7 +109,6 @@ if (isset($_GET['id'])) {
                 <table class='crud-table'>
                     <thead>
                         <tr>
-                            <th>Reservation ID</th>
                             <th>Venue Name</th>
                         </tr>
                     </thead>
@@ -150,7 +148,6 @@ if (isset($_GET['id'])) {
                 <table class='crud-table'>
                     <thead>
                         <tr>
-                            <th>Reservation ID</th>
                             <th>Request Name</th>
                             <th>Quantity</th>
                         </tr>
