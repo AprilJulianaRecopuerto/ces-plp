@@ -58,8 +58,17 @@ if (isset($_GET['id'])) {
                 /* Removed margin-left settings */
             }
 
+            .crud-table1 {
+                width: 50%;              /* Full width of the container */
+                border-collapse: collapse; /* Collapse borders for a cleaner look */
+                font-family: 'Poppins', sans-serif;
+                background-color: #ffffff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                border-radius: 10px;
+            }
+
             .crud-table {
-                width: 80%;              /* Full width of the container */
+                width: 50%;              /* Full width of the container */
                 border-collapse: collapse; /* Collapse borders for a cleaner look */
                 font-family: 'Poppins', sans-serif;
                 background-color: #ffffff;
@@ -100,7 +109,7 @@ if (isset($_GET['id'])) {
         if ($resultEventForm && $resultEventForm->num_rows > 0) {
             while ($row = $resultEventForm->fetch_assoc()) {
                 $html .= "<div class='table-container'>
-                <table class='crud-table'>
+                <table class='crud-table1'>
                     <tr><th>Department</th><td>" . $row["college_name"] . "</td></tr>
                     <tr><th>Procurement Title</th><td>" . $row["procurement_title"] . "</td></tr>
                     <tr><th>Agency</th><td>" . $row["agency"] . "</td></tr>
