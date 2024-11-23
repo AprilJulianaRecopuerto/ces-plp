@@ -14,6 +14,10 @@ $username_db = "gv5xdrzqyrg1qyvs";
 $password_db = "uv4wrt6zlfqzrpni";
 $dbname_mov = "tcbjgh4zgu5wj4bo";
 
+// Create connection to the database
+$conn_mov = new mysqli($servername, $username_db, $password_db, $dbname_mov);
+
+
 $servername_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username_ur = "equ6v8i5llo3uhjm"; 
 $password_ur = "vkfaxm2are5bjc3q"; 
@@ -24,8 +28,6 @@ $username_pl = "zf8r3n4qqjyrfx7o";
 $password_pl = "su6qmqa0gxuerg98"; 
 $dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-// Create connection to the database
-$conn_mov = new mysqli($servername, $username_db, $password_db, $dbname_mov);
 
 $conn_proj = new mysqli($servername_pl, $username_pl, $password_pl, $dbname_proj_list); // Connection to proj_list database
 
