@@ -798,9 +798,9 @@ if ($subfolder_name && is_dir($subfolder_path)) {
                 color: #000;
                 font-weight: bold;
                 text-align: center;
-                white-space: nowrap; /* Prevent text wrapping */
-                overflow: hidden; /* Hide overflow */
-                text-overflow: ellipsis; /* Add ellipsis if text overflows */
+                word-wrap: break-word; /* Break words if necessary */
+                overflow: hidden; /* Prevent overflow */
+                white-space: normal; /* Allow text to wrap */
                 margin-top: 8px;
                 width: 100%; /* Full width of the parent container */
                 line-height: 1.2; /* Adjust line height */
