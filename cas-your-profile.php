@@ -521,7 +521,6 @@ $conn->close();
                         }
                     ?>
 
-
                     <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
 
                     <i class="fa fa-chevron-down dropdown-icon"></i>
