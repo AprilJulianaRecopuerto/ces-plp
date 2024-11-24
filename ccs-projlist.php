@@ -10,18 +10,24 @@ require 'vendor/autoload.php';
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
     // Redirect to login page if the session variable is not set
-    header("Location: collegelogin.php");
+    header("Location: roleaccount.php");
     exit;
 }
 
 // Database credentials for proj_list
-$servername = "localhost";
-$username_db = "root";
-$password_db = "";
-$dbname_proj_list = "proj_list";
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
+// Database connection details
+$servername_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_ur = "equ6v8i5llo3uhjm"; // replace with your database username
+$password_ur = "vkfaxm2are5bjc3q"; // replace with your database password
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
 // Create connection to proj_list database
-$conn_proj_list = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
+$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
 // Check connection
 if ($conn_proj_list->connect_error) {
@@ -29,8 +35,12 @@ if ($conn_proj_list->connect_error) {
 }
 
 // Database credentials for 'mov' (notifications)
-$dbname_mov = "mov"; // For notifications
-$conn_mov = new mysqli($servername, $username_db, $password_db, $dbname_mov);
+$servername_mov = "arfo8ynm6olw6vpn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_mov = "tz8thfim1dq7l3rf";
+$password_mov = "wzt4gssgou2ofyo7";
+$dbname_mov = "uv1qyvm0b8oicg0v";
+
+$conn_mov = new mysqli($servername_mov, $username_mov, $password_mov, $dbname_mov);
 
 // Check connection for 'mov'
 if ($conn_mov->connect_error) {
@@ -66,8 +76,8 @@ if (isset($_POST['delete_id'])) {
 
         // Now send the email notification to the admin
         // Database connection to fetch admin email (user_registration database)
-        $user_dbname = "user_registration"; // For user data
-        $conn_users = new mysqli($servername, $username_db, $password_db, $user_dbname);
+        $user_dbname = "ylwrjgaks3fw5sdj"; // For user data
+        $conn_users = new mysqli($servername_ur, $username_ur, $password_ur, $user_dbname);
 
         if ($conn_users->connect_error) {
             die("Connection to 'user_registration' database failed: " . $conn_users->connect_error);
@@ -133,10 +143,10 @@ unset($_SESSION['message']); // Clear the message after displaying it
 $conn_proj_list->close();
 
 // Database credentials for user_registration
-$dbname_user_registration = "user_registration";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
 // Create connection to user_registration database
-$conn_user_registration = new mysqli($servername, $username_db, $password_db, $dbname_user_registration);
+$conn_user_registration = new mysqli($servername_ur, $username_ur, $password_ur, $dbname_user_registration);
 
 // Check connection
 if ($conn_user_registration->connect_error) {
@@ -155,6 +165,28 @@ $stmt->close();
 $conn_user_registration->close();
 
 $departmentName = htmlspecialchars($departmentName);
+
+// Fetch the profile picture from the colleges table in user_registration
+$conn_profile = new mysqli($servername_ur, $username_ur, $password_ur, $dbname_user_registration);
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
+}
+
+$uname = $_SESSION['uname'];
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $uname);
+$stmt->execute();
+$result_profile = $stmt->get_result();
+
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
+}
+
+$stmt->close();
+$conn_profile->close();
+
 ?>
 
 <!DOCTYPE html>
@@ -387,6 +419,7 @@ $departmentName = htmlspecialchars($departmentName);
                 float: right;
                 margin-left: 15px;
             }
+            
             .menu img {
                 height: 30px; /* Increased icon size */
                 margin-right: 15px; /* Adjusted space between icon and text */
@@ -496,7 +529,13 @@ $departmentName = htmlspecialchars($departmentName);
                 color: #666; /* Content text color */
             }
 
-            .custom-confirm-button {
+         
+            .custom-swal-popup {
+                font-family: 'Poppins', sans-serif;
+                width: 400px !important; /* Set a larger width */
+            }
+
+            .custom-swal-confirm {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
                 background-color: #089451;
@@ -507,32 +546,34 @@ $departmentName = htmlspecialchars($departmentName);
                 outline: none !important; /* Remove default focus outline */
             }
 
-            .custom-cancel-button {
+            .custom-swal-cancel {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
+                background-color: #e74c3c;
+                color: #fff;
+                border-radius: 10px;
                 cursor: pointer;
-                background-color: #089451; /* Background color for the cancel button */
-                color: #fff; /* Text color for the cancel button */
-                border-radius: 10px; /* Rounded corners for the button */
+                outline: none; /* Remove default focus outline */
             }
 
-            /* Additional hover effect for buttons */
-            .custom-confirm-button:hover,
-            .custom-cancel-button:hover {
-                opacity: 0.9; /* Slightly fade on hover */
+            .custom-swal-input {
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
             }
 
-            .custom-swal-popup {
-                font-family: "Poppins", sans-serif !important;
-                width: 400px;
+            .custom-error-popup {
+                font-family: 'Poppins', sans-serif;
+                width: 400px !important; /* Set a larger width */
             }
 
-            .custom-swal-confirm {
-                font-family: "Poppins", sans-serif !important;
-            }
-
-            .custom-swal-cancel {
-                font-family: "Poppins", sans-serif !important;
+            .custom-error-confirm {
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #e74c3c;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none; /* Remove default focus outline */
             }
 
             .edit a {
@@ -610,6 +651,7 @@ $departmentName = htmlspecialchars($departmentName);
             .swal-cancel {
                 font-family: "Poppins", sans-serif !important;
             }
+
             /* Chat styles */
             .navbar .profile-container {
                 display: flex;
@@ -640,15 +682,18 @@ $departmentName = htmlspecialchars($departmentName);
                 right: -10px; /* Adjust as needed */
                 font-size: 14px; /* Size of the exclamation point */
             }
+            .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
         </style>
     </head>
 
     <body>
         <nav class="navbar">
             <h2>
-                <span style="color: yellow; font-size: 28px;"><?php echo htmlspecialchars($departmentName); ?></span> Projects
+                <span style="color: purple; font-size: 28px;"><?php echo htmlspecialchars($departmentName); ?></span> Projects
             </h2>
-
 
             <div class="profile-container">
                 <!-- Chat Icon with Notification Badge -->
@@ -660,9 +705,9 @@ $departmentName = htmlspecialchars($departmentName);
                 <div class="profile" id="profileDropdown">
                     <?php
                         // Check if a profile picture is set in the session
-                        if (!empty($_SESSION['picture'])) {
-                            // Show the profile picture
-                            echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
                         } else {
                             // Get the first letter of the username for the placeholder
                             $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
@@ -705,14 +750,7 @@ $departmentName = htmlspecialchars($departmentName);
                 <li><a href="ccs-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="ccs-task.php">Upload Files</a>
-                    <a href="ccs-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="ccs-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="ccs-responses.php"><img src="images/feedback.png">Responses</a></li>
 
@@ -743,8 +781,9 @@ $departmentName = htmlspecialchars($departmentName);
                             <th>Lead Person</th>
                             <th>Department</th>
                             <th>Implementor</th>
+                            <th>Number of Target Participants</th>
                             <th>Project Title</th>
-                            <th>Classification</th>
+                            <th>Sustainable Development Goals</th>
                             <th>Specific Activity</th>
                             <th>Date of Implementation</th>
                             <th>Time From</th>
@@ -761,13 +800,13 @@ $departmentName = htmlspecialchars($departmentName);
                     <tbody>
                         <?php
                         // Database credentials
-                        $servername = "localhost";
-                        $username = "root";
-                        $password = "";
-                        $dbname = "proj_list";
+                        $servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                        $username_proj = "zf8r3n4qqjyrfx7o";
+                        $password_proj = "su6qmqa0gxuerg98";
+                        $dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
                         // Create connection
-                        $conn = new mysqli($servername, $username, $password, $dbname);
+                        $conn = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
                         // Check connection
                         if ($conn->connect_error) {
@@ -785,22 +824,23 @@ $departmentName = htmlspecialchars($departmentName);
                         $totalRecords = $countResult->fetch_assoc()['total'];
                         $totalPages = ceil($totalRecords / $limit); // Calculate total pages
 
-                        // Fetch projects with LIMIT and OFFSET for pagination
-                        $sql = "SELECT * FROM ccs LIMIT $limit OFFSET $offset";
+                        // Fetch projects with LIMIT, OFFSET, and ORDER BY DESC for pagination
+                        $sql = "SELECT * FROM ccs ORDER BY id DESC LIMIT $limit OFFSET $offset";
                         $result = $conn->query($sql);
 
                         if ($result->num_rows > 0) {
                             // Output data of each row
                             while ($row = $result->fetch_assoc()) {
                                 echo "<tr>
-                                        <td>" . $row["id"] . "</td>
+                                         <td>" . $row["id"] . "</td>
                                         <td>" . $row["date_of_sub"] . "</td>
                                         <td>" . $row["semester"] . "</td>
                                         <td>" . $row["lead_person"] . "</td>
                                         <td>" . $row["dept"] . "</td>
                                         <td>" . $row["implementor"] . "</td>
+                                        <td>" . $row["attendees"] . "</td>
                                         <td>" . $row["proj_title"] . "</td>
-                                        <td>" . $row["classification"] . "</td>
+                                        <td>" . $row["sdg"] . "</td>
                                         <td>" . $row["specific_activity"] . "</td>
                                         <td>" . $row["dateof_imple"] . "</td>
                                         <td>" . $row["time_from"] . "</td>
@@ -915,7 +955,12 @@ $departmentName = htmlspecialchars($departmentName);
                     // Additional logic for deletion can be added here if needed
                 });
             });
-             });
+
+            // Log clicks on the "Profile" link
+            document.querySelector('.dropdown-menu a[href="ccs-your-profile.php"]').addEventListener("click", function() {
+                logAction("Profile");
+            });
+        });
 
                 document.addEventListener('DOMContentLoaded', function() {
                 <?php if ($message): ?>
@@ -958,7 +1003,60 @@ $departmentName = htmlspecialchars($departmentName);
                 });
                 });
 
-                function confirmLogout(event) {
+                let inactivityTime = function () {
+                let time;
+
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
+
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
+
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
+                }
+            };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
+            function confirmLogout(event) {
                 event.preventDefault();
                 Swal.fire({
                     title: 'Are you sure?',
@@ -973,19 +1071,34 @@ $departmentName = htmlspecialchars($departmentName);
                         confirmButton: 'swal-confirm',
                         cancelButton: 'swal-cancel'
                     },
-                    // Additional custom styles via CSS can be added here
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Pass action in the fetch call
+                        // Execute the logout action (send a request to the server to log out)
                         fetch('college-logout.php?action=logout')
                             .then(response => response.text())
                             .then(data => {
                                 console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
                                 window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
                             })
                             .catch(error => console.error('Error:', error));
                     }
                 });
+            }
+
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, '', window.location.href);
+                };
             }
 
             document.getElementById('profileDropdown').addEventListener('click', function() {
@@ -1002,6 +1115,26 @@ $departmentName = htmlspecialchars($departmentName);
                     }
                 }
             };
+
+            document.addEventListener("DOMContentLoaded", () => {
+                function checkNotifications() {
+                    fetch('ccs-check_notifications.php')
+                        .then(response => response.json())
+                        .then(data => {
+                            const chatNotification = document.getElementById('chatNotification');
+                            if (data.unread_count > 0) {
+                                chatNotification.style.display = 'inline-block';
+                            } else {
+                                chatNotification.style.display = 'none';
+                            }
+                        })
+                        .catch(error => console.error('Error checking notifications:', error));
+                }
+
+                // Check for notifications every 2 seconds
+                setInterval(checkNotifications, 2000);
+                checkNotifications(); // Initial check when page loads
+            });
         </script>
     </body>
 </html>

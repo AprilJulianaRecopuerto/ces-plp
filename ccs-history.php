@@ -1,19 +1,20 @@
 <?php
-
 session_start();
-    if (!isset($_SESSION['uname'])) {
-        // Redirect to login page if the session variable is not set
-        header("Location: collegelogin.php");
-        exit;
-    }
+
+// Check if the user is logged in
+if (!isset($_SESSION['uname'])) {
+    // Redirect to login page if the session variable is not set
+    header("Location: roleaccount.php");
+    exit;
+}
 
 $currentUser = $_SESSION['uname']; // Get the currently logged-in username
 
-// Database credentials
-$servername = "localhost";
-$username = "root"; // your database username
-$password = ""; // your database password
-$dbname = "user_registration"; // your database name
+// Database connection details
+$servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "equ6v8i5llo3uhjm"; // replace with your database username
+$password = "vkfaxm2are5bjc3q"; // replace with your database password
+$dbname = "ylwrjgaks3fw5sdj";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -22,6 +23,32 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
+// Fetch the profile picture from the colleges table in user_registration
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
+}
+
+$uname = $_SESSION['uname'];
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $uname);
+$stmt->execute();
+$result_profile = $stmt->get_result();
+
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
+}
+
+$stmt->close();
+$conn_profile->close();
 ?>
 
 
@@ -444,6 +471,11 @@ if ($conn->connect_error) {
             right: -10px; /* Adjust as needed */
             font-size: 14px; /* Size of the exclamation point */
         }
+        
+        .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+        }
     </style>
 </head>
 
@@ -459,11 +491,11 @@ if ($conn->connect_error) {
                 </a>
 
                 <div class="profile" id="profileDropdown">
-                <?php
+                    <?php
                         // Check if a profile picture is set in the session
-                        if (!empty($_SESSION['picture'])) {
-                            // Show the profile picture
-                            echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
                         } else {
                             // Get the first letter of the username for the placeholder
                             $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
@@ -506,14 +538,7 @@ if ($conn->connect_error) {
                 <li><a href="ccs-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="ccs-task.php">Upload Files</a>
-                    <a href="ccs-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="ccs-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="ccs-responses.php"><img src="images/feedback.png">Responses</a></li>
 
@@ -533,11 +558,11 @@ if ($conn->connect_error) {
             <?php
             session_start(); // Start the session
 
-            // Database credentials
-            $servername = "localhost";
-            $username = "root"; // your database username
-            $password = ""; // your database password
-            $dbname = "user_registration"; // your database name
+            // Database connection details
+            $servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+            $username = "equ6v8i5llo3uhjm"; // replace with your database username
+            $password = "vkfaxm2are5bjc3q"; // replace with your database password
+            $dbname = "ylwrjgaks3fw5sdj";
 
             // Create connection
             $conn = new mysqli($servername, $username, $password, $dbname);
@@ -553,8 +578,6 @@ if ($conn->connect_error) {
 
                 // Pagination variables
                 $limit = 5; // Number of records per page
-                $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
-                $offset = ($page - 1) * $limit; // Offset for SQL query
 
                 // Count total records
                 $countSql = "SELECT COUNT(*) as total FROM college_history WHERE uname = ?";
@@ -565,17 +588,17 @@ if ($conn->connect_error) {
                 $totalRecords = $countResult->fetch_assoc()['total'];
                 $totalPages = ceil($totalRecords / $limit); // Calculate total pages
 
+                // Set the page to the last page if not specified
+                $page = isset($_GET['page']) ? (int)$_GET['page'] : $totalPages; // If no page is set, use the last page
+                $page = max(1, min($page, $totalPages)); // Ensure the page is within valid bounds
+                $offset = ($page - 1) * $limit; // Offset for SQL query
+
                 // Fetch login and logout timestamps for the current user
-                $sql = "SELECT uname, ts, logout_ts FROM college_history WHERE uname = ? LIMIT ? OFFSET ?";
+                $sql = "SELECT uname, ts, logout_ts FROM college_history WHERE uname = ? ORDER BY ts DESC LIMIT ? OFFSET ?";
                 $stmt = $conn->prepare($sql);
                 $stmt->bind_param("sii", $currentUser, $limit, $offset); // Bind the parameters for LIMIT and OFFSET
                 $stmt->execute();
                 $result = $stmt->get_result();
-
-                // Debug: print out the raw results (uncomment for debugging purposes)
-                // echo "<pre>";
-                // print_r($result->fetch_all(MYSQLI_ASSOC));
-                // echo "</pre>";
 
                 // HTML structure for displaying the table
                 echo '<div class="content">
@@ -642,71 +665,120 @@ if ($conn->connect_error) {
             </div>
         </div>
 
-    <script>
-        document.getElementById('profileDropdown').addEventListener('click', function() {
-            var dropdownMenu = document.querySelector('.dropdown-menu');
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+        <script>
+            // Dropdown menu toggle
+            document.getElementById('profileDropdown').addEventListener('click', function() {
+                const dropdown = this.querySelector('.dropdown-menu');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
             });
 
-            // Optional: Close the dropdown if clicking outside the profile area
-            window.onclick = function(event) {
-                if (!event.target.closest('#profileDropdown')) {
-                    var dropdownMenu = document.querySelector('.dropdown-menu');
-                    if (dropdownMenu.style.display === 'block') {
-                        dropdownMenu.style.display = 'none';
+            // Close dropdown if clicked outside
+            window.addEventListener('click', function(event) {
+                if (!document.getElementById('profileDropdown').contains(event.target)) {
+                    const dropdown = document.querySelector('.dropdown-menu');
+                    if (dropdown) {
+                        dropdown.style.display = 'none';
                     }
+                }
+            });
+
+            let inactivityTime = function () {
+            let time;
+
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
+
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
+
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
                 }
             };
 
-            var dropdowns = document.getElementsByClassName("dropdown-btn");
+            // Start the inactivity timeout function
+            inactivityTime();
 
-            for (let i = 0; i < dropdowns.length; i++) {
-                dropdowns[i].addEventListener("click", function () {
-                    // Close all dropdowns first
-                    let dropdownContents = document.getElementsByClassName("dropdown-container");
-                    for (let j = 0; j < dropdownContents.length; j++) {
-                        dropdownContents[j].style.display = "none";
-                    }
+            function confirmLogout(event) {
+                event.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to log out?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
+                    confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('college-logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
 
-                    // Toggle the clicked dropdown's visibility
-                    let dropdownContent = this.nextElementSibling;
-                    if (dropdownContent.style.display === "block") {
-                        dropdownContent.style.display = "none";
-                    } else {
-                        dropdownContent.style.display = "block";
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
                     }
                 });
             }
 
-  function confirmLogout(event) {
-    event.preventDefault();
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you really want to log out?",
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6', // Green confirm button
-        cancelButtonColor: '#dc3545', // Red cancel button
-        confirmButtonText: 'Yes, log me out',
-        cancelButtonText: 'Cancel',
-        customClass: {
-            popup: 'swal-popup',
-            confirmButton: 'swal-confirm',
-            cancelButton: 'swal-cancel'
-        },
-        // Additional custom styles via CSS can be added here
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Pass action in the fetch call
-            fetch('college-logout.php?action=logout')
-                .then(response => response.text())
-                .then(data => {
-                    console.log(data); // Log response for debugging
-                    window.location.href = 'roleaccount.php';
-                })
-                .catch(error => console.error('Error:', error));
-        }
-    });
-}
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, '', window.location.href);
+                };
+            }
 
                 function logAction(actionDescription) {
                 var xhr = new XMLHttpRequest();
@@ -715,12 +787,19 @@ if ($conn->connect_error) {
                 xhr.send("action=" + encodeURIComponent(actionDescription));
             }
 
+            function logAndRedirect(actionDescription, url) {
+                logAction(actionDescription); // Log the action
+                setTimeout(function() {
+                    window.location.href = url; // Redirect after logging
+                }, 100); // Delay to ensure logging completes
+            }
+
             // Add event listeners when the page is fully loaded
             document.addEventListener("DOMContentLoaded", function() {
                 // Log clicks on main menu links
                 document.querySelectorAll(".menu > li > a").forEach(function(link) {
                     link.addEventListener("click", function() {
-                        logAction(link.textContent.trim()); // Log the main menu link
+                        logAction(link.textContent.trim());
                     });
                 });
 
@@ -728,13 +807,10 @@ if ($conn->connect_error) {
                 var dropdowns = document.getElementsByClassName("dropdown-btn");
                 for (let i = 0; i < dropdowns.length; i++) {
                     dropdowns[i].addEventListener("click", function () {
-                        // Close all dropdowns first
                         let dropdownContents = document.getElementsByClassName("dropdown-container");
                         for (let j = 0; j < dropdownContents.length; j++) {
                             dropdownContents[j].style.display = "none";
                         }
-
-                        // Toggle the clicked dropdown's visibility
                         let dropdownContent = this.nextElementSibling;
                         if (dropdownContent.style.display === "block") {
                             dropdownContent.style.display = "none";
@@ -747,14 +823,36 @@ if ($conn->connect_error) {
                 // Log clicks on dropdown links
                 document.querySelectorAll(".dropdown-container a").forEach(function(link) {
                     link.addEventListener("click", function(event) {
-                        event.stopPropagation(); // Prevent click from closing the dropdown
-                        logAction(link.textContent.trim()); // Log the dropdown link
+                        event.stopPropagation();
+                        logAction(link.textContent.trim());
                     });
+                });
+
+                // Log clicks on the "Profile" link
+                document.querySelector('.dropdown-menu a[href="ccs-your-profile.php"]').addEventListener("click", function() {
+                    logAction("Profile");
                 });
             });
 
+            document.addEventListener("DOMContentLoaded", () => {
+                function checkNotifications() {
+                    fetch('ccs-check_notifications.php')
+                        .then(response => response.json())
+                        .then(data => {
+                            const chatNotification = document.getElementById('chatNotification');
+                            if (data.unread_count > 0) {
+                                chatNotification.style.display = 'inline-block';
+                            } else {
+                                chatNotification.style.display = 'none';
+                            }
+                        })
+                        .catch(error => console.error('Error checking notifications:', error));
+                }
 
-    </script>
-
-</body>
+                // Check for notifications every 2 seconds
+                setInterval(checkNotifications, 2000);
+                checkNotifications(); // Initial check when page loads
+            });
+        </script>
+    </body>
 </html>
