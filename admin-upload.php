@@ -473,37 +473,61 @@ if (!$folder_name) {
                 color: #6c757d;
             }
 
-            /* Styling for the folder list container */
+            /* Folder List */
             .folder-list {
-                margin-top: 20px;
                 display: flex;
                 flex-wrap: wrap;
-                gap: 20px;  /* Space between folder items */
+                gap: 20px;
+                margin-bottom: 5px;
             }
 
-            /* Folder item container */
+            /* Folder Item */
             .folder-item {
-                background-color: #f9f9f9;
-                border: 1px solid #ccc;
-                font-size: 16px;
-                color: #495057;
-                padding: 12px;
-                border-radius: 5px;
-                text-align: center;
-                width: 120px; /* Fixed width for folders */
-                height: 100px;
-                text-decoration: none;
+                font-family: 'Poppins', sans-serif !important;
                 display: flex;
-                flex-direction: column; /* Stack icon and folder name vertically */
-                align-items: center; /* Center contents horizontally */
-                justify-content: center; /* Center contents vertically */
+                flex-direction: column;
+                align-items: center;
+                width: 140px; /* Consistent width for each folder */
+                margin: 10px;
+                padding: 10px;
+                text-align: center;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                background-color: #f9f9f9;
+                overflow: hidden;
+                text-decoration: none !important; /* Remove underline from links */
+                color: inherit; /* Inherit text color */
             }
 
-            /* Style for the folder icon */
+            /* Folder Icon */
             .folder-icon {
-                width: 50px; /* Fixed width for icons */
-                height: 50px; /* Fixed height for icons */
-                margin-bottom: 5px; /* Space between icon and folder name */
+                width: 120px; /* Fixed width for folders */
+                height: auto;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .folder-icon img {
+                width: 50px; /* Set a fixed width for icons */
+                height: 45px; /* Set a fixed height for icons */
+                object-fit: contain; /* Ensure the image fits well within the icon container */
+            }
+
+            /* Style for span containing file name */
+            .folder-item span {
+                display: block;               /* Make the span take up the full width of the container */
+                width: 100%;                  /* Full width of the parent */
+                word-wrap: break-word;        /* Allow breaking long words */
+                white-space: normal;          /* Allow text to wrap */
+                overflow: hidden;             /* Prevent overflow */
+                text-overflow: ellipsis;      /* Show ellipsis if text is too long */
+                font-family: 'Poppins', sans-serif !important;
+                font-size: 16px;
+                color: #000;
+                text-align: center;
+                text-decoration: none;
+                line-height: 1.2;            /* Adjust line height for readability */
             }
 
 

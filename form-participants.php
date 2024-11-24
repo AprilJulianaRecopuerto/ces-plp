@@ -456,11 +456,11 @@ $conn->close();
                 <select name="department" required class="dept">
                     <option value="" disabled selected>Department</option>
                     <option value="College of Arts and Sciences">College of Arts and Sciences</option>
-                    <option value="College of Business and Accountancy">College of Business and Accountancy</option>
+                    <option value="College of Business Administration">College of Business Administration</option>
                     <option value="College of Computer Studies">College of Computer Studies</option>
                     <option value="College of Education">College of Education</option>
                     <option value="College of Engineering">College of Engineering</option>
-                    <option value="College of International Hospitality">College of International Hospitality</option>
+                    <option value="College of International Hospitality Management">College of International Hospitality Management</option>
                     <option value="College of Nursing">College of Nursing   </option>
                 </select><br>
             </div>

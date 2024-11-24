@@ -1,11 +1,24 @@
+
 <?php
-session_start(); // Start the session
+session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
     // Redirect to login page if the session variable is not set
     header("Location: roleaccount.php");
     exit;
+}
+
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
+$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
+
+// Check connection
+if ($conn_proj_list->connect_error) {
+    die("Connection failed: " . $conn_proj_list->connect_error);
 }
 
 // Database credentials
@@ -48,110 +61,17 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
 
 $stmt->close();
 $conn_profile->close();
-
-// Database credentials for proj_list
-$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_proj = "zf8r3n4qqjyrfx7o";
-$password_proj = "su6qmqa0gxuerg98";
-$dbname_proj_list = "hpvs3ggjc4qfg9jp";
-
-$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
-
-// Check connection
-if ($conn_proj_list->connect_error) {
-    die("Connection failed: " . $conn_proj_list->connect_error);
-}
-
-// Ensure the ID is passed and valid
-if (isset($_GET['id'])) {
-    $project_id = $_GET['id']; // Retrieve the ID from the URL
-
-    // Use this ID to fetch the project details from the database or perform other actions
-    $sql = "SELECT * FROM ccs WHERE id = ?";
-    $stmt = $conn_proj_list->prepare($sql);
-    $stmt->bind_param("i", $project_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows > 0) {
-        $project = $result->fetch_assoc();
-        // You can now use $project to display information about the selected project
-    } else {
-        echo "Project not found!";
-    }
-} else {
-    echo "No project ID provided.";
-}
-
-// Check if the form is submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Initialize and validate form data
-    $date = $_POST['date'] ?? '';
-    $name = $_POST['name'] ?? '';
-    $position = $_POST['position'] ?? '';
-    $college_name = $_POST['college_name'] ?? 'College of Arts and Science';
-
-    // Assign project_id to requi_sub
-    $requi_sub = $project_id; // Assuming the project ID is meant to be used as requi_sub
-
-    // Prepare to insert requisition data
-    $stmt = $conn->prepare("INSERT INTO ccs_requisition (requi_sub, date, name, position, college_name) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("issss",  $requi_sub, $date, $name, $position, $college_name);
-
-    // Execute the statement for requisition
-    if ($stmt->execute()) {
-        // Get the last inserted requisition ID
-        $requisition_id = $conn->insert_id;
-
-        // Prepare to insert items associated with this requisition
-        $itemStmt = $conn->prepare("INSERT INTO ccs_items (requisition_id, item_name, total_items, total_usage) VALUES (?, ?, ?, ?)");
-
-        // Loop through the items
-        if (isset($_POST['item']) && is_array($_POST['item'])) {
-            for ($i = 0; $i < count($_POST['item']); $i++) {
-                $item_name = $_POST['item'][$i] ?? '';
-                $total_items = $_POST['total_items'][$i] ?? 0;
-                $total_usage = $_POST['total_usage'][$i] ?? 0;
-
-                // Ensure that these values are not empty or invalid before executing
-                if (!empty($item_name) && $total_items >= 0 && $total_usage >= 0) {
-                    // Bind parameters and execute the item insertion statement
-                    $itemStmt->bind_param("isii", $requisition_id, $item_name, $total_items, $total_usage);
-
-                    // Execute the item insertion statement
-                    $itemStmt->execute(); // No echo needed here
-                } else {
-                    echo "Invalid data for item " . ($i + 1) . "<br>";
-                }
-
-            }
-        }
-
-        // Close the item statement
-        $itemStmt->close();
-
-        $_SESSION['success'] = "Requisition submitted successfully!";
-    } else {
-        $_SESSION['error'] = "Error submitting requisition.";
-        echo "Error: " . $stmt->error . "<br>";
-    }
-
-    // Close the requisition statement and connection
-    $stmt->close();
-    $conn->close();
-}
 ?>
 
-
 <!DOCTYPE html>
-<html lang="en">
+    <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+        
         <title>CES PLP</title>
 
-        <link rel="icon" href="images/icoon.png">
+        <link rel="icon" href="images/logoicon.png">
 
         <!-- SweetAlert CSS and JavaScript -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -167,6 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             body {
                 margin: 0;
                 background-color: #F6F5F5; /* Light gray background color */
+                font-family: 'Poppins', sans-serif;
             }
 
             .navbar {
@@ -383,31 +304,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 color: white; /* Change text color */
             }
 
-            .content-requisition {
-                margin-left: 340px; /* Align with the sidebar */
+            .content-resource {
+                margin-left: 320px; /* Align with the sidebar */
                 padding: 20px;
             }
-
-            .content-requisition h2 {
-                font-family: 'Poppins', sans-serif;
-                font-size: 28px; /* Adjust the font size as needed */
-                margin-bottom: 20px; /* Space below the heading */
-                color: black; /* Adjust text color */
-                margin-top: 110px;
-            }
-
-            .content-requisition p {
-                font-family: 'Poppins', sans-serif;
-                font-size: 16px;
-                font-style: Italic;
-                margin-top: 110px;
-                margin-left: 620px;
-                margin-bottom: 20px;
-            }
-
+            
             .form-container {
-                font-family: 'Poppins', sans-serif;
-                margin-left: -20px;
                 margin-top:110px;
                 background-color: #ffffff;
                 padding: 20px;
@@ -415,7 +317,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             }
 
-            .form-container h2 {
+            .form-container h3 {
                 margin-top: 0;
                 font-family: 'Poppins', sans-serif;
                 font-size: 24px;
@@ -427,13 +329,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             .form-group label {
-                font-family: 'Poppins', sans-serif;
                 display: block;
                 font-weight: bold;
                 margin-bottom: 5px;
             }
 
-            .form-group select, .form-group input[type="text"], .form-group input[type="date"], .form-group input[type="number"] {
+            .form-group select, .form-group input[type="text"], .form-group input[type="date"], 
+            .form-group input[type="time"], .form-group input[type="number"] {
                 width: 100%;
                 padding: 8px;
                 border: 1px solid #ddd;
@@ -441,7 +343,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 font-size: 16px;
                 box-sizing: border-box;
                 font-family: 'Poppins', sans-serif;
-                margin-bottom: 10px;
             }
 
             .form-group input::placeholder {
@@ -457,7 +358,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             .button-container {
                 display: flex;
                 justify-content: flex-end; /* Align buttons to the right */
-                margin-bottom: 20px; /* Space below the buttons */
+                margin-top: 20px; /* Space above the buttons */
             }
 
             .button-container button {
@@ -519,46 +420,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 outline: none; /* Remove default focus outline */
             }
 
-            .item-section {
-                border: 1px solid #ccc;
-                padding: 15px;
-                margin: 10px 0;
-            }
-
-            .remove-btn {
-                background-color: #e74c3c;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-
-            .remove-btn:hover {
-                background-color: #e74c1c;
-                color: white;
-            }
-
-            .add-btn {
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-            .add-btn:hover {
-                background-color: #45a049; /* Darker green on hover */
-            }
-
             .swal-popup {
                 font-family: "Poppins", sans-serif !important;
                 width: 400px;
@@ -604,16 +465,75 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 right: -10px; /* Adjust as needed */
                 font-size: 14px; /* Size of the exclamation point */
             }
+
+            .table-container {
+                width: 100%;
+                margin-left: -12px;
+                overflow-x: auto;
+                margin-top: 20px; /* Space above the table */
+            }
+
+            .crud-table {
+                margin-top: 110px;
+                width: 100%;
+                border-collapse: collapse;
+                font-family: 'Poppins', sans-serif;
+                background-color: #ffffff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .crud-table th, .crud-table td {
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+                white-space: nowrap; /* Prevent text from wrapping */
+            }
+
+            .crud-table th {
+                text-align: center; 
+                background-color: #4CAF50;
+                color: white;
+                height: 40px;
+                width: 14px; /* Set a fixed width for table headers */
+            }
+
+            .crud-table td {
+                height: 50px;
+                background-color: #fafafa;
+            }
+
+            .crud-table tr:hover {
+                background-color: #f1f1f1;
+            }
+
+            .add a {
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                text-decoration: none;
+                transition: background-color 0.3s;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .add a:hover {
+                background-color: #45a049; /* Darker green on hover */
+            }
+
             .smaller-alert {
-            font-size: 14px; /* Adjust text size for a compact look */
-            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+                font-size: 14px; /* Adjust text size for a compact look */
+                padding: 20px;   /* Adjust padding to mimic a smaller alert box */
             }
         </style>
     </head>
 
     <body>
         <nav class="navbar">
-            <h2>Requisition (for Materials)</h2> 
+            <h2>All Projects in ccs</h2>
 
             <div class="profile-container">
                 <!-- Chat Icon with Notification Badge -->
@@ -686,92 +606,73 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </ul>
         </div>
 
-        <div class="content-requisition">
-            <div class="form-container">
+        <div class="content-resource">
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Project Title</th>
+                        <th>Semester</th>
+                        <th>Department</th>
+                        <th>Date of Event</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Fetch all projects from the ccs table
+                    $sql = "SELECT * FROM ccs";
+                    $result = $conn_proj_list->query($sql);
 
-                <div class="form-group">
-                    <label for="requi_sub">ID:</label>
-                    <input type="text"  id="requi_sub" name="project_id" value="<?= $project['id']; ?>" readonly>
-                </div>
+                    // Initialize a flag to check if any rows are displayed
+                    $has_records = false;
 
-                <h2>Requisition Submission Form</h2>
-                
-                <form id="requisitionForm" action="" method="POST">
+                    if ($result && $result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            $project_id = $row["id"];
 
-                    <div class="form-group">
-                        <label for="date">Date:</label>
-                        <input type="date" id="date" name="date" required>
-                    </div>
+                            // Check if the project_id already exists in the ccs_tor table
+                            $check_sql = "SELECT * FROM ccs_tor WHERE tor_sub = ?";
+                            $check_stmt = $conn->prepare($check_sql);
+                            $check_stmt->bind_param("i", $project_id);
+                            $check_stmt->execute();
+                            $check_result = $check_stmt->get_result();
 
-                    <div class="form-group">
-                        <label for="name">Name:</label>
-                        <input type="text" id="name" name="name" placeholder="Enter your Name" required>
-                    </div>
+                            // If the project is already added in ccs_tor, skip it
+                            if ($check_result && $check_result->num_rows > 0) {
+                                continue; // Skip this project if it exists in ccs_tor
+                            }
 
-                    <div class="form-group">
-                        <label for="position">Designation/Position:</label>
-                        <input type="text" id="position" name="position" placeholder="Enter Designation or Position" required>
-                    </div>
+                            // If not already added, display the project
+                            echo "<tr>
+                                    <td>" . $project_id . "</td>
+                                    <td>" . $row["proj_title"] . "</td>
+                                    <td>" . $row["semester"] . "</td>
+                                    <td>" . $row["dept"] . "</td>
+                                    <td>" . $row["dateof_imple"] . "</td>
+                                    <td class='add'>
+                                        <a href='ccs-add-tor.php?id=" . $project_id . "'>Add</a>
+                                    </td>
+                                </tr>";
 
-                    <div class="form-group">
-                        <label for="college_name">Office/College:</label>
-                        <input type="text" id="college_name" name="college_name" value="College of Computer Studies" placeholder="Enter College Name" required>
-                    </div>
+                            // Set the flag to true since we displayed at least one record
+                            $has_records = true;
+                        }
+                    }
 
-                    <h2>Item/s Requested</h2>
-                    <div id="itemContainer">
-                        <div class="item-section">
-                            <h3>Item 1</h3>
+                    // Display a fallback message if no records were displayed
+                    if (!$has_records) {
+                        echo "<tr><td colspan='6'>No records found</td></tr>";
+                    }
 
-                            <div class="form-group">
-                                <label for="item_1">Item Name:</label>
-                                <input type="text" id="item_1" name="item[]" placeholder="Enter Name of Item" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="total_items_1">Total Item Requested:</label>
-                                <input type="text" id="total_items_1" name="total_items[]" placeholder="Enter Total of Meals (e.g 500)" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="total_usage_1">Total Usage:</label>
-                                <input type="text" id="total_usage_1" name="total_usage[]" placeholder="Enter Total Usage (e.g 450)" required>
-                            </div>
-
-                            <button type="button" class="remove-btn" onclick="removeEvent(this)">Remove Item</button>
-                        </div>
-                    </div>
-
-                    <button type="button" class="add-btn" onclick="addItem()">Add Another Item</button><br><br>
-
-                    <div class="button-container">
-                        <button type="submit">Submit</button>
-                        <button type="reset">Reset</button>
-                    </div>
-                </form>
-            </div>
+                    $conn_proj_list->close();
+                    ?>
+                </tbody>
+            </table>
         </div>
 
+
         <script>
-
-            // Set the current date in YYYY-MM-DD format
-            window.onload = function() {
-            var today = new Date();
-            var yyyy = today.getFullYear();
-            var mm = today.getMonth() + 1; // Months are zero-based
-            var dd = today.getDate();
-
-            // Add leading zero for single-digit day/month
-            if (mm < 10) mm = '0' + mm;
-            if (dd < 10) dd = '0' + dd;
-
-            // Format the date to match input type="date"
-            var formattedDate = yyyy + '-' + mm + '-' + dd;
-
-            // Set the value of the date input field
-            document.getElementById('date').value = formattedDate;
-            };
-            
             let inactivityTime = function () {
             let time;
 
@@ -869,7 +770,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     window.history.pushState(null, '', window.location.href);
                 };
             }
-            
+
             // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
                 const dropdown = this.querySelector('.dropdown-menu');
@@ -885,67 +786,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     }
                 }
             });
-
-            let itemCount = 1;
-
-            function addItem() {
-                itemCount++;
-                const itemContainer = document.getElementById('itemContainer');
-                const newItemSection = document.createElement('div');
-                newItemSection.className = 'item-section';
-                newItemSection.innerHTML = `
-                    <h3>Item ${itemCount}</h3>
-
-                    <div class="form-group">
-                        <label for="item_${itemCount}">Item Name:</label>
-                        <input type="text" id="item_${itemCount}" name="item[]" placeholder="Enter Name of Item" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="total_items_${itemCount}">Total Item Requested:</label>
-                        <input type="text" id="total_items_${itemCount}" name="total_items[]" placeholder="Enter Total of Meals (e.g 500 meals)" >
-                    </div>
-
-                    <div class="form-group">
-                        <label for="total_usage_${itemCount}">Total Usage:</label>
-                        <input type="text" id="total_usage_${itemCount}" name="total_usage[]" placeholder="Enter Total Usage (e.g 450 meals)" >
-                    </div>
-
-                    <button type="button" class="remove-btn" onclick="removeItem(this)">Remove Item</button>
-                `;
-                itemContainer.appendChild(newItemSection);
-            }
-
-            function removeItem(element) {
-                element.parentElement.remove();
-            }
-
-            // Function to show success SweetAlert
-            function showSuccessAlert(message) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: message,
-                    confirmButtonColor: '#089451',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                            popup: 'custom-swal-popup',
-                            title: 'custom-swal-title',
-                            confirmButton: 'custom-swal-confirm'
-                        }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = "ccs-requi.php"; // Redirect to the same page or desired page
-                    }
-                });
-            }
-
-            // Check for success message in session and show alert
-            <?php if (isset($_SESSION['success'])): ?>
-                showSuccessAlert('<?php echo addslashes($_SESSION['success']); ?>');
-                <?php unset($_SESSION['success']); ?> // Clear the message after displaying
-            <?php endif; ?>
-
+           
             function logAction(actionDescription) {
                 var xhr = new XMLHttpRequest();
                 xhr.open("POST", "college_logs.php", true);
