@@ -1,6 +1,5 @@
 <?php
 session_start();
-$department = $_SESSION['department'];
 
 if (!isset($_SESSION['uname'])) {
     // Redirect to login page if the session variable is not set
@@ -14,10 +13,10 @@ if (!isset($_SESSION['notified_tasks'])) {
 }
 
 // Database credentials for proj_list
-$servername = "localhost";
-$username_db = "root";
-$password_db = "";
-$dbname_proj_list = "admin_todo_list";
+$servername = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_db = "t9riamok80kmok3h";
+$password_db = "lzh13ihy0axfny6d";
+$dbname_proj_list = "g8ri1hhtsfx77ptb";//projlist
 
 // Create connection to proj_list database
 $conn = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
@@ -38,6 +37,7 @@ $sql = "SELECT id, task_description, created_at, ccs_status FROM ccs_notificatio
 $result = $conn->query($sql);
 
 $notifications = [];
+
 if ($result->num_rows > 0) {
     // Fetch all notifications
     while($row = $result->fetch_assoc()) {
@@ -138,7 +138,7 @@ if ($result_due_date->num_rows > 0) {
             if (!empty($notificationMessage)) {
                 // Insert notification for the user with 'unread' status
                 $insertNotification = $conn->prepare("INSERT INTO ccs_notifications (department, task_description, ccs_status, created_at) VALUES (?, ?, 'unread', NOW())");
-                $department = 'CBA'; // Set department explicitly (or dynamically if needed)
+                $department = 'CCS'; // Set department explicitly (or dynamically if needed)
                 $insertNotification->bind_param("ss", $department, $notificationMessage);
                 $insertNotification->execute();
                 $insertNotification->close();
@@ -149,6 +149,33 @@ if ($result_due_date->num_rows > 0) {
         }
     }
 }
+
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+// Fetch the profile picture from the colleges table in user_registration
+
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
+}
+
+$uname = $_SESSION['uname'];
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $uname);
+$stmt->execute();
+$result_profile = $stmt->get_result();
+
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
+}
+
+$stmt->close();
+$conn_profile->close();
+
 
 $conn->close();
 ?>
@@ -171,6 +198,8 @@ $conn->close();
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  <!-- Include Chart.js -->
+
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap');
@@ -486,21 +515,50 @@ $conn->close();
             }
 
             .custom-swal-popup {
-                font-family: "Poppins", sans-serif !important;
-                width: 400px;
+                font-family: 'Poppins', sans-serif;
+                font-size: 16px; /* Increase the font size */
+                width: 400px !important; /* Set a larger width */
             }
 
             .custom-swal-confirm {
-                font-family: "Poppins", sans-serif !important;
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #089451;
+                border: 0.5px #089451 !important;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none !important; /* Remove default focus outline */
             }
 
             .custom-swal-cancel {
-                font-family: "Poppins", sans-serif !important;
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #e74c3c;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none; /* Remove default focus outline */
+            }
+
+            .custom-error-popup {
+                font-family: 'Poppins', sans-serif;
+                width: 400px !important; /* Set a larger width */
+            }
+
+            .custom-error-confirm {
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #e74c3c;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none; /* Remove default focus outline */
             }
 
             canvas {
                 font-family: 'Poppins', sans-serif !important;
-               max-height: 330px;
+                max-height: 330px;
                 width: 500px;
                 margin: auto;
                 display: block;
@@ -540,7 +598,7 @@ $conn->close();
                 padding: 15px; 
                 margin-top: 25px;       
                 margin-bottom: 15px;         /* Set padding to 15 pixels on all sides */
-                border-radius: 10px;           /* Rounded corners with a radius of 10 pixels */
+                border-radius: 5px;           /* Rounded corners with a radius of 10 pixels */
                 box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Add shadow effect */
                 text-align: center;            /* Center align the text inside */
             }
@@ -724,7 +782,7 @@ $conn->close();
 				font-family: 'Poppins', sans-serif;
                 max-width: 550px;
                 margin: auto;
-				max-height: 630px;
+				height:635px;
                 background-color: white;    
                 margin-left: 925px;
                 margin-top: -690px;
@@ -749,7 +807,7 @@ $conn->close();
                 background-color: #fff; /* White background for better contrast */
                 position: absolute; /* Position it below the icon */
                 margin-top: 18px;
-                margin-left: -50px;
+                margin-left: -15px;
                 padding: 15px; /* Increased padding for a more spacious feel */
                 width: 280px; /* Increased width */
                 max-height: 300px; /* Set a max height to allow for scrolling */
@@ -763,7 +821,7 @@ $conn->close();
                 font-size: 18px;
                 cursor: pointer;
                 color: #333; /* Adjust color as needed */
-                margin-left: 280px;  
+                margin-left: 285px;  
                 margin-top: -4px;
             }
 
@@ -806,18 +864,11 @@ $conn->close();
                 font-family: 'Poppins', sans-serif;
 			}
 
-            /* Style for the notification item */
-            .notification-item {
-                position: relative; /* Allow for absolute positioning of the delete button */
-                padding-right: 75px; /* Add some space to the right for the delete button */
-            }
-
             /* Style for the delete button */
             .delete-btn {
                 font-family: 'Poppins', sans-serif;
                 position: absolute;
                 right: 10px; /* Adjust to your preference for spacing */
-                top: 30%;
                 transform: translateY(-50%); /* Vertically center the button */
                 padding: 5px 10px;
                 background-color: #e74c3c;
@@ -846,12 +897,38 @@ $conn->close();
                 font-family: "Poppins", sans-serif !important;
             }
 
-            .notification-item {
-                word-wrap: break-word; /* Breaks the long words to fit the container */
-                word-break: break-all; /* Ensures the word will break at any character if it's too long */
-                overflow-wrap: break-word; /* Ensures long words will break to fit the container */
-                white-space: normal; /* Ensures the text will wrap normally */
+            .recommend {
+				font-family: 'Poppins', sans-serif;
+                max-width: 550px;
+                margin: auto;
+                background-color: white;    
+                margin-left: 500px;
+                
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: #ffffff;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                overflow-x:auto;
             }
+
+            table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 8px 12px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+    th {
+        background-color: #f4f4f4;
+    }
+    .smaller-alert {
+        font-size: 14px; /* Adjust text size for a compact look */
+        padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+    }
+
 
         </style>
     </head>
@@ -861,40 +938,40 @@ $conn->close();
             <h2>Dashboard</h2> 
 
             <div class="notification">
-                <i class="fa fa-bell notification-icon" onclick="toggleNotifications()"></i>
+            <i class="fa fa-bell notification-icon" onclick="toggleNotifications()"></i>
 
-                <!-- Display the count of unread notifications in the badge -->
-                <?php if ($unreadCount > 0): ?>
-                    <span class="notification-count"><?php echo $unreadCount; ?></span>
+            <!-- Display the count of unread notifications in the badge -->
+            <?php if ($unreadCount > 0): ?>
+                <span class="notification-count" id="notification-count"><?php echo $unreadCount; ?></span>
+            <?php endif; ?>
+
+            <div class="notification-container" id="notification-container" style="display:none;">
+                <h3 style="display: inline-block;">Notifications</h3>
+
+                <?php
+                // Check if $notifications is set and is a non-empty array
+                if (isset($notifications) && is_array($notifications) && count($notifications) > 0): ?>
+                    <ul>
+                    <?php foreach ($notifications as $notification): ?>
+                        <?php if (isset($notification['task_description'], $notification['created_at'])): ?>
+                            <li id="notification-<?php echo $notification['id']; ?>" class="notification-item">
+                                <div class="notification-content">
+                                    <strong><?php echo htmlspecialchars($notification['task_description']); ?></strong>
+                                    <span><?php echo htmlspecialchars($notification['created_at']); ?></span>
+                                </div>
+                                <button class="delete-btn" onclick="deleteNotification(<?php echo $notification['id']; ?>)">Delete</button>
+                            </li>
+                            <hr>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    <!-- Show this message if there are no notifications -->
+                    <p style="text-align: center; color: #666; font-style: italic; margin-top: 10px;">No notifications available.</p>
                 <?php endif; ?>
-
-                <div class="notification-container" id="notification-container" style="display:none;">
-                    <h3 style="display: inline-block;">Notifications</h3>
-
-                    <?php
-                    // Check if $notifications is set and is a non-empty array
-                    if (isset($notifications) && is_array($notifications) && count($notifications) > 0): ?>
-                        <ul>
-                        <?php foreach ($notifications as $notification): ?>
-                            <?php if (isset($notification['task_description'], $notification['created_at'])): ?>
-                                <li id="notification-<?php echo $notification['id']; ?>" class="notification-item">
-                                    <div class="notification-content">
-                                        <strong><?php echo htmlspecialchars($notification['task_description']); ?></strong>
-                                        <span><?php echo htmlspecialchars($notification['created_at']); ?></span>
-                                    </div>
-                                    <button class="delete-btn" onclick="deleteNotification(<?php echo $notification['id']; ?>)">Delete</button>
-                                </li>
-                                <hr>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-
-                        </ul>
-                    <?php else: ?>
-                        <!-- Show this message if there are no notifications -->
-                        <p style="text-align: center; color: #666; font-style: italic; margin-top: 10px;">No notifications available.</p>
-                    <?php endif; ?>
-                </div>
             </div>
+        </div>
+
 
             <div class="profile-container">
                 <!-- Chat Icon with Notification Badge -->
@@ -906,9 +983,9 @@ $conn->close();
                 <div class="profile" id="profileDropdown">
                     <?php
                         // Check if a profile picture is set in the session
-                        if (!empty($_SESSION['picture'])) {
-                            // Show the profile picture
-                            echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
                         } else {
                             // Get the first letter of the username for the placeholder
                             $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
@@ -951,14 +1028,7 @@ $conn->close();
                 <li><a href="ccs-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="ccs-task.php">Upload Files</a>
-                    <a href="ccs-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="ccs-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="ccs-responses.php"><img src="images/feedback.png">Responses</a></li>
 
@@ -983,10 +1053,10 @@ $conn->close();
                             <div class="total-activities-count">
                                 <?php
                                 // Database credentials
-                                $servername = "localhost";
-                                $username = "root";
-                                $password = "";
-                                $dbname = "proj_list";
+                                $servername = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                                $username = "zf8r3n4qqjyrfx7o";
+                                $password = "su6qmqa0gxuerg98";
+                                $dbname = "hpvs3ggjc4qfg9jp";
 
                                 // Create connection
                                 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -1072,10 +1142,10 @@ $conn->close();
                 <canvas id="projectsChart"></canvas>
                 <?php
                 // Database connection details
-                $host = 'localhost';  // or your host
-                $db = 'proj_list';     // database name
-                $user = 'root'; // database username
-                $pass = ''; // database password
+                $host = 'ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com';  // or your host
+                $db = 'hpvs3ggjc4qfg9jp';     // database name
+                $user = 'zf8r3n4qqjyrfx7o'; // database username
+                $pass = 'su6qmqa0gxuerg98'; // database password
 
                 // Create a connection to the database
                 $conn = new mysqli($host, $user, $pass, $db);
@@ -1127,19 +1197,18 @@ $conn->close();
                 // Close the connection
                 $conn->close();
                 ?>
-            </div>
+                </div>
 			</div>
 			
-
             <div class="container">
                 <h2>Colleges To-Do List</h2>
 
                 <?php
                 // Database connection details
-                $servername = "localhost";
-                $username = "root";
-                $password = "";
-                $dbname = "admin_todo_list";  // Database for tasks
+                $servername = "d6ybckq58s9ru745.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                $username = "t9riamok80kmok3h";
+                $password = "lzh13ihy0axfny6d";
+                $dbname = "g8ri1hhtsfx77ptb";  // Database for tasks
 
                 // Create connection
                 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -1172,23 +1241,22 @@ $conn->close();
                         // Set the success message
                         $taskDoneMessage = 'Task Done: ' . htmlspecialchars($taskDescription);
 
-                        // Notify Admin in mov database
-                        $servername_mov = "localhost";
-                        $username_mov = "root";
-                        $password_mov = "";
-                        $dbname_mov = "mov";
+                        // Database credentials for 'mov' (notifications)
+                        $servername_mov = "arfo8ynm6olw6vpn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                        $username_mov = "tz8thfim1dq7l3rf";
+                        $password_mov = "wzt4gssgou2ofyo7";
+                        $dbname_mov = "uv1qyvm0b8oicg0v";
 
-                        // Create a new connection to the mov database
                         $conn_mov = new mysqli($servername_mov, $username_mov, $password_mov, $dbname_mov);
 
-                        // Check the mov connection
+                        // Check connection for 'mov'
                         if ($conn_mov->connect_error) {
-                            die("Connection to mov database failed: " . $conn_mov->connect_error);
+                            die("Connection to 'mov' database failed: " . $conn_mov->connect_error);
                         }
 
                         // Insert notification into mov database
                         $insertNotification = $conn_mov->prepare("INSERT INTO notifications (project_name, department, notification_message, status, created_at) VALUES (?, 'College of Arts and Sciences', ?, 'unread', NOW())");
-                        $notificationMessage = "A new task has been submitted by $department.";
+                        $notificationMessage = "A new task has been submitted by College of Arts and Sciences.";
                         $insertNotification->bind_param("ss", $taskDescription, $notificationMessage);
                         $insertNotification->execute();
                         $insertNotification->close();
@@ -1200,7 +1268,8 @@ $conn->close();
                                 title: 'Task Done!',
                                 text: 'Successfully Submitted to Admin: " . htmlspecialchars($taskDescription) . "',
                                 icon: 'success',
-                                confirmButtonText: 'OK',
+                                timer: 2000, // Automatically close after 2 seconds
+                                showConfirmButton: false, // Hide the OK button
                                 customClass: {
                                     popup: 'custom-swal-popup',
                                     title: 'custom-swal-title',
@@ -1217,7 +1286,8 @@ $conn->close();
                                 title: 'Error',
                                 text: 'Error marking task as done: " . $stmt->error . "',
                                 icon: 'error',
-                                confirmButtonText: 'OK',
+                                 timer: 2000, // Automatically close after 2 seconds
+                                showConfirmButton: false, // Hide the OK button
                                 customClass: {
                                     popup: 'custom-error-popup',
                                     title: 'custom-error-title',
@@ -1284,7 +1354,6 @@ $conn->close();
                 ?>
             </div>
 
-            
             <!-- Chatbot button -->
             <button class="chatbot-button" onclick="toggleChatbot()">
                 <i class="fas fa-comment-dots"></i> <!-- Chat icon -->
@@ -1302,6 +1371,29 @@ $conn->close();
                     <button onclick="sendMessage()">Send</button>
                 </div>
             </div>
+           
+            <?php
+                // Function to fetch the recommended events for a department from Flask API
+                $url = "https://ces-python-1da82b6d81f5.herokuapp.com/get_recommended_events/College%20of%20Computer%20Studies";
+                
+                // Use cURL to fetch the data from the Flask API
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                $response = curl_exec($ch);
+                curl_close($ch);
+                
+                // Decode the JSON response
+                $events = json_decode($response, true);
+                
+                // If the response includes raw HTML, inject it into the page.
+                if ($response) {
+                    // Optionally add inline styles for font-family here
+                    echo "<style>body { font-family: 'Poppins', sans-serif; }</style>";
+                    echo $response;  // Display the fetched HTML content
+                }
+            ?>
+            
 		</div>
 
         <script>
@@ -1408,7 +1500,60 @@ $conn->close();
                 }
             });
 
-                function confirmLogout(event) {
+            let inactivityTime = function () {
+            let time;
+
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
+
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
+
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
+                }
+            };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+            
+            function confirmLogout(event) {
                 event.preventDefault();
                 Swal.fire({
                     title: 'Are you sure?',
@@ -1423,20 +1568,36 @@ $conn->close();
                         confirmButton: 'swal-confirm',
                         cancelButton: 'swal-cancel'
                     },
-                    // Additional custom styles via CSS can be added here
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Pass action in the fetch call
+                        // Execute the logout action (send a request to the server to log out)
                         fetch('college-logout.php?action=logout')
                             .then(response => response.text())
                             .then(data => {
                                 console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
                                 window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
                             })
                             .catch(error => console.error('Error:', error));
                     }
                 });
             }
+
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, '', window.location.href);
+                };
+            }
+
 
             document.getElementById('profileDropdown').addEventListener('click', function() {
             var dropdownMenu = document.querySelector('.dropdown-menu');
@@ -1496,72 +1657,26 @@ $conn->close();
             }
 
             // Set an interval to check for due tasks every minute (60000 milliseconds)
-setInterval(function() {
-    // AJAX call to check for due tasks
-    fetch('ccs-check_due_tasks.php') // Path to the PHP script that checks for due tasks
-        .then(response => response.json()) // Assume the PHP script returns a JSON response
-        .then(data => {
-            if (data.status === 'success') {
-                // Handle the response if needed (e.g., display a notification)
-                console.log('Tasks checked successfully');
-            } else {
-                // Handle failure (if any)
-                console.log('No tasks due or error occurred');
-            }
-        })
-        .catch(error => {
-            console.error('Error checking due tasks:', error);
-        });
-}, 1000); // 60000ms = 1 minute
+            setInterval(function() {
+                // AJAX call to check for due tasks
+                fetch('ccs-check_due_tasks.php') // Path to the PHP script that checks for due tasks
+                    .then(response => response.json()) // Assume the PHP script returns a JSON response
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Handle the response if needed (e.g., display a notification)
+                            console.log('Tasks checked successfully');
+                        } else {
+                            // Handle failure (if any)
+                            console.log('No tasks due or error occurred');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking due tasks:', error);
+                    });
+            }, 1000); // 60000ms = 1 minute
 
 
             let lastFetchTime = new Date().toISOString(); // Initialize with the current timestamp
-
-            // Function to fetch new notifications every 3 seconds
-            setInterval(fetchNotifications, 1000); // Fetch every 3 seconds
-
-            function fetchNotifications() {
-                const notificationContainer = document.getElementById("notification-container");
-
-                // Fetch notifications from the server
-                fetch(`ccs-fetch_task.php?last_fetch_time=${encodeURIComponent(lastFetchTime)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const notificationCountElement = document.querySelector('.notification-count');
-
-                        if (data.notifications.length > 0) {
-                            // Update the last fetch time to the latest notification's timestamp
-                            lastFetchTime = new Date(data.notifications[0].created_at).toISOString();
-
-                            // If there are new notifications, display them
-                            const ul = notificationContainer.querySelector('ul') || document.createElement('ul');
-                            ul.innerHTML = ''; // Clear previous notifications
-                            data.notifications.forEach(notification => {
-                                const li = document.createElement('li');
-                                li.id = `notification-${notification.id}`;
-                                li.classList.add('notification-item');
-                                li.innerHTML = `
-                                    <strong>${notification.task_description}</strong><br>
-                                    <small>${notification.created_at}</small><br>
-                                    <button class="delete-btn" onclick="deleteNotification(${notification.id})">Delete</button>
-                                    <hr>
-                                `;
-                                ul.appendChild(li);
-                            });
-
-                            if (!notificationContainer.contains(ul)) {
-                                notificationContainer.appendChild(ul);
-                            }
-
-                            // Update the notification count
-                            notificationCountElement.textContent = data.notifications.filter(n => n.ccs_status === 'unread').length;
-                        } else {
-                            notificationContainer.innerHTML = "<p>No new notifications.</p>";
-                        }
-                    })
-                    .catch(error => console.error('Error fetching notifications:', error));
-            }
-
 
             // Function to mark notifications as read in the database
             function markNotificationsAsRead() {
@@ -1588,7 +1703,6 @@ setInterval(function() {
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'Cancel',
                     reverseButtons: true,
                     customClass: {
                         popup: 'custom-swal-popup',
@@ -1732,6 +1846,11 @@ setInterval(function() {
                         event.stopPropagation(); // Prevent click from closing the dropdown
                         logAction(link.textContent.trim()); // Log the dropdown link
                     });
+                });
+
+                // Log clicks on the "Profile" link
+                document.querySelector('.dropdown-menu a[href="ccs-your-profile.php"]').addEventListener("click", function() {
+                    logAction("Profile");
                 });
             });
 
@@ -1893,6 +2012,99 @@ setInterval(function() {
                     appendMessage('bot', response); // Display bot response
                 }, 2000); // Simulate a delay in bot response
             }
+
+            document.addEventListener("DOMContentLoaded", () => {
+                function checkNotifications() {
+                    fetch('ccs-check_notifications.php')
+                        .then(response => response.json())
+                        .then(data => {
+                            const chatNotification = document.getElementById('chatNotification');
+                            if (data.unread_count > 0) {
+                                chatNotification.style.display = 'inline-block';
+                            } else {
+                                chatNotification.style.display = 'none';
+                            }
+                        })
+                        .catch(error => console.error('Error checking notifications:', error));
+                }
+
+                // Check for notifications every 2 seconds
+                setInterval(checkNotifications, 2000);
+                checkNotifications(); // Initial check when page loads
+                
+                function fetchNotifications() {
+                    const notificationContainer = document.getElementById("notification-container");
+
+                    // Fetch notifications from the server
+                    fetch(`ccs-fetch_task.php?last_fetch_time=${encodeURIComponent(lastFetchTime)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const notificationCountElement = document.querySelector('.notification-count');
+
+                            if (data.notifications.length > 0) {
+                                // Update the last fetch time to the latest notification's timestamp
+                                lastFetchTime = new Date(data.notifications[0].created_at).toISOString();
+
+                                // If there are new notifications, display them
+                                const ul = notificationContainer.querySelector('ul') || document.createElement('ul');
+                                ul.innerHTML = ''; // Clear previous notifications
+                                data.notifications.forEach(notification => {
+                                    const li = document.createElement('li');
+                                    li.id = `notification-${notification.id}`;
+                                    li.classList.add('notification-item');
+                                    li.style.display = 'flex';
+                                    li.style.justifyContent = 'space-between';
+                                    li.style.alignItems = 'center';
+                                    li.style.flexWrap = 'wrap'; // Ensures content can wrap if needed
+
+                                    li.innerHTML = `
+                                        <div style="flex: 1; text-align: justify; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; margin-right: 85px;">
+                                            <strong class="task-desc">${notification.task_description}</strong><br>
+                                            <small>${notification.created_at}</small>
+                                        </div>
+                                        <button class="delete-btn" style="flex-shrink: 0; align-self: center;" onclick="deleteNotification(${notification.id})">Delete</button>
+                                        <hr style="width: 100%;">
+                                    `;
+                                    ul.appendChild(li);
+                                });
+
+                                if (!notificationContainer.contains(ul)) {
+                                    notificationContainer.appendChild(ul);
+                                }
+
+                                // Update the notification count
+                                notificationCountElement.textContent = data.notifications.filter(n => n.ccs_status === 'unread').length;
+                            } else {
+                                notificationContainer.innerHTML = "<p>No new notifications.</p>";
+                            }
+                        })
+                        .catch(error => console.error('Error fetching notifications:', error));
+                }
+                // Function to fetch new notifications every 3 seconds
+                setInterval(fetchNotifications, 1000); // Fetch every 3 seconds
+                fetchNotifications();
+            });
+
+            function fetchNotificationCount() {
+                fetch('?fetch_notification_count=1')
+                    .then(response => response.json())
+                    .then(data => {
+                        const notificationCountElement = document.querySelector('.notification-count');
+                        const unreadCount = data.unreadCount;
+
+                        if (unreadCount > 0) {
+                            notificationCountElement.textContent = unreadCount;
+                            notificationCountElement.style.display = "inline"; // Show the count
+                        } else {
+                            notificationCountElement.textContent = '';
+                            notificationCountElement.style.display = "none"; // Hide if zero
+                        }
+                    })
+                    .catch(error => console.error('Error fetching notification count:', error));
+            }
+
+            // Fetch notification count every 3 seconds (5000 milliseconds)
+            setInterval(fetchNotificationCount, 3000);
         </script>
     </body>
 </html>

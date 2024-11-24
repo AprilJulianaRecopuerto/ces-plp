@@ -1,18 +1,17 @@
 <?php
-session_start(); // Start the session
+session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
-    // Redirect to login page if the session variable is not set
-    header("Location: collegelogin.php");
+    header("Location: roleaccount.php");
     exit;
 }
 
-// Database connection to messages database
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "messages"; // Changed database to messages
+// Database connection to `messages` database
+$servername = "uoa25ublaow4obx5.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "lcq4zy2vi4302d1q";
+$password = "xswigco0cdxdi5dd";
+$dbname = "kup80a8cc3mqs4ao"; // Changed database to `messages`
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -21,101 +20,106 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj"; // your database name
+
+// Connection for profile fetching
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
+}
+
+$uname = $_SESSION['uname'];
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $uname);
+$stmt->execute();
+$result_profile = $stmt->get_result();
+
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
+}
+
+$stmt->close();
+$conn_profile->close();
+
+// Fetch user role from `colleges` table
+$conn_role = new mysqli($sn, $un, $psd, $dbname_user_registration);
+if ($conn_role->connect_error) {
+    die("Connection failed: " . $conn_role->connect_error);
+}
+
+$userRoleSql = "SELECT role FROM colleges WHERE uname = ?";
+$roleStmt = $conn_role->prepare($userRoleSql);
+$roleStmt->bind_param("s", $uname);
+$roleStmt->execute();
+$roleResult = $roleStmt->get_result();
+$userRole = $roleResult->fetch_assoc()['role'];
+$roleStmt->close();
+$conn_role->close();
+
+// Handle new message submission to `sent_messages` table
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['message'])) {
+    $sender = $_SESSION['uname'];
+    $message = $_POST['message'];
+
+    $insertSql = "INSERT INTO sent_messages (sender, role, message, timestamp) VALUES (?, ?, ?, NOW())";
+    $insertStmt = $conn->prepare($insertSql);
+    $insertStmt->bind_param("sss", $sender, $userRole, $message);
+
+    if (!$insertStmt->execute()) {
+        echo "Error: " . $insertStmt->error;
+    }
+    $insertStmt->close();
+}
+
+// Fetch messages for the logged-in user from `sent_messages`
+$sql_fetch_messages = "SELECT id, sender, role, message, timestamp FROM sent_messages WHERE sender = ? ORDER BY timestamp DESC";
+$fetchStmt = $conn->prepare($sql_fetch_messages);
+$fetchStmt->bind_param("s", $uname);
+$fetchStmt->execute();
+$result_messages = $fetchStmt->get_result();
+
 // Handle message deletion
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_message_id'])) {
-    $deleteMessageId = $_POST['delete_message_id'];
-
-    // Prepare and execute the DELETE statement
-    $deleteSql = "DELETE FROM sent_messages WHERE id = ?";
+if (isset($_POST['delete_message_id'])) {
+    $deleteId = $_POST['delete_message_id'];
+    $deleteSql = "DELETE FROM sent_messages WHERE id = ? AND sender = ?";
     $deleteStmt = $conn->prepare($deleteSql);
-    $deleteStmt->bind_param("i", $deleteMessageId);
-
+    $deleteStmt->bind_param("is", $deleteId, $uname);
+    
     if ($deleteStmt->execute()) {
-        // Optionally, display a success message or perform an action
+        // Redirect to refresh the page after deletion
+        header("Location: ccs-chat.php"); 
+        exit;
     } else {
-        // Handle error if needed
         echo "Error deleting message: " . $deleteStmt->error;
     }
-
     $deleteStmt->close();
 }
-
-// Handle message submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message'])) {
-    $message = trim($_POST['message']);
-    $sender = $_SESSION['uname'];
-
-    if (!empty($message)) {
-        // Retrieve the user's role from the colleges table in the user_registration database
-        $roleSql = "SELECT role FROM user_registration.colleges WHERE uname = ?";
-        $roleStmt = $conn->prepare($roleSql);
-        $roleStmt->bind_param("s", $sender);
-        $roleStmt->execute();
-        $roleResult = $roleStmt->get_result();
-        $roleRow = $roleResult->fetch_assoc();
-        $role = $roleRow ? $roleRow['role'] : null;
-        $roleStmt->close();
-
-        // Insert the message with the role into the sent_messages table
-        $insertSql = "INSERT INTO sent_messages (sender, role, message, timestamp) VALUES (?, ?, ?, NOW())";
-        $insertStmt = $conn->prepare($insertSql);
-        $insertStmt->bind_param("sss", $sender, $role, $message);
-
-        if ($insertStmt->execute()) {
-            // Optionally, display a success message
-        } else {
-            // Handle error if needed
-            echo "Error: " . $insertStmt->error;
-        }
-
-        $insertStmt->close();
-    }
-}
-
-// Fetch messages for the logged-in user from sent_messages
-$chatMessages = [];
-$fetchSql = "
-    SELECT sent_messages.*, 
-           IF(users.roles IS NOT NULL, users.roles, colleges.role) AS role,
-           IF(sent_messages.sender = ?, 'user', 'other') AS message_type
-    FROM sent_messages
-    LEFT JOIN user_registration.colleges ON sent_messages.sender = colleges.uname
-    LEFT JOIN user_registration.users ON sent_messages.sender = users.username
-    ORDER BY sent_messages.timestamp";
-
-$fetchStmt = $conn->prepare($fetchSql);
-$fetchStmt->bind_param("s", $_SESSION['uname']); // Get messages sent to or from the logged-in user
-$fetchStmt->execute();
-$messageResult = $fetchStmt->get_result();
-
-while ($msgRow = $messageResult->fetch_assoc()) {
-    $chatMessages[] = $msgRow;
-}
-$fetchStmt->close();
-
-
 
 $conn->close();
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>CES PLP</title>
+        <title>CES PLP</title>
 
-    <link rel="icon" href="images/icoon.png">
+        <link rel="icon" href="images/icoon.png">
 
-    <!-- SweetAlert CSS and JavaScript -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <!-- SweetAlert CSS and JavaScript -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <style>
+        <style>
             @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap');
             @import url('https://fonts.cdnfonts.com/css/glacial-indifference-2');
             @import url('https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500&display=swap');
@@ -284,8 +288,8 @@ $conn->close();
                 color: white; /* Ensure the text color is white when hovered */
             }
 
-             /* Style the sidenav links and the dropdown button */
-             .menu .dropdown-btn {
+            /* Style the sidenav links and the dropdown button */
+            .menu .dropdown-btn {
                 list-style: none;
                 padding: 0;
                 margin: 0;
@@ -409,8 +413,40 @@ $conn->close();
                 text-align: left; /* Align other messages to the left */
             }
 
-            .delete-btn {
+            .chat-window small {
+                margin-right: 9px;
+            }
+            
+            /* Chat styles */
+            .navbar .profile-container {
+                display: flex;
+                align-items: center;
+            }
 
+            .chat-icon {
+                margin-right: 15px;
+                font-size: 20px;
+                color: #333;
+                text-decoration: none;
+                position: relative; /* To position the badge correctly */
+            }
+
+            .notification-badge {
+                display: inline-block;
+                background-color: red; /* Change this to your preferred color */
+                color: white;
+                border-radius: 50%;
+                width: 20px; /* Width of the badge */
+                height: 20px; /* Height of the badge */
+                text-align: center;
+                font-weight: bold;
+                position: absolute; /* Position it relative to the chat icon */
+                top: -5px; /* Adjust as needed */
+                right: -10px; /* Adjust as needed */
+                font-size: 14px; /* Size of the exclamation point */
+            }
+
+            .delete-btn {
                 font-family: "Poppins", sans-serif;
                 background-color: #ff4d4d;
                 color: white;
@@ -429,11 +465,6 @@ $conn->close();
                 font-family: 'Poppins', sans-serif;
                 font-size: 16px; /* Increase the font size */
                 width: 400px !important; /* Set a larger width */
-            }
-
-            .custom-swal-title {
-                font-family: 'Poppins', sans-serif;
-                color: #3085d6; /* Custom title color */
             }
 
             .custom-swal-confirm {
@@ -457,6 +488,21 @@ $conn->close();
                 outline: none; /* Remove default focus outline */
             }
 
+            .custom-error-popup {
+                font-family: 'Poppins', sans-serif;
+                width: 400px !important; /* Set a larger width */
+            }
+
+            .custom-error-confirm {
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #e74c3c;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none; /* Remove default focus outline */
+            }
+
             .swal-popup {
                 font-family: "Poppins", sans-serif !important;
                 width: 400px;
@@ -471,57 +517,23 @@ $conn->close();
             .swal-cancel {
                 font-family: "Poppins", sans-serif !important;
             }
-
-            /* Chat styles */
-            .navbar .profile-container {
-                display: flex;
-                align-items: center;
-            }
-
-            .chat-icon {
-                font-size: 20px;
-                color: #333;
-                text-decoration: none;
-                position: relative; /* To position the badge correctly */
-                margin-right: 30px;
-                margin-top: 8px;
-                margin-left: -37px;
-            }
-
-            .notification-badge {
-                display: inline-block;
-                background-color: red; /* Change this to your preferred color */
-                color: white;
-                border-radius: 50%;
-                width: 20px; /* Width of the badge */
-                height: 20px; /* Height of the badge */
-                text-align: center;
-                font-weight: bold;
-                position: absolute; /* Position it relative to the chat icon */
-                top: -5px; /* Adjust as needed */
-                right: -10px; /* Adjust as needed */
-                font-size: 14px; /* Size of the exclamation point */
+            .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
             }
         </style>
-</head>
+    </head>
 
     <body>
         <nav class="navbar">
             <h2>Chat</h2> 
 
-            <div class="profile-container">
-                <!-- Chat Icon with Notification Badge -->
-                <a href="ccs-chat.php" class="chat-icon" onclick="resetNotifications()">
-                    <i class="fa fa-comments"></i>
-                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
-                </a>
-
-                <div class="profile" id="profileDropdown">
-                <?php
+            <div class="profile" id="profileDropdown">
+                    <?php
                         // Check if a profile picture is set in the session
-                        if (!empty($_SESSION['picture'])) {
-                            // Show the profile picture
-                            echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
                         } else {
                             // Get the first letter of the username for the placeholder
                             $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
@@ -529,24 +541,23 @@ $conn->close();
                         }
                     ?>
 
-                    <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
-
-                    <i class="fa fa-chevron-down dropdown-icon"></i>
-                    <div class="dropdown-menu">
-                        <a href="ccs-your-profile.php">Profile</a>
-                        <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
-                    </div>
+                <span class="username"><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+            
+                <i class="fa fa-chevron-down dropdown-icon"></i>
+                <div class="dropdown-menu">
+                    <a href="ccs-your-profile.php">Profile</a>
+                    <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
                 </div>
             </div>
         </nav>
-
+    
         <div class="sidebar">
             <div class="logo">
                 <img src="images/logo.png" alt="Logo">
             </div>
 
             <ul class="menu">
-                <li><a href="ccs-dash.php" class="active"><img src="images/home.png">Dashboard</a></li>
+                <li><a href="ccs-dash.php"><img src="images/home.png">Dashboard</a></li>
                 <li><a href="ccs-projlist.php"><img src="images/project-list.png">Project List</a></li>
                 <li><a href="ccs-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
 
@@ -564,14 +575,7 @@ $conn->close();
                 <li><a href="ccs-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="ccs-task.php">Upload Files</a>
-                    <a href="ccs-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="ccs-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="ccs-responses.php"><img src="images/feedback.png">Responses</a></li>
 
@@ -592,163 +596,334 @@ $conn->close();
                 <?php foreach ($chatMessages as $chatMessage): ?>
                     <div class="message <?php echo ($chatMessage['message_type'] == 'user') ? 'user' : 'other'; ?>" 
                         style="text-align: <?php echo ($chatMessage['message_type'] == 'user') ? 'right' : 'left'; ?>;">
-                        <strong><?php echo htmlspecialchars($chatMessage['role']); ?>:</strong>
+                        <strong><?php echo htmlspecialchars($chatMessage['role']); ?>:</strong> <!-- Display the sender's role -->
                         <p><?php echo htmlspecialchars($chatMessage['message']); ?></p>
-                        <small><?php echo date('F j, Y || h:i A', strtotime($chatMessage['timestamp'])); ?></small>
+                        <small>
+                            <?php 
+                            // Set timezone to Asia/Manila or your desired timezone
+                            $timestamp = new DateTime($chatMessage['timestamp'], new DateTimeZone('UTC')); // assuming stored in UTC
+                            $timestamp->setTimezone(new DateTimeZone('Asia/Manila')); // Adjust to local timezone
+                            echo $timestamp->format('F j, Y || h:i A'); // Format the timestamp
+                            ?>
+                        </small>
+                        
                         <?php if ($chatMessage['sender'] == $_SESSION['uname']): ?>
-                            <!-- Delete button -->
-                            <form method="POST" action="ccs-chat.php" style="display:inline;" id="deleteForm_<?php echo $chatMessage['id']; ?>">
-                                <input type="hidden" name="delete_message_id" value="<?php echo $chatMessage['id']; ?>">
-                                <button type="button" class="delete-btn" onclick="confirmDelete(<?php echo $chatMessage['id']; ?>)">Delete</button>
-                            </form>
-                        <?php endif; ?>
-                    </div>
+                        <!-- Delete button with type "button" to prevent immediate submission -->
+                        <form method="POST" action="ccs-chat.php" style="display:inline;" id="deleteForm_<?php echo $chatMessage['id']; ?>">
+                            <input type="hidden" name="delete_message_id" value="<?php echo $chatMessage['id']; ?>">
+                            <button type="button" class="delete-btn" onclick="confirmDelete(<?php echo $chatMessage['id']; ?>)">Delete</button>
+                        </form>
+                    <?php endif; ?>
+            </div>
+
                 <?php endforeach; ?>
             </div>
 
             <div class="message-input">
-                <form method="POST" action="ccs-chat.php">
+                <form method="POST" action="ccs-chat.php" style="width: 100%;" id="chat-form">
                     <textarea name="message" placeholder="Type your message..." required></textarea>
                     <button type="submit">Send</button>
                 </form>
             </div>
         </div>
-	
-    <script>
-        function confirmDelete(chatMessage) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "Do you really want to delete this message?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!',
-                customClass: {
-                    popup: 'custom-swal-popup',
-                    title: 'custom-swal-title',
-                    confirmButton: 'custom-swal-confirm',
-                    cancelButton: 'custom-swal-cancel'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('deleteForm_' + chatMessage).submit();
-                }
-            });
-        }
 
-        document.getElementById('profileDropdown').addEventListener('click', function() {
-            var dropdownMenu = document.querySelector('.dropdown-menu');
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-            });
-
-            // Optional: Close the dropdown if clicking outside the profile area
-            window.onclick = function(event) {
-                if (!event.target.closest('#profileDropdown')) {
-                    var dropdownMenu = document.querySelector('.dropdown-menu');
-                    if (dropdownMenu.style.display === 'block') {
-                        dropdownMenu.style.display = 'none';
-                    }
-                }
-            };
+        <script>
+             // Get the form and textarea elements
+            const form = document.getElementById('chat-form');
+            const textarea = form.querySelector('textarea');
             
-            var dropdowns = document.getElementsByClassName("dropdown-btn");
+            // Add an event listener to the textarea to listen for the 'Enter' key
+            textarea.addEventListener('keydown', function(event) {
+                // Check if the pressed key is 'Enter' (keyCode 13)
+                if (event.key === 'Enter') {
+                    // Prevent the default action (adding a newline)
+                    event.preventDefault();
+                    
+                    // Submit the form
+                    form.submit();
+                }
+            });
 
-            for (let i = 0; i < dropdowns.length; i++) {
-                dropdowns[i].addEventListener("click", function () {
-                    // Close all dropdowns first
-                    let dropdownContents = document.getElementsByClassName("dropdown-container");
-                    for (let j = 0; j < dropdownContents.length; j++) {
-                        dropdownContents[j].style.display = "none";
+             // Function to confirm the deletion of a message
+            function confirmDelete(chatMessageId) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to delete this message?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it!',
+                    customClass: {
+                        popup: 'custom-swal-popup',
+                        confirmButton: 'custom-swal-confirm',
+                        cancelButton: 'custom-swal-cancel'
                     }
-
-                    // Toggle the clicked dropdown's visibility
-                    let dropdownContent = this.nextElementSibling;
-                    if (dropdownContent.style.display === "block") {
-                        dropdownContent.style.display = "none";
-                    } else {
-                        dropdownContent.style.display = "block";
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Submit the form for deleting the message
+                        document.getElementById('deleteForm_' + chatMessageId).submit();
                     }
                 });
             }
 
-        // Confirmation for logout
-        function confirmLogout(event) {
-        event.preventDefault();
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Do you really want to log out?",
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6', // Green confirm button
-            cancelButtonColor: '#dc3545', // Red cancel button
-            confirmButtonText: 'Yes, log me out',
-            cancelButtonText: 'Cancel',
-            customClass: {
-                popup: 'swal-popup',
-                confirmButton: 'swal-confirm',
-                cancelButton: 'swal-cancel'
-            },
-            // Additional custom styles via CSS can be added here
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Pass action in the fetch call
-                fetch('college-logout.php?action=logout')
-                    .then(response => response.text())
-                    .then(data => {
-                        console.log(data); // Log response for debugging
-                        window.location.href = 'roleaccount.php';
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
-        });
-    }
 
-// Auto-scroll to the bottom of the chat window when the page loads or chat updates
-const chatWindow = document.getElementById('chatWindow');
-chatWindow.scrollTop = chatWindow.scrollHeight; // Scroll to the bottom
-
-// Function to fetch and update messages
-function fetchMessages() {
-    fetch('ccs-fetch_messages.php')
-        .then(response => response.json())
-        .then(data => {
-            const chatWindow = document.getElementById('chatWindow');
-            chatWindow.innerHTML = ''; // Clear current messages
-            data.forEach(chatMessage => {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${chatMessage.message_type}`;
-                messageDiv.style.textAlign = chatMessage.message_type === 'user' ? 'right' : 'left';
-                messageDiv.innerHTML = `
-                    <strong>${chatMessage.role}:</strong>
-                    <p>${chatMessage.message}</p>
-                    <small>${new Date(chatMessage.timestamp).toLocaleString()}</small>
-                    ${chatMessage.sender === '<?php echo $_SESSION['uname']; ?>' ? '<form method="POST" action="ccs-chat.php" style="display:inline;"><input type="hidden" name="delete_message_id" value="' + chatMessage.id + '"><button type="submit" onclick="return confirm(\'Are you sure you want to delete this message?\')">Delete</button></form>' : ''}
-                `;
-                chatWindow.appendChild(messageDiv);
+            // Dropdown menu toggle
+            document.getElementById('profileDropdown').addEventListener('click', function() {
+                const dropdown = this.querySelector('.dropdown-menu');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
             });
-            chatWindow.scrollTop = chatWindow.scrollHeight; // Scroll to the bottom
-        });
-}
 
-// Fetch messages every 2 seconds
-setInterval(fetchMessages, 2000);
-fetchMessages(); // Initial fetch to load messages on page load
+            // Close dropdown if clicked outside
+            window.addEventListener('click', function(event) {
+                if (!document.getElementById('profileDropdown').contains(event.target)) {
+                    const dropdown = document.querySelector('.dropdown-menu');
+                    if (dropdown) {
+                        dropdown.style.display = 'none';
+                    }
+                }
+            });
 
-// Fetch messages every 2 seconds for ccs-reset_notifications.php
-setInterval(fetchMessages, 2000);
-
-document.addEventListener("DOMContentLoaded", () => {
-    fetch('ccs-reset_notifications.php')
-        .then(response => response.json())
-        .then(data => {
-            if (data.status !== 'success') {
-                console.error('Error resetting notifications:', data.message);
+            function logAction(actionDescription) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "college_logs.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.send("action=" + encodeURIComponent(actionDescription));
             }
-        })
-        .catch(error => console.error('Error resetting notifications:', error));
-});
 
-</script>
+            function logAndRedirect(actionDescription, url) {
+                logAction(actionDescription); // Log the action
+                setTimeout(function() {
+                    window.location.href = url; // Redirect after logging
+                }, 100); // Delay to ensure logging completes
+            }
 
-</body>
+            // Add event listeners when the page is fully loaded
+            document.addEventListener("DOMContentLoaded", function() {
+                // Log clicks on main menu links
+                document.querySelectorAll(".menu > li > a").forEach(function(link) {
+                    link.addEventListener("click", function() {
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+                // Handle dropdown button clicks
+                var dropdowns = document.getElementsByClassName("dropdown-btn");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].addEventListener("click", function () {
+                        let dropdownContents = document.getElementsByClassName("dropdown-container");
+                        for (let j = 0; j < dropdownContents.length; j++) {
+                            dropdownContents[j].style.display = "none";
+                        }
+                        let dropdownContent = this.nextElementSibling;
+                        if (dropdownContent.style.display === "block") {
+                            dropdownContent.style.display = "none";
+                        } else {
+                            dropdownContent.style.display = "block";
+                        }
+                    });
+                }
+
+                // Log clicks on dropdown links
+                document.querySelectorAll(".dropdown-container a").forEach(function(link) {
+                    link.addEventListener("click", function(event) {
+                        event.stopPropagation();
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+                // Log clicks on the "Profile" link
+                document.querySelector('.dropdown-menu a[href="ccs-your-profile.php"]').addEventListener("click", function() {
+                    logAction("Profile");
+                });
+            });
+
+            let inactivityTime = function () {
+            let time;
+
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
+
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
+
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
+                }
+            };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
+            function confirmLogout(event) {
+                event.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to log out?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
+                    confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('college-logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
+                });
+            }
+
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, '', window.location.href);
+                };
+            }
+            
+           // Auto-scroll to the bottom of the chat window when the page loads or chat updates
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.scrollTop = chatWindow.scrollHeight; // Scroll to the bottom
+
+            // Function to fetch and update messages
+            function fetchMessages() {
+                fetch('ccs-fetch_messages.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        const chatWindow = document.getElementById('chatWindow');
+                        chatWindow.innerHTML = ''; // Clear current messages
+                        data.forEach(chatMessage => {
+                            const messageDiv = document.createElement('div');
+                            messageDiv.className = `message ${chatMessage.message_type}`;
+                            messageDiv.style.textAlign = chatMessage.message_type === 'user' ? 'right' : 'left';
+
+                            // Format the date as "Month Day, Year || Time"
+                            const timestamp = new Date(chatMessage.timestamp);
+                            const formattedDate = timestamp.toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            });
+                            const formattedTime = timestamp.toLocaleTimeString('en-US', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true
+                            });
+                            const formattedTimestamp = `${formattedDate} || ${formattedTime}`;
+
+                            // Construct the message HTML
+                            messageDiv.innerHTML = `
+                                <strong>${chatMessage.role}:</strong>
+                                <p>${chatMessage.message}</p>
+                                <small>${formattedTimestamp}</small>
+                            `;
+
+                            // Check if the message sender is the current user, add delete button
+                            if (chatMessage.sender === '<?php echo $_SESSION['uname']; ?>') {
+                                const deleteForm = document.createElement('form');
+                                deleteForm.method = 'POST';
+                                deleteForm.action = 'ccs-chat.php';
+                                deleteForm.style.display = 'inline';
+                                deleteForm.id = 'deleteForm_' + chatMessage.id;
+
+                                const input = document.createElement('input');
+                                input.type = 'hidden';
+                                input.name = 'delete_message_id';
+                                input.value = chatMessage.id;
+
+                                const button = document.createElement('button');
+                                button.type = 'button';
+                                button.textContent = 'Delete';
+                                button.classList.add('delete-btn'); // Ensure the button retains styling
+
+                                // Add event listener for the delete button
+                                button.addEventListener('click', function() {
+                                    confirmDelete(chatMessage.id); // Pass the message ID
+                                });
+
+                                deleteForm.appendChild(input);
+                                deleteForm.appendChild(button);
+                                messageDiv.appendChild(deleteForm);
+                            }
+
+                            // Append the new message to the chat window
+                            chatWindow.appendChild(messageDiv);
+                        });
+
+                        // Auto-scroll to the bottom of the chat window after new messages are added
+                        chatWindow.scrollTop = chatWindow.scrollHeight;
+                    })
+                    .catch(error => console.error('Error fetching messages:', error));
+            }
+
+            // Fetch messages every 2 seconds
+            setInterval(fetchMessages, 2000);
+            fetchMessages(); // Initial fetch to load messages on page load
+
+            // Event listener to reset notifications on page load
+            document.addEventListener("DOMContentLoaded", () => {
+                fetch('ccs-reset_notifications.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status !== 'success') {
+                            console.error('Error resetting notifications:', data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error resetting notifications:', error));
+            });
+        </script>
+    </body>
 </html>
