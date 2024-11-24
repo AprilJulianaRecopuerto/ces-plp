@@ -531,11 +531,11 @@ $conn_profile->close();
 
     <body>
         <nav class="navbar">
-            <h2>All Projects in CAS</h2>
+            <h2>All Projects in CBA</h2>
 
             <div class="profile-container">
                 <!-- Chat Icon with Notification Badge -->
-                <a href="cas-chat.php" class="chat-icon" onclick="resetNotifications()">
+                <a href="cba-chat.php" class="chat-icon" onclick="resetNotifications()">
                     <i class="fa fa-comments"></i>
                     <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
                 </a>
@@ -557,7 +557,7 @@ $conn_profile->close();
 
                     <i class="fa fa-chevron-down dropdown-icon"></i>
                     <div class="dropdown-menu">
-                        <a href="cas-your-profile.php">Profile</a>
+                        <a href="cba-your-profile.php">Profile</a>
                         <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
                     </div>
                 </div>
@@ -570,9 +570,9 @@ $conn_profile->close();
             </div>
 
             <ul class="menu">
-                <li><a href="cas-dash.php"><img src="images/home.png">Dashboard</a></li>
-                <li><a href="cas-projlist.php"><img src="images/project-list.png">Project List</a></li>
-                <li><a href="cas-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
+                <li><a href="cba-dash.php"><img src="images/home.png">Dashboard</a></li>
+                <li><a href="cba-projlist.php"><img src="images/project-list.png">Project List</a></li>
+                <li><a href="cba-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
 
                 <!-- Dropdown for Resource Utilization -->
                 <button class="dropdown-btn">
@@ -580,17 +580,17 @@ $conn_profile->close();
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="cas-tor.php">Term of Reference</a>
-                    <a href="cas-requi.php">Requisition</a>
-                    <a href="cas-venue.php">Venue</a>
+                    <a href="cba-tor.php">Term of Reference</a>
+                    <a href="cba-requi.php">Requisition</a>
+                    <a href="cba-venue.php">Venue</a>
                 </div>
 
-                <li><a href="cas-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
+                <li><a href="cba-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <li><a href="cas-mov.php"><img src="images/task.png">Mode of Verification</a></li>
+                <li><a href="cba-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
+                <li><a href="cba-responses.php"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
@@ -598,8 +598,8 @@ $conn_profile->close();
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="cas-history.php">Log In History</a>
-                    <a href="cas-activitylogs.php">Activity Logs</a>
+                    <a href="cba-history.php">Log In History</a>
+                    <a href="cba-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>
         </div>
@@ -618,8 +618,8 @@ $conn_profile->close();
                 </thead>
                 <tbody>
                     <?php
-                    // Fetch all projects from the cas table
-                    $sql = "SELECT * FROM cas";
+                    // Fetch all projects from the cba table
+                    $sql = "SELECT * FROM cba";
                     $result = $conn_proj_list->query($sql);
 
                     // Initialize a flag to check if any rows are displayed
@@ -629,16 +629,16 @@ $conn_profile->close();
                         while ($row = $result->fetch_assoc()) {
                             $project_id = $row["id"];
 
-                            // Check if the project_id already exists in the cas_tor table
-                            $check_sql = "SELECT * FROM cas_requisition WHERE requi_sub = ?";
+                            // Check if the project_id already exists in the cba_tor table
+                            $check_sql = "SELECT * FROM cba_requisition WHERE requi_sub = ?";
                             $check_stmt = $conn->prepare($check_sql);
                             $check_stmt->bind_param("i", $project_id);
                             $check_stmt->execute();
                             $check_result = $check_stmt->get_result();
 
-                            // If the project is already added in cas_tor, skip it
+                            // If the project is already added in cba_tor, skip it
                             if ($check_result && $check_result->num_rows > 0) {
-                                continue; // Skip this project if it exists in cas_tor
+                                continue; // Skip this project if it exists in cba_tor
                             }
 
                             // If not already added, display the project
@@ -649,7 +649,7 @@ $conn_profile->close();
                                     <td>" . $row["dept"] . "</td>
                                     <td>" . $row["dateof_imple"] . "</td>
                                     <td class='add'>
-                                        <a href='cas-add-requi.php?id=" . $project_id . "'>Add</a>
+                                        <a href='cba-add-requi.php?id=" . $project_id . "'>Add</a>
                                     </td>
                                 </tr>";
 
@@ -833,14 +833,14 @@ $conn_profile->close();
                 });
 
             // Log clicks on the "Profile" link
-            document.querySelector('.dropdown-menu a[href="cas-your-profile.php"]').addEventListener("click", function() {
+            document.querySelector('.dropdown-menu a[href="cba-your-profile.php"]').addEventListener("click", function() {
                 logAction("Profile");
             });
         });
 
             document.addEventListener("DOMContentLoaded", () => {
                 function checkNotifications() {
-                    fetch('cas-check_notifications.php')
+                    fetch('cba-check_notifications.php')
                         .then(response => response.json())
                         .then(data => {
                             const chatNotification = document.getElementById('chatNotification');

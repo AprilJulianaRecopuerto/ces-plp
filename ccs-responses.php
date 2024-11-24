@@ -1,167 +1,174 @@
 <?php
 session_start();
 
+// Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
-    // Redirect to login page if the session variable is not set
-    header("Location: collegelogin.php");
+    header("Location: roleaccount.php");
     exit;
 }
 
-$currentDepartment= $_SESSION['department']; // Get the currently logged-in username
-
+$currentDepartment = $_SESSION['department']; // Get the current department
 $showForm = isset($_SESSION['show_event_form']) && $_SESSION['show_event_form'];
+
 require 'vendor/autoload.php';
+
 use Dompdf\Dompdf;
+use Dompdf\Options;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "certificate";
-$conn = new mysqli($servername, $username, $password, $dbname);
+$servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username = "sh9sgtg12c8vyqoa";
+$password = "s3jzz232brki4nnv";
+$dbname = "szk9kdwhvpxy2g77";
 
-$currentDepartment = mysqli_real_escape_string($conn, $currentDepartment);
-// Check connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
 $sql = "SELECT name, email, event, rate, department FROM submissions WHERE department = ?";
-
-// Prepare the statement
 $stmt = $conn->prepare($sql);
-
-// Bind the parameter to the placeholder
-$stmt->bind_param("s", $currentDepartment); // "s" means string (for the department)
-
-// Execute the prepared statement
+$stmt->bind_param("s", $currentDepartment);
 $stmt->execute();
-
-// Get the result of the query
 $result = $stmt->get_result();
+
 // Handle form submission for sending certificates
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) {
     $all_sent = true;
-    
     while ($row = $result->fetch_assoc()) {
         $name = $row['name'];
         $email = $row['email'];
         $department = $row['department'];
         $event = $row['event'];
-
+        
         // Generate PDF for each participant
-        $date = date("F j, Y");
+        $date = date("l, F j, Y");
+        
         $html = "
         <html>
         <head>
             <!-- Link Google Fonts directly -->
             <link href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap' rel='stylesheet'>
-            <link href='https://fonts.googleapis.com/css2?family=Ovo&display=swap' rel='stylesheet'>
+            <link href='https://fonts.googleapis.com/css2?family=Lilita+One&display=swap' rel='stylesheet'>
+        
+           <style>
+    body { 
+        text-align: center;
+        margin: 0; 
+        padding: 0; 
+        font-family: 'Poppins', sans-serif;
+    }
 
-            <link rel='preconnect' href='https://fonts.googleapis.com'>
-            <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
-            <link href='https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap' rel='stylesheet'>
-        
-            <style>
-                body { 
-                    text-align: center;
-                    margin: 0; 
-                    padding: 0; 
-                }
-        
-                .certificate {
-                    border: 20px solid #4CAF50;
-                    width: 100%; 
-                    max-width: 990px; 
-                    height: 610px;
-                    box-sizing: border-box; 
-                    margin: 0;
-                    background-color: #fff;
-                    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-                    border-radius: 10px;
-                    position: relative;
-                    padding-bottom: 50px; /* Space for the footer */
-                }
-        
-                h1 { 
-                    font-family: 'Ovo', serif;
-                    font-size: 50px;
-                    color: #333;
-                    margin: 0;
-                    letter-spacing: 1px;
-                    line-height: 1.2;
-                }
-        
-                .certificate-title .main {
-                    margin-top: 25px;
-                    font-size: 65px;
-                    font-weight: bold;
-                    display: block;
-                }
-        
-                .certificate-title .sub {
-                    font-size: 40px;
-                    display: block;
-                    margin-top: 5px;
-                }
-        
-                .subheading {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 22px;
-                    color: #666;
-                    margin: 20px 0;
-                    letter-spacing: 0.5px;
-                }
-        
-                .name { 
-                    font-family: 'DM Serif Display', serif;
-                    font-size: 65px;
-                    font-weight: bold; 
-                    color: #333;
-                    margin: 20px 0;
-                    text-decoration: underline;
-                }
-        
-                .details {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 22px; 
-                    color: #555;
-                    line-height: 1.5;
-                    margin-top: 20px;
-                }
-        
-                .date {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 20px; 
-                    color: #888;
-                    margin-top: 30px;
-                }
-        
-                .footer {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 18px;
-                    color: black;
-                    position: absolute;
-                    bottom: 15px;
-                    width: 100%;
-                    text-align: center;
-                }
-            </style>
+    .certificate {
+        font-family: 'Poppins', sans-serif;
+        position: relative;
+        width: 90%; /* Full width */
+        height: 80%;
+        padding: 50px;
+        background: white; /* Solid white background */
+        border: 8px double #001d3d; /* Double border with dark blue color */
+        border-radius: 20px; /* Rounded corners for the content */
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow for a 3D effect */
+        overflow: hidden; /* Ensures the border radius is respected */
+        box-sizing: border-box; /* Makes sure the border and padding are within the width */
+    }
+
+    /* Apply styles for the text inside the certificate */
+    .main-title, .participation {
+        display: block;
+        text-align: center;
+    }
+
+    .main-title {
+        font-family: 'Poppins', sans-serif !important;
+        font-size: 55px;
+        font-weight: bold;
+        color: #333;
+        margin-top: -15px;
+    }
+
+    .subheading {
+        font-family: 'Poppins', sans-serif !important;
+        font-size: 20px;
+        font-weight: bold;
+        color: #555;
+        margin: 10px 0 30px;
+        letter-spacing: 1px;
+        text-align: center;
+    }
+
+    .participation {
+        font-family: 'Poppins', sans-serif !important;
+        font-size: 28px;
+        color: white;
+        background: #003566;
+        padding: 10px 20px;
+        border-radius: 50px;
+        display: inline-block;
+        margin: 20px 0;
+        margin-top: -20px;
+    }
+
+    .name { 
+        font-family: 'Lilita One', sans-serif;
+        font-size: 85px;
+        font-weight: bold;
+        color: black;
+        margin: 20px 0;
+        text-decoration: underline;
+        font-style: italic;
+        text-transform: uppercase;
+    }
+
+    .details {
+        font-family: 'Poppins', sans-serif;
+        font-size: 22px; 
+        color: black;
+        line-height: 1.5;
+        margin-top: 22px;
+    }
+
+    .date {
+        font-family: 'Poppins', sans-serif;
+        font-size: 20px; 
+        color: #888;
+        margin-top: 30px;
+    }
+
+    .footer {
+        font-family: 'Poppins', sans-serif;
+        font-size: 18px;
+        color: black;
+        text-align: center;
+        margin-top: 70px;
+    }
+
+    .footer-content {
+        display: flex;
+        justify-content: center;
+    }
+
+    .footer-text {
+        font-size: 20px;
+        margin-left: 10px;
+        font-weight: normal;
+    }
+</style>
+
         </head>
         <body>
             <div class='certificate'>
-                <h1 class='certificate-title'>
-                    <span class='main'>CERTIFICATE</span>
-                    <span class='sub'>OF PARTICIPATION</span>
-                </h1>
+                <p class='main-title'>CERTIFICATE OF</p>
+                <p class='participation'>PARTICIPATION</p>
                 <p class='subheading'>This certificate is proudly presented to</p>
                 <p class='name'>" . htmlspecialchars($name) . "</p>
-                <p class='details'>For participating in <strong>$event</strong> held by <strong>$department</strong><br> on <strong>$date</strong>.</p>
-                
+                <p class='details'>Who have participated in <strong>&quot;$event&quot;</strong> hosted by <strong>$department</strong><br> on <strong>$date</strong>.</p>
                 <div class='footer'>
-                    Community Extension Services PLP
+                    <div class='footer-content'>
+                        <p class='footer-text'>Community Extension Services</p>
+                    </div>
                 </div>
             </div>
         </body>
@@ -169,22 +176,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         ";
         
 
-        // Generate PDF
-        $dompdf = new Dompdf();
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'landscape');
-        $dompdf->render();
-        $pdfFilePath = "certificates/certificate_$name.pdf";
-        file_put_contents($pdfFilePath, $dompdf->output());
+        try {
+            // Generate the PDF
+            $options = new Options();
+            $options->set('defaultFont', 'Poppins');
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isPhpEnabled', true); // Ensure this is enabled for PHP functionality
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isCssFloatEnabled', true); // Ensure floating is enabled
+            $dompdf = new Dompdf($options);
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
 
-        // Send Email with the certificate attached
+            // Save PDF to a temporary directory
+            $pdfFilePath = '/tmp/certificate_' . urlencode($name) . '.pdf';
+            file_put_contents($pdfFilePath, $dompdf->output());
+        } catch (Exception $e) {
+            error_log("PDF generation failed: " . $e->getMessage());
+            $all_sent = false;
+            continue;
+        }
+
+        // Send Email
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com'; 
+            $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'communityextensionservices1@gmail.com'; 
-            $mail->Password = 'ctpy rvsc tsiv fwix'; 
+            $mail->Username = 'communityextensionservices1@gmail.com';
+            $mail->Password = 'ctpy rvsc tsiv fwix';
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
@@ -197,25 +218,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             $mail->send();
         } catch (Exception $e) {
             $all_sent = false;
-            break; // Stop if an error occurs
+            break;
         }
 
-        // Remove the PDF file after sending
+        // Cleanup PDF file
         unlink($pdfFilePath);
     }
 
-    // Send a response back to the front end
-    if ($all_sent) {
-        echo 'success';
-    } else {
-        echo 'error';
-    }
+    // Return response
+    echo $all_sent ? 'success' : 'error';
     exit;
 }
 
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
+// Fetch the profile picture from the colleges table in user_registration
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
+}
+
+$uname = $_SESSION['uname'];
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $uname);
+$stmt->execute();
+$result_profile = $stmt->get_result();
+
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture'];
+}
+
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -738,6 +776,48 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
             .pagination-link:hover {
                 background-color: #45a049; /* Darker green on hover */
             }
+            .custom-swal-popup {
+                font-family: 'Poppins', sans-serif;
+                font-size: 16px; /* Increase the font size */
+                width: 400px !important; /* Set a larger width */
+            }
+
+            .custom-swal-confirm {
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #089451;
+                border: 0.5px #089451 !important;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none !important; /* Remove default focus outline */
+            }
+
+            .custom-swal-cancel {
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #e74c3c;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none; /* Remove default focus outline */
+            }
+
+            .custom-error-popup {
+                font-family: 'Poppins', sans-serif;
+                width: 400px !important; /* Set a larger width */
+            }
+
+            .custom-error-confirm {
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #e74c3c;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none; /* Remove default focus outline */
+            }
+
             .swal-popup {
                 font-family: "Poppins", sans-serif !important;
                 width: 400px;
@@ -783,6 +863,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                 right: -10px; /* Adjust as needed */
                 font-size: 14px; /* Size of the exclamation point */
             }
+
+            .pagination-info {
+            font-family: 'Poppins', sans-serif;
+            display: flex;               /* Use flexbox */
+            justify-content: space-between; /* Distribute items with space between */
+            align-items: center;         /* Align items vertically at the center */
+            margin-top: 10px;
+        }
+
+        .pagination-link {
+            font-family: 'Poppins', sans-serif;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            margin-right: 10px !important;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+
+        .pagination-link:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+
+        .pagination-text {
+            margin-right: 15px !important;
+            flex-grow: 1; /* Push the pagination text to the left */
+        }
+
+        .page {
+            display: flex;
+            justify-content: flex-end;  /* Align the pagination links to the right */
+            width: 100%;
+        }
+        .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
         </style>
     </head>
 
@@ -800,9 +921,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                 <div class="profile" id="profileDropdown">
                     <?php
                         // Check if a profile picture is set in the session
-                        if (!empty($_SESSION['picture'])) {
-                            // Show the profile picture
-                            echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
                         } else {
                             // Get the first letter of the username for the placeholder
                             $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
@@ -845,16 +966,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                 <li><a href="ccs-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="ccs-task.php">Upload Files</a>
-                    <a href="ccs-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="ccs-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="ccs-responses.php"><img src="images/feedback.png">Responses</a></li>
+                <li><a href="ccs-responses.php" class="active"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
@@ -879,61 +993,102 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                 </div>
        
                 <div class="table-container">
-                <table class="crud-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Event</th>
-                            <th>Department</th>
-                            <th>Rating</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body">
-                        <?php
-                        // Ensure $conn is already defined above this block for the connection
-                        // Prepare the SQL query to fetch records
-                        $sql = "SELECT name, email, event, department, rate FROM submissions WHERE department = ?";
-                        $stmt = $conn->prepare($sql); // Use prepare() for parameterized query
+                    <table class="crud-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Event</th>
+                                <th>Department</th>
+                                <th>Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                    <?php
+                    // Pagination variables
+                    $limit = 5; // Number of records per page
+                    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
+                    $offset = ($page - 1) * $limit; // Offset for SQL query
+                
+                    // Count total records for the current department
+                    $countSql = "SELECT COUNT(*) as total FROM submissions WHERE department = ?";
+                    $countStmt = $conn->prepare($countSql); // Prepare the query
+
+                    // Bind the department parameter to the query
+                    $countStmt->bind_param("s", $currentDepartment); 
+                    $countStmt->execute(); // Execute the query
+
+                    // Get the result of the query
+                    $countResult = $countStmt->get_result(); // Fetch the result
+
+                    // Fetch the total records from the result
+                    $totalRecords = $countResult->fetch_assoc()['total']; 
+
+                    // Calculate total pages for pagination
+                    $totalPages = ceil($totalRecords / $limit); // Calculate total pages
+
+                    // Prepare the SQL query to fetch records for the current department
+                    $sql = "SELECT name, email, event, department, rate FROM submissions WHERE department = ? LIMIT $limit OFFSET $offset";
+
+
+                    // Prepare the statement for fetching records
+                    $stmt = $conn->prepare($sql); // Use prepare() for parameterized query
                     
-                        if ($stmt === false) {
-                            // Check if the prepare query failed
-                            die('MySQL prepare error: ' . $conn->error);
+                    if ($stmt === false) {
+                        // Check if the prepare query failed
+                        die('MySQL prepare error: ' . $conn->error);
+                    }
+
+                    // Bind the parameter for the department
+                    $stmt->bind_param("s", $currentDepartment); // Bind the current department to the query
+
+                    // Execute the query
+                    $stmt->execute();
+
+                    // Get the result of the query
+                    $result = $stmt->get_result();
+
+                    // Check if there are results
+                    if ($result->num_rows > 0) {
+                        // Loop through the rows and display them
+                        while ($row = $result->fetch_assoc()) {
+                            echo "<tr>
+                                    <td>" . htmlspecialchars($row["name"]) . "</td>
+                                    <td>" . htmlspecialchars($row["email"]) . "</td>
+                                    <td>" . htmlspecialchars($row["event"]) . "</td>
+                                    <td>" . htmlspecialchars($row["department"]) . "</td>
+                                    <td>" . htmlspecialchars($row["rate"]) . "</td>
+                                </tr>";
                         }
-                    
-                        // Bind the parameter for the department
-                        $stmt->bind_param("s", $currentDepartment); // Assuming $currentDepartment is already set
-                    
-                        // Execute the query
-                        $stmt->execute();
-                    
-                        // Get the result of the query
-                        $result = $stmt->get_result();
-                    
-                        // Check if there are results
-                        if ($result->num_rows > 0) {
-                            // Loop through the rows and display them
-                            while ($row = $result->fetch_assoc()) {
-                                echo "<tr>
-                                        <td>" . htmlspecialchars($row["name"]) . "</td>
-                                        <td>" . htmlspecialchars($row["email"]) . "</td>
-                                        <td>" . htmlspecialchars($row["event"]) . "</td>
-                                        <td>" . htmlspecialchars($row["department"]) . "</td>
-                                        <td>" . htmlspecialchars($row["rate"]) . "</td>
-                                    </tr>";
-                            }
-                        } else {
-                            echo "<tr><td colspan='5'>No records found</td></tr>";
-                        }
-                    
-                        // Close the prepared statement
-                        $stmt->close();
-                    
-                        // Close the connection
-                        $conn->close();
-                        ?>
-                    </tbody>
+                    } else {
+                        echo "<tr><td colspan='5'>No records found</td></tr>";
+                    }
+
+                    // Close the prepared statement
+                    $stmt->close();
+
+                    // Close the connection
+                    $conn->close();
+                    ?>
+                </tbody>
                 </table>
+
+                <!-- Pagination Section: Move it under the table -->
+                <div class="pagination-info">
+                    <div class="page">
+                        <p>
+                            <?php if ($page > 1): ?>
+                                <a class="pagination-link" href="?page=<?php echo $page - 1; ?>">PREV</a>
+                            <?php endif; ?>
+
+                            <span class="pagination-text">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
+
+                            <?php if ($page < $totalPages): ?>
+                                <a class="pagination-link" href="?page=<?php echo $page + 1; ?>">NEXT</a>
+                            <?php endif; ?>
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <script>                   
@@ -948,7 +1103,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                         text: 'Please wait while certificates are being sent.',
                         allowOutsideClick: false,
                         didOpen: () => Swal.showLoading(),
-                        width: '500px'
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                        }
                     });
 
                     // Send AJAX request to trigger PHP functionality
@@ -962,8 +1119,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                                     icon: 'success',
                                     title: 'Success!',
                                     text: 'Certificates sent successfully.',
-                                    confirmButtonColor: '#28a745',
-                                    width: '500px'
+                                    customClass: {
+                                        popup: 'custom-swal-popup',
+                                        confirmButton: 'custom-swal-confirm'
+                                    }
                                 });
                             } else {
                                 Swal.fire({
@@ -989,50 +1148,119 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                 });
             });
 
-        function confirmLogout(event) {
-        event.preventDefault();
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Do you really want to log out?",
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6', // Green confirm button
-            cancelButtonColor: '#dc3545', // Red cancel button
-            confirmButtonText: 'Yes, log me out',
-            cancelButtonText: 'Cancel',
-            customClass: {
-                popup: 'swal-popup',
-                confirmButton: 'swal-confirm',
-                cancelButton: 'swal-cancel'
-            },
-            // Additional custom styles via CSS can be added here
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Pass action in the fetch call
-                fetch('college-logout.php?action=logout')
-                    .then(response => response.text())
-                    .then(data => {
-                        console.log(data); // Log response for debugging
-                        window.location.href = 'roleaccount.php';
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
-        });
-    }
+            let inactivityTime = function () {
+                let time;
 
-            document.getElementById('profileDropdown').addEventListener('click', function() {
-            var dropdownMenu = document.querySelector('.dropdown-menu');
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-            });
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
 
-            // Optional: Close the dropdown if clicking outside the profile area
-            window.onclick = function(event) {
-                if (!event.target.closest('#profileDropdown')) {
-                    var dropdownMenu = document.querySelector('.dropdown-menu');
-                    if (dropdownMenu.style.display === 'block') {
-                        dropdownMenu.style.display = 'none';
-                    }
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
+
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
                 }
             };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
+            function confirmLogout(event) {
+                event.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to log out?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
+                    confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('college-logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
+                });
+            }
+
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, '', window.location.href);
+                };
+            }
+
+            // Dropdown menu toggle
+            document.getElementById('profileDropdown').addEventListener('click', function() {
+                const dropdown = this.querySelector('.dropdown-menu');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close dropdown if clicked outside
+            window.addEventListener('click', function(event) {
+                if (!document.getElementById('profileDropdown').contains(event.target)) {
+                    const dropdown = document.querySelector('.dropdown-menu');
+                    if (dropdown) {
+                        dropdown.style.display = 'none';
+                    }
+                }
+            });
 
             function logAction(actionDescription) {
                 var xhr = new XMLHttpRequest();
@@ -1082,22 +1310,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                     });
                 });
 
-                document.querySelectorAll("td.edit a").forEach(function(link) {
-                link.addEventListener("click", function(event) {
-                    event.preventDefault(); // Prevent the default action
-                    var url = this.href; // Get the URL from the href attribute
-                    logAndRedirect("Edit Project", url); // Log the action and redirect
+                // Log clicks on the "Send Certificates to All Participants" button
+                document.getElementById("sendCertificatesButton").addEventListener("click", function() {
+                    logAction("Send Certificates"); // Log action
                 });
-            });
 
-            // Log clicks on action buttons (Delete)
-            document.querySelectorAll(".delete-project-button").forEach(function(button) {
-                button.addEventListener("click", function() {
-                    logAction("Delete Project"); // Log deletion action
-                    // Additional logic for deletion can be added here if needed
+                // Log clicks on the "Open Event Form" button
+                document.getElementById("toggle-button").addEventListener("click", function() {
+                    logAction("Open Event Form"); // Log action
+                    toggleForm(); // Call the existing function to toggle the form visibility
+                });
+
+                // Log clicks on the "Profile" link
+                document.querySelector('.dropdown-menu a[href="ccs-your-profile.php"]').addEventListener("click", function() {
+                    logAction("Profile");
                 });
             });
-        });
 
             document.addEventListener('DOMContentLoaded', function() {
                 var toggleButton = document.getElementById("toggle-button");
@@ -1121,14 +1349,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
                             // Show SweetAlert feedback to the user
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Form Visibility Toggled',
-                                text: 'The event form is Open.',
-                                confirmButtonColor: '#3085d6'
+                                title: 'Form',
+                                customClass: {
+                                    popup: 'custom-swal-popup',
+                                    confirmButton: 'custom-swal-confirm'
+                                }
                             });
                         }
                     };
                     xhr.send("toggleForm=true"); // Data to send
                 });
+            });
+
+            document.addEventListener("DOMContentLoaded", () => {
+                function checkNotifications() {
+                    fetch('ccs-check_notifications.php')
+                        .then(response => response.json())
+                        .then(data => {
+                            const chatNotification = document.getElementById('chatNotification');
+                            if (data.unread_count > 0) {
+                                chatNotification.style.display = 'inline-block';
+                            } else {
+                                chatNotification.style.display = 'none';
+                            }
+                        })
+                        .catch(error => console.error('Error checking notifications:', error));
+                }
+
+                // Check for notifications every 2 seconds
+                setInterval(checkNotifications, 2000);
+                checkNotifications(); // Initial check when page loads
             });
       </script>
     </body>

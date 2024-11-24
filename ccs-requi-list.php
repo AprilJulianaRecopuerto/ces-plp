@@ -1,11 +1,37 @@
 <?php
-session_start(); // Start the session
+session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
     // Redirect to login page if the session variable is not set
     header("Location: roleaccount.php");
     exit;
+}
+
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
+$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
+
+// Check connection
+if ($conn_proj_list->connect_error) {
+    die("Connection failed: " . $conn_proj_list->connect_error);
+}
+
+// Database credentials
+$servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_resource = "dnr20srzjycb99tw";
+$password_resource = "ndfnpz4j74v8t0p7";
+$dbname_resource = "x8uwt594q5jy7a7o";
+
+// Create connection
+$conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
 $sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
@@ -37,14 +63,14 @@ $conn_profile->close();
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+    <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+        
         <title>CES PLP</title>
 
-        <link rel="icon" href="images/icoon.png">
+        <link rel="icon" href="images/logoicon.png">
 
         <!-- SweetAlert CSS and JavaScript -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -60,6 +86,7 @@ $conn_profile->close();
             body {
                 margin: 0;
                 background-color: #F6F5F5; /* Light gray background color */
+                font-family: 'Poppins', sans-serif;
             }
 
             .navbar {
@@ -276,67 +303,61 @@ $conn_profile->close();
                 color: white; /* Change text color */
             }
 
-            .content-requi {
+            .content-resource {
                 margin-left: 320px; /* Align with the sidebar */
                 padding: 20px;
             }
-
-            .content-requi h2 {
-                font-family: 'Poppins', sans-serif;
-                font-size: 28px; /* Adjust the font size as needed */
-                margin-bottom: 20px; /* Space below the heading */
-                color: black; /* Adjust text color */
-                margin-top: 110px;
-            }
-
-            .data-details .table-container {
-                text-align: center;
-                width: 100%;               /* Full width of the parent */
-                overflow-x: auto;         /* Allow horizontal scrolling if needed */
-                margin: 20px auto;        /* Center the container with space above */
-                /* Removed margin-left settings */
-            }
-
-            .crud-table {
-                width: 100%;              /* Full width of the container */
-                border-collapse: collapse; /* Collapse borders for a cleaner look */
-                font-family: 'Poppins', sans-serif;
-                background-color: #ffffff;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                border-radius: 10px;
-            }
-
-            .crud-table th, .crud-table td {
-                text-align: center;
-                border: 1px solid #ddd;
-                padding: 10px;
-                text-align: left;
-                white-space: nowrap; /* Prevent text from wrapping */
-            }
-
-            .crud-table th {
-                text-align: center;
-                background-color: #4CAF50;
-                color: white;
-                height: 40px;
-            }
-
-            .crud-table td {
-                text-align: center;
-                height: 50px;
-                background-color: #fafafa;
-            }
-
-            .crud-table tr:hover {
-                background-color: #f1f1f1;
-            }
             
+            .form-container {
+                margin-top:110px;
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            .form-container h3 {
+                margin-top: 0;
+                font-family: 'Poppins', sans-serif;
+                font-size: 24px;
+                color: black;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-group label {
+                display: block;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            .form-group select, .form-group input[type="text"], .form-group input[type="date"], 
+            .form-group input[type="time"], .form-group input[type="number"] {
+                width: 100%;
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-size: 16px;
+                box-sizing: border-box;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .form-group input::placeholder {
+                font-family: 'Poppins', sans-serif;
+                color: #999;
+                font-style: italic;
+            }
+
+            .form-group select {
+                background: #f9f9f9;
+            }
+
             .button-container {
                 display: flex;
-                justify-content: left; /* Align buttons to the right */
-                margin-bottom: 20px; /* Space below the buttons */
-                margin-right: 20px;
-                margin-top: 110px;
+                justify-content: flex-end; /* Align buttons to the right */
+                margin-top: 20px; /* Space above the buttons */
             }
 
             .button-container button {
@@ -356,49 +377,9 @@ $conn_profile->close();
                 background-color: #45a049; /* Darker green on hover */
             }
 
-            .data-details {
-                font-family: 'Poppins', sans-serif;
-                margin-left: 10px;
-            }
-
-            .edit a {
-                font-family: 'Poppins', sans-serif;
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                text-align: center;
-                transition: background-color 0.3s;
-                text-decoration: none;
-            }
-
-            .edit a:hover {
-                background-color: #45a049; /* Darker green on hover */
-            }
-
-            .delete-button {
-                font-family: 'Poppins', sans-serif;
-                background-color: #e74c3c;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-            }
-
-            .delete-button:hover {
-                background-color: #ef233c; /* Darker green on hover */
-            }
-
             .custom-swal-popup {
                 font-family: 'Poppins', sans-serif;
+                font-size: 16px; /* Increase the font size */
                 width: 400px !important; /* Set a larger width */
             }
 
@@ -423,11 +404,6 @@ $conn_profile->close();
                 outline: none; /* Remove default focus outline */
             }
 
-            .custom-swal-input {
-                font-family: 'Poppins', sans-serif;
-                font-size: 17px;
-            }
-
             .custom-error-popup {
                 font-family: 'Poppins', sans-serif;
                 width: 400px !important; /* Set a larger width */
@@ -441,85 +417,6 @@ $conn_profile->close();
                 border-radius: 10px;
                 cursor: pointer;
                 outline: none; /* Remove default focus outline */
-            }
-
-            .custom-event-popup {
-                font-family: 'Poppins', sans-serif;
-                width: 600px;
-                background: #f8f9fa; /* Light background for the popup */
-                border-radius: 8px; /* Rounded corners */
-                padding: 15px; /* Padding inside the popup */
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-            }
-
-            .custom-event-confirm {
-                font-family: 'Poppins', sans-serif;
-                font-size: 17px;
-                background-color: #089451;
-                border: 0.5px #089451 !important;
-                color: #fff;
-                border-radius: 10px;
-                cursor: pointer;
-                outline: none !important; /* Remove default focus outline */
-            }
-
-            .custom-event-confirm:hover {
-                background-color: #218838; /* Darker green on hover */
-            }
-
-            .custom-event-cancel {
-                font-family: 'Poppins', sans-serif;
-                font-size: 17px;
-                background-color: #e74c3c;
-                color: #fff;
-                border-radius: 10px;
-                cursor: pointer;
-                outline: none; /* Remove default focus outline */
-            }
-
-            .custom-event-cancel:hover {
-                background-color: #c82333; /* Darker red on hover */
-            }
-
-            .custom-event-deny {
-                font-family: 'Poppins', sans-serif;
-                font-size: 17px;
-                background-color: #6c757d !important; /* Gray for deny button */
-                color: white !important; /* White text on the button */
-                padding: 10px 20px; /* Padding inside the button */
-                border-radius: 4px; /* Rounded corners for button */
-                border: none; /* No border */
-                transition: background-color 0.3s ease; /* Smooth background transition */
-            }
-
-            .custom-event-deny:hover {
-                background-color: #5a6268; /* Darker gray on hover */
-            }
-
-            .pagination-info {
-                font-family: 'Poppins', sans-serif;
-                display: flex; 
-                justify-content: space-between; 
-                align-items: center; 
-                margin-top: 10px;"
-            }
-
-            .pagination-link {
-                font-family: 'Poppins', sans-serif;
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 14px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                text-decoration: none;
-            }
-
-            .pagination-link:hover {
-                background-color: #45a049; /* Darker green on hover */
             }
 
             .swal-popup {
@@ -567,17 +464,74 @@ $conn_profile->close();
                 right: -10px; /* Adjust as needed */
                 font-size: 14px; /* Size of the exclamation point */
             }
+
+            .table-container {
+                width: 100%;
+                margin-left: -12px;
+                overflow-x: auto;
+                margin-top: 20px; /* Space above the table */
+            }
+
+            .crud-table {
+                margin-top: 110px;
+                width: 100%;
+                border-collapse: collapse;
+                font-family: 'Poppins', sans-serif;
+                background-color: #ffffff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .crud-table th, .crud-table td {
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+                white-space: nowrap; /* Prevent text from wrapping */
+            }
+
+            .crud-table th {
+                text-align: center; 
+                background-color: #4CAF50;
+                color: white;
+                height: 40px;
+                width: 14px; /* Set a fixed width for table headers */
+            }
+
+            .crud-table td {
+                height: 50px;
+                background-color: #fafafa;
+            }
+
+            .crud-table tr:hover {
+                background-color: #f1f1f1;
+            }
+
+            .add a {
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                text-decoration: none;
+                transition: background-color 0.3s;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .add a:hover {
+                background-color: #45a049; /* Darker green on hover */
+            }
             .smaller-alert {
             font-size: 14px; /* Adjust text size for a compact look */
             padding: 20px;   /* Adjust padding to mimic a smaller alert box */
             }
-            
         </style>
     </head>
 
     <body>
         <nav class="navbar">
-            <h2>Requisition (for Materials)</h2> 
+            <h2>All Projects in CCS</h2>
 
             <div class="profile-container">
                 <!-- Chat Icon with Notification Badge -->
@@ -650,165 +604,69 @@ $conn_profile->close();
             </ul>
         </div>
 
-        <div class="content-requi">
-            <div class="button-container">
-                    <button onclick="logAndRedirect('Add Requisition', 'ccs-requi-list.php')">Requisition Form</button>
-            </div>
+        <div class="content-resource">
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Project Title</th>
+                        <th>Semester</th>
+                        <th>Department</th>
+                        <th>Date of Event</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Fetch all projects from the ccs table
+                    $sql = "SELECT * FROM ccs";
+                    $result = $conn_proj_list->query($sql);
 
-            <?php
-            // Database credentials
-            $servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-            $username_resource = "dnr20srzjycb99tw";
-            $password_resource = "ndfnpz4j74v8t0p7";
-            $dbname_resource = "x8uwt594q5jy7a7o";
+                    // Initialize a flag to check if any rows are displayed
+                    $has_records = false;
 
-            // Create connection
-            $conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
+                    if ($result && $result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            $project_id = $row["id"];
 
-            // Check connection
-            if ($conn->connect_error) {
-                die("Connection failed: " . $conn->connect_error);
-            }
-            ?>
+                            // Check if the project_id already exists in the ccs_tor table
+                            $check_sql = "SELECT * FROM ccs_requisition WHERE requi_sub = ?";
+                            $check_stmt = $conn->prepare($check_sql);
+                            $check_stmt->bind_param("i", $project_id);
+                            $check_stmt->execute();
+                            $check_result = $check_stmt->get_result();
 
-            <div class="data-details">
-                <h3>Requisition Form Details</h3>
-
-                <div class="table-container">
-                    <table class="crud-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Date</th>
-                                <th>Name</th>
-                                <th>Position</th>
-                                <th>College Name</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            // Pagination variables for requisitions
-                            $limit = 5; // Number of records per page
-                            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
-                            $offset = ($page - 1) * $limit; // Offset for SQL query
-
-                            // Count total requisition records
-                            $countSql = "SELECT COUNT(*) as total FROM ccs_requisition";
-                            $countResult = $conn->query($countSql);
-                            $totalRecords = $countResult->fetch_assoc()['total'];
-                            $totalPages = ceil($totalRecords / $limit); // Calculate total pages
-
-                            // Fetch paginated requisition details
-                            $requisitionSql = "SELECT * FROM ccs_requisition ORDER BY requisition_id DESC LIMIT $limit OFFSET $offset";
-                            $resultRequisitions = $conn->query($requisitionSql);
-
-                            if ($resultRequisitions && $resultRequisitions->num_rows > 0) {
-                                while ($row = $resultRequisitions->fetch_assoc()) {
-                                    echo "<tr>
-                                        <td>" . $row["requisition_id"] . "</td>
-                                        <td>" . $row["date"] . "</td>
-                                        <td>" . $row["name"] . "</td>
-                                        <td>" . $row["position"] . "</td>
-                                        <td>" . $row["college_name"] . "</td>
-                                        <td class='edit'>
-                                            <a href='ccs-edit-requisition.php?requisition_id=" . $row["requisition_id"] . "'>EDIT</a>
-                                            <button class='delete-button' data-id='" . $row["requisition_id"] . "'>DELETE</button>
-                                            <a href='ccs-requi-download.php?id=" . $row["requisition_id"] . "' class='download-button'>Download Report</a>
-                                        </td>
-                                    </tr>";
-                                }
-                            } else {
-                                echo "<tr><td colspan='6'>No requisitions found.</td></tr>";
+                            // If the project is already added in ccs_tor, skip it
+                            if ($check_result && $check_result->num_rows > 0) {
+                                continue; // Skip this project if it exists in ccs_tor
                             }
-                            ?>
-                        </tbody>
-                    </table>
-                </div>
 
-                <h3>Items for Requisitions</h3>
-                <div class="table-container">
-                    <table class="crud-table">
-                        <thead>
-                            <tr>
-                                <th>Requisition ID</th>
-                                <th>Item Name</th>
-                                <th>Total Items Requested</th>
-                                <th>Total Usage</th>
-                                <th>Utilization %</th>
-                            
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            // Pagination variables for requisitions
-                            $limit = 5; // Number of records per page
-                            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
-                            $offset = ($page - 1) * $limit; // Offset for SQL query
+                            // If not already added, display the project
+                            echo "<tr>
+                                    <td>" . $project_id . "</td>
+                                    <td>" . $row["proj_title"] . "</td>
+                                    <td>" . $row["semester"] . "</td>
+                                    <td>" . $row["dept"] . "</td>
+                                    <td>" . $row["dateof_imple"] . "</td>
+                                    <td class='add'>
+                                        <a href='ccs-add-requi.php?id=" . $project_id . "'>Add</a>
+                                    </td>
+                                </tr>";
 
-                            // Fetch all items details (removing pagination for items)
-                            $itemsSql = "SELECT * FROM ccs_items ORDER BY requisition_id DESC";
-                            $resultItems = $conn->query($itemsSql);
+                            // Set the flag to true since we displayed at least one record
+                            $has_records = true;
+                        }
+                    }
 
-                            if ($resultItems && $resultItems->num_rows > 0) {
-                                $itemsData = [];
-                                
-                                // Group items by requisition_id
-                                while ($row = $resultItems->fetch_assoc()) {
-                                    $itemsData[$row['requisition_id']][] = $row; // Grouping items by requisition_id
-                                }
+                    // Display a fallback message if no records were displayed
+                    if (!$has_records) {
+                        echo "<tr><td colspan='6'>No records found</td></tr>";
+                    }
 
-                                // Output rows with calculated rowspans for requisition_id
-                                foreach ($itemsData as $requisitionId => $items) {
-                                    $firstRow = true; // Track the first row for requisition_id
-
-                                    foreach ($items as $index => $item) {
-                                        echo "<tr>";
-
-                                        // Display Requisition ID only once per unique requisition_id
-                                        if ($firstRow) {
-                                            echo "<td rowspan='" . count($items) . "'>" . $requisitionId . "</td>";
-                                            $firstRow = false; // Set to false after the first row
-                                        }
-
-                                        // Output remaining columns for the current item
-                                        echo "<td>" . htmlspecialchars($item["item_name"]) . "</td>
-                                            <td>" . htmlspecialchars($item["total_items"]) . "</td>
-                                            <td>" . htmlspecialchars($item["total_usage"]) . "</td>
-                                            <td>" . htmlspecialchars($item["utilization_percentage"]) . '%'. "</td>
-                                            
-                                            </tr>";
-                                    }
-                                }
-                            } else {
-                                echo "<tr><td colspan='4'>No items found.</td></tr>";
-                            }
-                            ?>
-
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="pagination-info">
-                    <div>
-                        <p><?php echo "$totalRecords RECORDS FOUND"; ?></p>
-                    </div>
-
-                    <div class="page">
-                        <p>
-                            <?php if ($page > 1): ?>
-                                <a class="pagination-link" href="?page=<?php echo $page - 1; ?>">PREV</a>
-                            <?php endif; ?>
-
-                            <span class="pagination-text">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
-                            
-                            <?php if ($page < $totalPages): ?>
-                                <a class="pagination-link" href="?page=<?php echo $page + 1; ?>">NEXT</a>
-                            <?php endif; ?>
-                        </p>
-                    </div>
-                </div>
-            </div>
+                    $conn_proj_list->close();
+                    ?>
+                </tbody>
+            </table>
         </div>
 
         <script>
@@ -909,7 +767,7 @@ $conn_profile->close();
                     window.history.pushState(null, '', window.location.href);
                 };
             }
-
+            
             // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
                 const dropdown = this.querySelector('.dropdown-menu');
@@ -925,172 +783,7 @@ $conn_profile->close();
                     }
                 }
             });
-
-            function showInputFields(mealTime) {
-                const inputFields = document.getElementById('input_fields');
-                
-                // Show input fields only if "AM", "Lunch", or "PM" is selected
-                if (mealTime) {
-                    inputFields.style.display = 'block';
-                } else {
-                    inputFields.style.display = 'none'; // Hide if no option is selected
-                }
-            }
-
-            document.addEventListener("DOMContentLoaded", function () {
-            const deleteButtons = document.querySelectorAll(".delete-button");
-
-            deleteButtons.forEach(button => {
-                button.addEventListener("click", function () {
-                    const requisitionId = this.getAttribute("data-id");
-
-                    // Fetch the count of items in the requisition (AJAX call)
-                    fetch(`ccs-requi-delete.php?requisition_id=${requisitionId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.count > 1) {
-                                // Show SweetAlert for multiple items
-                                Swal.fire({
-                                    title: "Multiple Items Found",
-                                    text: "Do you want to delete all items associated with this ID?",
-                                    icon: "warning",
-                                    showCancelButton: true,
-                                    confirmButtonText: "Yes, delete all",
-                                    cancelButtonText: "No, enter specific Item Name",
-                                    showDenyButton: true,
-                                    denyButtonText: "Cancel",
-                                    background: '#f8f9fa',
-                                    customClass: {
-                                        popup: 'custom-event-popup',
-                                        title: 'custom-event-title',
-                                        confirmButton: 'custom-event-confirm',
-                                        cancelButton: 'custom-event-cancel',
-                                        denyButton: 'custom-event-deny'
-                                    }
-                                }).then(result => {
-                                    if (result.isConfirmed) {
-                                        deleteRequisition(requisitionId, 'all');
-                                    } else if (result.isDenied) {
-                                        Swal.fire({
-                                            title: 'Action Cancelled',
-                                            text: 'Your action has been cancelled.',
-                                            icon: 'info',
-                                            background: '#f8f9fa',
-                                            customClass: {
-                                                popup: 'custom-error-popup',
-                                                title: 'custom-error-title',
-                                                confirmButton: 'custom-swal-confirm'
-                                            }
-                                        });
-                                    } else if (result.dismiss === Swal.DismissReason.cancel) {
-                                        Swal.fire({
-                                            title: 'Enter Specific Item Name',
-                                            input: 'text',
-                                            inputLabel: 'Item Name',
-                                            inputPlaceholder: 'Enter the specific item name',
-                                            showCancelButton: true,
-                                            background: '#f8f9fa',
-                                            customClass: {
-                                                popup: 'custom-swal-popup',
-                                                input: 'custom-swal-input',
-                                                title: 'custom-swal-title',
-                                                confirmButton: 'custom-swal-confirm',
-                                                cancelButton: 'custom-swal-cancel'
-                                            }
-                                        }).then(itemResult => {
-                                            if (itemResult.isConfirmed) {
-                                                deleteRequisition(requisitionId, itemResult.value);
-                                            }
-                                        });
-                                    }
-                                });
-                            } else {
-                                // Only one item found; confirm delete requisition and item
-                                Swal.fire({
-                                    title: 'Are you sure?',
-                                    text: 'Do you really want to delete this?',
-                                    icon: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Yes, delete',
-                                    cancelButtonText: 'Cancel',
-                                    background: '#f8f9fa',
-                                    customClass: {
-                                        popup: 'custom-swal-popup',
-                                        title: 'custom-swal-title',
-                                        confirmButton: 'custom-swal-confirm',
-                                        cancelButton: 'custom-swal-cancel'
-                                    }
-                                }).then(result => {
-                                    if (result.isConfirmed) {
-                                        deleteRequisition(requisitionId, 'single');
-                                    }
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            console.error("Error fetching item count:", error);
-                            Swal.fire({
-                                title: 'Error',
-                                text: 'Unable to proceed with delete action.',
-                                icon: 'error',
-                                background: '#f8f9fa',
-                                customClass: {
-                                    popup: 'custom-error-popup',
-                                    title: 'custom-error-title'
-                                }
-                            });
-                        });
-                    });
-                });
-
-                // Function to handle the deletion
-                function deleteRequisition(requisitionId, itemName) {
-                    fetch(`ccs-requi-delete.php?requisition_id=${requisitionId}&item_name=${itemName}`, {
-                        method: 'POST'
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                title: 'Deleted!',
-                                text: 'The requisition has been deleted.',
-                                icon: 'success',
-                                background: '#f8f9fa',
-                                customClass: {
-                                    popup: 'custom-swal-popup',
-                                    title: 'custom-swal-title',
-                                    confirmButton: 'custom-swal-confirm'
-                                }
-                            }).then(() => location.reload()); // Reload page after deletion
-                        } else {
-                            Swal.fire({
-                                title: 'Error',
-                                text: 'An error occurred while deleting the requisition.',
-                                icon: 'error',
-                                background: '#f8f9fa',
-                                customClass: {
-                                    popup: 'custom-error-popup',
-                                    title: 'custom-error-title'
-                                }
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error deleting requisition:", error);
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'Unable to complete the deletion.',
-                            icon: 'error',
-                            background: '#f8f9fa',
-                            customClass: {
-                                popup: 'custom-error-popup',
-                                title: 'custom-error-title'
-                            }
-                        });
-                    });
-                }
-            });
-
+           
             function logAction(actionDescription) {
                 var xhr = new XMLHttpRequest();
                 xhr.open("POST", "college_logs.php", true);
@@ -1138,22 +831,6 @@ $conn_profile->close();
                         logAction(link.textContent.trim());
                     });
                 });
-
-                document.querySelectorAll("td.edit a").forEach(function(link) {
-                link.addEventListener("click", function(event) {
-                    event.preventDefault(); // Prevent the default action
-                    var url = this.href; // Get the URL from the href attribute
-                    logAndRedirect("Edit Requisition", url); // Log the action and redirect
-                });
-            });
-
-            // Log clicks on action buttons (Delete)
-            document.querySelectorAll(".delete-button").forEach(function(button) {
-                button.addEventListener("click", function() {
-                    logAction("Delete Requistion"); // Log deletion action
-                    // Additional logic for deletion can be added here if needed
-                });
-            });
 
             // Log clicks on the "Profile" link
             document.querySelector('.dropdown-menu a[href="ccs-your-profile.php"]').addEventListener("click", function() {
