@@ -985,7 +985,7 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
         <div class="content-projectlist">
             <div class="content">
                 <div class="button-container">
-                    <form method="POST" action = "">
+                    <form id="sendCertificatesForm" method="POST" action = "">
                         <button type="submit" name="send_certificates" id="sendCertificatesButton">Send Certificates to All Participants</button>
                     </form>
 
@@ -1094,7 +1094,7 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
             <script>                   
             // Display loading SweetAlert
             $(document).ready(function() {
-                $('form').submit(function (e) {
+                $('#sendCertificatesForm').submit(function (e) {
                     e.preventDefault(); // Prevent the form from submitting normally
 
                     // Show loading SweetAlert
