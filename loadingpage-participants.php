@@ -137,9 +137,9 @@
 
         .header-button-dropbtn{
             font-family: 'Glacial Indifference', sans-serif;
-            background-color: none;
+            background-color: white;
             font-size: 17.9px;
-            color: white;
+            color: black;
             border: none;
             border-radius: 12px;
             width: 145.7px;
@@ -151,6 +151,7 @@
 
         .header-button-dropbtn:hover {
             background-color: #218838;
+            color: black;
         }
 
         /* Banner styles*/
