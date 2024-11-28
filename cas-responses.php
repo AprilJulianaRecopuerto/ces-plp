@@ -1021,10 +1021,16 @@ if (isset($_POST['update_link'])) {
                 $fetchLinkStmt->bind_param("s", $currentDepartment);
                 $fetchLinkStmt->execute();
                 $linkResult = $fetchLinkStmt->get_result();
-                $currentLink = ($linkResult->num_rows > 0) ? $linkResult->fetch_assoc()['response_link'] : '';
+                $currentLink = ($linkResult->num_rows > 0) ? $linkResult->fetch_assoc()['response_link'] : 'No link set';
                 $fetchLinkStmt->close();
                 ?>
-                <input type="text" id="responseLink" name="responseLink" value="<?php echo htmlspecialchars($currentLink); ?>" required>
+                <input 
+                    type="text" 
+                    id="responseLink" 
+                    name="responseLink" 
+                    value="<?php echo htmlspecialchars($currentLink); ?>" 
+                    placeholder="Enter the new response link" 
+                    required>
                 <button type="submit" name="update_link">Update Link</button>
             </form>
         </div>
