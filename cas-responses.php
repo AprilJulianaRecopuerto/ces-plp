@@ -274,7 +274,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -1102,7 +1101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
 </div>
 
             <script>                 
-            $(document).ready(function () {
+ $(document).ready(function () {
     $('#updateLinkForm').submit(function (e) {
         e.preventDefault(); // Prevent default form submission
 
@@ -1115,7 +1114,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
             type: 'POST',
             data: { response_form_link: newLink },
             success: function (response) {
-                if (response === 'success') {
+                // Check if the response is 'success' or 'error'
+                if (response.trim() === 'success') {
                     // Show SweetAlert success notification
                     Swal.fire({
                         icon: 'success',
@@ -1128,7 +1128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
                         }
                     });
                 } else {
-                    // Show SweetAlert error notification
+                    // Show SweetAlert error notification for any other response
                     Swal.fire({
                         icon: 'error',
                         title: 'Update Failed',
