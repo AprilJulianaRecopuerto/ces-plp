@@ -1,5 +1,5 @@
 <?php
-// Database connection
+// Database connection for evaluation_links table
 $servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username = "sh9sgtg12c8vyqoa";
 $password = "s3jzz232brki4nnv";
@@ -10,6 +10,9 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+
+$alertMessage = '';
+$evaluationLink = ''; // Variable to hold the link
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get the form data
@@ -22,7 +25,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sql = "INSERT INTO submissions (name, email, event, department) VALUES ('$name', '$email', '$event', '$department')";
 
     if ($conn->query($sql) === TRUE) {
-        // If insertion is successful, set success message and show second SweetAlert
+        // Fetch the link from evaluation_links where department = 'CAS'
+        $linkQuery = "SELECT response_link FROM evaluation_links WHERE department = 'CAS'";
+        $resultLink = $conn->query($linkQuery);
+
+        if ($resultLink->num_rows > 0) {
+            $row = $resultLink->fetch_assoc();
+            $evaluationLink = $row['response_link']; // Get the response_link
+        }
+
+        // Set success message and flag to show rating SweetAlert
         $alertMessage = "Thank you for your submission!";
         $showRatingAlert = true; // Flag to show rating SweetAlert
     } else {
@@ -33,7 +45,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conn->close();
 }
 ?>
-
 
 
 <!DOCTYPE html>
@@ -573,16 +584,25 @@ $conn_proj->close();
             });
         });
 
-        <?php if (isset($alertMessage)) { ?>
-            // First SweetAlert - Submission Successful
+        <?php if ($alertMessage): ?>
             Swal.fire({
                 title: 'Submission Successful!',
                 text: '<?php echo $alertMessage; ?>',
                 icon: 'success',
                 showConfirmButton: true,
                 confirmButtonText: 'OK',
-            })
-        <?php } ?>
+            }).then(function() {
+                // Check if there's an evaluation link
+                <?php if (!empty($evaluationLink)): ?>
+                    Swal.fire({
+                        title: 'Your Evaluation Link',
+                        html: 'Click <a href="<?php echo $evaluationLink; ?>" target="_blank">here</a> to access the evaluation form.',
+                        icon: 'info',
+                        confirmButtonText: 'Okay',
+                    });
+                <?php endif; ?>
+            });
+        <?php endif; ?>
 
     </script>
 </body>
