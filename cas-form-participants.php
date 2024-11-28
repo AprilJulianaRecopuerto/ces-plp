@@ -25,16 +25,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sql = "INSERT INTO submissions (name, email, event, department) VALUES ('$name', '$email', '$event', '$department')";
 
     if ($conn->query($sql) === TRUE) {
-        // If insertion is successful, show SweetAlert
+        // If insertion is successful, set success message and show second SweetAlert
         $alertMessage = "Thank you for your submission!";
+        $showRatingAlert = true; // Flag to show rating SweetAlert
     } else {
         // If insertion fails, show error message
         $alertMessage = "Error: " . $sql . "<br>" . $conn->error;
+        $showRatingAlert = false;
     }
     $conn->close();
 }
-
-
 ?>
 
 <!DOCTYPE html>
