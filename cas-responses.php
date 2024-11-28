@@ -252,32 +252,28 @@ $profilePicture = null;
 if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
     $profilePicture = $row_profile['picture'];
 }
-
-// Handle updating the link
-if (isset($_POST['update_link'])) {
-    $newLink = $_POST['responseLink'];
-
-    // Validate and sanitize input
-    $sanitizedLink = filter_var($newLink, FILTER_SANITIZE_URL);
-
-    if ($sanitizedLink) {
-        // Update the link in the database for the CAS department
-        $sql = "UPDATE evaluation_links SET link = ? WHERE department = 'CAS'";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $sanitizedLink);
-
-        if ($stmt->execute()) {
-            echo 'success'; // Respond with 'success' for AJAX success
-        } else {
-            echo 'error'; // Respond with 'error' for AJAX failure
-        }
-    } else {
-        echo 'error'; // Respond with 'error' if sanitization fails
-    }
-    exit(); // Exit script to prevent further output
-}
-
 ?>
+
+<?php
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])) {
+    $newLink = $_POST['response_form_link'];
+
+    // Update the link in the database
+    $sql = "UPDATE evaluation_links SET response_link = ? WHERE department = 'CAS'";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $newLink);
+
+    if ($stmt->execute()) {
+        echo 'success'; // Send success response
+    } else {
+        echo 'error'; // Send error response
+    }
+
+    $stmt->close();
+    exit;
+}
+?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -1028,8 +1024,8 @@ if (isset($_POST['update_link'])) {
                 $currentLink = ($linkResult->num_rows > 0) ? $linkResult->fetch_assoc()['response_link'] : 'No link set';
                 $fetchLinkStmt->close();
                 ?>
-                <input type="text" id="responseLink" name="responseLink" value="<?php echo htmlspecialchars($currentLink); ?>" required>
-                <button type="submit" name="update_link">Update Link</button>
+                <input type="text" name="response_form_link" id="responseFormLink" value="<?php echo htmlspecialchars($currentLink); ?>" required>
+                <button type="submit" id="updateLinkButton">Update Link</button>
             </form>
         </div>
 
@@ -1105,43 +1101,57 @@ if (isset($_POST['update_link'])) {
     </div>
 </div>
 
-            <script>      
+            <script>                 
             $(document).ready(function () {
-    // Handle form submission
     $('#updateLinkForm').submit(function (e) {
         e.preventDefault(); // Prevent default form submission
 
-        const responseLink = $('#responseLink').val(); // Get the link value
+        // Get the new link value from the input field
+        const newLink = $('#responseFormLink').val();
 
         // Send AJAX request to update the link
         $.ajax({
-            url: '', // The same page or a specific handler script
+            url: '', // Leave empty if submitting to the same page
             type: 'POST',
-            data: { update_link: true, responseLink: responseLink },
+            data: { response_form_link: newLink },
             success: function (response) {
                 if (response === 'success') {
+                    // Show SweetAlert success notification
                     Swal.fire({
                         icon: 'success',
                         title: 'Link Updated!',
-                        text: 'The response form link has been updated successfully.',
-                        confirmButtonColor: '#28a745'
+                        text: 'The response form link has been successfully updated.',
+                        confirmButtonColor: '#4caf50',
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
                     });
                 } else {
+                    // Show SweetAlert error notification
                     Swal.fire({
                         icon: 'error',
-                        title: 'Update Failed!',
-                        text: 'There was an issue updating the response form link.',
-                        confirmButtonColor: '#dc3545'
+                        title: 'Update Failed',
+                        text: 'Unable to update the response form link. Please try again.',
+                        confirmButtonColor: '#dc3545',
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
                     });
                 }
             },
-            error: function () {
-                // Handle AJAX errors
+            error: function (xhr, status, error) {
+                // Show SweetAlert error notification for AJAX failure
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error!',
-                    text: 'An error occurred while updating the link. Please try again.',
-                    confirmButtonColor: '#dc3545'
+                    title: 'Server Error',
+                    text: 'An error occurred while updating the response form link.',
+                    confirmButtonColor: '#dc3545',
+                    customClass: {
+                        popup: 'custom-swal-popup',
+                        confirmButton: 'custom-swal-confirm'
+                    }
                 });
             }
         });
