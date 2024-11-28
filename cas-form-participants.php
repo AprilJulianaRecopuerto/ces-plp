@@ -308,7 +308,7 @@ $conn->close();
             border-radius: 4px;
 		}
 
-        select[type="event"] {
+        select{
             font-family: 'Poppins', sans-serif;
 			height: 17px;
 			width: 270%;
@@ -325,7 +325,7 @@ $conn->close();
 		/* Focus state for inputs */
 		input[type="text"]:focus,
 		input[type="email"]:focus,
-        select[type="event"] {
+        select {
 			border-color: black; /* Darker green focus border */
 		}
 
