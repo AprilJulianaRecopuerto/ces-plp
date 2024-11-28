@@ -135,6 +135,24 @@
             background-color: #218838;
         }
 
+        .header-button-dropbtn{
+            font-family: 'Glacial Indifference', sans-serif;
+            background-color: #089451;
+            font-size: 17.9px;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            width: 145.7px;
+            height: 60px;
+            margin-top: 14px;
+            margin-right: 50px;
+            cursor: pointer;
+        }
+
+        .header-button-dropbtn {
+            background-color: #218838;
+        }
+
         /* Banner styles*/
         .banner1 {
             position: relative;
@@ -252,14 +270,14 @@
         </nav>
     
         <div class="dropdown">
-        <button class="header-button dropbtn">Evaluation Form &nbsp;
+        <button class="header-button-dropbtn">Evaluation Form &nbsp;
             <i class="fa fa-caret-down"></i>
         </button>
         <div class="dropdown-content" style="right: 50px; top: 45px; position: absolute;">
             <a href="ces-form.php">CES Form</a>
             <a href="ccs-form.php">CCS Form</a>
             <a href="cihm-form.php">CIHM Form</a>
-            <a href="cas-form.php">CAS Form</a>
+            <a href="cas-form-participants.php">CAS Form</a>
             <a href="con-form.php">CON Form</a>
             <a href="coe-form.php">COE Form</a>
             <a href="cba-form.php">CBA Form</a>
@@ -272,20 +290,5 @@
         <img src="images/Admin (1).png">
         <h1 class="banner-heading">Empowering Communities <br> Through <br> Collaboration</h1>
     </div>
-
-    <script>
-        // LoadingPage Script
-        // Wait for the DOM to be fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get a reference to the login button by class name
-            var loginButton = document.querySelector('.header-button'); // Corrected selector to target the login button inside .header
-
-            // Add click event listener to the login button
-            loginButton.addEventListener('click', function() {
-                // Redirect to roleaccount.html when the button is clicked
-                window.location.href = 'form-participants.php';
-            });
-        });
-    </script>
 </body>
 </html>
