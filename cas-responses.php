@@ -985,33 +985,11 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
         <div class="content-projectlist">
             <div class="content">
                 <div class="button-container">
-                    <form id="sendCertificatesForm" method="POST" action = "">
+                    <form method="POST" action = "">
                         <button type="submit" name="send_certificates" id="sendCertificatesButton">Send Certificates to All Participants</button>
                     </form>
 
                     <button id="toggle-button" onclick="toggleForm()">Open Event Form</button>
-                </div>
-
-                        <!-- Form for updating evaluation link -->
-                <div class="evaluation-link-form">
-                    <form method="POST" action="">
-                        <?php
-                        // Fetch the current evaluation link for CAS department
-                        $linkSql = "SELECT link FROM evaluation_links WHERE department = 'CAS'";
-                        $linkResult = $conn->query($linkSql);
-
-                        // Check if a link exists
-                        if ($linkResult->num_rows > 0) {
-                            $linkRow = $linkResult->fetch_assoc();
-                            $currentLink = htmlspecialchars($linkRow['link']);
-                        } else {
-                            $currentLink = ''; // Default to empty if no link exists
-                        }
-                        ?>
-                        <label for="evaluationLink">Evaluation Link:</label>
-                        <input type="url" name="evaluationLink" id="evaluationLink" value="<?php echo $currentLink; ?>" required>
-                        <button type="submit" name="updateLink">Update Link</button>
-                    </form>
                 </div>
        
                 <div class="table-container">
@@ -1113,52 +1091,10 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
                 </div>
             </div>
 
-            <?php
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['updateLink'])) {
-    // Sanitize the input link
-    $newLink = trim($_POST['evaluationLink']);
-
-    // Update the link in the database for CAS department
-    $updateSql = "UPDATE evaluation_links SET link = ? WHERE department = 'CAS'";
-    $updateStmt = $conn->prepare($updateSql);
-
-    if ($updateStmt) {
-        $updateStmt->bind_param("s", $newLink);
-        if ($updateStmt->execute()) {
-            echo "<script>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: 'Evaluation link updated successfully.',
-                });
-            </script>";
-        } else {
-            echo "<script>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: 'Failed to update the evaluation link.',
-                });
-            </script>";
-        }
-        $updateStmt->close();
-    } else {
-        echo "<script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: 'Failed to prepare the update query.',
-            });
-        </script>";
-    }
-}
-?>
-
-
             <script>                   
             // Display loading SweetAlert
             $(document).ready(function() {
-                $('#sendCertificatesForm').submit(function (e) {
+                $('form').submit(function (e) {
                     e.preventDefault(); // Prevent the form from submitting normally
 
                     // Show loading SweetAlert
