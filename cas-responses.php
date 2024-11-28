@@ -1001,7 +1001,7 @@ if (isset($_POST['update_link'])) {
         <div class="content-projectlist">
     <div class="content">
         <div class="button-container">
-            <form method="POST" action="">
+            <form id="sendCertificatesForm" method="POST" action="">
                 <button type="submit" name="send_certificates" id="sendCertificatesButton">Send Certificates to All Participants</button>
             </form>
 
@@ -1100,7 +1100,7 @@ if (isset($_POST['update_link'])) {
             <script>                   
             // Display loading SweetAlert
             $(document).ready(function() {
-                $('#sendCertificatesButton').submit(function (e) {
+                $('#sendCertificatesForm').submit(function (e) {
                     e.preventDefault(); // Prevent the form from submitting normally
 
                     // Show loading SweetAlert
