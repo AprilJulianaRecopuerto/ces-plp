@@ -36,6 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conn->close();
 }
 ?>
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -587,14 +588,19 @@ $conn_proj->close();
                 if (<?php echo $showRatingAlert ? 'true' : 'false'; ?>) {
                     Swal.fire({
                         title: 'How satisfied are you with the event?',
-                        html: '<a href="https://forms.gle/CshKcCeExNbusNeD9" target="_blank">Click here to give ratings.</a>',
+                        html: '<a href="https://forms.gle/CshKcCeExNbusNeD9" target="_blank" id="ratingLink">Click here to give ratings.</a>',
                         icon: 'info',
-                        showConfirmButton: true,
-                        confirmButtonText: 'Done',
+                        showConfirmButton: false, // No confirm button
+                    });
+
+                    // Close SweetAlert when the link is clicked
+                    document.getElementById('ratingLink').addEventListener('click', function() {
+                        Swal.close(); // Close the SweetAlert
                     });
                 }
             });
         <?php } ?>
+        
     </script>
 </body>
 </html>
