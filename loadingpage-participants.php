@@ -149,7 +149,7 @@
             cursor: pointer;
         }
 
-        .header-button-dropbtn {
+        .header-button-dropbtn:hover {
             background-color: #218838;
         }
 
