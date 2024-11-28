@@ -319,7 +319,7 @@ select {
     font-family: 'Poppins', sans-serif;
     height: 40px; /* Adjusted height for consistency */
     width: 270%; /* Same width as the input fields */
-    padding: 15px; /* Adjusted padding */
+    padding: 2px; /* Adjusted padding */
     margin: 5px auto; /* Adjusted spacing */
     margin-top: 12px;
     border-radius: 10px;
