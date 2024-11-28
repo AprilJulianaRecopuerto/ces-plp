@@ -472,7 +472,7 @@ $conn->close();
             
             <label for="rating" class= "rating">How satisfied are you with the event?</label>
 
-            <p>https://forms.gle/CshKcCeExNbusNeD9</p>
+            <a href=https://forms.gle/CshKcCeExNbusNeD9>Clich here to give ratings.</a>
             
             
             <button class="button-submit" type="submit" name="signup">Submit</button>
