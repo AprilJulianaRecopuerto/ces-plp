@@ -595,7 +595,7 @@ $conn_proj->close();
                 // Check if there's an evaluation link
                 <?php if (!empty($evaluationLink)): ?>
                     Swal.fire({
-                        title: 'Your Evaluation Link',
+                        title: 'Event Evaluation Link',
                         html: 'Click <a href="<?php echo $evaluationLink; ?>" target="_blank">here</a> to access the evaluation form.',
                         icon: 'info',
                         confirmButtonText: 'Okay',
