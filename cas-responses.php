@@ -257,18 +257,26 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
 if (isset($_POST['update_link'])) {
     $newLink = $_POST['responseLink'];
 
-    // Update the response link for the CAS department in the database
-    $updateLinkSql = "UPDATE evaluation_links SET response_link = ? WHERE department = 'CAS'";
-    $updateLinkStmt = $conn->prepare($updateLinkSql);
-    $updateLinkStmt->bind_param("s", $newLink);
-    if ($updateLinkStmt->execute()) {
-        echo "<script>alert('CAS Response link updated successfully!');</script>";
-        echo "<script>window.location.reload();</script>";
+    // Validate and sanitize input
+    $sanitizedLink = filter_var($newLink, FILTER_SANITIZE_URL);
+
+    if ($sanitizedLink) {
+        // Update the link in the database for the CAS department
+        $sql = "UPDATE evaluation_links SET link = ? WHERE department = 'CAS'";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $sanitizedLink);
+
+        if ($stmt->execute()) {
+            echo 'success'; // Respond with 'success' for AJAX success
+        } else {
+            echo 'error'; // Respond with 'error' for AJAX failure
+        }
     } else {
-        echo "<script>alert('Failed to update the CAS response link.');</script>";
+        echo 'error'; // Respond with 'error' if sanitization fails
     }
-    $updateLinkStmt->close();
+    exit(); // Exit script to prevent further output
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -1009,7 +1017,7 @@ if (isset($_POST['update_link'])) {
         </div>
 
         <div class="form-container">
-            <form method="POST" action="">
+            <form id="updateLinkForm" method="POST" action="">
                 <label for="responseLink">CAS Response Form Link:</label>
                 <?php
                 // Fetch the current response link for the CAS department
@@ -1097,7 +1105,50 @@ if (isset($_POST['update_link'])) {
     </div>
 </div>
 
-            <script>                   
+            <script>      
+            $(document).ready(function () {
+    // Handle form submission
+    $('#updateLinkForm').submit(function (e) {
+        e.preventDefault(); // Prevent default form submission
+
+        const responseLink = $('#responseLink').val(); // Get the link value
+
+        // Send AJAX request to update the link
+        $.ajax({
+            url: '', // The same page or a specific handler script
+            type: 'POST',
+            data: { update_link: true, responseLink: responseLink },
+            success: function (response) {
+                if (response === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Link Updated!',
+                        text: 'The response form link has been updated successfully.',
+                        confirmButtonColor: '#28a745'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Update Failed!',
+                        text: 'There was an issue updating the response form link.',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            },
+            error: function () {
+                // Handle AJAX errors
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'An error occurred while updating the link. Please try again.',
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        });
+    });
+});
+
+            
             // Display loading SweetAlert
             $(document).ready(function() {
                 $('#sendCertificatesForm').submit(function (e) {
