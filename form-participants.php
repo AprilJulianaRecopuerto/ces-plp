@@ -472,23 +472,7 @@ $conn->close();
             
             <label for="rating" class= "rating">How satisfied are you with the event?</label>
 
-            <div id="rating" style="display: flex; gap: 10px;">
-                <label>
-                    <input type="radio" name="rating" value="1" required> Very Dissatisfied
-                </label>
-                <label>
-                    <input type="radio" name="rating" value="2"> Dissatisfied
-                </label>
-                <label>
-                    <input type="radio" name="rating" value="3"> Neutral
-                </label>
-                <label>
-                    <input type="radio" name="rating" value="4"> Satisfied
-                </label>
-                <label>
-                    <input type="radio" name="rating" value="5"> Very Satisfied
-                </label> 
-            </div>
+            
             
             <button class="button-submit" type="submit" name="signup">Submit</button>
         </form>

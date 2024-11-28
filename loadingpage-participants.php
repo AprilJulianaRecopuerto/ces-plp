@@ -177,6 +177,41 @@
         }
         /*LoadingPage*/
 		
+        /* Adjust dropdown for Evaluation Form */
+.header .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 200px; /* Adjust as needed */
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    z-index: 1000;
+    right: 50px; /* Align to the right */
+    top: 45px; /* Adjust vertical placement */
+}
+
+.header .dropdown-content a {
+    font-family: 'Poppins', sans-serif;
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+    border-radius: 5px;
+}
+
+.header .dropdown-content a:hover {
+    background-color: #ddd;
+}
+
+.header .dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.header .dropdown:hover .dropbtn {
+    background-color: #218838;
+}
+
     </style>
 </head>
 
@@ -217,19 +252,19 @@
         </nav>
     
         <div class="dropdown">
-    <button class="header-button dropbtn">Evaluation Form &nbsp;
-        <i class="fa fa-caret-down"></i>
-    </button>
-    <div class="dropdown-content" style="right: 50px; top: 45px; position: absolute;">
-        <a href="ces-form.php">CES Form</a>
-        <a href="ccs-form.php">CCS Form</a>
-        <a href="cihm-form.php">CIHM Form</a>
-        <a href="cas-form.php">CAS Form</a>
-        <a href="con-form.php">CON Form</a>
-        <a href="coe-form.php">COE Form</a>
-        <a href="cba-form.php">CBA Form</a>
+        <button class="header-button dropbtn">Evaluation Form &nbsp;
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content" style="right: 50px; top: 45px; position: absolute;">
+            <a href="ces-form.php">CES Form</a>
+            <a href="ccs-form.php">CCS Form</a>
+            <a href="cihm-form.php">CIHM Form</a>
+            <a href="cas-form.php">CAS Form</a>
+            <a href="con-form.php">CON Form</a>
+            <a href="coe-form.php">COE Form</a>
+            <a href="cba-form.php">CBA Form</a>
+        </div>
     </div>
-</div>
     </header>
     
     
