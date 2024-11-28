@@ -581,43 +581,9 @@ $conn_proj->close();
                 icon: 'success',
                 showConfirmButton: true,
                 confirmButtonText: 'OK',
-            }).then(function() {
-                // Second SweetAlert - Rating Request (remains open until the link is clicked)
-                if (<?php echo $showRatingAlert ? 'true' : 'false'; ?>) {
-                    // Get the link for the CAS department from PHP
-                    const ratingLink = '<?php echo addslashes($casLink); ?>';  // Use addslashes to escape quotes
-
-                    // Show SweetAlert with the dynamic link
-                    Swal.fire({
-                        title: 'How satisfied are you with the event?',
-                        html: `<a href="${ratingLink}" target="_blank" id="ratingLink">Click here to give ratings.</a>`,
-                        icon: 'info',
-                        showConfirmButton: false, // No confirm button
-                    });
-
-                    // Close SweetAlert only when the link is clicked
-                    document.getElementById('ratingLink').addEventListener('click', function() {
-                        Swal.close(); // Close the SweetAlert
-                    });
-                }
-            });
+            })
         <?php } ?>
 
     </script>
-    <?php
-// Fetch the link for the CAS department
-$query = "SELECT response_link FROM evaluation_links WHERE department = 'CAS' LIMIT 1";
-$result = $conn->query($query);
-
-// Check if the query was successful and if a link was found
-if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    $casLink = $row['response_link'];
-} else {
-    // Default link or handle the error as needed
-    $casLink = 'https://forms.gle/CshKcCeExNbusNeD9'; // Replace with a default link or handle error
-}
-?>
-
 </body>
 </html>
