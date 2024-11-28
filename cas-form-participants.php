@@ -472,6 +472,7 @@ $conn->close();
             
             <label for="rating" class= "rating">How satisfied are you with the event?</label>
 
+            <p>https://forms.gle/CshKcCeExNbusNeD9</p>
             
             
             <button class="button-submit" type="submit" name="signup">Submit</button>
