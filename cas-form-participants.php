@@ -34,22 +34,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-<?php
-// Assuming you have a valid connection in $conn
-$sql = "SELECT response_link FROM evaluation_links WHERE department = 'CAS' LIMIT 1";
-$result = $conn->query($sql);
-
-if ($result->num_rows > 0) {
-    // Fetch the link for CAS department
-    $row = $result->fetch_assoc();
-    $evaluationLink = $row['response_link'];
-} else {
-    // If no link found, you can set a default or show an error
-    $evaluationLink = '#'; // Default fallback link
-}
-?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -317,32 +301,32 @@ if ($result->num_rows > 0) {
 		}
 
         /* Dropdown style */
-        select {
-            font-family: 'Poppins', sans-serif;
-            height: 40px; /* Adjusted height for consistency */
-            width: 270%; /* Same width as the input fields */
-            padding: 2px; /* Adjusted padding */
-            margin: 5px auto; /* Adjusted spacing */
-            margin-top: 12px;
-            border-radius: 10px;
-            outline: none;
-            font-size: 16px; /* Adjusted font size */
-            border: 1px solid #ccc;
-            background-color: #fff; /* White background for the dropdown */
-            transition: border-color 0.3s ease; /* Smooth transition for focus */
-        }
+select {
+    font-family: 'Poppins', sans-serif;
+    height: 40px; /* Adjusted height for consistency */
+    width: 270%; /* Same width as the input fields */
+    padding: 2px; /* Adjusted padding */
+    margin: 5px auto; /* Adjusted spacing */
+    margin-top: 12px;
+    border-radius: 10px;
+    outline: none;
+    font-size: 16px; /* Adjusted font size */
+    border: 1px solid #ccc;
+    background-color: #fff; /* White background for the dropdown */
+    transition: border-color 0.3s ease; /* Smooth transition for focus */
+}
 
-        /* Focus state for dropdown */
-        select:focus {
-            border-color: black; /* Darker focus border color */
-        }
+/* Focus state for dropdown */
+select:focus {
+    border-color: black; /* Darker focus border color */
+}
 
-        /* Option styling */
-        select option {
-            font-family: 'Poppins', sans-serif;
-            font-size: 16px; /* Ensures option text matches dropdown styling */
-            padding: 10px; /* Adds padding inside options */
-        }
+/* Option styling */
+select option {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px; /* Ensures option text matches dropdown styling */
+    padding: 10px; /* Adds padding inside options */
+}
 
 
         .dept {
@@ -587,34 +571,54 @@ $conn_proj->close();
             });
         });
 
-        <?php if (isset($alertMessage)) { ?>
-    <script>
-        // First SweetAlert - Submission Successful
-        Swal.fire({
-            title: 'Submission Successful!',
-            text: '<?php echo $alertMessage; ?>',
-            icon: 'success',
-            showConfirmButton: true,
-            confirmButtonText: 'OK',
-        }).then(function() {
-            // Second SweetAlert - Rating Request (remains open until the link is clicked)
-            if (<?php echo $showRatingAlert ? 'true' : 'false'; ?>) {
-                Swal.fire({
-                    title: 'How satisfied are you with the event?',
-                    html: '<a href="<?php echo $evaluationLink; ?>" target="_blank" id="ratingLink">Click here to give ratings.</a>',
-                    icon: 'info',
-                    showConfirmButton: false, // No confirm button
-                    allowOutsideClick: false, // Prevent modal from closing when clicking outside
-                });
+        <?php
+        // Fetch the link for the CAS department
+        $sql = "SELECT response_link FROM evaluation_links WHERE department = 'CAS'";
+        $result = $conn->query($sql);
 
-                // Close SweetAlert only when the link is clicked
-                document.getElementById('ratingLink').addEventListener('click', function() {
-                    Swal.close(); // Close the SweetAlert when the link is clicked
+        $link = ''; // Initialize the link variable
+
+        // Check if the query returned any results
+        if ($result->num_rows > 0) {
+            // Get the link for the CAS department
+            $row = $result->fetch_assoc();
+            $link = $row['response_link'];
+        }
+
+        // Define alert message and condition for showing rating alert
+        $alertMessage = 'The submission was successful!';
+        $showRatingAlert = true; // You can modify this based on your condition
+        ?>
+
+        <?php if (isset($alertMessage)) { ?>
+            <script>
+                // First SweetAlert - Submission Successful
+                Swal.fire({
+                    title: 'Submission Successful!',
+                    text: '<?php echo $alertMessage; ?>',
+                    icon: 'success',
+                    showConfirmButton: true,
+                    confirmButtonText: 'OK',
+                }).then(function() {
+                    // Second SweetAlert - Rating Request (remains open until the link is clicked)
+                    if (<?php echo $showRatingAlert ? 'true' : 'false'; ?>) {
+                        Swal.fire({
+                            title: 'How satisfied are you with the event?',
+                            html: '<a href="<?php echo $link; ?>" target="_blank" id="ratingLink">Click here to give ratings.</a>',
+                            icon: 'info',
+                            showConfirmButton: false, // No confirm button
+                            allowOutsideClick: false, // Prevent modal from closing when clicking outside
+                        });
+
+                        // Close SweetAlert only when the link is clicked
+                        document.getElementById('ratingLink').addEventListener('click', function() {
+                            Swal.close(); // Close the SweetAlert when the link is clicked
+                        });
+                    }
                 });
-            }
-        });
-    </script>
-<?php } ?>
+            </script>
+        <?php } ?>
+
 
     </script>
 </body>
