@@ -33,19 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conn->close();
 }
 ?>
-<?php
-// Fetch the response link for CAS from the database
-$sql = "SELECT response_link FROM evaluation_links WHERE department = 'CAS' LIMIT 1";
-$result = $conn->query($sql);
 
-$link = ''; // Default link if no value is found
-
-if ($result->num_rows > 0) {
-    // Fetch the link from the database
-    $row = $result->fetch_assoc();
-    $link = $row['response_link'];
-}
-?>
 
 
 <!DOCTYPE html>
@@ -594,14 +582,11 @@ $conn_proj->close();
                 showConfirmButton: true,
                 confirmButtonText: 'OK',
             }).then(function() {
-                // Fetch the dynamic link from PHP
-                var ratingLink = "<?php echo htmlspecialchars($link); ?>";
-
                 // Second SweetAlert - Rating Request (remains open until the link is clicked)
                 if (<?php echo $showRatingAlert ? 'true' : 'false'; ?>) {
                     Swal.fire({
                         title: 'How satisfied are you with the event?',
-                        html: '<a href="' + ratingLink + '" target="_blank" id="ratingLink">Click here to give ratings.</a>',
+                        html: '<a href="https://forms.gle/CshKcCeExNbusNeD9" target="_blank" id="ratingLink">Click here to give ratings.</a>',
                         icon: 'info',
                         showConfirmButton: false, // No confirm button
                     });
