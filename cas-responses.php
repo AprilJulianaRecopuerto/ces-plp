@@ -253,6 +253,44 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
     $profilePicture = $row_profile['picture'];
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['updateLink'])) {
+    // Sanitize the input link
+    $newLink = trim($_POST['evaluationLink']);
+
+    // Update the link in the database for CAS department
+    $updateSql = "UPDATE evaluation_links SET link = ? WHERE department = 'CAS'";
+    $updateStmt = $conn->prepare($updateSql);
+
+    if ($updateStmt) {
+        $updateStmt->bind_param("s", $newLink);
+        if ($updateStmt->execute()) {
+            echo "<script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Evaluation link updated successfully.',
+                });
+            </script>";
+        } else {
+            echo "<script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Failed to update the evaluation link.',
+                });
+            </script>";
+        }
+        $updateStmt->close();
+    } else {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Failed to prepare the update query.',
+            });
+        </script>";
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -1055,47 +1093,6 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
         </div>
     </div>
 </div>
-
-<?php
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['updateLink'])) {
-    // Sanitize the input link
-    $newLink = trim($_POST['evaluationLink']);
-
-    // Update the link in the database for CAS department
-    $updateSql = "UPDATE evaluation_links SET link = ? WHERE department = 'CAS'";
-    $updateStmt = $conn->prepare($updateSql);
-
-    if ($updateStmt) {
-        $updateStmt->bind_param("s", $newLink);
-        if ($updateStmt->execute()) {
-            echo "<script>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: 'Evaluation link updated successfully.',
-                });
-            </script>";
-        } else {
-            echo "<script>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: 'Failed to update the evaluation link.',
-                });
-            </script>";
-        }
-        $updateStmt->close();
-    } else {
-        echo "<script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: 'Failed to prepare the update query.',
-            });
-        </script>";
-    }
-}
-?>
 
 
             <script>                   
