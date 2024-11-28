@@ -9,55 +9,30 @@ $password = "s3jzz232brki4nnv";
 $dbname = "szk9kdwhvpxy2g77";
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check connection
+// Check the connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Initialize message variables
-$successMessage = "";
-$errorMessage = "";
-
-// Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Get the form data
     $name = $_POST['name'];
     $email = $_POST['email'];
     $event = $_POST['event'];
-    $rate = $_POST['rate'];
     $department = $_POST['department'];
 
-    // Insert data into database
-    $stmt = $conn->prepare("INSERT INTO submissions (name, email, event, rate, department) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssds", $name, $email, $event, $rate, $department);
+    // Prepare SQL to insert data into 'submissions' table
+    $sql = "INSERT INTO submissions (name, email, event, department) VALUES ('$name', '$email', '$event', '$department')";
 
-    if ($stmt->execute()) {
-        // Success message
-        echo "<script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    title: '<label for=\"rating\" class=\"rating\">How satisfied are you with the event?</label>',
-                    html: '<a href=\"https://forms.gle/CshKcCeExNbusNeD9\" target=\"_blank\" style=\"color: #007bff; text-decoration: underline;\" onclick=\"window.location.reload();\">Click here to give ratings.</a>',
-                    icon: 'success',
-                    showConfirmButton: false, // Hide the 'OK' button
-                });
-            });
-        </script>";
+    if ($conn->query($sql) === TRUE) {
+        // If insertion is successful, show SweetAlert
+        $alertMessage = "Thank you for your submission!";
     } else {
-        // Error message
-        echo "<script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'There was a problem submitting your response.',
-                    icon: 'error',
-                    showConfirmButton: 'OK'
-                });
-            });
-        </script>";
+        // If insertion fails, show error message
+        $alertMessage = "Error: " . $sql . "<br>" . $conn->error;
     }
-    $stmt->close();
+    $conn->close();
 }
-$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -597,25 +572,31 @@ $conn_proj->close();
             });
         });
 
-          // Add event listener to the form submission
-    document.getElementById('signupForm').addEventListener('submit', function(event) {
+        // Add event listener to the form submission
+        document.getElementById('signupForm').addEventListener('submit', function(event) {
         // Prevent the default form submission
-        event.preventDefault();
+            event.preventDefault();
 
-        // Show the SweetAlert with the custom message
-        Swal.fire({
-            title: '<label for="rating" class="rating">How satisfied are you with the event?</label>',
-            html: '<a href="https://forms.gle/CshKcCeExNbusNeD9" target="_blank" style="color: #007bff; text-decoration: underline;">Click here to give ratings.</a>',
-            icon: 'info',
-            showConfirmButton: true,
-            confirmButtonText: 'OK',
-            customClass: {
-                popup: 'custom-swal-popup',
-                title: 'custom-swal-title',
-                confirmButton: 'custom-swal-confirm'
-            }
+            // Show the SweetAlert with the custom message
+            Swal.fire({
+                title: '<label for="rating" class="rating">How satisfied are you with the event?</label>',
+                html: '<a href="https://forms.gle/CshKcCeExNbusNeD9" target="_blank" style="color: #007bff; text-decoration: underline;">Click here to give ratings.</a>',
+                icon: 'info',
+                showConfirmButton: false,
+                confirmButtonText: false,
+                customClass: {
+                    popup: 'custom-swal-popup',
+                    title: 'custom-swal-title',
+                    confirmButton: 'custom-swal-confirm'
+                }
+            }).then((result) => {
+                // Refresh the page when the link is clicked
+                if (result.isConfirmed) {
+                    window.location.reload(); // Refresh the page
+                }
+            });
         });
-    });
+
     </script>
 </body>
 </html>
