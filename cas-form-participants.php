@@ -571,32 +571,55 @@ $conn_proj->close();
             });
         });
 
-        <?php if (isset($alertMessage)) { ?>
-            // First SweetAlert - Submission Successful
-            Swal.fire({
-                title: 'Submission Successful!',
-                text: '<?php echo $alertMessage; ?>',
-                icon: 'success',
-                showConfirmButton: true,
-                confirmButtonText: 'OK',
-            }).then(function() {
-                // Second SweetAlert - Rating Request (remains open until the link is clicked)
-                if (<?php echo $showRatingAlert ? 'true' : 'false'; ?>) {
-                    Swal.fire({
-                        title: 'How satisfied are you with the event?',
-                        html: '<a href="https://forms.gle/CshKcCeExNbusNeD9" target="_blank" id="ratingLink">Click here to give ratings.</a>',
-                        icon: 'info',
-                        showConfirmButton: false, // No confirm button
-                        allowOutsideClick: false, // Prevent modal from closing when clicking outside
-                    });
+        <?php
+// Assuming $conn is the active database connection
 
-                    // Close SweetAlert only when the link is clicked
-                    document.getElementById('ratingLink').addEventListener('click', function() {
-                        Swal.close(); // Close the SweetAlert when the link is clicked
-                    });
-                }
-            });
-        <?php } ?>
+// Fetch the evaluation link for the CAS department
+$sql = "SELECT response_link FROM evaluation_links WHERE department = 'CAS'";
+$result = $conn->query($sql);
+
+// Initialize variable for the link
+$evaluationLink = '';
+
+if ($result && $result->num_rows > 0) {
+    // Fetch the link for the CAS department
+    $row = $result->fetch_assoc();
+    $evaluationLink = $row['response_link'];
+}
+
+// Check if an alert message should be displayed
+if (isset($alertMessage)) {
+    ?>
+    <script>
+        // First SweetAlert - Submission Successful
+        Swal.fire({
+            title: 'Submission Successful!',
+            text: '<?php echo $alertMessage; ?>',
+            icon: 'success',
+            showConfirmButton: true,
+            confirmButtonText: 'OK',
+        }).then(function() {
+            // Second SweetAlert - Rating Request (remains open until the link is clicked)
+            if (<?php echo $showRatingAlert ? 'true' : 'false'; ?>) {
+                Swal.fire({
+                    title: 'How satisfied are you with the event?',
+                    html: '<a href="<?php echo $evaluationLink; ?>" target="_blank" id="ratingLink">Click here to give ratings.</a>',
+                    icon: 'info',
+                    showConfirmButton: false, // No confirm button
+                    allowOutsideClick: false, // Prevent modal from closing when clicking outside
+                });
+
+                // Close SweetAlert only when the link is clicked
+                document.getElementById('ratingLink').addEventListener('click', function() {
+                    Swal.close(); // Close the SweetAlert when the link is clicked
+                });
+            }
+        });
+    </script>
+    <?php
+}
+?>
+
     </script>
 </body>
 </html>
