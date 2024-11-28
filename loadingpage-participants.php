@@ -137,7 +137,7 @@
 
         .header-button-dropbtn{
             font-family: 'Glacial Indifference', sans-serif;
-            background-color: #089451;
+            background-color: none;
             font-size: 17.9px;
             color: white;
             border: none;
