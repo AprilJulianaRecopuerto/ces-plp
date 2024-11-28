@@ -575,12 +575,24 @@ $conn_proj->close();
         });
 
         <?php if (isset($alertMessage)) { ?>
+            // First SweetAlert - Submission Successful
             Swal.fire({
                 title: 'Submission Successful!',
                 text: '<?php echo $alertMessage; ?>',
                 icon: 'success',
                 showConfirmButton: true,
                 confirmButtonText: 'OK',
+            }).then(function() {
+                // Second SweetAlert - Rating Request
+                if (<?php echo $showRatingAlert ? 'true' : 'false'; ?>) {
+                    Swal.fire({
+                        title: 'How satisfied are you with the event?',
+                        html: '<a href="https://forms.gle/CshKcCeExNbusNeD9" target="_blank">Click here to give ratings.</a>',
+                        icon: 'info',
+                        showConfirmButton: true,
+                        confirmButtonText: 'Done',
+                    });
+                }
             });
         <?php } ?>
     </script>
