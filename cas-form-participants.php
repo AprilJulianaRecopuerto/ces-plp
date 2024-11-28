@@ -33,6 +33,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $conn->close();
 }
+
+
 ?>
 
 <!DOCTYPE html>
@@ -572,31 +574,15 @@ $conn_proj->close();
             });
         });
 
-        // Add event listener to the form submission
-        document.getElementById('signupForm').addEventListener('submit', function(event) {
-        // Prevent the default form submission
-            event.preventDefault();
-
-            // Show the SweetAlert with the custom message
+        <?php if (isset($alertMessage)) { ?>
             Swal.fire({
-                title: '<label for="rating" class="rating">How satisfied are you with the event?</label>',
-                html: '<a href="https://forms.gle/CshKcCeExNbusNeD9" target="_blank" style="color: #007bff; text-decoration: underline;">Click here to give ratings.</a>',
-                icon: 'info',
-                showConfirmButton: false,
-                confirmButtonText: false,
-                customClass: {
-                    popup: 'custom-swal-popup',
-                    title: 'custom-swal-title',
-                    confirmButton: 'custom-swal-confirm'
-                }
-            }).then((result) => {
-                // Refresh the page when the link is clicked
-                if (result.isConfirmed) {
-                    window.location.reload(); // Refresh the page
-                }
+                title: 'Submission Successful!',
+                text: '<?php echo $alertMessage; ?>',
+                icon: 'success',
+                showConfirmButton: true,
+                confirmButtonText: 'OK',
             });
-        });
-
+        <?php } ?>
     </script>
 </body>
 </html>
