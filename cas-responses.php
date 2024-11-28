@@ -255,25 +255,6 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
 
 ?>
 
-<?php
-// Handle updating the link
-if (isset($_POST['update_link'])) {
-    $newLink = $_POST['responseLink'];
-
-    // Update the response link for the CAS department in the database
-    $updateLinkSql = "UPDATE evaluation_links SET response_link = ? WHERE department = 'CAS'";
-    $updateLinkStmt = $conn->prepare($updateLinkSql);
-    $updateLinkStmt->bind_param("s", $newLink);
-    if ($updateLinkStmt->execute()) {
-        echo "<script>alert('CAS Response link updated successfully!');</script>";
-        echo "<script>window.location.reload();</script>";
-    } else {
-        echo "<script>alert('Failed to update the CAS response link.');</script>";
-    }
-    $updateLinkStmt->close();
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -1026,6 +1007,24 @@ if (isset($_POST['update_link'])) {
                 <input type="text" id="responseLink" name="responseLink" value="<?php echo htmlspecialchars($currentLink); ?>" required>
                 <button type="submit" name="update_link">Update Link</button>
             </form>
+            <?php
+            // Handle updating the link
+            if (isset($_POST['update_link'])) {
+                $newLink = $_POST['responseLink'];
+
+                // Update the response link for the CAS department in the database
+                $updateLinkSql = "UPDATE evaluation_links SET response_link = ? WHERE department = 'CAS'";
+                $updateLinkStmt = $conn->prepare($updateLinkSql);
+                $updateLinkStmt->bind_param("s", $newLink);
+                if ($updateLinkStmt->execute()) {
+                    echo "<script>alert('CAS Response link updated successfully!');</script>";
+                    echo "<script>window.location.reload();</script>";
+                } else {
+                    echo "<script>alert('Failed to update the CAS response link.');</script>";
+                }
+                $updateLinkStmt->close();
+            }
+            ?>
         </div>
 
         <div class="table-container">
