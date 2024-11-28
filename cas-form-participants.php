@@ -587,16 +587,16 @@ $conn_proj->close();
                         html: '<a href="https://forms.gle/CshKcCeExNbusNeD9" target="_blank" id="ratingLink">Click here to give ratings.</a>',
                         icon: 'info',
                         showConfirmButton: false, // No confirm button
+                        allowOutsideClick: false, // Prevent modal from closing when clicking outside
                     });
 
                     // Close SweetAlert only when the link is clicked
                     document.getElementById('ratingLink').addEventListener('click', function() {
-                        Swal.close(); // Close the SweetAlert
+                        Swal.close(); // Close the SweetAlert when the link is clicked
                     });
                 }
             });
         <?php } ?>
-
     </script>
 </body>
 </html>
