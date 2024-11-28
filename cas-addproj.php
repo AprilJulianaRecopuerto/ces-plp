@@ -858,7 +858,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <script>
             function toggleOtherClassificationInput() {
-                var classificationSelect = document.getElementById("classification");
+                var classificationSelect = document.getElementById("sdg");
                 var otherClassificationGroup = document.getElementById("other_classification_group");
 
                 if (classificationSelect.value === "Others") {
