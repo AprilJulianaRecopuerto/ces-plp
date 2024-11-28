@@ -1,7 +1,4 @@
 <?php
-session_start();
-$isFormClosed = isset($_SESSION['show_event_form']) && $_SESSION['show_event_form'] === false;
-    
 // Database connection
 $servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username = "sh9sgtg12c8vyqoa";
@@ -35,7 +32,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $conn->close();
 }
-?>
 ?>
 
 <!DOCTYPE html>
@@ -584,7 +580,7 @@ $conn_proj->close();
                 showConfirmButton: true,
                 confirmButtonText: 'OK',
             }).then(function() {
-                // Second SweetAlert - Rating Request
+                // Second SweetAlert - Rating Request (remains open until the link is clicked)
                 if (<?php echo $showRatingAlert ? 'true' : 'false'; ?>) {
                     Swal.fire({
                         title: 'How satisfied are you with the event?',
@@ -593,14 +589,14 @@ $conn_proj->close();
                         showConfirmButton: false, // No confirm button
                     });
 
-                    // Close SweetAlert when the link is clicked
+                    // Close SweetAlert only when the link is clicked
                     document.getElementById('ratingLink').addEventListener('click', function() {
                         Swal.close(); // Close the SweetAlert
                     });
                 }
             });
         <?php } ?>
-        
+
     </script>
 </body>
 </html>
