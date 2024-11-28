@@ -18,33 +18,45 @@ if ($conn->connect_error) {
 $successMessage = "";
 $errorMessage = "";
 
-// Check if the local form data is submitted
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['signup'])) {
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['name'];
     $email = $_POST['email'];
     $event = $_POST['event'];
-    $department = $_POST['department'];  // Capture the department value
-    $rate = $_POST['rating'];  //
+    $rate = $_POST['rate'];
+    $department = $_POST['department'];
 
-    
-    // Insert submission data into the database
-    $stmt = $conn->prepare("INSERT INTO submissions (name, email, event, department, rate) VALUES (?, ?, ?, ?, ?)");
-    
-    // Bind parameters
-    $stmt->bind_param("sssss", $name, $email, $event, $department, $rate);  // "sssss" means all are strings
-    
+    // Insert data into database
+    $stmt = $conn->prepare("INSERT INTO submissions (name, email, event, rate, department) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssds", $name, $email, $event, $rate, $department);
 
     if ($stmt->execute()) {
-        // Success response
-        $successMessage = "Thank you for signing up for the event!";
+        // Success message
+        echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    title: '<label for=\"rating\" class=\"rating\">How satisfied are you with the event?</label>',
+                    html: '<a href=\"https://forms.gle/CshKcCeExNbusNeD9\" target=\"_blank\" style=\"color: #007bff; text-decoration: underline;\" onclick=\"window.location.reload();\">Click here to give ratings.</a>',
+                    icon: 'success',
+                    showConfirmButton: false, // Hide the 'OK' button
+                });
+            });
+        </script>";
     } else {
-        // Error response
-        $errorMessage = "There was an error signing up. Please try again.";
+        // Error message
+        echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'There was a problem submitting your response.',
+                    icon: 'error',
+                    showConfirmButton: 'OK'
+                });
+            });
+        </script>";
     }
-
     $stmt->close();
 }
-
 $conn->close();
 ?>
 
