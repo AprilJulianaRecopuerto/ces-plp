@@ -308,9 +308,24 @@ $conn->close();
             border-radius: 4px;
 		}
 
+        select[type="event"] {
+            font-family: 'Poppins', sans-serif;
+			height: 17px;
+			width: 270%;
+			padding: 12px; /* Adjusted padding for input */
+			margin: 5px auto; /* Adjusted spacing */
+            margin-top: 12px;
+			border-radius: 10px;
+			outline: none;
+			font-size: 16px; /* Adjusted font size */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+		}
+
 		/* Focus state for inputs */
 		input[type="text"]:focus,
-		input[type="email"]:focus {
+		input[type="email"]:focus,
+        select[type="event"] {
 			border-color: black; /* Darker green focus border */
 		}
 
