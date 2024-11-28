@@ -453,24 +453,50 @@ $conn->close();
 
             <div style="display: flex; align-items: center; margin-bottom: 5px;">
                 <label for="department">Department:</label>
-                <select name="department" required class="dept">
-                    <option value="" disabled selected>Department</option>
-                    <option value="College of Arts and Sciences">College of Arts and Sciences</option>
-                    <option value="College of Business Administration">College of Business Administration</option>
-                    <option value="College of Computer Studies">College of Computer Studies</option>
-                    <option value="College of Education">College of Education</option>
-                    <option value="College of Engineering">College of Engineering</option>
-                    <option value="College of International Hospitality Management">College of International Hospitality Management</option>
-                    <option value="College of Nursing">College of Nursing   </option>
-                </select><br>
+                <input type="text" id="department" name="department" value="College of Arts and Sciences" readonly class="dept">
             </div>
+
             
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <label for="event">Event:</label>
-                <input type="text" id="event" name="event" required>
-            </div>
+            <?php
+// Database connection
+$servername = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_db = "zf8r3n4qqjyrfx7o";
+$password_db = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
+$conn_proj = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
+
+// Check connection
+if ($conn_proj->connect_error) {
+    die("Connection failed: " . $conn_proj->connect_error);
+}
+
+// Fetch project titles from the cas table
+$sql = "SELECT proj_title FROM cas";
+$result = $conn_proj->query($sql);
+?>
+
+<div style="display: flex; align-items: center; margin-bottom: 10px;">
+    <label for="event">Event:</label>
+    <select id="event" name="event" required>
+        <option value="" disabled selected>Select Event</option>
+        <?php
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                echo '<option value="' . htmlspecialchars($row['proj_title']) . '">' . htmlspecialchars($row['proj_title']) . '</option>';
+            }
+        } else {
+            echo '<option value="" disabled>No Events Available</option>';
+        }
+        ?>
+    </select>
+</div>
+
+<?php
+$conn_proj->close();
+?>
             
-            <label for="rating" class= "rating">How satisfied are you with the event?</label>
+            <label for="rating" class= "rating">How satisfied are you with the event?</label><br>
 
             <a href=https://forms.gle/CshKcCeExNbusNeD9>Clich here to give ratings.</a>
             
