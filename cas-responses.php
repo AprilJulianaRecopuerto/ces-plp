@@ -260,15 +260,15 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
 if (isset($_POST['update_link'])) {
     $newLink = $_POST['responseLink'];
 
-    // Update the response link in the database
-    $updateLinkSql = "UPDATE evaluation_links SET response_link = ? WHERE department = ?";
+    // Update the response link for the CAS department in the database
+    $updateLinkSql = "UPDATE evaluation_links SET response_link = ? WHERE department = 'CAS'";
     $updateLinkStmt = $conn->prepare($updateLinkSql);
-    $updateLinkStmt->bind_param("ss", $newLink, $currentDepartment);
+    $updateLinkStmt->bind_param("s", $newLink);
     if ($updateLinkStmt->execute()) {
-        echo "<script>alert('Response link updated successfully!');</script>";
+        echo "<script>alert('CAS Response link updated successfully!');</script>";
         echo "<script>window.location.reload();</script>";
     } else {
-        echo "<script>alert('Failed to update the response link.');</script>";
+        echo "<script>alert('Failed to update the CAS response link.');</script>";
     }
     $updateLinkStmt->close();
 }
@@ -1010,27 +1010,20 @@ if (isset($_POST['update_link'])) {
 
             <button id="toggle-button" onclick="toggleForm()">Open Event Form</button>
         </div>
-        
+
         <div class="form-container">
             <form method="POST" action="">
-                <label for="responseLink">Response Form Link:</label>
+                <label for="responseLink">CAS Response Form Link:</label>
                 <?php
-                // Fetch the current response link for the department
-                $fetchLinkSql = "SELECT response_link FROM evaluation_links WHERE department = ?";
+                // Fetch the current response link for the CAS department
+                $fetchLinkSql = "SELECT response_link FROM evaluation_links WHERE department = 'CAS'";
                 $fetchLinkStmt = $conn->prepare($fetchLinkSql);
-                $fetchLinkStmt->bind_param("s", $currentDepartment);
                 $fetchLinkStmt->execute();
                 $linkResult = $fetchLinkStmt->get_result();
                 $currentLink = ($linkResult->num_rows > 0) ? $linkResult->fetch_assoc()['response_link'] : 'No link set';
                 $fetchLinkStmt->close();
                 ?>
-                <input 
-                    type="text" 
-                    id="responseLink" 
-                    name="responseLink" 
-                    value="<?php echo htmlspecialchars($currentLink); ?>" 
-                    placeholder="Enter the new response link" 
-                    required>
+                <input type="text" id="responseLink" name="responseLink" value="<?php echo htmlspecialchars($currentLink); ?>" required>
                 <button type="submit" name="update_link">Update Link</button>
             </form>
         </div>
