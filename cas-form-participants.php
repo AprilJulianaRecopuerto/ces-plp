@@ -525,12 +525,8 @@ $result = $conn_proj->query($sql);
 $conn_proj->close();
 ?>
             
-            <label for="rating" class= "rating">How satisfied are you with the event?</label><br>
-
-            <a href=https://forms.gle/CshKcCeExNbusNeD9>Clich here to give ratings.</a>
-            
-            
             <button class="button-submit" type="submit" name="signup">Submit</button>
+
         </form>
     </div>
 
@@ -588,6 +584,26 @@ $conn_proj->close();
                 window.location.href = 'loadingpage-participants.php';
             });
         });
+
+          // Add event listener to the form submission
+    document.getElementById('signupForm').addEventListener('submit', function(event) {
+        // Prevent the default form submission
+        event.preventDefault();
+
+        // Show the SweetAlert with the custom message
+        Swal.fire({
+            title: '<label for="rating" class="rating">How satisfied are you with the event?</label>',
+            html: '<a href="https://forms.gle/CshKcCeExNbusNeD9" target="_blank" style="color: #007bff; text-decoration: underline;">Click here to give ratings.</a>',
+            icon: 'info',
+            showConfirmButton: true,
+            confirmButtonText: 'OK',
+            customClass: {
+                popup: 'custom-swal-popup',
+                title: 'custom-swal-title',
+                confirmButton: 'custom-swal-confirm'
+            }
+        });
+    });
     </script>
 </body>
 </html>
