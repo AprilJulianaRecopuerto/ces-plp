@@ -319,7 +319,7 @@ select {
     font-family: 'Poppins', sans-serif;
     height: 40px; /* Adjusted height for consistency */
     width: 270%; /* Same width as the input fields */
-    padding: 12px; /* Adjusted padding */
+    padding: 15px; /* Adjusted padding */
     margin: 5px auto; /* Adjusted spacing */
     margin-top: 12px;
     border-radius: 10px;
@@ -338,8 +338,8 @@ select:focus {
 /* Option styling */
 select option {
     font-family: 'Poppins', sans-serif;
-    font-size: 10px; /* Ensures option text matches dropdown styling */
-    padding: 15px; /* Adds padding inside options */
+    font-size: 16px; /* Ensures option text matches dropdown styling */
+    padding: 10px; /* Adds padding inside options */
 }
 
 
