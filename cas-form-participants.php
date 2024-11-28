@@ -33,6 +33,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conn->close();
 }
 ?>
+<?php
+// Fetch the response link for CAS from the database
+$sql = "SELECT response_link FROM evaluation_links WHERE department = 'CAS' LIMIT 1";
+$result = $conn->query($sql);
+
+$link = ''; // Default link if no value is found
+
+if ($result->num_rows > 0) {
+    // Fetch the link from the database
+    $row = $result->fetch_assoc();
+    $link = $row['response_link'];
+}
+?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -301,32 +315,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 		}
 
         /* Dropdown style */
-select {
-    font-family: 'Poppins', sans-serif;
-    height: 40px; /* Adjusted height for consistency */
-    width: 270%; /* Same width as the input fields */
-    padding: 2px; /* Adjusted padding */
-    margin: 5px auto; /* Adjusted spacing */
-    margin-top: 12px;
-    border-radius: 10px;
-    outline: none;
-    font-size: 16px; /* Adjusted font size */
-    border: 1px solid #ccc;
-    background-color: #fff; /* White background for the dropdown */
-    transition: border-color 0.3s ease; /* Smooth transition for focus */
-}
+        select {
+            font-family: 'Poppins', sans-serif;
+            height: 40px; /* Adjusted height for consistency */
+            width: 270%; /* Same width as the input fields */
+            padding: 2px; /* Adjusted padding */
+            margin: 5px auto; /* Adjusted spacing */
+            margin-top: 12px;
+            border-radius: 10px;
+            outline: none;
+            font-size: 16px; /* Adjusted font size */
+            border: 1px solid #ccc;
+            background-color: #fff; /* White background for the dropdown */
+            transition: border-color 0.3s ease; /* Smooth transition for focus */
+        }
 
-/* Focus state for dropdown */
-select:focus {
-    border-color: black; /* Darker focus border color */
-}
+        /* Focus state for dropdown */
+        select:focus {
+            border-color: black; /* Darker focus border color */
+        }
 
-/* Option styling */
-select option {
-    font-family: 'Poppins', sans-serif;
-    font-size: 16px; /* Ensures option text matches dropdown styling */
-    padding: 10px; /* Adds padding inside options */
-}
+        /* Option styling */
+        select option {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px; /* Ensures option text matches dropdown styling */
+            padding: 10px; /* Adds padding inside options */
+        }
 
 
         .dept {
@@ -580,11 +594,14 @@ $conn_proj->close();
                 showConfirmButton: true,
                 confirmButtonText: 'OK',
             }).then(function() {
+                // Fetch the dynamic link from PHP
+                var ratingLink = "<?php echo htmlspecialchars($link); ?>";
+
                 // Second SweetAlert - Rating Request (remains open until the link is clicked)
                 if (<?php echo $showRatingAlert ? 'true' : 'false'; ?>) {
                     Swal.fire({
                         title: 'How satisfied are you with the event?',
-                        html: '<a href="https://forms.gle/CshKcCeExNbusNeD9" target="_blank" id="ratingLink">Click here to give ratings.</a>',
+                        html: '<a href="' + ratingLink + '" target="_blank" id="ratingLink">Click here to give ratings.</a>',
                         icon: 'info',
                         showConfirmButton: false, // No confirm button
                     });
