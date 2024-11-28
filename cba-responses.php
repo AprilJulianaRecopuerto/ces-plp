@@ -119,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_certificates'])) 
         margin: 20px 0;
         text-decoration: underline;
         font-style: italic;
-        text-transform: uppercbae;
+        text-transform: uppercase;
     }
 
     .details {
@@ -252,7 +252,26 @@ $profilePicture = null;
 if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
     $profilePicture = $row_profile['picture'];
 }
+?>
 
+<?php
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])) {
+    $newLink = $_POST['response_form_link'];
+
+    // Update the link in the database
+    $sql = "UPDATE evaluation_links SET response_link = ? WHERE department = 'CBA'";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $newLink);
+
+    if ($stmt->execute()) {
+        echo 'success'; // Send success response
+    } else {
+        echo 'error'; // Send error response
+    }
+
+    $stmt->close();
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
@@ -983,118 +1002,166 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
         </div>
     
         <div class="content-projectlist">
-            <div class="content">
-                <div class="button-container">
-                    <form method="POST" action = "">
-                        <button type="submit" name="send_certificates" id="sendCertificatesButton">Send Certificates to All Participants</button>
-                    </form>
+    <div class="content">
+        <div class="button-container">
+            <form id="sendCertificatesForm" method="POST" action="">
+                <button type="submit" name="send_certificates" id="sendCertificatesButton">Send Certificates to All Participants</button>
+            </form>
 
-                    <button id="toggle-button" onclick="toggleForm()">Open Event Form</button>
-                </div>
-       
-                <div class="table-container">
-                    <table class="crud-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Event</th>
-                                <th>Department</th>
-                                <th>Rating</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body">
-                    <?php
-                    // Pagination variables
-                    $limit = 5; // Number of records per page
-                    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
-                    $offset = ($page - 1) * $limit; // Offset for SQL query
-                
-                    // Count total records for the current department
-                    $countSql = "SELECT COUNT(*) as total FROM submissions WHERE department = ?";
-                    $countStmt = $conn->prepare($countSql); // Prepare the query
+            <button id="toggle-button" onclick="toggleForm()">Open Event Form</button>
+        </div>
 
-                    // Bind the department parameter to the query
-                    $countStmt->bind_param("s", $currentDepartment); 
-                    $countStmt->execute(); // Execute the query
+        <div class="form-container">
+            <form id="updateLinkForm" method="POST" action="">
+                <label for="responseLink">cba Response Form Link:</label>
+                <?php
+                // Fetch the current response link for the cba department
+                $fetchLinkSql = "SELECT response_link FROM evaluation_links WHERE department = 'CBA'";
+                $fetchLinkStmt = $conn->prepare($fetchLinkSql);
+                $fetchLinkStmt->execute();
+                $linkResult = $fetchLinkStmt->get_result();
+                $currentLink = ($linkResult->num_rows > 0) ? $linkResult->fetch_assoc()['response_link'] : 'No link set';
+                $fetchLinkStmt->close();
+                ?>
+                <input type="text" name="response_form_link" id="responseFormLink" value="<?php echo htmlspecialchars($currentLink); ?>" required>
+                <button type="submit" id="updateLinkButton">Update Link</button>
+            </form>
+        </div>
 
-                    // Get the result of the query
-                    $countResult = $countStmt->get_result(); // Fetch the result
+        <div class="table-container">
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Event</th>
+                        <th>Department</th>
+                        <th>Rating</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                <?php
+                // Pagination variables
+                $limit = 5;
+                $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+                $offset = ($page - 1) * $limit;
 
-                    // Fetch the total records from the result
-                    $totalRecords = $countResult->fetch_assoc()['total']; 
+                // Count total records
+                $countSql = "SELECT COUNT(*) as total FROM submissions WHERE department = ?";
+                $countStmt = $conn->prepare($countSql);
+                $countStmt->bind_param("s", $currentDepartment);
+                $countStmt->execute();
+                $countResult = $countStmt->get_result();
+                $totalRecords = $countResult->fetch_assoc()['total'];
+                $totalPages = ceil($totalRecords / $limit);
 
-                    // Calculate total pages for pagination
-                    $totalPages = ceil($totalRecords / $limit); // Calculate total pages
+                // Fetch records
+                $sql = "SELECT name, email, event, department, rate FROM submissions WHERE department = ? LIMIT $limit OFFSET $offset";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("s", $currentDepartment);
+                $stmt->execute();
+                $result = $stmt->get_result();
 
-                    // Prepare the SQL query to fetch records for the current department
-                    $sql = "SELECT name, email, event, department, rate FROM submissions WHERE department = ? LIMIT $limit OFFSET $offset";
-
-
-                    // Prepare the statement for fetching records
-                    $stmt = $conn->prepare($sql); // Use prepare() for parameterized query
-                    
-                    if ($stmt === false) {
-                        // Check if the prepare query failed
-                        die('MySQL prepare error: ' . $conn->error);
+                if ($result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+                        echo "<tr>
+                                <td>" . htmlspecialchars($row["name"]) . "</td>
+                                <td>" . htmlspecialchars($row["email"]) . "</td>
+                                <td>" . htmlspecialchars($row["event"]) . "</td>
+                                <td>" . htmlspecialchars($row["department"]) . "</td>
+                                <td>" . htmlspecialchars($row["rate"]) . "</td>
+                            </tr>";
                     }
+                } else {
+                    echo "<tr><td colspan='5'>No records found</td></tr>";
+                }
 
-                    // Bind the parameter for the department
-                    $stmt->bind_param("s", $currentDepartment); // Bind the current department to the query
-
-                    // Execute the query
-                    $stmt->execute();
-
-                    // Get the result of the query
-                    $result = $stmt->get_result();
-
-                    // Check if there are results
-                    if ($result->num_rows > 0) {
-                        // Loop through the rows and display them
-                        while ($row = $result->fetch_assoc()) {
-                            echo "<tr>
-                                    <td>" . htmlspecialchars($row["name"]) . "</td>
-                                    <td>" . htmlspecialchars($row["email"]) . "</td>
-                                    <td>" . htmlspecialchars($row["event"]) . "</td>
-                                    <td>" . htmlspecialchars($row["department"]) . "</td>
-                                    <td>" . htmlspecialchars($row["rate"]) . "</td>
-                                </tr>";
-                        }
-                    } else {
-                        echo "<tr><td colspan='5'>No records found</td></tr>";
-                    }
-
-                    // Close the prepared statement
-                    $stmt->close();
-
-                    // Close the connection
-                    $conn->close();
-                    ?>
+                $stmt->close();
+                ?>
                 </tbody>
-                </table>
+            </table>
 
-                <!-- Pagination Section: Move it under the table -->
-                <div class="pagination-info">
-                    <div class="page">
-                        <p>
-                            <?php if ($page > 1): ?>
-                                <a class="pagination-link" href="?page=<?php echo $page - 1; ?>">PREV</a>
-                            <?php endif; ?>
+            <div class="pagination-info">
+                <div class="page">
+                    <p>
+                        <?php if ($page > 1): ?>
+                            <a class="pagination-link" href="?page=<?php echo $page - 1; ?>">PREV</a>
+                        <?php endif; ?>
 
-                            <span class="pagination-text">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
+                        <span class="pagination-text">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
 
-                            <?php if ($page < $totalPages): ?>
-                                <a class="pagination-link" href="?page=<?php echo $page + 1; ?>">NEXT</a>
-                            <?php endif; ?>
-                        </p>
-                    </div>
+                        <?php if ($page < $totalPages): ?>
+                            <a class="pagination-link" href="?page=<?php echo $page + 1; ?>">NEXT</a>
+                        <?php endif; ?>
+                    </p>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
 
-            <script>                   
+            <script>                 
+ $(document).ready(function () {
+    $('#updateLinkForm').submit(function (e) {
+        e.preventDefault(); // Prevent default form submission
+
+        // Get the new link value from the input field
+        const newLink = $('#responseFormLink').val();
+
+        // Send AJAX request to update the link
+        $.ajax({
+            url: '', // Leave empty if submitting to the same page
+            type: 'POST',
+            data: { response_form_link: newLink },
+            success: function (response) {
+                // Check if the response is 'success' or 'error'
+                if (response.trim() === 'success') {
+                    // Show SweetAlert success notification
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Link Updated!',
+                        text: 'The response form link has been successfully updated.',
+                        confirmButtonColor: '#4caf50',
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    });
+                } else {
+                    // Show SweetAlert error notification for any other response
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Update Failed',
+                        text: 'Unable to update the response form link. Please try again.',
+                        confirmButtonColor: '#dc3545',
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                // Show SweetAlert error notification for AJAX failure
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Server Error',
+                    text: 'An error occurred while updating the response form link.',
+                    confirmButtonColor: '#dc3545',
+                    customClass: {
+                        popup: 'custom-swal-popup',
+                        confirmButton: 'custom-swal-confirm'
+                    }
+                });
+            }
+        });
+    });
+});
+
+            
             // Display loading SweetAlert
             $(document).ready(function() {
-                $('form').submit(function (e) {
+                $('#sendCertificatesForm').submit(function (e) {
                     e.preventDefault(); // Prevent the form from submitting normally
 
                     // Show loading SweetAlert

@@ -259,7 +259,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
     $newLink = $_POST['response_form_link'];
 
     // Update the link in the database
-    $sql = "UPDATE evaluation_links SET response_link = ? WHERE department = 'CCS'";
+    $sql = "UPDATE evaluation_links SET response_link = ? WHERE department = 'COED'";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $newLink);
 
@@ -932,7 +932,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
 
             <div class="profile-container">
                 <!-- Chat Icon with Notification Badge -->
-                <a href="ccs-chat.php" class="chat-icon" onclick="resetNotifications()">
+                <a href="coed-chat.php" class="chat-icon" onclick="resetNotifications()">
                     <i class="fa fa-comments"></i>
                     <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
                 </a>
@@ -954,7 +954,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
 
                     <i class="fa fa-chevron-down dropdown-icon"></i>
                     <div class="dropdown-menu">
-                        <a href="ccs-your-profile.php">Profile</a>
+                        <a href="coed-your-profile.php">Profile</a>
                         <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
                     </div>
                 </div>
@@ -967,9 +967,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
             </div>
 
             <ul class="menu">
-                <li><a href="ccs-dash.php"><img src="images/home.png">Dashboard</a></li>
-                <li><a href="ccs-projlist.php"><img src="images/project-list.png">Project List</a></li>
-                <li><a href="ccs-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
+                <li><a href="coed-dash.php"><img src="images/home.png">Dashboard</a></li>
+                <li><a href="coed-projlist.php"><img src="images/project-list.png">Project List</a></li>
+                <li><a href="coed-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
 
                 <!-- Dropdown for Resource Utilization -->
                 <button class="dropdown-btn">
@@ -977,17 +977,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="ccs-tor.php">Term of Reference</a>
-                    <a href="ccs-requi.php">Requisition</a>
-                    <a href="ccs-venue.php">Venue</a>
+                    <a href="coed-tor.php">Term of Reference</a>
+                    <a href="coed-requi.php">Requisition</a>
+                    <a href="coed-venue.php">Venue</a>
                 </div>
 
-                <li><a href="ccs-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
+                <li><a href="coed-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <li><a href="ccs-mov.php"><img src="images/task.png">Mode of Verification</a></li>
+                <li><a href="coed-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="ccs-responses.php" class="active"><img src="images/feedback.png">Responses</a></li>
+                <li><a href="coed-responses.php" class="active"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
@@ -995,8 +995,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="ccs-history.php">Log In History</a>
-                    <a href="ccs-activitylogs.php">Activity Logs</a>
+                    <a href="coed-history.php">Log In History</a>
+                    <a href="coed-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>
         </div>
@@ -1013,10 +1013,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
 
         <div class="form-container">
             <form id="updateLinkForm" method="POST" action="">
-                <label for="responseLink">ccs Response Form Link:</label>
+                <label for="responseLink">coed Response Form Link:</label>
                 <?php
-                // Fetch the current response link for the ccs department
-                $fetchLinkSql = "SELECT response_link FROM evaluation_links WHERE department = 'CCS'";
+                // Fetch the current response link for the coed department
+                $fetchLinkSql = "SELECT response_link FROM evaluation_links WHERE department = 'COED'";
                 $fetchLinkStmt = $conn->prepare($fetchLinkSql);
                 $fetchLinkStmt->execute();
                 $linkResult = $fetchLinkStmt->get_result();
@@ -1389,7 +1389,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
                 });
 
                 // Log clicks on the "Profile" link
-                document.querySelector('.dropdown-menu a[href="ccs-your-profile.php"]').addEventListener("click", function() {
+                document.querySelector('.dropdown-menu a[href="coed-your-profile.php"]').addEventListener("click", function() {
                     logAction("Profile");
                 });
             });
@@ -1430,7 +1430,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
 
             document.addEventListener("DOMContentLoaded", () => {
                 function checkNotifications() {
-                    fetch('ccs-check_notifications.php')
+                    fetch('coed-check_notifications.php')
                         .then(response => response.json())
                         .then(data => {
                             const chatNotification = document.getElementById('chatNotification');
