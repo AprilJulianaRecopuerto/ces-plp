@@ -151,7 +151,7 @@
 
         .header-button-dropbtn:hover {
             background-color: #218838;
-            color: black;
+            color: white;
         }
 
         /* Banner styles*/
@@ -207,6 +207,7 @@
     z-index: 1000;
     right: 50px; /* Align to the right */
     top: 45px; /* Adjust vertical placement */
+    margin-top:10px;
 }
 
 .header .dropdown-content a {
