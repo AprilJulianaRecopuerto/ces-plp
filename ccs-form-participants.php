@@ -481,7 +481,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <div style="display: flex; align-items: center; margin-bottom: 5px;">
                 <label for="department">Department:</label>
-                <input type="text" id="department" name="department" value="College of Arts and Sciences" readonly class="dept">
+                <input type="text" id="department" name="department" value="College of Computer Studies" readonly class="dept">
             </div>
 
             
