@@ -308,26 +308,40 @@ $conn->close();
             border-radius: 4px;
 		}
 
-        select{
-            font-family: 'Poppins', sans-serif;
-			height: 17px;
-			width: 270%;
-			padding: 12px; /* Adjusted padding for input */
-			margin: 5px auto; /* Adjusted spacing */
-            margin-top: 12px;
-			border-radius: 10px;
-			outline: none;
-			font-size: 16px; /* Adjusted font size */
-            border: 1px solid #ccc;
-            border-radius: 4px;
-		}
-
 		/* Focus state for inputs */
 		input[type="text"]:focus,
-		input[type="email"]:focus,
-        select {
+		input[type="email"]:focus{
 			border-color: black; /* Darker green focus border */
 		}
+
+        /* Dropdown style */
+select {
+    font-family: 'Poppins', sans-serif;
+    height: 40px; /* Adjusted height for consistency */
+    width: 270%; /* Same width as the input fields */
+    padding: 12px; /* Adjusted padding */
+    margin: 5px auto; /* Adjusted spacing */
+    margin-top: 12px;
+    border-radius: 10px;
+    outline: none;
+    font-size: 16px; /* Adjusted font size */
+    border: 1px solid #ccc;
+    background-color: #fff; /* White background for the dropdown */
+    transition: border-color 0.3s ease; /* Smooth transition for focus */
+}
+
+/* Focus state for dropdown */
+select:focus {
+    border-color: black; /* Darker focus border color */
+}
+
+/* Option styling */
+select option {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px; /* Ensures option text matches dropdown styling */
+    padding: 10px; /* Adds padding inside options */
+}
+
 
         .dept {
             font-family: 'Poppins', sans-serif;
