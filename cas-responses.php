@@ -1100,7 +1100,7 @@ if (isset($_POST['update_link'])) {
             <script>                   
             // Display loading SweetAlert
             $(document).ready(function() {
-                $('form').submit(function (e) {
+                $('#sendCertificatesButton').submit(function (e) {
                     e.preventDefault(); // Prevent the form from submitting normally
 
                     // Show loading SweetAlert
