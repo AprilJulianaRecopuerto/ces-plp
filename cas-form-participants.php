@@ -34,6 +34,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
+<?php
+// Assuming you have a valid connection in $conn
+$sql = "SELECT response_link FROM evaluation_links WHERE department = 'CAS' LIMIT 1";
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+    // Fetch the link for CAS department
+    $row = $result->fetch_assoc();
+    $evaluationLink = $row['response_link'];
+} else {
+    // If no link found, you can set a default or show an error
+    $evaluationLink = '#'; // Default fallback link
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -301,32 +317,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 		}
 
         /* Dropdown style */
-select {
-    font-family: 'Poppins', sans-serif;
-    height: 40px; /* Adjusted height for consistency */
-    width: 270%; /* Same width as the input fields */
-    padding: 2px; /* Adjusted padding */
-    margin: 5px auto; /* Adjusted spacing */
-    margin-top: 12px;
-    border-radius: 10px;
-    outline: none;
-    font-size: 16px; /* Adjusted font size */
-    border: 1px solid #ccc;
-    background-color: #fff; /* White background for the dropdown */
-    transition: border-color 0.3s ease; /* Smooth transition for focus */
-}
+        select {
+            font-family: 'Poppins', sans-serif;
+            height: 40px; /* Adjusted height for consistency */
+            width: 270%; /* Same width as the input fields */
+            padding: 2px; /* Adjusted padding */
+            margin: 5px auto; /* Adjusted spacing */
+            margin-top: 12px;
+            border-radius: 10px;
+            outline: none;
+            font-size: 16px; /* Adjusted font size */
+            border: 1px solid #ccc;
+            background-color: #fff; /* White background for the dropdown */
+            transition: border-color 0.3s ease; /* Smooth transition for focus */
+        }
 
-/* Focus state for dropdown */
-select:focus {
-    border-color: black; /* Darker focus border color */
-}
+        /* Focus state for dropdown */
+        select:focus {
+            border-color: black; /* Darker focus border color */
+        }
 
-/* Option styling */
-select option {
-    font-family: 'Poppins', sans-serif;
-    font-size: 16px; /* Ensures option text matches dropdown styling */
-    padding: 10px; /* Adds padding inside options */
-}
+        /* Option styling */
+        select option {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px; /* Ensures option text matches dropdown styling */
+            padding: 10px; /* Adds padding inside options */
+        }
 
 
         .dept {
@@ -571,25 +587,7 @@ $conn_proj->close();
             });
         });
 
-        <?php
-// Assuming $conn is the active database connection
-
-// Fetch the evaluation link for the CAS department
-$sql = "SELECT response_link FROM evaluation_links WHERE department = 'CAS'";
-$result = $conn->query($sql);
-
-// Initialize variable for the link
-$evaluationLink = '';
-
-if ($result && $result->num_rows > 0) {
-    // Fetch the link for the CAS department
-    $row = $result->fetch_assoc();
-    $evaluationLink = $row['response_link'];
-}
-
-// Check if an alert message should be displayed
-if (isset($alertMessage)) {
-    ?>
+        <?php if (isset($alertMessage)) { ?>
     <script>
         // First SweetAlert - Submission Successful
         Swal.fire({
@@ -616,9 +614,8 @@ if (isset($alertMessage)) {
             }
         });
     </script>
-    <?php
-}
-?>
+<?php } ?>
+
     </script>
 </body>
 </html>
