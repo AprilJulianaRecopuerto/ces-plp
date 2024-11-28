@@ -338,8 +338,8 @@ select:focus {
 /* Option styling */
 select option {
     font-family: 'Poppins', sans-serif;
-    font-size: 16px; /* Ensures option text matches dropdown styling */
-    padding: 10px; /* Adds padding inside options */
+    font-size: 10px; /* Ensures option text matches dropdown styling */
+    padding: 15px; /* Adds padding inside options */
 }
 
 
