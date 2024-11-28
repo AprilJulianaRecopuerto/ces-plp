@@ -619,7 +619,6 @@ if (isset($alertMessage)) {
     <?php
 }
 ?>
-
     </script>
 </body>
 </html>
