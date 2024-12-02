@@ -937,7 +937,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
             /* Input Field Styling */
             #responseFormLink {
                 font-family: 'Poppins', sans-serif;
-                width: 70%; /* Responsive width */
+                width: 80%; /* Responsive width */
                 padding: 10px; /* Adjusted padding for a balanced look */
                 margin-bottom: 16px; /* Space between input and button */
                 border-radius: 5px; /* Rounded corners */

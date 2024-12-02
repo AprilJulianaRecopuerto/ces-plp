@@ -594,6 +594,11 @@ $conn_proj->close();
                 icon: 'success',
                 showConfirmButton: true,
                 confirmButtonText: 'OK',
+                customClass: {
+                    popup: 'custom-swal-popup',
+                    title: 'custom-swal-title',
+                    confirmButton: 'custom-swal-confirm'
+                },
             }).then(function() {
                 // Check if there's an evaluation link
                 <?php if (!empty($evaluationLink)): ?>
@@ -602,11 +607,15 @@ $conn_proj->close();
                         html: 'Click <a href="<?php echo $evaluationLink; ?>" target="_blank">here</a> to access the evaluation form.',
                         icon: 'info',
                         confirmButtonText: 'Okay',
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            title: 'custom-swal-title',
+                            confirmButton: 'custom-swal-confirm'
+                        },
                     });
                 <?php endif; ?>
             });
         <?php endif; ?>
-
     </script>
 </body>
 </html>
