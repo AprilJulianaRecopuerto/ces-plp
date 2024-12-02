@@ -928,7 +928,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
             /* Label Styling */
             label {
                 font-family: 'Poppins', sans-serif;
-                font-size: 14px;
+                font-size: 16px;
                 display: block;
                 margin-bottom: 8px;
                 color: #333; /* Darker text for better visibility */
@@ -937,7 +937,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
             /* Input Field Styling */
             #responseFormLink {
                 font-family: 'Poppins', sans-serif;
-                width: 100%; /* Responsive width */
+                width: 70%; /* Responsive width */
                 padding: 10px; /* Adjusted padding for a balanced look */
                 margin-bottom: 16px; /* Space between input and button */
                 border-radius: 5px; /* Rounded corners */
