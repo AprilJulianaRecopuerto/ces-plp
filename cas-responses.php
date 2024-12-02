@@ -884,44 +884,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
             }
 
             .pagination-info {
-            font-family: 'Poppins', sans-serif;
-            display: flex;               /* Use flexbox */
-            justify-content: space-between; /* Distribute items with space between */
-            align-items: center;         /* Align items vertically at the center */
-            margin-top: 10px;
-        }
+                font-family: 'Poppins', sans-serif;
+                display: flex;               /* Use flexbox */
+                justify-content: space-between; /* Distribute items with space between */
+                align-items: center;         /* Align items vertically at the center */
+                margin-top: 10px;
+            }
 
-        .pagination-link {
-            font-family: 'Poppins', sans-serif;
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            margin-right: 10px !important;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            text-decoration: none;
-        }
+            .pagination-link {
+                font-family: 'Poppins', sans-serif;
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                margin-right: 10px !important;
+                border-radius: 5px;
+                font-size: 14px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+                text-decoration: none;
+            }
 
-        .pagination-link:hover {
-            background-color: #45a049; /* Darker green on hover */
-        }
+            .pagination-link:hover {
+                background-color: #45a049; /* Darker green on hover */
+            }
 
-        .pagination-text {
-            margin-right: 15px !important;
-            flex-grow: 1; /* Push the pagination text to the left */
-        }
+            .pagination-text {
+                margin-right: 15px !important;
+                flex-grow: 1; /* Push the pagination text to the left */
+            }
 
-        .page {
-            display: flex;
-            justify-content: flex-end;  /* Align the pagination links to the right */
-            width: 100%;
-        }
-        .smaller-alert {
-            font-size: 14px; /* Adjust text size for a compact look */
-            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            .page {
+                display: flex;
+                justify-content: flex-end;  /* Align the pagination links to the right */
+                width: 100%;
+            }
+
+            .smaller-alert {
+                font-size: 14px; /* Adjust text size for a compact look */
+                padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
+
+            .updateLinkForm label {
+                font-family: 'Poppins', sans-serif;
+                font-size: 14px;
+            }
+
+            .updateLinkForm input {
+                font-family: 'Poppins', sans-serif;
+                height: 17px;
+                width: 270%;
+                padding: 12px; /* Adjusted padding for input */
+                margin: 5px auto; /* Adjusted spacing */
+                margin-top: 12px;
+                border-radius: 10px;
+                outline: none;
+                font-size: 16px; /* Adjusted font size */
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+
+            .updateLinkForm button {
+                font-family: 'Poppins', sans-serif;
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                margin-right: 10px !important;
+                border-radius: 5px;
+                font-size: 14px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+                text-decoration: none;
             }
         </style>
     </head>
@@ -1002,163 +1036,162 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
         </div>
     
         <div class="content-projectlist">
-    <div class="content">
-        <div class="button-container">
-            <form id="sendCertificatesForm" method="POST" action="">
-                <button type="submit" name="send_certificates" id="sendCertificatesButton">Send Certificates to All Participants</button>
-            </form>
+            <div class="content">
+                <div class="button-container">
+                    <form id="sendCertificatesForm" method="POST" action="">
+                        <button type="submit" name="send_certificates" id="sendCertificatesButton">Send Certificates to All Participants</button>
+                    </form>
 
-            <button id="toggle-button" onclick="toggleForm()">Open Event Form</button>
-        </div>
+                    <button id="toggle-button" onclick="toggleForm()">Open Event Form</button>
+                </div>
 
-        <div class="form-container">
-            <form id="updateLinkForm" method="POST" action="">
-                <label for="responseLink">CAS Response Form Link:</label>
-                <?php
-                // Fetch the current response link for the CAS department
-                $fetchLinkSql = "SELECT response_link FROM evaluation_links WHERE department = 'CAS'";
-                $fetchLinkStmt = $conn->prepare($fetchLinkSql);
-                $fetchLinkStmt->execute();
-                $linkResult = $fetchLinkStmt->get_result();
-                $currentLink = ($linkResult->num_rows > 0) ? $linkResult->fetch_assoc()['response_link'] : 'No link set';
-                $fetchLinkStmt->close();
-                ?>
-                <input type="text" name="response_form_link" id="responseFormLink" value="<?php echo htmlspecialchars($currentLink); ?>" required>
-                <button type="submit" id="updateLinkButton">Update Link</button>
-            </form>
-        </div>
+                <div class="form-container">
+                    <form id="updateLinkForm" method="POST" action="">
+                        <label for="responseLink">CAS Response Form Link:</label>
+                        <?php
+                        // Fetch the current response link for the CAS department
+                        $fetchLinkSql = "SELECT response_link FROM evaluation_links WHERE department = 'CAS'";
+                        $fetchLinkStmt = $conn->prepare($fetchLinkSql);
+                        $fetchLinkStmt->execute();
+                        $linkResult = $fetchLinkStmt->get_result();
+                        $currentLink = ($linkResult->num_rows > 0) ? $linkResult->fetch_assoc()['response_link'] : 'No link set';
+                        $fetchLinkStmt->close();
+                        ?>
+                        <input type="text" name="response_form_link" id="responseFormLink" value="<?php echo htmlspecialchars($currentLink); ?>" required>
+                        <button type="submit" id="updateLinkButton">Update Link</button>
+                    </form>
+                </div>
 
-        <div class="table-container">
-            <table class="crud-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Event</th>
-                        <th>Department</th>
-                        <th>Rating</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                <?php
-                // Pagination variables
-                $limit = 5;
-                $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-                $offset = ($page - 1) * $limit;
+                <div class="table-container">
+                    <table class="crud-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Event</th>
+                                <th>Department</th>
+                                <th>Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                        <?php
+                        // Pagination variables
+                        $limit = 5;
+                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+                        $offset = ($page - 1) * $limit;
 
-                // Count total records
-                $countSql = "SELECT COUNT(*) as total FROM submissions WHERE department = ?";
-                $countStmt = $conn->prepare($countSql);
-                $countStmt->bind_param("s", $currentDepartment);
-                $countStmt->execute();
-                $countResult = $countStmt->get_result();
-                $totalRecords = $countResult->fetch_assoc()['total'];
-                $totalPages = ceil($totalRecords / $limit);
+                        // Count total records
+                        $countSql = "SELECT COUNT(*) as total FROM submissions WHERE department = ?";
+                        $countStmt = $conn->prepare($countSql);
+                        $countStmt->bind_param("s", $currentDepartment);
+                        $countStmt->execute();
+                        $countResult = $countStmt->get_result();
+                        $totalRecords = $countResult->fetch_assoc()['total'];
+                        $totalPages = ceil($totalRecords / $limit);
 
-                // Fetch records
-                $sql = "SELECT name, email, event, department, rate FROM submissions WHERE department = ? LIMIT $limit OFFSET $offset";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("s", $currentDepartment);
-                $stmt->execute();
-                $result = $stmt->get_result();
+                        // Fetch records
+                        $sql = "SELECT name, email, event, department, rate FROM submissions WHERE department = ? LIMIT $limit OFFSET $offset";
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bind_param("s", $currentDepartment);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
 
-                if ($result->num_rows > 0) {
-                    while ($row = $result->fetch_assoc()) {
-                        echo "<tr>
-                                <td>" . htmlspecialchars($row["name"]) . "</td>
-                                <td>" . htmlspecialchars($row["email"]) . "</td>
-                                <td>" . htmlspecialchars($row["event"]) . "</td>
-                                <td>" . htmlspecialchars($row["department"]) . "</td>
-                                <td>" . htmlspecialchars($row["rate"]) . "</td>
-                            </tr>";
-                    }
-                } else {
-                    echo "<tr><td colspan='5'>No records found</td></tr>";
-                }
+                        if ($result->num_rows > 0) {
+                            while ($row = $result->fetch_assoc()) {
+                                echo "<tr>
+                                        <td>" . htmlspecialchars($row["name"]) . "</td>
+                                        <td>" . htmlspecialchars($row["email"]) . "</td>
+                                        <td>" . htmlspecialchars($row["event"]) . "</td>
+                                        <td>" . htmlspecialchars($row["department"]) . "</td>
+                                        <td>" . htmlspecialchars($row["rate"]) . "</td>
+                                    </tr>";
+                            }
+                        } else {
+                            echo "<tr><td colspan='5'>No records found</td></tr>";
+                        }
 
-                $stmt->close();
-                ?>
-                </tbody>
-            </table>
+                        $stmt->close();
+                        ?>
+                        </tbody>
+                    </table>
 
-            <div class="pagination-info">
-                <div class="page">
-                    <p>
-                        <?php if ($page > 1): ?>
-                            <a class="pagination-link" href="?page=<?php echo $page - 1; ?>">PREV</a>
-                        <?php endif; ?>
+                    <div class="pagination-info">
+                        <div class="page">
+                            <p>
+                                <?php if ($page > 1): ?>
+                                    <a class="pagination-link" href="?page=<?php echo $page - 1; ?>">PREV</a>
+                                <?php endif; ?>
 
-                        <span class="pagination-text">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
+                                <span class="pagination-text">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
 
-                        <?php if ($page < $totalPages): ?>
-                            <a class="pagination-link" href="?page=<?php echo $page + 1; ?>">NEXT</a>
-                        <?php endif; ?>
-                    </p>
+                                <?php if ($page < $totalPages): ?>
+                                    <a class="pagination-link" href="?page=<?php echo $page + 1; ?>">NEXT</a>
+                                <?php endif; ?>
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-            <script>                 
- $(document).ready(function () {
-    $('#updateLinkForm').submit(function (e) {
-        e.preventDefault(); // Prevent default form submission
+        <script>                 
+            $(document).ready(function () {
+                $('#updateLinkForm').submit(function (e) {
+                    e.preventDefault(); // Prevent default form submission
 
-        // Get the new link value from the input field
-        const newLink = $('#responseFormLink').val();
+                    // Get the new link value from the input field
+                    const newLink = $('#responseFormLink').val();
 
-        // Send AJAX request to update the link
-        $.ajax({
-            url: '', // Leave empty if submitting to the same page
-            type: 'POST',
-            data: { response_form_link: newLink },
-            success: function (response) {
-                // Check if the response is 'success' or 'error'
-                if (response.trim() === 'success') {
-                    // Show SweetAlert success notification
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Link Updated!',
-                        text: 'The response form link has been successfully updated.',
-                        confirmButtonColor: '#4caf50',
-                        customClass: {
-                            popup: 'custom-swal-popup',
-                            confirmButton: 'custom-swal-confirm'
+                    // Send AJAX request to update the link
+                    $.ajax({
+                        url: '', // Leave empty if submitting to the same page
+                        type: 'POST',
+                        data: { response_form_link: newLink },
+                        success: function (response) {
+                            // Check if the response is 'success' or 'error'
+                            if (response.trim() === 'success') {
+                                // Show SweetAlert success notification
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Link Updated!',
+                                    text: 'The response form link has been successfully updated.',
+                                    confirmButtonColor: '#4caf50',
+                                    customClass: {
+                                        popup: 'custom-swal-popup',
+                                        confirmButton: 'custom-swal-confirm'
+                                    }
+                                });
+                            } else {
+                                // Show SweetAlert error notification for any other response
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Update Failed',
+                                    text: 'Unable to update the response form link. Please try again.',
+                                    confirmButtonColor: '#dc3545',
+                                    customClass: {
+                                        popup: 'custom-swal-popup',
+                                        confirmButton: 'custom-swal-confirm'
+                                    }
+                                });
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            // Show SweetAlert error notification for AJAX failure
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Server Error',
+                                text: 'An error occurred while updating the response form link.',
+                                confirmButtonColor: '#dc3545',
+                                customClass: {
+                                    popup: 'custom-swal-popup',
+                                    confirmButton: 'custom-swal-confirm'
+                                }
+                            });
                         }
                     });
-                } else {
-                    // Show SweetAlert error notification for any other response
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Update Failed',
-                        text: 'Unable to update the response form link. Please try again.',
-                        confirmButtonColor: '#dc3545',
-                        customClass: {
-                            popup: 'custom-swal-popup',
-                            confirmButton: 'custom-swal-confirm'
-                        }
-                    });
-                }
-            },
-            error: function (xhr, status, error) {
-                // Show SweetAlert error notification for AJAX failure
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Server Error',
-                    text: 'An error occurred while updating the response form link.',
-                    confirmButtonColor: '#dc3545',
-                    customClass: {
-                        popup: 'custom-swal-popup',
-                        confirmButton: 'custom-swal-confirm'
-                    }
                 });
-            }
-        });
-    });
-});
+            });
 
-            
             // Display loading SweetAlert
             $(document).ready(function() {
                 $('#sendCertificatesForm').submit(function (e) {
