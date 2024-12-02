@@ -142,7 +142,7 @@
             color: black;
             border: none;
             border-radius: 12px;
-            width: 165.7px;
+            width: 160.7px;
             height: 60px;
             margin-top: 14px;
             margin-right: 40px;
