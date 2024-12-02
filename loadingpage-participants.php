@@ -91,8 +91,7 @@
             min-width: 180px;
             box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.1);
             z-index: 15;
-            margin-top: 15px;
-            margin-left: 20px;
+            margin-left: 15px;
         }
 
         .dropdown-content a {
@@ -277,7 +276,7 @@
             <i class="fa fa-caret-down"></i>
         </button>
 
-        <div class="dropdown-content" style="right: 50px; top: 45px; position: absolute;">
+        <div class="dropdown-content" style="right: 45px; top: 55px; position: absolute;">
             <a href="cas-form-participants.php">CAS Form</a>
             <a href="coed-form-participants.php">CCS Form</a>
             <a href="ccs-form-participants.php">CCS Form</a>
