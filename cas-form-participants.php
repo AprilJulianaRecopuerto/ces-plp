@@ -1,4 +1,7 @@
 <?php
+session_start();
+$isFormClosed = isset($_SESSION['show_event_form']) && $_SESSION['show_event_form'] === false;
+
 // Database connection for evaluation_links table
 $servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username = "sh9sgtg12c8vyqoa";
