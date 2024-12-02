@@ -925,37 +925,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response_form_link'])
                 padding: 20px;   /* Adjust padding to mimic a smaller alert box */
             }
 
-            .updateLinkForm label {
+            /* Label Styling */
+            label {
                 font-family: 'Poppins', sans-serif;
                 font-size: 14px;
+                display: block;
+                margin-bottom: 8px;
+                color: #333; /* Darker text for better visibility */
             }
 
-            .updateLinkForm input {
+            /* Input Field Styling */
+            #responseFormLink {
                 font-family: 'Poppins', sans-serif;
-                height: 17px;
-                width: 270%;
-                padding: 12px; /* Adjusted padding for input */
-                margin: 5px auto; /* Adjusted spacing */
-                margin-top: 12px;
-                border-radius: 10px;
+                width: 100%; /* Responsive width */
+                padding: 10px; /* Adjusted padding for a balanced look */
+                margin-bottom: 16px; /* Space between input and button */
+                border-radius: 5px; /* Rounded corners */
                 outline: none;
-                font-size: 16px; /* Adjusted font size */
-                border: 1px solid #ccc;
-                border-radius: 4px;
+                font-size: 14px;
+                border: 1px solid #ccc; /* Light border */
+                transition: border-color 0.3s ease; /* Smooth focus effect */
             }
 
-            .updateLinkForm button {
+            #responseFormLink:focus {
+                border-color: #4CAF50; /* Highlighted border on focus */
+                box-shadow: 0 0 4px rgba(76, 175, 80, 0.4); /* Subtle glow */
+            }
+
+            /* Button Styling */
+            #updateLinkButton {
                 font-family: 'Poppins', sans-serif;
                 background-color: #4CAF50;
                 border: none;
                 color: white;
                 padding: 10px 20px;
-                margin-right: 10px !important;
                 border-radius: 5px;
                 font-size: 14px;
                 cursor: pointer;
-                transition: background-color 0.3s;
-                text-decoration: none;
+                transition: background-color 0.3s ease, transform 0.2s ease; /* Add smooth transitions */
+            }
+
+            #updateLinkButton:hover {
+                background-color: #45a049; /* Darker shade on hover */
+                transform: scale(1.05); /* Slight zoom effect */
+            }
+
+            #updateLinkButton:active {
+                background-color: #3e8e41; /* Even darker when clicked */
+                transform: scale(1); /* Reset zoom on click */
             }
         </style>
     </head>
