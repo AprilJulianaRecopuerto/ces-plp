@@ -116,12 +116,12 @@ if (isset($_POST['delete_id'])) {
                 $mail->send();
             } catch (Exception $e) {
                 $_SESSION['error'] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-                header("Location: ccs-addtask.php");
+                header("Location: ccs-projlist.php");
                 exit;
             }
         } else {
             $_SESSION['error'] = "No admin user found for email notification.";
-            header("Location: ccs-addtask.php");
+            header("Location: ccs-projlist.php");
             exit;
         }
     } else {

@@ -3,12 +3,37 @@ session_start(); // Start the session
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
-    header("Location: loginpage.php");
+    header("Location: roleaccount.php");
     exit;
 }
+
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
+// Fetch the profile picture from the colleges table in user_registration
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
+}
+
+$uname = $_SESSION['uname'];
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $uname);
+$stmt->execute();
+$result_profile = $stmt->get_result();
+
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
+}
+
+$stmt->close();
+$conn_profile->close();
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -424,11 +449,6 @@ if (!isset($_SESSION['uname'])) {
                 width: 400px !important; /* Set a larger width */
             }
 
-            .custom-swal-title {
-                font-family: 'Poppins', sans-serif;
-                color: #3085d6; /* Custom title color */
-            }
-
             .custom-swal-confirm {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
@@ -460,11 +480,6 @@ if (!isset($_SESSION['uname'])) {
                 width: 400px !important; /* Set a larger width */
             }
 
-            .custom-error-title {
-                font-family: 'Poppins', sans-serif;
-                color: #e74c3c; /* Custom title color for error */
-            }
-
             .custom-error-confirm {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
@@ -482,13 +497,6 @@ if (!isset($_SESSION['uname'])) {
                 border-radius: 8px; /* Rounded corners */
                 padding: 15px; /* Padding inside the popup */
                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-            }
-
-            .custom-event-title {
-                font-family: 'Poppins', sans-serif;
-                color: #343a40; /* Dark color for the title */
-                font-size: 1.5em; /* Font size for the title */
-                margin-bottom: 10px; /* Spacing below the title */
             }
 
             .custom-event-confirm {
@@ -560,32 +568,89 @@ if (!isset($_SESSION['uname'])) {
             .pagination-link:hover {
                 background-color: #45a049; /* Darker green on hover */
             }
+            .swal-popup {
+                font-family: "Poppins", sans-serif !important;
+                width: 400px;
+            }
+
+            /* SweetAlert confirm button */
+            .swal-confirm {
+                font-family: "Poppins", sans-serif !important;
+            }
+
+            /* SweetAlert cancel button */
+            .swal-cancel {
+                font-family: "Poppins", sans-serif !important;
+            }
+
+            /* Chat styles */
+            .navbar .profile-container {
+                display: flex;
+                align-items: center;
+            }
+
+            .chat-icon {
+                font-size: 20px;
+                color: #333;
+                text-decoration: none;
+                position: relative; /* To position the badge correctly */
+                margin-right: 30px;
+                margin-top: 8px;
+                margin-left: -37px;
+            }
+
+            .notification-badge {
+                display: inline-block;
+                background-color: red; /* Change this to your preferred color */
+                color: white;
+                border-radius: 50%;
+                width: 20px; /* Width of the badge */
+                height: 20px; /* Height of the badge */
+                text-align: center;
+                font-weight: bold;
+                position: absolute; /* Position it relative to the chat icon */
+                top: -5px; /* Adjust as needed */
+                right: -10px; /* Adjust as needed */
+                font-size: 14px; /* Size of the exclamation point */
+            }
+            .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
         </style>
     </head>
 
     <body>
-    <nav class="navbar">
+        <nav class="navbar">
             <h2>Terms of Reference (for Food)</h2> 
 
-            <div class="profile" id="profileDropdown">
-                <?php
-                    // Check if a profile picture is set in the session
-                    if (!empty($_SESSION['picture'])) {
-                        // Show the profile picture
-                        echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
-                    } else {
-                        // Get the first letter of the username for the placeholder
-                        $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
-                        echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
-                    }
-                ?>
+            <div class="profile-container">
+                <!-- Chat Icon with Notification Badge -->
+                <a href="cihm-chat.php" class="chat-icon" onclick="resetNotifications()">
+                    <i class="fa fa-comments"></i>
+                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+                </a>
 
-                <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+                <div class="profile" id="profileDropdown">
+                    <?php
+                        // Check if a profile picture is set in the session
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
+                        } else {
+                            // Get the first letter of the username for the placeholder
+                            $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
+                            echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
+                        }
+                    ?>
 
-                <i class="fa fa-chevron-down dropdown-icon"></i>
-                <div class="dropdown-menu">
-                    <a href="cihm-your-profile.php">Profile</a>
-                    <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+
+                    <i class="fa fa-chevron-down dropdown-icon"></i>
+                    <div class="dropdown-menu">
+                        <a href="cihm-your-profile.php">Profile</a>
+                        <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -614,24 +679,17 @@ if (!isset($_SESSION['uname'])) {
                 <li><a href="cihm-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="cihm-task.php">Upload Files</a>
-                    <a href="cihm-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="cihm-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="responses.php"><img src="images/setting.png">Responses</a></li>
+                <li><a href="cihm-responses.php"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
-                    <img src="images/resource.png"> Audit Trails
+                    <img src="images/logs.png"> Audit Trails
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="cihm-login.php">Log In History</a>
+                    <a href="cihm-history.php">Log In History</a>
                     <a href="cihm-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>
@@ -639,18 +697,18 @@ if (!isset($_SESSION['uname'])) {
 
         <div class="content-tor">
             <div class="button-container">
-                <button onclick="window.location.href='cihm-add-tor.php'">TOR Form</button>
+                <button onclick="logAndRedirect('Add TOR','cihm-add-resource.php')">TOR Form</button>
             </div>
 
             <?php
-            // Database connection
-            $servername = "localhost";
-            $username = "root";
-            $password = "";
-            $dbname = "resource_utilization"; // Change to your actual database name
+            // Database credentials
+            $servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+            $username_resource = "dnr20srzjycb99tw";
+            $password_resource = "ndfnpz4j74v8t0p7";
+            $dbname_resource = "x8uwt594q5jy7a7o";
 
             // Create connection
-            $conn = new mysqli($servername, $username, $password, $dbname);
+            $conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
 
             // Check connection
             if ($conn->connect_error) {
@@ -700,6 +758,7 @@ if (!isset($_SESSION['uname'])) {
                                         <td class='edit'>
                                             <a href='cihm-edit-tor.php?id=" . $row["id"] . "'>EDIT</a>
                                             <button class='delete-button' data-id='" . $row["id"] . "'>DELETE</button>
+                                            <a href='cihm-download-report.php?id=" . $row["id"] . "' class='download-button'>Download Report</a>
                                         </td>
                                     </tr>";
                                 }
@@ -806,329 +865,472 @@ if (!isset($_SESSION['uname'])) {
         </div>
 
         <script>
-            function confirmLogout(event) {
-                    event.preventDefault(); // Prevent the default link behavior
+            let inactivityTime = function () {
+            let time;
+
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
+
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
+
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
                     Swal.fire({
-                        title: 'Are you sure?',
-                        text: "Do you really want to log out?",
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, log me out',
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
                         customClass: {
                             popup: 'custom-swal-popup',
-                            confirmButton: 'custom-swal-confirm',
-                            cancelButton: 'custom-swal-cancel'
+                            confirmButton: 'custom-swal-confirm'
                         }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = 'roleaccount.php'; // Redirect to the logout page
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
+                }
+            };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
+            function confirmLogout(event) {
+                event.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to log out?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
+                    confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('college-logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
                         }
                     });
                 }
 
-                // Dropdown menu toggle
-            document.getElementById('profileDropdown').addEventListener('click', function() {
-                const dropdown = this.querySelector('.dropdown-menu');
-                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-            });
-
-            // Close dropdown if clicked outside
-            window.addEventListener('click', function(event) {
-                if (!document.getElementById('profileDropdown').contains(event.target)) {
-                    const dropdown = document.querySelector('.dropdown-menu');
-                    if (dropdown) {
-                        dropdown.style.display = 'none';
-                    }
+                // This should only run when you're on a page where the user has logged out
+                if (window.location.href !== 'roleaccount.php') {
+                    window.history.pushState(null, '', window.location.href);
+                    window.onpopstate = function () {
+                        window.history.pushState(null, '', window.location.href);
+                    };
                 }
-            });
 
-            // Function to show success SweetAlert
-            function showSuccessAlert() {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Events saved successfully.',
-                    confirmButtonColor: '#089451',
-                    confirmButtonText: 'Continue',
-                    customClass: {
-                        popup: 'custom-swal-popup',
-                        title: 'custom-swal-title',
-                        confirmButton: 'custom-swal-confirm'
-                    }
-                }).then(() => {
-                    window.location.href = "cihm-resource.php"; // Redirect to the dashboard or desired page
+                // Dropdown menu toggle
+                document.getElementById('profileDropdown').addEventListener('click', function() {
+                    const dropdown = this.querySelector('.dropdown-menu');
+                    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
                 });
-            }
 
-            // Function to show error SweetAlert
-            function showErrorAlert(message) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: message,
-                    confirmButtonColor: '#e74c3c',
-                    confirmButtonText: 'Try Again',
-                    customClass: {
-                        popup: 'custom-error-popup',
-                        title: 'custom-error-title',
-                        confirmButton: 'custom-error-confirm'
+                // Close dropdown if clicked outside
+                window.addEventListener('click', function(event) {
+                    if (!document.getElementById('profileDropdown').contains(event.target)) {
+                        const dropdown = document.querySelector('.dropdown-menu');
+                        if (dropdown) {
+                            dropdown.style.display = 'none';
+                        }
                     }
                 });
-            }
 
-            // Check for success message in session and show alert
-            <?php if (isset($_SESSION['success'])): ?>
-                showSuccessAlert();
-                <?php unset($_SESSION['success']); ?> // Clear the message after displaying
-            <?php endif; ?>
+                // Function to show success SweetAlert
+                function showSuccessAlert() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Events saved successfully.',
+                        confirmButtonColor: '#089451',
+                        confirmButtonText: 'Continue',
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            title: 'custom-swal-title',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    }).then(() => {
+                        window.location.href = "cihm-resource.php"; // Redirect to the dashboard or desired page
+                    });
+                }
 
-            // Check for error message in session and show alert
-            <?php if (isset($_SESSION['error'])): ?>
-                showErrorAlert('<?php echo addslashes($_SESSION['error']); ?>');
-                <?php unset($_SESSION['error']); ?> // Clear the message after displaying
-            <?php endif; ?>
-
-            let eventCount = 1; // Initialize event counter
-
-            // Function to add a new event section
-            function addEvent() {
-                eventCount++; // Increment the event counter
-                const eventContainer = document.getElementById('eventContainer'); // Get the container for events
-                const newEventSection = document.createElement('div'); // Create a new div for the event section
-                newEventSection.className = 'event-section'; // Assign a class name for styling
-                newEventSection.innerHTML = `
-                    <h3>Event ${eventCount}</h3>
-                    <div class="form-group">
-                        <label for="event_date_${eventCount}">Event Date:</label>
-                        <input type="date" id="event_date_${eventCount}" name="event_date[]" onblur="checkEventDate()" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="event_title_${eventCount}">Event Title:</label>
-                        <input type="text" id="event_title_${eventCount}" name="event_title[]" placeholder="Enter Event Title" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="meal_type_${eventCount}">Food Category:</label>
-                        <select id="meal_type_${eventCount}" name="meal_type[]" required>
-                            <option value="" disabled selected>Select Meal Type</option>
-                            <option value="Packed Meals">Packed Meals</option>
-                            <option value="Catering Services">Catering Services</option>
-                            <option value="Boxed Meals">Boxed Meals</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="menu_${eventCount}">Menu:</label>
-                        <textarea id="menu_${eventCount}" name="menu[]" placeholder="Enter Menu Details" required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="total_meals_${eventCount}">Total of Meals:</label>
-                        <input type="text" id="total_meals_${eventCount}" name="total_meals[]" placeholder="Enter Total of Meals (e.g 500 meals)" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="total_usage_${eventCount}">Total Usage:</label>
-                        <input type="text" id="total_usage_${eventCount}" name="total_usage[]" placeholder="Enter Total Usage (e.g 450 meals)" required>
-                    </div>
-
-                    <button type="button" class="remove-btn" onclick="removeEvent(this)">Remove Event</button>
-                `;
-                eventContainer.appendChild(newEventSection); // Append the new event section to the container
-            }
-
-            // Function to remove an event section
-            function removeEvent(element) {
-                const eventSection = element.parentElement; // Get the parent div of the button
-                eventSection.remove(); // Remove the event section
-                eventCount--; // Decrement the event counter
-            }
-
-
-                        function checkEventDate() {
-                const dateOfDelivery = new Date(document.getElementById('date_of_delivery').value);
-                const eventDate = new Date(document.getElementById('event_date_1').value);
-
-                if (eventDate < dateOfDelivery) {
+                // Function to show error SweetAlert
+                function showErrorAlert(message) {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Invalid Date',
-                        text: 'You have entered an event date that is earlier than the date of delivery. Please check.',
+                        title: 'Error',
+                        text: message,
                         confirmButtonColor: '#e74c3c',
-                        confirmButtonText: 'Okay',
+                        confirmButtonText: 'Try Again',
                         customClass: {
                             popup: 'custom-error-popup',
                             title: 'custom-error-title',
                             confirmButton: 'custom-error-confirm'
                         }
                     });
-
-                    // Optionally, reset the event date field
-                    document.getElementById('event_date_1').value = '';
                 }
-            }
 
-            var dropdowns = document.getElementsByClassName("dropdown-btn");
+                // Check for success message in session and show alert
+                <?php if (isset($_SESSION['success'])): ?>
+                    showSuccessAlert();
+                    <?php unset($_SESSION['success']); ?> // Clear the message after displaying
+                <?php endif; ?>
 
-            for (let i = 0; i < dropdowns.length; i++) {
-                dropdowns[i].addEventListener("click", function () {
-                    // Close all dropdowns first
-                    let dropdownContents = document.getElementsByClassName("dropdown-container");
-                    for (let j = 0; j < dropdownContents.length; j++) {
-                        dropdownContents[j].style.display = "none";
-                    }
+                // Check for error message in session and show alert
+                <?php if (isset($_SESSION['error'])): ?>
+                    showErrorAlert('<?php echo addslashes($_SESSION['error']); ?>');
+                    <?php unset($_SESSION['error']); ?> // Clear the message after displaying
+                <?php endif; ?>
 
-                    // Toggle the clicked dropdown's visibility
-                    let dropdownContent = this.nextElementSibling;
-                    if (dropdownContent.style.display === "block") {
-                        dropdownContent.style.display = "none";
-                    } else {
-                        dropdownContent.style.display = "block";
-                    }
-                });
-            }
+                let eventCount = 1; // Initialize event counter
 
-            document.addEventListener('DOMContentLoaded', function() {
-                const deleteButtons = document.querySelectorAll('.delete-button');
+                // Function to add a new event section
+                function addEvent() {
+                    eventCount++; // Increment the event counter
+                    const eventContainer = document.getElementById('eventContainer'); // Get the container for events
+                    const newEventSection = document.createElement('div'); // Create a new div for the event section
+                    newEventSection.className = 'event-section'; // Assign a class name for styling
+                    newEventSection.innerHTML = `
+                        <h3>Event ${eventCount}</h3>
+                        <div class="form-group">
+                            <label for="event_date_${eventCount}">Event Date:</label>
+                            <input type="date" id="event_date_${eventCount}" name="event_date[]" onblur="checkEventDate()" required>
+                        </div>
 
-                deleteButtons.forEach(button => {
-                    button.addEventListener('click', function() {
-                        const eventId = this.getAttribute('data-id');
+                        <div class="form-group">
+                            <label for="event_title_${eventCount}">Event Title:</label>
+                            <input type="text" id="event_title_${eventCount}" name="event_title[]" placeholder="Enter Event Title" required>
+                        </div>
 
-                        // AJAX request to check for multiple events with the same event_form_id
-                        fetch(`cihm-delete-event.php?cihm_tor_id=${eventId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.eventCount > 1) {
-                                // Multiple events found: ask if user wants to delete all or specify date
-                                Swal.fire({
-                                    title: 'Multiple Events Found',
-                                    text: 'Do you want to delete all?',
-                                    icon: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Yes, delete all',
-                                    cancelButtonText: 'No, enter specific date',
-                                    showDenyButton: true, // Enable additional cancel button
-                                    denyButtonText: 'Cancel', // Text for additional cancel button
-                                    background: '#f8f9fa',
-                                    customClass: {
-                                        popup: 'custom-event-popup',
-                                        title: 'custom-event-title',
-                                        confirmButton: 'custom-event-confirm',
-                                        cancelButton: 'custom-event-cancel',
-                                        denyButton: 'custom-event-deny' // Add styling class for deny button
-                                    }
-                                }).then(result => {
-                                    if (result.isConfirmed) {
-                                        // User chose to delete all
-                                        deleteEvent(eventId, 'all');
-                                    } else if (result.isDenied) {
-                                        // User clicked the additional cancel button
-                                        Swal.fire({
-                                            title: 'Action cancelled',
-                                            text: 'Your action has been cancelled.',
-                                            icon: 'info',
-                                            background: '#f8f9fa',
-                                            customClass: {
-                                                popup: 'custom-error-popup',
-                                                title: 'custom-error-title',
-                                                confirmButton: 'custom-swal-confirm'
-                                            }
-                                        });
-                                    } else if (result.dismiss === Swal.DismissReason.cancel) {
-                                        // User wants to specify a date
-                                        Swal.fire({
-                                            title: 'Enter Specific Date',
-                                            input: 'text',
-                                            inputLabel: 'Date (YYYY-MM-DD)',
-                                            showCancelButton: true,
-                                            background: '#f8f9fa',
-                                            customClass: {
-                                                popup: 'custom-swal-popup',
-                                                input: 'custom-swal-input',
-                                                title: 'custom-swal-title',
-                                                confirmButton: 'custom-swal-confirm',
-                                                cancelButton: 'custom-swal-cancel'
-                                            }
-                                        }).then(dateResult => {
-                                            if (dateResult.isConfirmed && dateResult.value) {
-                                                deleteEvent(eventId, dateResult.value);
-                                            } else if (dateResult.isDismissed) {
-                                                Swal.fire({
-                                                    title: 'Cancelled',
-                                                    text: 'No date was entered.',
-                                                    icon: 'info',
-                                                    background: '#f8f9fa',
-                                                    customClass: {
-                                                        popup: 'custom-error-popup',
-                                                        title: 'custom-error-title',
-                                                        confirmButton: 'custom-swal-confirm'
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
-                            } else {
-                                // Single event found: ask for confirmation to delete
-                                Swal.fire({
-                                    title: 'Are you sure?',
-                                    text: 'Do you really want to delete this?',
-                                    icon: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Yes, delete',
-                                    cancelButtonText: 'Cancel',
-                                    background: '#f8f9fa',
-                                    customClass: {
-                                        popup: 'custom-swal-popup',
-                                        title: 'custom-swal-title',
-                                        confirmButton: 'custom-swal-confirm',
-                                        cancelButton: 'custom-swal-cancel'
-                                    }
-                                }).then(result => {
-                                    if (result.isConfirmed) {
-                                        deleteEvent(eventId, 'single');
-                                    }
-                                });
-                            }
+                        <div class="form-group">
+                            <label for="meal_type_${eventCount}">Food Category:</label>
+                            <select id="meal_type_${eventCount}" name="meal_type[]" required>
+                                <option value="" disabled selected>Select Meal Type</option>
+                                <option value="Packed Meals">Packed Meals</option>
+                                <option value="Catering Services">Catering Services</option>
+                                <option value="Boxed Meals">Boxed Meals</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="menu_${eventCount}">Menu:</label>
+                            <textarea id="menu_${eventCount}" name="menu[]" placeholder="Enter Menu Details" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="total_meals_${eventCount}">Total of Meals:</label>
+                            <input type="text" id="total_meals_${eventCount}" name="total_meals[]" placeholder="Enter Total of Meals (e.g 500 meals)" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="total_usage_${eventCount}">Total Usage:</label>
+                            <input type="text" id="total_usage_${eventCount}" name="total_usage[]" placeholder="Enter Total Usage (e.g 450 meals)" required>
+                        </div>
+
+                        <button type="button" class="remove-btn" onclick="removeEvent(this)">Remove Event</button>
+                    `;
+                    eventContainer.appendChild(newEventSection); // Append the new event section to the container
+                }
+
+                // Function to remove an event section
+                function removeEvent(element) {
+                    const eventSection = element.parentElement; // Get the parent div of the button
+                    eventSection.remove(); // Remove the event section
+                    eventCount--; // Decrement the event counter
+                }
+
+                var dropdowns = document.getElementsByClassName("dropdown-btn");
+
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].addEventListener("click", function () {
+                        // Close all dropdowns first
+                        let dropdownContents = document.getElementsByClassName("dropdown-container");
+                        for (let j = 0; j < dropdownContents.length; j++) {
+                            dropdownContents[j].style.display = "none";
+                        }
+
+                        // Toggle the clicked dropdown's visibility
+                        let dropdownContent = this.nextElementSibling;
+                        if (dropdownContent.style.display === "block") {
+                            dropdownContent.style.display = "none";
+                        } else {
+                            dropdownContent.style.display = "block";
+                        }
+                    });
+                }
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    const deleteButtons = document.querySelectorAll('.delete-button');
+
+                    deleteButtons.forEach(button => {
+                        button.addEventListener('click', function() {
+                            const eventId = this.getAttribute('data-id');
+
+                            // AJAX request to check for multiple events with the same event_form_id
+                            fetch(`cihm-delete-event.php?cihm_tor_id=${eventId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.eventCount > 1) {
+                                    // Multiple events found: ask if user wants to delete all or specify date
+                                    Swal.fire({
+                                        title: 'Multiple Events Found',
+                                        text: 'Do you want to delete all?',
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonText: 'Yes, delete all',
+                                        cancelButtonText: 'No, enter specific date',
+                                        showDenyButton: true, // Enable additional cancel button
+                                        denyButtonText: 'Cancel', // Text for additional cancel button
+                                        background: '#f8f9fa',
+                                        customClass: {
+                                            popup: 'custom-event-popup',
+                                            title: 'custom-event-title',
+                                            confirmButton: 'custom-event-confirm',
+                                            cancelButton: 'custom-event-cancel',
+                                            denyButton: 'custom-event-deny' // Add styling class for deny button
+                                        }
+                                    }).then(result => {
+                                        if (result.isConfirmed) {
+                                            // User chose to delete all
+                                            deleteEvent(eventId, 'all');
+                                        } else if (result.isDenied) {
+                                            // User clicked the additional cancel button
+                                            Swal.fire({
+                                                title: 'Action cancelled',
+                                                text: 'Your action has been cancelled.',
+                                                icon: 'info',
+                                                background: '#f8f9fa',
+                                                customClass: {
+                                                    popup: 'custom-error-popup',
+                                                    title: 'custom-error-title',
+                                                    confirmButton: 'custom-swal-confirm'
+                                                }
+                                            });
+                                        } else if (result.dismiss === Swal.DismissReason.cancel) {
+                                            // User wants to specify a date
+                                            Swal.fire({
+                                                title: 'Enter Specific Date',
+                                                input: 'text',
+                                                inputLabel: 'Date (YYYY-MM-DD)',
+                                                showCancelButton: true,
+                                                background: '#f8f9fa',
+                                                customClass: {
+                                                    popup: 'custom-swal-popup',
+                                                    input: 'custom-swal-input',
+                                                    title: 'custom-swal-title',
+                                                    confirmButton: 'custom-swal-confirm',
+                                                    cancelButton: 'custom-swal-cancel'
+                                                }
+                                            }).then(dateResult => {
+                                                if (dateResult.isConfirmed && dateResult.value) {
+                                                    deleteEvent(eventId, dateResult.value);
+                                                } else if (dateResult.isDismissed) {
+                                                    Swal.fire({
+                                                        title: 'Cancelled',
+                                                        text: 'No date was entered.',
+                                                        icon: 'info',
+                                                        background: '#f8f9fa',
+                                                        customClass: {
+                                                            popup: 'custom-error-popup',
+                                                            title: 'custom-error-title',
+                                                            confirmButton: 'custom-swal-confirm'
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    // Single event found: ask for confirmation to delete
+                                    Swal.fire({
+                                        title: 'Are you sure?',
+                                        text: 'Do you really want to delete this?',
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonText: 'Yes, delete',
+                                        cancelButtonText: 'Cancel',
+                                        background: '#f8f9fa',
+                                        customClass: {
+                                            popup: 'custom-swal-popup',
+                                            title: 'custom-swal-title',
+                                            confirmButton: 'custom-swal-confirm',
+                                            cancelButton: 'custom-swal-cancel'
+                                        }
+                                    }).then(result => {
+                                        if (result.isConfirmed) {
+                                            deleteEvent(eventId, 'single');
+                                        }
+                                    });
+                                }
+                            });
                         });
                     });
+
+                    // Function to handle deletion
+                    function deleteEvent(eventId, date) {
+                        fetch(`cihm-delete-event.php?cihm_tor_id=${eventId}&event_date=${date}`, {
+                            method: 'POST'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: 'The event has been deleted.',
+                            icon: 'success',
+                            customClass: {
+                                popup: 'custom-swal-popup',
+                                title: 'custom-swal-title',
+                                confirmButton: 'custom-swal-confirm'
+                            }
+                        }).then(() => location.reload()); // Reload page after deletion
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'An error occurred while deleting the event.',
+                            icon: 'error',
+                            customClass: {
+                                popup: 'custom-error-popup',
+                                title: 'custom-error-title'
+                            }
+                        });
+                    }
                 });
 
-                // Function to handle deletion
-                function deleteEvent(eventId, date) {
-                    fetch(`cihm-delete-event.php?cihm_tor_id=${eventId}&event_date=${date}`, {
-                        method: 'POST'
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        title: 'Deleted!',
-                        text: 'The event has been deleted.',
-                        icon: 'success',
-                        customClass: {
-                            popup: 'custom-swal-popup',
-                            title: 'custom-swal-title',
-                            confirmButton: 'custom-swal-confirm'
-                        }
-                    }).then(() => location.reload()); // Reload page after deletion
-                } else {
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'An error occurred while deleting the event.',
-                        icon: 'error',
-                        customClass: {
-                            popup: 'custom-error-popup',
-                            title: 'custom-error-title'
-                        }
-                    });
+                    }
+                });
+
+                function logAction(actionDescription) {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("POST", "college_logs.php", true);
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    xhr.send("action=" + encodeURIComponent(actionDescription));
                 }
+
+                function logAndRedirect(actionDescription, url) {
+                    logAction(actionDescription); // Log the action
+                    setTimeout(function() {
+                        window.location.href = url; // Redirect after logging
+                    }, 100); // Delay to ensure logging completes
+                }
+
+                // Add event listeners when the page is fully loaded
+                document.addEventListener("DOMContentLoaded", function() {
+                    // Log clicks on main menu links
+                    document.querySelectorAll(".menu > li > a").forEach(function(link) {
+                        link.addEventListener("click", function() {
+                            logAction(link.textContent.trim());
+                        });
+                    });
+
+                    // Handle dropdown button clicks
+                    var dropdowns = document.getElementsByClassName("dropdown-btn");
+                    for (let i = 0; i < dropdowns.length; i++) {
+                        dropdowns[i].addEventListener("click", function () {
+                            let dropdownContents = document.getElementsByClassName("dropdown-container");
+                            for (let j = 0; j < dropdownContents.length; j++) {
+                                dropdownContents[j].style.display = "none";
+                            }
+                            let dropdownContent = this.nextElementSibling;
+                            if (dropdownContent.style.display === "block") {
+                                dropdownContent.style.display = "none";
+                            } else {
+                                dropdownContent.style.display = "block";
+                            }
+                        });
+                    }
+
+                    // Log clicks on dropdown links
+                    document.querySelectorAll(".dropdown-container a").forEach(function(link) {
+                        link.addEventListener("click", function(event) {
+                            event.stopPropagation();
+                            logAction(link.textContent.trim());
+                        });
+                    });
+
+                    document.querySelectorAll("td.edit a").forEach(function(link) {
+                    link.addEventListener("click", function(event) {
+                        event.preventDefault(); // Prevent the default action
+                        var url = this.href; // Get the URL from the href attribute
+                        logAndRedirect("Edit TOR", url); // Log the action and redirect
+                    });
+                });
+
+                /// Log clicks on action buttons (Delete)
+                document.querySelectorAll(".delete-button").forEach(function(button) {
+                    button.addEventListener("click", function() {
+                        logAction("Delete TOR"); // Log deletion action
+                        // Additional logic for deletion can be added here if needed
+                    });
+                });
+
+                // Log clicks on the "Profile" link
+                document.querySelector('.dropdown-menu a[href="cihm-your-profile.php"]').addEventListener("click", function() {
+                    logAction("Profile");
+                });
             });
 
+            document.addEventListener("DOMContentLoaded", () => {
+                function checkNotifications() {
+                    fetch('cihm-check_notifications.php')
+                        .then(response => response.json())
+                        .then(data => {
+                            const chatNotification = document.getElementById('chatNotification');
+                            if (data.unread_count > 0) {
+                                chatNotification.style.display = 'inline-block';
+                            } else {
+                                chatNotification.style.display = 'none';
+                            }
+                        })
+                        .catch(error => console.error('Error checking notifications:', error));
                 }
+
+                // Check for notifications every 2 seconds
+                setInterval(checkNotifications, 2000);
+                checkNotifications(); // Initial check when page loads
             });
         </script>
     </body>
