@@ -671,93 +671,93 @@ $conn_profile->close();
 
                 xhr.send(data);
             }
+
             function addProjectToBudget(projectId) {
-    var projTitle = document.getElementById("proj_title_" + projectId).innerText;
-    var leadPerson = document.getElementById("lead_person_" + projectId).innerText;
-    var semester = document.getElementById("semester_" + projectId).innerText;
+                var projTitle = document.getElementById("proj_title_" + projectId).innerText;
+                var leadPerson = document.getElementById("lead_person_" + projectId).innerText;
+                var semester = document.getElementById("semester_" + projectId).innerText;
 
-    // Use SweetAlert for inputting expenses
-    Swal.fire({
-        title: 'Enter the expenses for the new project:',
-        input: 'text',
-        inputPlaceholder: 'Enter expenses here...',
-        showCancelButton: true,
-        confirmButtonText: 'Submit',
-        cancelButtonText: 'Cancel',
-        preConfirm: (value) => {
-            if (!value || isNaN(value) || value <= 0) {
-                Swal.showValidationMessage('Please enter a valid amount for the expenses');
-            }
-            return value;
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            var expenses = parseFloat(result.value);
-
-            // Check if the new expense exceeds the allotted budget
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "cas-check_budget_limit.php", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    var response = xhr.responseText.split('|');
-                    if (response[0] === "error") {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Budget Exceeded!',
-                            text: response[1],
-                            showConfirmButton: true
-                        });
-                    } else if (response[0] === "success") {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Budget Check Passed!',
-                            text: response[1],
-                            showConfirmButton: true
-                        }).then(() => {
-                            // Proceed to add project to budget
-                            var xhrAdd = new XMLHttpRequest();
-                            xhrAdd.open("POST", "cas-add_to_budget.php", true);
-                            xhrAdd.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                            xhrAdd.onreadystatechange = function () {
-                                if (xhrAdd.readyState == 4 && xhrAdd.status == 200) {
-                                    if (xhrAdd.responseText === "success") {
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: 'Project successfully added!',
-                                            showConfirmButton: false,
-                                            timer: 1500
-                                        }).then(function() {
-                                            window.location.href = 'cas-budget-utilization.php';
-                                        });
-                                    } else {
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: 'Error!',
-                                            text: xhrAdd.responseText,
-                                            showConfirmButton: true
-                                        });
-                                    }
-                                }
-                            };
-
-                            var data = "projectId=" + projectId +
-                                       "&projTitle=" + encodeURIComponent(projTitle) +
-                                       "&leadPerson=" + encodeURIComponent(leadPerson) +
-                                       "&semester=" + encodeURIComponent(semester) +
-                                       "&expenses=" + encodeURIComponent(expenses);
-                            xhrAdd.send(data);
-                        });
+                // Use SweetAlert for inputting expenses
+                Swal.fire({
+                    title: 'Enter the expenses for the new project:',
+                    input: 'text',
+                    inputPlaceholder: 'Enter expenses here...',
+                    showCancelButton: true,
+                    confirmButtonText: 'Submit',
+                    cancelButtonText: 'Cancel',
+                    preConfirm: (value) => {
+                        if (!value || isNaN(value) || value <= 0) {
+                            Swal.showValidationMessage('Please enter a valid amount for the expenses');
+                        }
+                        return value;
                     }
-                }
-            };
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        var expenses = parseFloat(result.value);
 
-            var checkBudgetData = "newExpense=" + expenses;
-            xhr.send(checkBudgetData);
-        }
-    });
-}
+                        // Check if the new expense exceeds the allotted budget
+                        var xhr = new XMLHttpRequest();
+                        xhr.open("POST", "cas-check_budget_limit.php", true);
+                        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState == 4 && xhr.status == 200) {
+                                var response = xhr.responseText.split('|');
+                                if (response[0] === "error") {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Budget Exceeded!',
+                                        text: response[1],
+                                        showConfirmButton: true
+                                    });
+                                } else if (response[0] === "success") {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Budget Check Passed!',
+                                        text: response[1],
+                                        showConfirmButton: true
+                                    }).then(() => {
+                                        // Proceed to add project to budget
+                                        var xhrAdd = new XMLHttpRequest();
+                                        xhrAdd.open("POST", "cas-add_to_budget.php", true);
+                                        xhrAdd.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                                        xhrAdd.onreadystatechange = function () {
+                                            if (xhrAdd.readyState == 4 && xhrAdd.status == 200) {
+                                                if (xhrAdd.responseText === "success") {
+                                                    Swal.fire({
+                                                        icon: 'success',
+                                                        title: 'Project successfully added!',
+                                                        showConfirmButton: false,
+                                                        timer: 1500
+                                                    }).then(function() {
+                                                        window.location.href = 'cas-budget-utilization.php';
+                                                    });
+                                                } else {
+                                                    Swal.fire({
+                                                        icon: 'error',
+                                                        title: 'Error!',
+                                                        text: xhrAdd.responseText,
+                                                        showConfirmButton: true
+                                                    });
+                                                }
+                                            }
+                                        };
 
+                                        var data = "projectId=" + projectId +
+                                                "&projTitle=" + encodeURIComponent(projTitle) +
+                                                "&leadPerson=" + encodeURIComponent(leadPerson) +
+                                                "&semester=" + encodeURIComponent(semester) +
+                                                "&expenses=" + encodeURIComponent(expenses);
+                                        xhrAdd.send(data);
+                                    });
+                                }
+                            }
+                        };
+
+                        var checkBudgetData = "newExpense=" + expenses;
+                        xhr.send(checkBudgetData);
+                    }
+                });
+            }
 
             function updateBarangays() {
             const district = document.getElementById('district').value;
@@ -806,70 +806,70 @@ $conn_profile->close();
             });
 
             let entryCount = 1; // Tracks the number of entries
-        let totalBudgetValue = 0; // Holds the total budget from the first entry
+            let totalBudgetValue = 0; // Holds the total budget from the first entry
 
-        function addEntry() {
-            entryCount++;
-            const entryContainer = document.getElementById('entryContainer');
-            const newEntrySection = document.createElement('div');
-            newEntrySection.className = 'entry-section';
-            newEntrySection.innerHTML = `
-                <h3>Entry ${entryCount}</h3>
-                <div class="form-group">
-                    <label for="event_title_${entryCount}">Event Title:</label>
-                    <input type="text" id="event_title_${entryCount}" name="event_title[]" placeholder="Enter Event Title" required>
-                </div>
-                <div class="form-group">
-                    <label for="total_budget_${entryCount}">Total Budget:</label>
-                    <input type="text" id="total_budget_${entryCount}" name="total_budget[]" value="${totalBudgetValue}" placeholder="Total Budget" readonly />
-                </div>
-                <div class="form-group">
-                    <label for="expenses_${entryCount}">Expenses:</label>
-                    <input type="text" id="expenses_${entryCount}" name="expenses[]" placeholder="Enter Total Expenses" required oninput="updateRemainingBudget(this.parentElement.parentElement)">
-                </div>
-                <div class="form-group">
-                    <label for="remaining_budget_${entryCount}">Remaining Budget:</label>
-                    <input type="text" id="remaining_budget_${entryCount}" name="remaining_budget[]" placeholder="Remaining Budget" readonly />
-                </div>
-                <button type="button" class="remove-btn" onclick="removeEntry(this)">Remove Entry</button>
-            `;
-            entryContainer.appendChild(newEntrySection);
+            function addEntry() {
+                entryCount++;
+                const entryContainer = document.getElementById('entryContainer');
+                const newEntrySection = document.createElement('div');
+                newEntrySection.className = 'entry-section';
+                newEntrySection.innerHTML = `
+                    <h3>Entry ${entryCount}</h3>
+                    <div class="form-group">
+                        <label for="event_title_${entryCount}">Event Title:</label>
+                        <input type="text" id="event_title_${entryCount}" name="event_title[]" placeholder="Enter Event Title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="total_budget_${entryCount}">Total Budget:</label>
+                        <input type="text" id="total_budget_${entryCount}" name="total_budget[]" value="${totalBudgetValue}" placeholder="Total Budget" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label for="expenses_${entryCount}">Expenses:</label>
+                        <input type="text" id="expenses_${entryCount}" name="expenses[]" placeholder="Enter Total Expenses" required oninput="updateRemainingBudget(this.parentElement.parentElement)">
+                    </div>
+                    <div class="form-group">
+                        <label for="remaining_budget_${entryCount}">Remaining Budget:</label>
+                        <input type="text" id="remaining_budget_${entryCount}" name="remaining_budget[]" placeholder="Remaining Budget" readonly />
+                    </div>
+                    <button type="button" class="remove-btn" onclick="removeEntry(this)">Remove Entry</button>
+                `;
+                entryContainer.appendChild(newEntrySection);
 
-            // Set the total budget value for this entry based on the first entry's total budget
-            if (entryCount > 1) {
-                const firstBudgetInput = document.getElementById('total_budget_1');
-                newEntrySection.querySelector(`input[id^="total_budget_"]`).value = firstBudgetInput.value;
-                updateRemainingBudget(newEntrySection); // Call to update remaining budget when a new entry is added
+                // Set the total budget value for this entry based on the first entry's total budget
+                if (entryCount > 1) {
+                    const firstBudgetInput = document.getElementById('total_budget_1');
+                    newEntrySection.querySelector(`input[id^="total_budget_"]`).value = firstBudgetInput.value;
+                    updateRemainingBudget(newEntrySection); // Call to update remaining budget when a new entry is added
+                }
             }
-        }
 
-        function updateRemainingBudget(entrySection) {
-            const expensesInput = entrySection.querySelector('input[id^="expenses_"]');
-            const remainingInput = entrySection.querySelector('input[id^="remaining_budget_"]');
-            const firstBudgetInput = document.getElementById('total_budget_1');
-            const totalBudget = parseFloat(firstBudgetInput.value) || 0; // Get total budget for the first entry
+            function updateRemainingBudget(entrySection) {
+                const expensesInput = entrySection.querySelector('input[id^="expenses_"]');
+                const remainingInput = entrySection.querySelector('input[id^="remaining_budget_"]');
+                const firstBudgetInput = document.getElementById('total_budget_1');
+                const totalBudget = parseFloat(firstBudgetInput.value) || 0; // Get total budget for the first entry
 
-            // Calculate total expenses from all entries
-            const totalExpenses = getTotalExpenses();
+                // Calculate total expenses from all entries
+                const totalExpenses = getTotalExpenses();
 
-            // Calculate remaining budget
-            const remainingBudget = totalBudget - totalExpenses; // Subtract total expenses from total budget
-            remainingInput.value = remainingBudget.toFixed(2); // Update the remaining budget display
-        }
+                // Calculate remaining budget
+                const remainingBudget = totalBudget - totalExpenses; // Subtract total expenses from total budget
+                remainingInput.value = remainingBudget.toFixed(2); // Update the remaining budget display
+            }
 
-        function getTotalExpenses() {
-            const expenseInputs = document.querySelectorAll('[id^="expenses_"]');
-            let totalExpenses = 0;
-            expenseInputs.forEach(input => {
-                totalExpenses += parseFloat(input.value) || 0; // Sum up all expenses
-            });
-            return totalExpenses;
-        }
+            function getTotalExpenses() {
+                const expenseInputs = document.querySelectorAll('[id^="expenses_"]');
+                let totalExpenses = 0;
+                expenseInputs.forEach(input => {
+                    totalExpenses += parseFloat(input.value) || 0; // Sum up all expenses
+                });
+                return totalExpenses;
+            }
 
-        function removeEntry(element) {
-            element.parentElement.remove();
-            updateRemainingBudget(); // Recalculate remaining budget after removing an entry
-        }
+            function removeEntry(element) {
+                element.parentElement.remove();
+                updateRemainingBudget(); // Recalculate remaining budget after removing an entry
+            }
 
             // Check if there is a success or error message
             <?php if (isset($_SESSION['success'])): ?>
@@ -949,7 +949,7 @@ $conn_profile->close();
                 function resetTimer() {
                     clearTimeout(time);
                     // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
                 }
 
                 // Check if the user is logged in and clear the loggedOut flag
@@ -1021,7 +1021,6 @@ $conn_profile->close();
                     }
                 }
             });
-
            
             function logAction(actionDescription) {
                 var xhr = new XMLHttpRequest();

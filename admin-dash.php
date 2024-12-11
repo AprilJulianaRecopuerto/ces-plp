@@ -1303,9 +1303,17 @@ if (isset($_POST['delete_notification'])) {
 									FROM (
 										SELECT COUNT(*) as total_count FROM cas
 										UNION ALL
-										SELECT COUNT(*) as total_count FROM ccs
-										UNION ALL
 										SELECT COUNT(*) as total_count FROM cba
+										UNION ALL
+										SELECT COUNT(*) as total_count FROM ccs
+                                        UNION ALL
+										SELECT COUNT(*) as total_count FROM coed
+                                        UNION ALL
+										SELECT COUNT(*) as total_count FROM coe
+                                        UNION ALL
+										SELECT COUNT(*) as total_count FROM cihm
+                                        UNION ALL
+										SELECT COUNT(*) as total_count FROM con
 									) as combined_counts
 								";
 								$result = $conn_proj_list->query($sql);

@@ -898,59 +898,58 @@ if (isset($_SESSION['alert_shown']) && $_SESSION['alert_shown']) {
         </div>
     </div>
 
-<script>
-    let inactivityTime = function () {
-    let time;
+    <script>
+        let inactivityTime = function () {
+        let time;
 
-    // List of events to reset the inactivity timer
-    window.onload = resetTimer;
-    document.onmousemove = resetTimer;
-    document.onkeypress = resetTimer;
-    document.onscroll = resetTimer;
-    document.onclick = resetTimer;
+        // List of events to reset the inactivity timer
+        window.onload = resetTimer;
+        document.onmousemove = resetTimer;
+        document.onkeypress = resetTimer;
+        document.onscroll = resetTimer;
+        document.onclick = resetTimer;
 
-    // If logged out due to inactivity, prevent user from accessing dashboard
-    if (sessionStorage.getItem('loggedOut') === 'true') {
-        // Ensure the user cannot access the page and is redirected
-        window.location.replace('loadingpage.php');
-    }
-
-    function logout() {
-        // SweetAlert2 popup styled similar to the standard alert
-        Swal.fire({
-            title: 'Session Expired',
-            text: 'You have been logged out due to inactivity.',
-            icon: 'warning',
-            confirmButtonText: 'OK',
-            width: '400px',   // Adjust width (close to native alert size)
-            heightAuto: false, // Prevent automatic height adjustment
-            customClass: {
-                popup: 'smaller-alert' // Custom class for further styling if needed
-            }
-        }).then(() => {
-            // Set sessionStorage to indicate user has been logged out due to inactivity
-            sessionStorage.setItem('loggedOut', 'true');
-
-            // Redirect to loadingpage.php
+        // If logged out due to inactivity, prevent user from accessing dashboard
+        if (sessionStorage.getItem('loggedOut') === 'true') {
+            // Ensure the user cannot access the page and is redirected
             window.location.replace('loadingpage.php');
-        });
-    }
+        }
 
-    function resetTimer() {
-        clearTimeout(time);
-        // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-        time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
-    }
+        function logout() {
+            // SweetAlert2 popup styled similar to the standard alert
+            Swal.fire({
+                title: 'Session Expired',
+                text: 'You have been logged out due to inactivity.',
+                icon: 'warning',
+                confirmButtonText: 'OK',
+                width: '400px',   // Adjust width (close to native alert size)
+                heightAuto: false, // Prevent automatic height adjustment
+                customClass: {
+                    popup: 'smaller-alert' // Custom class for further styling if needed
+                }
+            }).then(() => {
+                // Set sessionStorage to indicate user has been logged out due to inactivity
+                sessionStorage.setItem('loggedOut', 'true');
 
-    // Check if the user is logged in and clear the loggedOut flag
-    if (sessionStorage.getItem('loggedOut') === 'false') {
-        sessionStorage.removeItem('loggedOut');
-    }
-};
+                // Redirect to loadingpage.php
+                window.location.replace('loadingpage.php');
+            });
+        }
 
-// Start the inactivity timeout function
-inactivityTime();
+        function resetTimer() {
+            clearTimeout(time);
+            // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+            time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+        }
 
+        // Check if the user is logged in and clear the loggedOut flag
+        if (sessionStorage.getItem('loggedOut') === 'false') {
+            sessionStorage.removeItem('loggedOut');
+        }
+    };
+
+    // Start the inactivity timeout function
+    inactivityTime();
 
             document.getElementById('profileDropdown').addEventListener('click', function() {
                 var dropdownMenu = document.querySelector('.dropdown-menu');

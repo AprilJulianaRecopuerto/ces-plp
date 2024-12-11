@@ -165,218 +165,218 @@ $conn_proj_list->close();
             }
 
             .navbar {
-                    background-color: #E7F0DC; /* Dirty white color */
-                    color: black;
-                    padding: 10px;
-                    display: flex;
-                    justify-content: space-between; /* Space between heading and profile */
-                    align-items: center;
-                    position: fixed;
-                    width: calc(96.2% - 270px); /* Adjusted width considering the sidebar */
-                    height: 80px;
-                    margin-left: 320px; /* Align with the sidebar */
-                    border-radius: 10px;
-                    z-index: 5;
-                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Added box shadow */
-                }
+                background-color: #E7F0DC; /* Dirty white color */
+                color: black;
+                padding: 10px;
+                display: flex;
+                justify-content: space-between; /* Space between heading and profile */
+                align-items: center;
+                position: fixed;
+                width: calc(96.2% - 270px); /* Adjusted width considering the sidebar */
+                height: 80px;
+                margin-left: 320px; /* Align with the sidebar */
+                border-radius: 10px;
+                z-index: 5;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Added box shadow */
+            }
 
-                .navbar h2 {
-                    font-family: "Glacial Indifference", sans-serif;
-                    margin: 0; /* Remove default margin */
-                    font-size: 32px; /* Adjust font size if needed */
-                    color: black; /* Set text color */
-                    margin-left: 20px;
-                }
+            .navbar h2 {
+                font-family: "Glacial Indifference", sans-serif;
+                margin: 0; /* Remove default margin */
+                font-size: 32px; /* Adjust font size if needed */
+                color: black; /* Set text color */
+                margin-left: 20px;
+            }
 
-                .profile {
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    cursor: pointer;
-                    margin-right: 20px; /* Space from the right edge */
-                }
+            .profile {
+                position: relative;
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                margin-right: 20px; /* Space from the right edge */
+            }
 
-                .profile img, .profile-placeholder {
-                    width: 50px;
-                    height: 50px;
-                    border-radius: 50%;
-                    margin-right: 10px;
-                }
+            .profile img, .profile-placeholder {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                margin-right: 10px;
+            }
 
-                .profile-placeholder {
-                    font-family: "Poppins", sans-serif;
-                    width: 50px; /* Adjust as needed */
-                    height: 50px;
-                    border-radius: 50%;
-                    background-color: #ccc; /* Placeholder background color */
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 24px; /* Adjust text size */
-                    color: green;
-                    font-weight: bold;
-                    margin-right: 20px; /* Space between profile picture and name */
-                }
+            .profile-placeholder {
+                font-family: "Poppins", sans-serif;
+                width: 50px; /* Adjust as needed */
+                height: 50px;
+                border-radius: 50%;
+                background-color: #ccc; /* Placeholder background color */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px; /* Adjust text size */
+                color: green;
+                font-weight: bold;
+                margin-right: 20px; /* Space between profile picture and name */
+            }
 
-                span {
-                    font-family: "Poppins", sans-serif;
-                    font-size: 17px;
-                    color: black; /* Set text color */
-                    white-space: nowrap; /* Prevent line breaks */
-                    overflow: hidden; /* Hide overflow */
-                    text-overflow: ellipsis; /* Show ellipsis if the text overflows */
-                    flex-grow: 1; /* Allow the username to take available space */
-                }
+            span {
+                font-family: "Poppins", sans-serif;
+                font-size: 17px;
+                color: black; /* Set text color */
+                white-space: nowrap; /* Prevent line breaks */
+                overflow: hidden; /* Hide overflow */
+                text-overflow: ellipsis; /* Show ellipsis if the text overflows */
+                flex-grow: 1; /* Allow the username to take available space */
+            }
 
-                .dropdown-icon {
-                    width:22px !important; /* Adjust size of the down-arrow icon */
-                    height: 15px !important;
-                    margin-left: 10px; /* Space between name and icon */
-                }
+            .dropdown-icon {
+                width:22px !important; /* Adjust size of the down-arrow icon */
+                height: 15px !important;
+                margin-left: 10px; /* Space between name and icon */
+            }
 
-                .dropdown-menu {
-                    font-family: "Poppins", sans-serif;
-                    display: none; /* Hidden by default */
-                    position: absolute;
-                    width: 198px;
-                    top: 60px; /* Adjust based on the profile's height */
-                    right: 0;
-                    background-color: white;
-                    border: 1px solid #ccc;
-                    border-radius: 10px;
-                    padding: 10px;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                    z-index: 1;
-                }
+            .dropdown-menu {
+                font-family: "Poppins", sans-serif;
+                display: none; /* Hidden by default */
+                position: absolute;
+                width: 198px;
+                top: 60px; /* Adjust based on the profile's height */
+                right: 0;
+                background-color: white;
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                padding: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                z-index: 1;
+            }
 
-                .dropdown-menu a {
-                    text-decoration: none;
-                    border-radius: 10px;
-                    color: black;
-                    display: block;
-                    padding: 10px;
-                }
+            .dropdown-menu a {
+                text-decoration: none;
+                border-radius: 10px;
+                color: black;
+                display: block;
+                padding: 10px;
+            }
 
-                .dropdown-menu a:hover {
-                    background-color: #218838;
-                    color: white;
-                }
+            .dropdown-menu a:hover {
+                background-color: #218838;
+                color: white;
+            }
 
-                .sidebar {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    height: 100%;
-                    width: 278px;
-                    background-color: #FFF8A5; /* Light yellow */
-                    color: black;
-                    padding: 20px;
-                    z-index: 1000;
-                    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Added box shadow */
-                }
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 278px;
+                background-color: #FFF8A5; /* Light yellow */
+                color: black;
+                padding: 20px;
+                z-index: 1000;
+                box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Added box shadow */
+            }
 
-                .logo {
-                    display: flex;
-                    align-items: center;
-                    margin-bottom: 25px; /* Increased margin bottom */
-                }
+            .logo {
+                display: flex;
+                align-items: center;
+                margin-bottom: 25px; /* Increased margin bottom */
+            }
 
-                .logo img {
-                    height: 80px; /* Increased logo size */
-                    margin-left: 25px; /* Adjusted margin */
-                }
+            .logo img {
+                height: 80px; /* Increased logo size */
+                margin-left: 25px; /* Adjusted margin */
+            }
 
-                .logo span {
-                    font-size: 30px; /* Increased font size */
-                    margin-left: -15px;
-                    font-family: 'Glacial Indifference', sans-serif;
-                    font-weight: bold;
-                }
+            .logo span {
+                font-size: 30px; /* Increased font size */
+                margin-left: -15px;
+                font-family: 'Glacial Indifference', sans-serif;
+                font-weight: bold;
+            }
 
-                .menu {
-                    list-style: none;
-                    padding: 0;
-                    margin: 0;
-                }
+            .menu {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
 
-                .menu li {
-                    margin: 6px; /* Increased margin for spacing between items */
-                    display: flex;
-                    align-items: center;
-                }
+            .menu li {
+                margin: 6px; /* Increased margin for spacing between items */
+                display: flex;
+                align-items: center;
+            }
 
-                .menu a {
-                    color: black;
-                    text-decoration: none;
-                    display: flex;
-                    align-items: center;
-                    padding: 10.5px; /* Increased padding for better click area */
-                    border-radius: 5px; /* Increased border-radius for rounded corners */
-                    width: 94%;
-                    font-size: 17px; /* Increased font size */
-                    font-family: 'Poppins', sans-serif;
-                }
+            .menu a {
+                color: black;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                padding: 10.5px; /* Increased padding for better click area */
+                border-radius: 5px; /* Increased border-radius for rounded corners */
+                width: 94%;
+                font-size: 17px; /* Increased font size */
+                font-family: 'Poppins', sans-serif;
+            }
 
-                .menu a:hover {
-                    background-color: #22901C;
-                    transition: 0.3s;
-                    color: white; /* Ensure the text color is white when hovered */
-                }
+            .menu a:hover {
+                background-color: #22901C;
+                transition: 0.3s;
+                color: white; /* Ensure the text color is white when hovered */
+            }
 
-                /* Style the sidenav links and the dropdown button */
-                .menu .dropdown-btn {
-                    list-style: none;
-                    padding: 0;
-                    margin: 0;
-                    text-decoration: none !important;
-                    display: flex;
-                    align-items: center;
-                    padding: 10.5px; /* Increased padding for better click area */
-                    border-radius: 5px; /* Increased border-radius for rounded corners */
-                    width: 97%;
-                    font-size: 17px; /* Increased font size */
-                    font-family: 'Poppins', sans-serif;
-                    background-color: transparent; /* Set background to transparent */
-                    border: none; /* Remove border */
-                    cursor: pointer; /* Change cursor to pointer */
-                }
+            /* Style the sidenav links and the dropdown button */
+            .menu .dropdown-btn {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                text-decoration: none !important;
+                display: flex;
+                align-items: center;
+                padding: 10.5px; /* Increased padding for better click area */
+                border-radius: 5px; /* Increased border-radius for rounded corners */
+                width: 97%;
+                font-size: 17px; /* Increased font size */
+                font-family: 'Poppins', sans-serif;
+                background-color: transparent; /* Set background to transparent */
+                border: none; /* Remove border */
+                cursor: pointer; /* Change cursor to pointer */
+            }
 
-                /* On mouse-over */
-                .menu .dropdown-btn:hover {
-                    background-color: #22901C;
-                    transition: 0.3s;
-                    color: white;
-                }
+            /* On mouse-over */
+            .menu .dropdown-btn:hover {
+                background-color: #22901C;
+                transition: 0.3s;
+                color: white;
+            }
 
-                .dropdown-btn img {
-                    height: 30px; /* Increased icon size */
-                    margin-left: 6px; /* Adjusted space between icon and text */
-                }
+            .dropdown-btn img {
+                height: 30px; /* Increased icon size */
+                margin-left: 6px; /* Adjusted space between icon and text */
+            }
 
-                /* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
-                .dropdown-container {
-                    display: none;
-                    padding-left: 8px;
-                    margin-top: -2px;
-                    width: 85%;
-                    margin-left: 25px;
-                    margin-bottom: -5px;
-                }
+            /* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
+            .dropdown-container {
+                display: none;
+                padding-left: 8px;
+                margin-top: -2px;
+                width: 85%;
+                margin-left: 25px;
+                margin-bottom: -5px;
+            }
 
-                /* Optional: Style the caret down icon */
-                .fa-chevron-down {
-                    float: right;
-                    margin-left: 15px;
-                }
-                .menu img {
-                    height: 30px; /* Increased icon size */
-                    margin-right: 15px; /* Adjusted space between icon and text */
-                }
+            /* Optional: Style the caret down icon */
+            .fa-chevron-down {
+                float: right;
+                margin-left: 15px;
+            }
+            .menu img {
+                height: 30px; /* Increased icon size */
+                margin-right: 15px; /* Adjusted space between icon and text */
+            }
 
-                .menu li a.active {
-                    background-color: green; /* Change background color */
-                    color: white; /* Change text color */
-                }
+            .menu li a.active {
+                background-color: green; /* Change background color */
+                color: white; /* Change text color */
+            }
 
 
             .content-cal {
@@ -517,6 +517,7 @@ $conn_proj_list->close();
             }
         </style>
     </head>
+
     <body>
         <!-- Navbar -->
         <nav class="navbar">
@@ -606,281 +607,280 @@ $conn_proj_list->close();
             </div>
         </div>
 
-<script>
-let inactivityTime = function () {
-    let time;
+    <script>
+            let inactivityTime = function () {
+                let time;
 
-    // List of events to reset the inactivity timer
-    window.onload = resetTimer;
-    document.onmousemove = resetTimer;
-    document.onkeypress = resetTimer;
-    document.onscroll = resetTimer;
-    document.onclick = resetTimer;
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
 
-    // If logged out due to inactivity, prevent user from accessing dashboard
-    if (sessionStorage.getItem('loggedOut') === 'true') {
-        // Ensure the user cannot access the page and is redirected
-        window.location.replace('loadingpage.php');
-    }
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
 
-    function logout() {
-        // SweetAlert2 popup styled similar to the standard alert
-        Swal.fire({
-            title: 'Session Expired',
-            text: 'You have been logged out due to inactivity.',
-            icon: 'warning',
-            confirmButtonText: 'OK',
-            width: '400px',   // Adjust width (close to native alert size)
-            heightAuto: false, // Prevent automatic height adjustment
-            customClass: {
-                popup: 'smaller-alert' // Custom class for further styling if needed
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'smaller-alert' // Custom class for further styling if needed
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
+                }
+            };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
+            function confirmLogout(event) {
+                event.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to log out?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
+                    confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
+                });
             }
-        }).then(() => {
-            // Set sessionStorage to indicate user has been logged out due to inactivity
-            sessionStorage.setItem('loggedOut', 'true');
 
-            // Redirect to loadingpage.php
-            window.location.replace('loadingpage.php');
-        });
-    }
-
-    function resetTimer() {
-        clearTimeout(time);
-        // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-        time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
-    }
-
-    // Check if the user is logged in and clear the loggedOut flag
-    if (sessionStorage.getItem('loggedOut') === 'false') {
-        sessionStorage.removeItem('loggedOut');
-    }
-};
-
-// Start the inactivity timeout function
-inactivityTime();
-
-
- function confirmLogout(event) {
-    event.preventDefault();
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you really want to log out?",
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6', // Green confirm button
-        cancelButtonColor: '#dc3545', // Red cancel button
-        confirmButtonText: 'Yes, log me out',
-        cancelButtonText: 'Cancel',
-        customClass: {
-            popup: 'swal-popup',
-            confirmButton: 'swal-confirm',
-            cancelButton: 'swal-cancel'
-        },
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Execute the logout action (send a request to the server to log out)
-            fetch('logout.php?action=logout')
-                .then(response => response.text())
-                .then(data => {
-                    console.log(data); // Log response for debugging
-
-                    // Redirect the user to the role account page after logout
-                    window.location.href = 'roleaccount.php';
-
-                    // Modify the history to prevent back navigation after logout
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
                     window.history.pushState(null, '', window.location.href);
-                    window.onpopstate = function () {
-                        window.history.pushState(null, '', window.location.href);
-                    };
+                };
+            }
+
+
+            // Dropdown elements
+            const monthDropdown = document.getElementById('month');
+            const yearDropdown = document.getElementById('year');
+            const calendar = document.getElementById('calendar');
+            const eventDetails = document.getElementById('eventDetails');
+            const monthNames = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+
+            // Populate month dropdown
+            monthNames.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index; // Month values start from 0
+                option.textContent = month;
+                monthDropdown.appendChild(option);
+            });
+
+            // Populate year dropdown
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear; i >= currentYear - 100; i--) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                yearDropdown.appendChild(option);
+            }
+
+            // Initialize calendar
+            const initMonth = new Date().getMonth();
+            const initYear = currentYear;
+            monthDropdown.value = initMonth;
+            yearDropdown.value = initYear;
+            updateCalendar();
+
+            let activeDayCell = null; // To keep track of the currently active day
+
+            function updateCalendar() {
+            const month = parseInt(monthDropdown.value);
+            const year = parseInt(yearDropdown.value);
+            calendar.innerHTML = '';
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const totalDays = lastDay.getDate();
+
+            // Fetch event days for the selected month and year
+            fetch(`<?php echo basename(__FILE__); ?>?month=${month + 1}&year=${year}`)
+            .then(response => response.json())
+            .then(eventDays => {
+                // Add headers for days of the week
+                const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                daysOfWeek.forEach(day => {
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = 'day header';
+                    dayHeader.textContent = day;
+                    calendar.appendChild(dayHeader);
+                });
+
+                // Add empty cells for days before the first day of the month
+                for (let i = 0; i < firstDay.getDay(); i++) {
+                    const emptyCell = document.createElement('div');
+                    emptyCell.className = 'day';
+                    calendar.appendChild(emptyCell);
+                }
+
+                // Add days of the month
+                for (let day = 1; day <= totalDays; day++) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day';
+                    dayCell.textContent = day;
+
+                    // Check if the current day has an event
+                    if (eventDays.includes(day)) {
+                        dayCell.classList.add('event-day'); // Highlight the day
+                    }
+
+                    // Add click event listener to each day cell
+                    dayCell.addEventListener('click', () => {
+                        const selectedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+                        // Remove 'active' class from previously active day
+                        if (activeDayCell) {
+                            activeDayCell.classList.remove('active');
+                        }
+
+                        // Add 'active' class to the clicked day
+                        dayCell.classList.add('active');
+                        activeDayCell = dayCell;
+
+                        displayEventDetails(selectedDate);
+                    });
+
+                    calendar.appendChild(dayCell);
+                }
+            });
+            }
+
+            function displayEventDetails(date) {
+                // Fetch event details from the server (same file with 'date' parameter)
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', `<?php echo basename(__FILE__); ?>?date=${date}`, true);
+                xhr.onload = function () {
+                    if (this.status === 200) {
+                        // Update the event details section with the response
+                        eventDetails.innerHTML = this.responseText;
+                    } else {
+                        eventDetails.innerHTML = '<p style="color: red;">Error fetching event details.</p>';
+                    }
+                };
+                xhr.send();
+            }
+
+            // Dropdown menu toggle
+            document.getElementById('profileDropdown').addEventListener('click', function() {
+                const dropdown = this.querySelector('.dropdown-menu');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close dropdown if clicked outside
+            window.addEventListener('click', function(event) {
+                if (!document.getElementById('profileDropdown').contains(event.target)) {
+                    const dropdown = document.querySelector('.dropdown-menu');
+                    if (dropdown) {
+                        dropdown.style.display = 'none';
+                    }
+                }
+            });
+
+            var dropdowns = document.getElementsByClassName("dropdown-btn");
+            for (let i = 0; i < dropdowns.length; i++) {
+                dropdowns[i].addEventListener("click", function () {
+                    // Close all dropdowns first
+                    let dropdownContents = document.getElementsByClassName("dropdown-container");
+                    for (let j = 0; j < dropdownContents.length; j++) {
+                        dropdownContents[j].style.display = "none";
+                    }
+
+                    // Toggle the clicked dropdown's visibility
+                    let dropdownContent = this.nextElementSibling;
+                    if (dropdownContent.style.display === "block") {
+                        dropdownContent.style.display = "none";
+                    } else {
+                        dropdownContent.style.display = "block";
+                    }
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+            const username = "<?php echo $_SESSION['username']; ?>"; // Get the username from PHP session
+
+            // Function to log activity
+            function logActivity(buttonName) {
+                const timestamp = new Date().toISOString(); // Get current timestamp
+
+                fetch('log_activity.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        buttonFunction: buttonName // Updated to match the PHP variable
+                    }),
                 })
-                .catch(error => console.error('Error:', error));
-        }
-    });
-}
-
-// This should only run when you're on a page where the user has logged out
-if (window.location.href !== 'roleaccount.php') {
-    window.history.pushState(null, '', window.location.href);
-    window.onpopstate = function () {
-        window.history.pushState(null, '', window.location.href);
-    };
-}
-
-
-                // Dropdown elements
-                const monthDropdown = document.getElementById('month');
-                const yearDropdown = document.getElementById('year');
-                const calendar = document.getElementById('calendar');
-                const eventDetails = document.getElementById('eventDetails');
-                const monthNames = [
-                    'January', 'February', 'March', 'April', 'May', 'June',
-                    'July', 'August', 'September', 'October', 'November', 'December'
-                ];
-
-                // Populate month dropdown
-                monthNames.forEach((month, index) => {
-                    const option = document.createElement('option');
-                    option.value = index; // Month values start from 0
-                    option.textContent = month;
-                    monthDropdown.appendChild(option);
-                });
-
-                // Populate year dropdown
-                const currentYear = new Date().getFullYear();
-                for (let i = currentYear; i >= currentYear - 100; i--) {
-                    const option = document.createElement('option');
-                    option.value = i;
-                    option.textContent = i;
-                    yearDropdown.appendChild(option);
-                }
-
-                // Initialize calendar
-                const initMonth = new Date().getMonth();
-                const initYear = currentYear;
-                monthDropdown.value = initMonth;
-                yearDropdown.value = initYear;
-                updateCalendar();
-
-                let activeDayCell = null; // To keep track of the currently active day
-
-                function updateCalendar() {
-                const month = parseInt(monthDropdown.value);
-                const year = parseInt(yearDropdown.value);
-                calendar.innerHTML = '';
-
-                const firstDay = new Date(year, month, 1);
-                const lastDay = new Date(year, month + 1, 0);
-                const totalDays = lastDay.getDate();
-
-                // Fetch event days for the selected month and year
-                fetch(`<?php echo basename(__FILE__); ?>?month=${month + 1}&year=${year}`)
                 .then(response => response.json())
-                .then(eventDays => {
-                    // Add headers for days of the week
-                    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                    daysOfWeek.forEach(day => {
-                        const dayHeader = document.createElement('div');
-                        dayHeader.className = 'day header';
-                        dayHeader.textContent = day;
-                        calendar.appendChild(dayHeader);
-                    });
-
-                    // Add empty cells for days before the first day of the month
-                    for (let i = 0; i < firstDay.getDay(); i++) {
-                        const emptyCell = document.createElement('div');
-                        emptyCell.className = 'day';
-                        calendar.appendChild(emptyCell);
+                .then(data => {
+                    if (data.status === 'error') {
+                        console.error('Error logging activity:', data.message);
+                    } else {
+                        console.log('Activity logged successfully:', data);
                     }
-
-                    // Add days of the month
-                    for (let day = 1; day <= totalDays; day++) {
-                        const dayCell = document.createElement('div');
-                        dayCell.className = 'day';
-                        dayCell.textContent = day;
-
-                        // Check if the current day has an event
-                        if (eventDays.includes(day)) {
-                            dayCell.classList.add('event-day'); // Highlight the day
-                        }
-
-                        // Add click event listener to each day cell
-                        dayCell.addEventListener('click', () => {
-                            const selectedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
-                            // Remove 'active' class from previously active day
-                            if (activeDayCell) {
-                                activeDayCell.classList.remove('active');
-                            }
-
-                            // Add 'active' class to the clicked day
-                            dayCell.classList.add('active');
-                            activeDayCell = dayCell;
-
-                            displayEventDetails(selectedDate);
-                        });
-
-                        calendar.appendChild(dayCell);
-                    }
+                })
+                .catch(error => {
+                    console.error('Error logging activity:', error);
                 });
-                }
-
-                function displayEventDetails(date) {
-                    // Fetch event details from the server (same file with 'date' parameter)
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('GET', `<?php echo basename(__FILE__); ?>?date=${date}`, true);
-                    xhr.onload = function () {
-                        if (this.status === 200) {
-                            // Update the event details section with the response
-                            eventDetails.innerHTML = this.responseText;
-                        } else {
-                            eventDetails.innerHTML = '<p style="color: red;">Error fetching event details.</p>';
-                        }
-                    };
-                    xhr.send();
-                }
-
-                // Dropdown menu toggle
-                document.getElementById('profileDropdown').addEventListener('click', function() {
-                    const dropdown = this.querySelector('.dropdown-menu');
-                    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-                });
-
-                // Close dropdown if clicked outside
-                window.addEventListener('click', function(event) {
-                    if (!document.getElementById('profileDropdown').contains(event.target)) {
-                        const dropdown = document.querySelector('.dropdown-menu');
-                        if (dropdown) {
-                            dropdown.style.display = 'none';
-                        }
-                    }
-                });
-
-                var dropdowns = document.getElementsByClassName("dropdown-btn");
-                for (let i = 0; i < dropdowns.length; i++) {
-                    dropdowns[i].addEventListener("click", function () {
-                        // Close all dropdowns first
-                        let dropdownContents = document.getElementsByClassName("dropdown-container");
-                        for (let j = 0; j < dropdownContents.length; j++) {
-                            dropdownContents[j].style.display = "none";
-                        }
-
-                        // Toggle the clicked dropdown's visibility
-                        let dropdownContent = this.nextElementSibling;
-                        if (dropdownContent.style.display === "block") {
-                            dropdownContent.style.display = "none";
-                        } else {
-                            dropdownContent.style.display = "block";
-                        }
-                    });
-                }
-
-                document.addEventListener('DOMContentLoaded', function () {
-                const username = "<?php echo $_SESSION['username']; ?>"; // Get the username from PHP session
-
-                // Function to log activity
-                function logActivity(buttonName) {
-                    const timestamp = new Date().toISOString(); // Get current timestamp
-
-                    fetch('log_activity.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            buttonFunction: buttonName // Updated to match the PHP variable
-                        }),
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'error') {
-                            console.error('Error logging activity:', data.message);
-                        } else {
-                            console.log('Activity logged successfully:', data);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error logging activity:', error);
-                    });
-                }
+            }
 
             // Add event listeners specifically to buttons and links
             const trackableElements = document.querySelectorAll('button, a'); // Select all buttons and links
