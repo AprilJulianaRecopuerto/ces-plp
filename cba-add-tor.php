@@ -717,7 +717,7 @@ $conn->close();
                 <form id="eventForm" action="" method="POST">
                     <div class="form-group">
                         <label for="college_name">College Name:</label>
-                        <input type="text" id="college_name" name="college_name" value="College of Arts and Science" placeholder="Enter College Name" required>
+                        <input type="text" id="college_name" name="college_name" value="College of Business Administration" placeholder="Enter College Name" required>
                     </div>
 
                     <div class="form-group">

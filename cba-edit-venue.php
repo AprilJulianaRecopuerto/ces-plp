@@ -666,7 +666,7 @@ $conn->close();
 
                     <div class="form-group">
                         <label for="college_name">Office/College:</label>
-                        <input type="text" id="college_name" name="college_name" value="<?php echo htmlspecialchars($requisitionFormData['college_name'] ?? 'College of Arts and Science'); ?>" placeholder="Enter College Name" required>
+                        <input type="text" id="college_name" name="college_name" value="<?php echo htmlspecialchars($requisitionFormData['college_name'] ?? 'College of Business Administration'); ?>" placeholder="Enter College Name" required>
                     </div>
 
                     <div class="form-group">
