@@ -489,43 +489,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             
             <?php
-// Database connection
-$servername = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_db = "zf8r3n4qqjyrfx7o";
-$password_db = "su6qmqa0gxuerg98";
-$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+            // Database connection
+            $servername = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+            $username_db = "zf8r3n4qqjyrfx7o";
+            $password_db = "su6qmqa0gxuerg98";
+            $dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-$conn_proj = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
+            $conn_proj = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
 
-// Check connection
-if ($conn_proj->connect_error) {
-    die("Connection failed: " . $conn_proj->connect_error);
-}
-
-// Fetch project titles from the cas table
-$sql = "SELECT proj_title FROM cas";
-$result = $conn_proj->query($sql);
-?>
-
-<div style="display: flex; align-items: center; margin-bottom: 10px;">
-    <label for="event">Event:</label>
-    <select id="event" name="event" required>
-        <option value="" disabled selected>Select Event</option>
-        <?php
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                echo '<option value="' . htmlspecialchars($row['proj_title']) . '">' . htmlspecialchars($row['proj_title']) . '</option>';
+            // Check connection
+            if ($conn_proj->connect_error) {
+                die("Connection failed: " . $conn_proj->connect_error);
             }
-        } else {
-            echo '<option value="" disabled>No Events Available</option>';
-        }
-        ?>
-    </select>
-</div>
 
-<?php
-$conn_proj->close();
-?>
+            // Fetch project titles from the cas table
+            $sql = "SELECT proj_title FROM cas";
+            $result = $conn_proj->query($sql);
+            ?>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <label for="event">Event:</label>
+                <select id="event" name="event" required>
+                    <option value="" disabled selected>Select Event</option>
+                    <?php
+                    if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            echo '<option value="' . htmlspecialchars($row['proj_title']) . '">' . htmlspecialchars($row['proj_title']) . '</option>';
+                        }
+                    } else {
+                        echo '<option value="" disabled>No Events Available</option>';
+                    }
+                    ?>
+                </select>
+            </div>
+
+            <?php
+            $conn_proj->close();
+            ?>
             
             <button class="button-submit" type="submit" name="signup">Submit</button>
 
