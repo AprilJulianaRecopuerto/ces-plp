@@ -3,28 +3,109 @@ session_start(); // Start the session
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
-    header("Location: collegelogin.php"); // Redirect to login page
+    // Redirect to login page if the session variable is not set
+    header("Location: roleaccount.php");
     exit;
 }
 
 // Database credentials
-$servername = "localhost";
-$username_db = "root";
-$password_db = "";
-$dbname_mov = "task_mov";
+$servername = "l7cup2om0gngra77.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_db = "gv5xdrzqyrg1qyvs";
+$password_db = "uv4wrt6zlfqzrpni";
+$dbname_mov = "tcbjgh4zgu5wj4bo";
 
 // Create connection to the database
 $conn_mov = new mysqli($servername, $username_db, $password_db, $dbname_mov);
 
+
+$servername_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_ur = "equ6v8i5llo3uhjm"; 
+$password_ur = "vkfaxm2are5bjc3q"; 
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
+$servername_pl = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_pl = "zf8r3n4qqjyrfx7o";
+$password_pl = "su6qmqa0gxuerg98"; 
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
+
+$conn_proj = new mysqli($servername_pl, $username_pl, $password_pl, $dbname_proj_list); // Connection to proj_list database
+
 // Check connection
-if ($conn_mov->connect_error) {
+if ($conn_mov->connect_error || $conn_proj->connect_error) {
     die("Connection failed: " . $conn_mov->connect_error);
 }
 
 // Define the base directory for folders
 $base_directory = 'movuploads/coe-mov/';
 
-// Handle folder creation
+// Fetch the latest project title and dateof_imple from the proj_list database
+$query = "SELECT proj_title, dateof_imple FROM coe ORDER BY id DESC LIMIT 1"; // Adjusted to fetch both columns
+$result_proj = $conn_proj->query($query);
+
+// Check if the query was successful
+if ($result_proj === false) {
+    // Query failed, show an error
+    die("Error executing query: " . $conn_proj->error);
+}
+
+if ($result_proj->num_rows > 0) {
+    // Get the project title and date of implementation
+    $row = $result_proj->fetch_assoc();
+    $proj_title = $row['proj_title'];
+    $dateof_imple = $row['dateof_imple'];
+    
+    // Format dateof_imple if it's not already in the desired format (assuming it's in a valid date format)
+    $formatted_date = date('m-d-Y', strtotime($dateof_imple));
+    
+    // Format folder name (e.g., Project Title 05-20-2024)
+    $folder_name = $proj_title . ' ' . $formatted_date;
+    
+    // Folder path in 'movuploads/coe-mov/'
+    $folder_path = $base_directory . $folder_name;
+
+    // Check if the folder entry already exists in the coe_mov table
+    $check_existing_folder_query = "SELECT * FROM coe_mov WHERE folder_name = '$folder_name'";
+    $result_check = $conn_mov->query($check_existing_folder_query);
+
+    if ($result_check->num_rows == 0) {
+        // Folder entry does not exist in the database, proceed to check filesystem and create folder
+        if (!file_exists($folder_path)) {
+            // Create the folder in the filesystem
+            if (mkdir($folder_path, 0777, true)) {
+                // Define the subfolders to be created
+                $subfolders = ['Program - Colloquium', 'Profile of Presenters', 'Presenters', 'Presentation per Presented', 'Post Evaluation Survey or Feedback', 'Photos', 'Certificate', 'Attendance'];
+
+                // Create each subfolder inside the main folder
+                foreach ($subfolders as $subfolder) {
+                    $subfolder_path = $folder_path . '/' . $subfolder;
+                    if (!mkdir($subfolder_path, 0777, true)) {
+                        $_SESSION['folder_error'] = 'Error creating subfolder: ' . $subfolder;
+                        break; // Stop creating further subfolders if one fails
+                    }
+                }
+
+                // Insert the folder name into the coe_mov table for tracking
+                $insert_folder_sql = "INSERT INTO coe_mov (folder_name) VALUES ('$folder_name')";
+                if ($conn_mov->query($insert_folder_sql) === TRUE) {
+                    $_SESSION['folder_create_success'] = 'Folder and subfolders created successfully for event: ' . $folder_name;
+                } else {
+                    $_SESSION['folder_error'] = 'Error inserting folder name into database: ' . $conn_mov->error;
+                }
+            } else {
+                $_SESSION['folder_error'] = 'Error creating folder for event: ' . $folder_name;
+            }
+        } else {
+            // The folder already exists in the filesystem but not in the database
+            $_SESSION['folder_error'] = 'The folder already exists in the filesystem but not in the database.';
+        }
+    } else {
+        // The folder entry already exists in the database, no action needed
+        $_SESSION['folder_info'] = 'The folder entry already exists in the database.';
+    }
+}
+
+// Handle folder creation via manual input
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'create') {
     $folder_name = $conn_mov->real_escape_string(trim($_POST['folder_name']));
     $folder_path = $base_directory . $folder_name; // Full path for new folder
@@ -38,13 +119,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
         header('Location: coe-mov.php'); // Redirect after setting the session
         exit();
     }
-
+    
     // Create the folder in the filesystem
-    if (mkdir($folder_path)) {
+    if (mkdir($folder_path, 0777, true)) {
+        // Define subfolders
+        $subfolders = ['Program - Colloquium', 'Profile of Presenters', 'Presenters', 'Presentation per Presented', 'Post Evaluation Survey or Feedback', 'Photos', 'Certificate', 'Attendance'];
+        foreach ($subfolders as $subfolder) {
+            $subfolder_path = $folder_path . '/' . $subfolder;
+            if (!mkdir($subfolder_path, 0777, true)) {
+                $_SESSION['folder_error'] = 'Error creating subfolder: ' . $subfolder;
+                break;
+            }
+        }
+
         // Insert folder name into the coe_mov table
         $sql = "INSERT INTO coe_mov (folder_name) VALUES ('$folder_name')";
         if ($conn_mov->query($sql) === TRUE) {
-            $_SESSION['folder_create_success'] = 'Folder created successfully';
+            $_SESSION['folder_create_success'] = 'Folder and subfolders created successfully';
             header('Location: coe-mov.php'); // Redirect after success
             exit();
         } else {
@@ -59,73 +150,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     }
 }
 
-// Handle folder renaming
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'rename') {
-    $old_folder_name = $conn_mov->real_escape_string(trim($_POST['old_folder_name']));
-    $new_folder_name = $conn_mov->real_escape_string(trim($_POST['new_folder_name']));
-    $old_folder_path = $base_directory . $old_folder_name; // Old path
-    $new_folder_path = $base_directory . $new_folder_name; // New path
 
-    // Check if the new folder name already exists
-    $check_sql = "SELECT * FROM coe_mov WHERE folder_name = '$new_folder_name'";
-    $result = $conn_mov->query($check_sql);
+// Fetch folders from the database, excluding deleted records
+$query = "SELECT * FROM coe_mov WHERE folder_name IS NOT NULL"; // Adjusted to filter out deleted records
+$result = $conn_mov->query($query);
 
-    if ($result->num_rows > 0) {
-        $_SESSION['folder_error'] = 'The new folder name already exists. Please choose a different name.';
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    }
-
-    // Rename the folder in the filesystem
-    if (rename($old_folder_path, $new_folder_path)) {
-        // Update the folder name in the database
-        $sql = "UPDATE coe_mov SET folder_name = '$new_folder_name' WHERE folder_name = '$old_folder_name'";
-        if ($conn_mov->query($sql) === TRUE) {
-            $_SESSION['folder_rename_success'] = "Folder renamed successfully.";
-        } else {
-            $_SESSION['folder_error'] = "Error updating database: " . $conn_mov->error;
-        }
-    } else {
-        $_SESSION['folder_error'] = "Error renaming folder in filesystem.";
-    }
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
+// Check if the query was successful
+if ($result === false) {
+    // Query failed, show an error
+    die("Error executing query: " . $conn_mov->error);
 }
-
-// Handle folder deletion
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'delete') {
-    $folder_name = $conn_mov->real_escape_string(trim($_POST['folder_name']));
-    $folder_path = $base_directory . $folder_name; // Define the directory path
-    $recycle_bin_path = 'movuploads/coe-recycle/' . $folder_name; // Path to coe-recycle
-
-    // Create coe-recycle directory if it doesn't exist
-    if (!is_dir('movuploads/coe-recycle')) {
-        mkdir('movuploads/coe-recycle', 0777, true);
-    }
-
-    // Move the folder to the coe-recycle
-    if (is_dir($folder_path)) {
-        if (rename($folder_path, $recycle_bin_path)) {
-            $_SESSION['folder_delete_success'] = "Folder moved to recycle bin successfully.";
-            // Delete the folder from the database
-            $sql = "DELETE FROM coe_mov WHERE folder_name = '$folder_name'";
-            if ($conn_mov->query($sql) !== TRUE) {
-                $_SESSION['folder_error'] = "Error deleting folder entry from database: " . $conn_mov->error;
-            }
-        } else {
-            $_SESSION['folder_error'] = "Error moving folder to recycle bin.";
-        }
-    } else {
-        $_SESSION['folder_error'] = "The folder does not exist: $folder_path";
-    }
-
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
-}
-
-// Fetch folders from the database
-$result = $conn_mov->query("SELECT * FROM coe_mov");
-$conn_mov->close();
 ?>
 
 
@@ -421,15 +455,9 @@ $conn_mov->close();
                 background-color: #45a049; /* Darker green on hover */
             }
 
-
             .custom-swal-popup {
                 font-family: 'Poppins', sans-serif;
                 width: 400px !important; /* Set a larger width */
-            }
-
-            .custom-swal-title {
-                font-family: 'Poppins', sans-serif;
-                color: #3085d6; /* Custom title color */
             }
 
             .custom-swal-confirm {
@@ -462,11 +490,6 @@ $conn_mov->close();
             .custom-error-popup {
                 font-family: 'Poppins', sans-serif;
                 width: 400px !important; /* Set a larger width */
-            }
-
-            .custom-error-title {
-                font-family: 'Poppins', sans-serif;
-                color: #e74c3c; /* Custom title color for error */
             }
 
             .custom-error-confirm {
@@ -597,7 +620,7 @@ $conn_mov->close();
                 border-radius: 5px; /* Rounded corners */
                 background-color: #f9f9f9; /* Background color */
                 width: 120px; /* Fixed width for folders */
-                height: 110px;
+                height: auto;
                 text-align: center; /* Center text */
             }
 
@@ -690,6 +713,57 @@ $conn_mov->close();
             .btn-cancel:hover {
                 background-color: #c82333; /* Darker red */
             }
+
+            .swal-popup {
+                font-family: "Poppins", sans-serif !important;
+                width: 400px;
+            }
+
+            /* SweetAlert confirm button */
+            .swal-confirm {
+                font-family: "Poppins", sans-serif !important;
+            }
+
+            /* SweetAlert cancel button */
+            .swal-cancel {
+                font-family: "Poppins", sans-serif !important;
+            }
+
+            /* Chat styles */
+            .navbar .profile-container {
+                display: flex;
+                align-items: center;
+            }
+
+            .chat-icon {
+                font-size: 20px;
+                color: #333;
+                text-decoration: none;
+                position: relative; /* To position the badge correctly */
+                margin-right: 30px;
+                margin-top: 8px;
+                margin-left: -37px;
+            }
+
+            .notification-badge {
+                display: inline-block;
+                background-color: red; /* Change this to your preferred color */
+                color: white;
+                border-radius: 50%;
+                width: 20px; /* Width of the badge */
+                height: 20px; /* Height of the badge */
+                text-align: center;
+                font-weight: bold;
+                position: absolute; /* Position it relative to the chat icon */
+                top: -5px; /* Adjust as needed */
+                right: -10px; /* Adjust as needed */
+                font-size: 14px; /* Size of the exclamation point */
+            }
+
+            .smaller-alert {
+                font-size: 14px; /* Adjust text size for a compact look */
+                padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
         </style>
     </head>
 
@@ -697,25 +771,33 @@ $conn_mov->close();
         <nav class="navbar">
             <h2>Mode of Verification</h2> 
 
-            <div class="profile" id="profileDropdown">
-                <?php
-                    // Check if a profile picture is set in the session
-                    if (!empty($_SESSION['picture'])) {
-                        // Show the profile picture
-                        echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
-                    } else {
-                        // Get the first letter of the username for the placeholder
-                        $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
-                        echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
-                    }
-                ?>
+            <div class="profile-container">
+                <!-- Chat Icon with Notification Badge -->
+                <a href="coe-chat.php" class="chat-icon" onclick="resetNotifications()">
+                    <i class="fa fa-comments"></i>
+                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+                </a>
 
-                <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+                <div class="profile" id="profileDropdown">
+                    <?php
+                        // Check if a profile picture is set in the session
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
+                        } else {
+                            // Get the first letter of the username for the placeholder
+                            $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
+                            echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
+                        }
+                    ?>
 
-                <i class="fa fa-chevron-down dropdown-icon"></i>
-                <div class="dropdown-menu">
-                    <a href="coe-your-profile.php">Profile</a>
-                    <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+
+                    <i class="fa fa-chevron-down dropdown-icon"></i>
+                    <div class="dropdown-menu">
+                        <a href="coe-your-profile.php">Profile</a>
+                        <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -744,24 +826,17 @@ $conn_mov->close();
                 <li><a href="coe-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="coe-task.php">Upload Files</a>
-                    <a href="coe-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="coe-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="responses.php"><img src="images/setting.png">Responses</a></li>
+                <li><a href="coe-responses.php"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
-                    <img src="images/resource.png"> Audit Trails
+                    <img src="images/logs.png"> Audit Trails
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="coe-login.php">Log In History</a>
+                    <a href="coe-history.php">Log In History</a>
                     <a href="coe-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>
@@ -769,22 +844,7 @@ $conn_mov->close();
         
         <div class="content-task">
             <div class="button-container">
-                <button id="createFolderBtn">Create Folder</button>
                 <a href="coe-archive.php" id="archive" class="archive-button">Archive</a>
-            </div>
-
-           <!-- Modal for folder creation -->
-            <div id="folderModal" class="modal" style="display: none;">
-                <div class="modal-content">
-                    <h2>Folder Name</h2>
-                    <p>Enter Event Name and Date of Event (e.g. Blood Letting 05-20-2024)</p>
-                    <form method="POST" action="">
-                        <input type="text" name="folder_name" id="folderName" placeholder="Enter Folder Name" required />
-                        <input type="hidden" name="action" value="create" /> <!-- Add this hidden input -->
-                        <button type="submit" class="btn btn-create">Create</button>
-                        <button type="button" id="cancelButton" class="btn btn-cancel">Cancel</button>
-                    </form>
-                </div>
             </div>
 
             <!-- Display error message -->
@@ -799,7 +859,7 @@ $conn_mov->close();
                         while($row = $result->fetch_assoc()) {
                             $folder_name = htmlspecialchars($row['folder_name']); // Sanitize folder name
                             echo "<div class='folder' data-folder-name='$folder_name'>
-                                    <a href='coe-upload.php?folder=" . urlencode($folder_name) . "' class='folder-link'>
+                                    <a href='coe-subfolder.php?folder=" . urlencode($folder_name) . "' class='folder-link'>
                                         <div class='folder-icon'>
                                             <img src='images/folder.png' alt='File Icon' class='file-icon'>
                                         </div>
@@ -812,285 +872,202 @@ $conn_mov->close();
                     }
                 ?>
             </div>
-
-            <!-- Context Menu -->
-            <div id="contextMenu" class="context-menu" style="display: none;">
-                <ul>
-                    <li id="renameFolder">Rename Folder</li>
-                    <li id="deleteFolder">Delete Folder</li>
-                </ul>
-            </div>
         </div>
 
         <script>
+            let inactivityTime = function () {
+                let time;
+
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
+
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
+
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
+                }
+            };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
             function confirmLogout(event) {
-                event.preventDefault(); // Prevent the default link behavior
+                event.preventDefault();
                 Swal.fire({
                     title: 'Are you sure?',
                     text: "Do you really want to log out?",
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
                     confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
                     customClass: {
-                        popup: 'custom-swal-popup',
-                        confirmButton: 'custom-swal-confirm',
-                        cancelButton: 'custom-swal-cancel'
-                    }
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = 'roleaccount.php'; // Redirect to the logout page
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('college-logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
                     }
                 });
             }
 
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, '', window.location.href);
+                };
+            }
+
+            // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
-            var dropdownMenu = document.querySelector('.dropdown-menu');
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+                const dropdown = this.querySelector('.dropdown-menu');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
             });
 
-            // Optional: Close the dropdown if clicking outside the profile area
-            window.onclick = function(event) {
-                if (!event.target.closest('#profileDropdown')) {
-                    var dropdownMenu = document.querySelector('.dropdown-menu');
-                    if (dropdownMenu.style.display === 'block') {
-                        dropdownMenu.style.display = 'none';
+            // Close dropdown if clicked outside
+            window.addEventListener('click', function(event) {
+                if (!document.getElementById('profileDropdown').contains(event.target)) {
+                    const dropdown = document.querySelector('.dropdown-menu');
+                    if (dropdown) {
+                        dropdown.style.display = 'none';
                     }
                 }
-            }; 
+            });
 
-            var dropdowns = document.getElementsByClassName("dropdown-btn");
+            function logAction(actionDescription) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "college_logs.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.send("action=" + encodeURIComponent(actionDescription));
+            }
 
-            for (let i = 0; i < dropdowns.length; i++) {
-                dropdowns[i].addEventListener("click", function () {
-                    // Close all dropdowns first
-                    let dropdownContents = document.getElementsByClassName("dropdown-container");
-                    for (let j = 0; j < dropdownContents.length; j++) {
-                        dropdownContents[j].style.display = "none";
-                    }
+            function logAndRedirect(actionDescription, url) {
+                logAction(actionDescription); // Log the action
+                setTimeout(function() {
+                    window.location.href = url; // Redirect after logging
+                }, 100); // Delay to ensure logging completes
+            }
 
-                    // Toggle the clicked dropdown's visibility
-                    let dropdownContent = this.nextElementSibling;
-                    if (dropdownContent.style.display === "block") {
-                        dropdownContent.style.display = "none";
-                    } else {
-                        dropdownContent.style.display = "block";
-                    }
+            // Add event listeners when the page is fully loaded
+            document.addEventListener("DOMContentLoaded", function() {
+                // Log clicks on main menu links
+                document.querySelectorAll(".menu > li > a").forEach(function(link) {
+                    link.addEventListener("click", function() {
+                        logAction(link.textContent.trim());
+                    });
                 });
-            }
 
-           // Get modal elements
-            var modal = document.getElementById("folderModal");
-            var btn = document.getElementById("createFolderBtn");
-            var cancelButton = document.getElementById("cancelButton");
+                // Handle dropdown button clicks
+                var dropdowns = document.getElementsByClassName("dropdown-btn");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].addEventListener("click", function () {
+                        let dropdownContents = document.getElementsByClassName("dropdown-container");
+                        for (let j = 0; j < dropdownContents.length; j++) {
+                            dropdownContents[j].style.display = "none";
+                        }
+                        let dropdownContent = this.nextElementSibling;
+                        if (dropdownContent.style.display === "block") {
+                            dropdownContent.style.display = "none";
+                        } else {
+                            dropdownContent.style.display = "block";
+                        }
+                    });
+                }
 
-            // When the user clicks the button, open the modal
-            btn.onclick = function() {
-                modal.style.display = "block";
-            }
+                // Log clicks on dropdown links
+                document.querySelectorAll(".dropdown-container a").forEach(function(link) {
+                    link.addEventListener("click", function(event) {
+                        event.stopPropagation();
+                        logAction(link.textContent.trim());
+                    });
+                });
 
-            cancelButton.onclick = function() {
-                modal.style.display = "none";
-            }
+                // Log clicks on the "Archive" link
+                document.getElementById("archive").addEventListener("click", function(event) {
+                    event.preventDefault(); // Prevent default action to allow logging first
+                    logAndRedirect("Archive", "coe-archive.php");
+                });
 
-            // JavaScript code for context menu actions
-            const contextMenu = document.getElementById('contextMenu');
-            const folderElements = document.querySelectorAll('.folder');
-
-            folderElements.forEach(folder => {
-                folder.addEventListener('contextmenu', function (event) {
-                    event.preventDefault();
-                    const folderName = folder.getAttribute('data-folder-name');
-
-                    // Position the context menu
-                    contextMenu.style.display = 'block';
-                    contextMenu.style.left = `${event.pageX}px`;
-                    contextMenu.style.top = `${event.pageY}px`;
-
-                    // Rename Folder action
-                    document.getElementById('renameFolder').onclick = function () {
-                        contextMenu.style.display = 'none'; // Hide context menu
-                        Swal.fire({
-                            title: 'Rename Folder',
-                            input: 'text',
-                            inputValue: folderName, // Pre-fill with current folder name
-                            inputPlaceholder: 'Enter new folder name',
-                            showCancelButton: true,
-                            confirmButtonText: 'Rename',
-                            cancelButtonText: 'Cancel',
-                            customClass: {
-                                popup: 'custom-swal-popup',
-                                title: 'custom-swal-title',
-                                input: 'custom-swal-input',
-                                confirmButton: 'custom-swal-confirm',
-                                cancelButton: 'custom-swal-cancel' // Custom class for the cancel button
-                            },
-                            preConfirm: (newName) => {
-                                if (!newName) {
-                                    Swal.showValidationMessage('Folder name cannot be empty');
-                                }
-                                return newName;
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                const newFolderName = result.value;
-
-                                // Create a hidden form for renaming the folder
-                                const form = document.createElement('form');
-                                form.method = 'POST';
-                                form.action = ''; // The same page
-
-                                const actionInput = document.createElement('input');
-                                actionInput.type = 'hidden';
-                                actionInput.name = 'action';
-                                actionInput.value = 'rename';
-
-                                const oldNameInput = document.createElement('input');
-                                oldNameInput.type = 'hidden';
-                                oldNameInput.name = 'old_folder_name';
-                                oldNameInput.value = folderName;
-
-                                const newNameInput = document.createElement('input');
-                                newNameInput.type = 'hidden';
-                                newNameInput.name = 'new_folder_name';
-                                newNameInput.value = newFolderName;
-
-                                form.appendChild(actionInput);
-                                form.appendChild(oldNameInput);
-                                form.appendChild(newNameInput);
-                                document.body.appendChild(form);
-                                form.submit(); // Submit the form
-                            }
-                        });
-                    };
-
-                    // Delete Folder action
-                    document.getElementById('deleteFolder').onclick = function () {
-                        contextMenu.style.display = 'none'; // Hide context menu
-                        Swal.fire({
-                            title: 'Delete Folder',
-                            text: `Are you sure you want to delete "${folderName}"?`,
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonText: 'Delete',
-                            cancelButtonText: 'Cancel',
-                            customClass: {
-                                popup: 'custom-swal-popup',
-                                title: 'custom-swal-title',
-                                confirmButton: 'custom-swal-confirm',
-                                cancelButton: 'custom-swal-cancel'
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                // Create a hidden form for deleting the folder
-                                const form = document.createElement('form');
-                                form.method = 'POST';
-                                form.action = ''; // The same page
-
-                                const actionInput = document.createElement('input');
-                                actionInput.type = 'hidden';
-                                actionInput.name = 'action';
-                                actionInput.value = 'delete';
-
-                                const nameInput = document.createElement('input');
-                                nameInput.type = 'hidden';
-                                nameInput.name = 'folder_name';
-                                nameInput.value = folderName;
-
-                                form.appendChild(actionInput);
-                                form.appendChild(nameInput);
-                                document.body.appendChild(form);
-                                form.submit(); // Submit the form
-                            }
-                        });
-                    };
+                // Log clicks on the "Profile" link
+                document.querySelector('.dropdown-menu a[href="coe-your-profile.php"]').addEventListener("click", function() {
+                    logAction("Profile");
                 });
             });
 
-            // Hide context menu when clicking anywhere else
-            window.addEventListener('click', function () {
-                contextMenu.style.display = 'none';
+            document.addEventListener("DOMContentLoaded", () => {
+                function checkNotifications() {
+                    fetch('coe-check_notifications.php')
+                        .then(response => response.json())
+                        .then(data => {
+                            const chatNotification = document.getElementById('chatNotification');
+                            if (data.unread_count > 0) {
+                                chatNotification.style.display = 'inline-block';
+                            } else {
+                                chatNotification.style.display = 'none';
+                            }
+                        })
+                        .catch(error => console.error('Error checking notifications:', error));
+                }
+
+                // Check for notifications every 2 seconds
+                setInterval(checkNotifications, 2000);
+                checkNotifications(); // Initial check when page loads
             });
-
-
-           // Function to show success SweetAlert
-            function showSuccessAlert(message) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: message,
-                    confirmButtonColor: '#089451',
-                    confirmButtonText: 'Continue',
-                    customClass: {
-                        popup: 'custom-swal-popup',
-                        title: 'custom-swal-title',
-                        confirmButton: 'custom-swal-confirm'
-                    }
-                }).then(() => {
-                    window.location.href = "coe-mov.php"; // Redirect to the desired page
-                });
-            }
-
-            // Function to show error SweetAlert
-            function showErrorAlert(message) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: message,
-                    confirmButtonColor: '#e74c3c',
-                    confirmButtonText: 'Try Again',
-                    customClass: {
-                        popup: 'custom-error-popup',
-                        title: 'custom-error-title',
-                        confirmButton: 'custom-error-confirm'
-                    }
-                });
-            }
-
-            // Function to show warning SweetAlert
-            function showWarningAlert(message) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Warning',
-                    text: message,
-                    confirmButtonText: 'Okay',
-                    customClass: {
-                        popup: 'custom-warning-popup',
-                        title: 'custom-warning-title',
-                        confirmButton: 'custom-warning-confirm'
-                    }
-                });
-            }
-
-            // Check for folder creation success message
-            <?php if (isset($_SESSION['folder_create_success'])): ?>
-                showSuccessAlert('<?php echo addslashes($_SESSION['folder_create_success']); ?>');
-                <?php unset($_SESSION['folder_create_success']); ?> // Clear the message
-            <?php endif; ?>
-
-            // Check for folder rename success message
-            <?php if (isset($_SESSION['folder_rename_success'])): ?>
-                showSuccessAlert('<?php echo addslashes($_SESSION['folder_rename_success']); ?>');
-                <?php unset($_SESSION['folder_rename_success']); ?> // Clear the message
-            <?php endif; ?>
-
-            // Check for folder deletion success message
-            <?php if (isset($_SESSION['folder_delete_success'])): ?>
-                showSuccessAlert('<?php echo addslashes($_SESSION['folder_delete_success']); ?>');
-                <?php unset($_SESSION['folder_delete_success']); ?> // Clear the message
-            <?php endif; ?>
-
-            // Check for error messages
-            <?php if (isset($_SESSION['folder_error'])): ?>
-                showErrorAlert('<?php echo addslashes($_SESSION['folder_error']); ?>');
-                <?php unset($_SESSION['folder_error']); ?> // Clear the message
-            <?php endif; ?>
-
-            // Check for warning message in session and show alert
-            <?php if (isset($_SESSION['warning'])): ?>
-                showWarningAlert('<?php echo addslashes($_SESSION['warning']); ?>');
-                <?php unset($_SESSION['warning']); ?> // Clear the message after displaying
-            <?php endif; ?>
         </script>
     </body>
 </html>
