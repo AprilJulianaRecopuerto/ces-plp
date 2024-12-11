@@ -14,7 +14,7 @@ if ($conn->connect_error) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newExpense = isset($_POST['newExpense']) ? floatval($_POST['newExpense']) : 0;
 
-    // Fetch the allotted budget for cba
+    // Fetch the allotted budget for CBA
     $queryAllottedBudget = "
         SELECT allotted_budget 
         FROM allotted_budget 
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Calculate the total expenses in CAS
+    // Calculate the total expenses in CBA
     $queryTotalExpenses = "
         SELECT COALESCE(SUM(expenses), 0) AS total_expenses 
         FROM cba_budget";

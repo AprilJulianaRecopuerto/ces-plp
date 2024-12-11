@@ -731,7 +731,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <label for="lead_person">Lead Person:</label>
                         <select id="lead_person" name="lead_person" onchange="toggleOtherInput()" required>
                             <option value="" disabled selected>Select Lead Person</option>
-                            <option value="CBA Coordinator">CAS Coordinator</option>
+                            <option value="CBA Coordinator">CBA Coordinator</option>
                             <option value="Others">Others (Please specify)</option>
                         </select>
                     </div>
@@ -741,7 +741,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     <div class="form-group">
                         <label for="dept">Department:</label>
-                        <input type="text" id="dept" name="dept" value="College of Business Administration" readonly>
+                        <input type="text" id="dept" name="dept" value="College of Arts and Science" readonly>
                     </div>
 
                     <div class="form-group">
@@ -858,7 +858,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <script>
             function toggleOtherClassificationInput() {
-                var classificationSelect = document.getElementById("classification");
+                var classificationSelect = document.getElementById("sdg");
                 var otherClassificationGroup = document.getElementById("other_classification_group");
 
                 if (classificationSelect.value === "Others") {
@@ -1013,7 +1013,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 function resetTimer() {
                     clearTimeout(time);
                     // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
                 }
 
                 // Check if the user is logged in and clear the loggedOut flag

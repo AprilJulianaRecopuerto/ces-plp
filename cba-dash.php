@@ -913,23 +913,21 @@ $conn->close();
             }
 
             table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    th, td {
-        padding: 8px 12px;
-        text-align: left;
-        border: 1px solid #ddd;
-    }
-    th {
-        background-color: #f4f4f4;
-    }
-    .smaller-alert {
-        font-size: 14px; /* Adjust text size for a compact look */
-        padding: 20px;   /* Adjust padding to mimic a smaller alert box */
-    }
-
-
+                width: 100%;
+                border-collapse: collapse;
+            }
+            th, td {
+                padding: 8px 12px;
+                text-align: left;
+                border: 1px solid #ddd;
+            }
+            th {
+                background-color: #f4f4f4;
+            }
+            .smaller-alert {
+                font-size: 14px; /* Adjust text size for a compact look */
+                padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
         </style>
     </head>
 
@@ -938,40 +936,39 @@ $conn->close();
             <h2>Dashboard</h2> 
 
             <div class="notification">
-            <i class="fa fa-bell notification-icon" onclick="toggleNotifications()"></i>
+                <i class="fa fa-bell notification-icon" onclick="toggleNotifications()"></i>
 
-            <!-- Display the count of unread notifications in the badge -->
-            <?php if ($unreadCount > 0): ?>
-                <span class="notification-count" id="notification-count"><?php echo $unreadCount; ?></span>
-            <?php endif; ?>
-
-            <div class="notification-container" id="notification-container" style="display:none;">
-                <h3 style="display: inline-block;">Notifications</h3>
-
-                <?php
-                // Check if $notifications is set and is a non-empty array
-                if (isset($notifications) && is_array($notifications) && count($notifications) > 0): ?>
-                    <ul>
-                    <?php foreach ($notifications as $notification): ?>
-                        <?php if (isset($notification['task_description'], $notification['created_at'])): ?>
-                            <li id="notification-<?php echo $notification['id']; ?>" class="notification-item">
-                                <div class="notification-content">
-                                    <strong><?php echo htmlspecialchars($notification['task_description']); ?></strong>
-                                    <span><?php echo htmlspecialchars($notification['created_at']); ?></span>
-                                </div>
-                                <button class="delete-btn" onclick="deleteNotification(<?php echo $notification['id']; ?>)">Delete</button>
-                            </li>
-                            <hr>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-                    </ul>
-                <?php else: ?>
-                    <!-- Show this message if there are no notifications -->
-                    <p style="text-align: center; color: #666; font-style: italic; margin-top: 10px;">No notifications available.</p>
+                <!-- Display the count of unread notifications in the badge -->
+                <?php if ($unreadCount > 0): ?>
+                    <span class="notification-count" id="notification-count"><?php echo $unreadCount; ?></span>
                 <?php endif; ?>
-            </div>
-        </div>
 
+                <div class="notification-container" id="notification-container" style="display:none;">
+                    <h3 style="display: inline-block;">Notifications</h3>
+
+                    <?php
+                    // Check if $notifications is set and is a non-empty array
+                    if (isset($notifications) && is_array($notifications) && count($notifications) > 0): ?>
+                        <ul>
+                        <?php foreach ($notifications as $notification): ?>
+                            <?php if (isset($notification['task_description'], $notification['created_at'])): ?>
+                                <li id="notification-<?php echo $notification['id']; ?>" class="notification-item">
+                                    <div class="notification-content">
+                                        <strong><?php echo htmlspecialchars($notification['task_description']); ?></strong>
+                                        <span><?php echo htmlspecialchars($notification['created_at']); ?></span>
+                                    </div>
+                                    <button class="delete-btn" onclick="deleteNotification(<?php echo $notification['id']; ?>)">Delete</button>
+                                </li>
+                                <hr>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                        </ul>
+                    <?php else: ?>
+                        <!-- Show this message if there are no notifications -->
+                        <p style="text-align: center; color: #666; font-style: italic; margin-top: 10px;">No notifications available.</p>
+                    <?php endif; ?>
+                </div>
+            </div>
 
             <div class="profile-container">
                 <!-- Chat Icon with Notification Badge -->
@@ -1374,7 +1371,7 @@ $conn->close();
            
             <?php
                 // Function to fetch the recommended events for a department from Flask API
-                $url = "https://ces-python-1da82b6d81f5.herokuapp.com/get_recommended_events/College%20of%20Business%20Administration";
+                $url = "https://ces-python-1da82b6d81f5.herokuapp.com/get_recommended_events/College%20of%20Arts%20and%20Sciences";
                 
                 // Use cURL to fetch the data from the Flask API
                 $ch = curl_init();
@@ -1541,7 +1538,7 @@ $conn->close();
                 function resetTimer() {
                     clearTimeout(time);
                     // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
                 }
 
                 // Check if the user is logged in and clear the loggedOut flag
@@ -1659,7 +1656,7 @@ $conn->close();
             // Set an interval to check for due tasks every minute (60000 milliseconds)
             setInterval(function() {
                 // AJAX call to check for due tasks
-                fetch('cba-check_due_tasks.php') // Path to the PHP script that checks for due tasks
+                fetch('check_due_tasks.php') // Path to the PHP script that checks for due tasks
                     .then(response => response.json()) // Assume the PHP script returns a JSON response
                     .then(data => {
                         if (data.status === 'success') {

@@ -123,556 +123,556 @@ $conn->close();
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CES PLP</title>
-
-    <link rel="icon" href="images/icoon.png">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap');
-        @import url('https://fonts.cdnfonts.com/css/glacial-indifference-2');
-        @import url('https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500&display=swap');
-
-        body {
-            margin: 0;
-            background-color: #F6F5F5; /* Light gray background color */
-        }
-
-        .navbar {
-            background-color: #E7F0DC; /* Dirty white color */
-            color: black;
-            padding: 10px;
-            display: flex;
-            justify-content: space-between; /* Space between heading and profile */
-            align-items: center;
-            position: fixed;
-            width: calc(96.2% - 270px); /* Adjusted width considering the sidebar */
-            height: 80px;
-            margin-left: 320px; /* Align with the sidebar */
-            border-radius: 10px;
-            z-index: 5;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Added box shadow */
-        }
-
-        .navbar h2 {
-            font-family: "Glacial Indifference", sans-serif;
-            margin: 0; /* Remove default margin */
-            font-size: 32px; /* Adjust font size if needed */
-            color: black; /* Set text color */
-            margin-left: 20px;
-        }
-
-        .profile {
-            position: relative;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            margin-right: 20px; /* Space from the right edge */
-        }
-
-        .profile img, .profile-placeholder {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
-        .profile-placeholder {
-            font-family: "Poppins", sans-serif;
-            width: 50px; /* Adjust as needed */
-            height: 50px;
-            border-radius: 50%;
-            background-color: #ccc; /* Placeholder background color */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px; /* Adjust text size */
-            color: green;
-            font-weight: bold;
-            margin-right: 20px; /* Space between profile picture and name */
-        }
-
-        span {
-            font-family: "Poppins", sans-serif;
-            font-size: 17px;
-            color: black; /* Set text color */
-            white-space: nowrap; /* Prevent line breaks */
-            overflow: hidden; /* Hide overflow */
-            text-overflow: ellipsis; /* Show ellipsis if the text overflows */
-            flex-grow: 1; /* Allow the username to take available space */
-        }
-
-        .dropdown-icon {
-            width:22px !important; /* Adjust size of the down-arrow icon */
-            height: 15px !important;
-            margin-left: 10px; /* Space between name and icon */
-        }
-
-        .dropdown-menu {
-            font-family: "Poppins", sans-serif;
-            display: none; /* Hidden by default */
-            position: absolute;
-            width: 198px;
-            top: 60px; /* Adjust based on the profile's height */
-            right: 0;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1;
-        }
-
-        .dropdown-menu a {
-            text-decoration: none;
-            border-radius: 10px;
-            color: black;
-            display: block;
-            padding: 10px;
-        }
-
-        .dropdown-menu a:hover {
-            background-color: #218838;
-            color: white;
-        }
-
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 278px;
-            background-color: #FFF8A5; /* Light yellow */
-            color: black;
-            padding: 20px;
-            z-index: 1000;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Added box shadow */
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            margin-bottom: 25px; /* Increased margin bottom */
-        }
-
-        .logo img {
-            height: 80px; /* Increased logo size */
-            margin-left: 25px; /* Adjusted margin */
-        }
-
-        .logo span {
-            font-size: 30px; /* Increased font size */
-            margin-left: -15px;
-            font-family: 'Glacial Indifference', sans-serif;
-            font-weight: bold;
-        }
-
-        .menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .menu li {
-            margin: 6px; /* Increased margin for spacing between items */
-            display: flex;
-            align-items: center;
-        }
-
-        .menu a {
-            color: black;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            padding: 10.5px; /* Increased padding for better click area */
-            border-radius: 5px; /* Increased border-radius for rounded corners */
-            width: 94%;
-            font-size: 17px; /* Increased font size */
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .menu a:hover {
-            background-color: #22901C;
-            transition: 0.3s;
-            color: white; /* Ensure the text color is white when hovered */
-        }
-
-            /* Style the sidenav links and the dropdown button */
-            .menu .dropdown-btn {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            text-decoration: none !important;
-            display: flex;
-            align-items: center;
-            padding: 10.5px; /* Increased padding for better click area */
-            border-radius: 5px; /* Increased border-radius for rounded corners */
-            width: 100%;
-            font-size: 17px; /* Increased font size */
-            font-family: 'Poppins', sans-serif;
-            background-color: transparent; /* Set background to transparent */
-            border: none; /* Remove border */
-            cursor: pointer; /* Change cursor to pointer */
-        }
-
-        /* On mouse-over */
-        .menu .dropdown-btn:hover {
-            background-color: #22901C;
-            transition: 0.3s;
-            color: white;
-        }
-
-        .dropdown-btn img {
-            height: 30px; /* Increased icon size */
-            margin-left: 6px; /* Adjusted space between icon and text */
-        }
-
-        /* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
-        .dropdown-container {
-            display: none;
-            padding-left: 8px;
-            margin-top: -2px;
-            width: 85%;
-            margin-left: 25px;
-            margin-bottom: -5px;
-        }
-
-        /* Optional: Style the caret down icon */
-        .fa-chevron-down {
-            float: right;
-            margin-left: 15px;
-        }
-        .menu img {
-            height: 30px; /* Increased icon size */
-            margin-right: 15px; /* Adjusted space between icon and text */
-        }
-
-        .menu li a.active {
-            background-color: green; /* Change background color */
-            color: white; /* Change text color */
-        }
-
-        .content-settings {
-            margin-left: 290px; /* Align content with sidebar */
-            padding-top: 90px; /* Space for navbar */
-            padding: 20px;
-            display: flex; /* Use flexbox to center the content */
-            justify-content: center; /* Center the content horizontally */
-            align-items: center; /* Center the content vertically */
-            height: calc(100vh - 90px); /* Full height minus navbar */
-        }
-
-        .profile-section {
-            background-color: #fff; /* White background */
-            border-radius: 10px; /* Rounded corners */
-            padding: 40px; /* Increased padding for bigger look */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Larger box shadow */
-            display: flex; /* Flexbox for alignment */
-            align-items: center; /* Center align items vertically */
-            gap: 40px; /* Increased space between items */
-            max-width: 800px; /* Increased max width for the section */
-            width: 100%; /* Allow full width utilization */
-            margin: auto; /* Center the section */
-        }
-
-        .profile-section img {
-            width: 150px; /* Increased size of the profile picture */
-            height: 150px; /* Set the size of the profile picture */
-            border-radius: 50%; /* Circular frame */
-        }
-		
-		.profile img {
-			margin-right: 10px; /* Adjust the value to increase/decrease space */
-		}
-
-
-        .profile-info {
-            font-family: "Poppins", sans-serif;
-            color: black;
-        }
-
-        .profile-info h3 {
-            margin: 0; /* Remove default margin */
-            font-size: 28px; /* Increased font size for name */
-        }
-
-        .profile-info p {
-            margin: 10px 0; /* Space between paragraphs */
-            font-size: 20px; /* Increased font size for role and ID */
-        }
-
-        .change-password-button,
-        .edit-profile-button {
-            background-color: #22901C; /* Button color */
-            color: white; /* Text color */
-            border: none; /* Remove border */
-            border-radius: 5px; /* Rounded corners */
-            padding: 15px 20px; /* Increased padding for button */
-            cursor: pointer; /* Cursor change on hover */
-            font-size: 18px; /* Increased font size */
-            font-family: "Poppins", sans-serif; /* Font family */
-            margin-top: 10px; /* Space above the button */
-            transition: background-color 0.3s; /* Smooth transition for hover effect */
-        }
-
-        .change-password-button:hover,
-        .edit-profile-button:hover {
-            background-color: #1a7d13; /* Darker green on hover */
-        }
-
-        .content-editor{
-            margin-left: 340px; /* Align with the sidebar */
-            padding: 20px;
-        }
-
-        .content-editor h2 {
-            font-family: 'Poppins', sans-serif;
-            font-size: 28px; /* Adjust the font size as needed */
-            margin-bottom: 20px; /* Space below the heading */
-            color: black; /* Adjust text color */
-            margin-top: 110px;
-        }
-
-        .form-container {
-            font-family: 'Glacial Indifference', sans-serif;
-            margin-left: -20px;
-            margin-top:110px;
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-container h3 {
-            margin-top: 0;
-            font-family: 'Poppins', sans-serif;
-            font-size: 24px;
-            color: black;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            font-family: 'Poppins', sans-serif;
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .form-group select, .form-group input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-
-        .button-container button {
-            font-family: 'Poppins', sans-serif;
-            background-color: #22901C;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .button-container button:hover {
-            background-color: #1b7a0f;
-        }
-
-        /* Custom styles for SweetAlert success popup */
-        .custom-popupcp {
-            font-family: 'Poppins', sans-serif;
-            font-size: 16px; /* Increase the font size */
-            width: 400px !important; /* Set a larger width */
-        }
-
-        .custom-confirmcp {
-            font-family: 'Poppins', sans-serif;
-            font-size: 17px;
-            background-color: #089451;
-            border: 0.5px #089451 !important;
-            color: #fff;
-            border-radius: 10px;
-            cursor: pointer;
-            outline: none !important; /* Remove default focus outline */
-        }
-
-        /* Custom styles for SweetAlert error popup */
-        .custom-popuper {
-            font-family: 'Poppins', sans-serif;
-            width: 400px !important; /* Set a larger width */
-        }
-
-        .custom-confirmer {
-            font-family: 'Poppins', sans-serif;
-            font-size: 17px;
-            background-color: #e74c3c;
-            color: #fff;
-            border-radius: 10px;
-            cursor: pointer;
-            outline: none; /* Remove default focus outline */
-        }
-
-        /* Style the popup container */
-        .my-popup {
-            font-family: 'Poppins', sans-serif;
-            font-size: 16px; /* Increase the font size */
-            width: 400px !important; /* Set a larger width */
-        }
-
-        /* Style the confirm button */
-        .my-confirm-btn {
-            font-family: 'Poppins', sans-serif;
-            font-size: 17px;
-            background-color: #089451;
-            border: 0.5px #089451 !important;
-            color: #fff;
-            border-radius: 10px;
-            cursor: pointer;
-            outline: none !important; /* Remove default focus outline */
-        }
-
-        /* Style the cancel button */
-        .my-cancel-btn {
-            font-family: 'Poppins', sans-serif;
-            font-size: 17px;
-            background-color: #e74c3c;
-            color: #fff;
-            border-radius: 10px;
-            cursor: pointer;
-            outline: none; /* Remove default focus outline */
-        }
-
-        .delete-picture-btn {
-            font-family: 'Poppins', sans-serif;
-            background-color: #d33; /* Custom color */
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        ..delete-picture-btn button:hover {
-            background-color: #1b7a0f;
-        }
-
-        .file-upload-container {
-            display: flex;
-            align-items: center;
-            margin: 10px 0;
-        }
-
-        .file-upload-label {
-            font-size: 14px; /* Font size for the file name */
-            display: inline-block;
-            background-color: #3085d6; /* Custom background color */
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            font-weight: normal !important; /* Ensure the text is not bold */
-        }
-
-        .file-upload-label:hover {
-            background-color: #2579a8; /* Darker shade on hover */
-        }
-
-        .file-input {
-            display: none; /* Hide the default file input */
-        }
-
-        .file-name-display {
-            margin-left: 10px;
-            font-size: 14px;
-            color: #333; /* Text color */
-            display: inline-block; /* Align with the label */
-        }
-
-        .file-name-display {
-            margin-left: 10px; /* Add some space between the image and the file name */
-            font-size: 14px; /* Font size for the file name */
-            color: #333; /* Text color */
-            display: inline-block; /* Keep it inline with the image */
-            vertical-align: top; /* Align it to the top of the image */
-        }
-
-        .swal-popup {
-            font-family: "Poppins", sans-serif !important;
-            width: 400px;
-        }
-
-        /* SweetAlert confirm button */
-        .swal-confirm {
-            font-family: "Poppins", sans-serif !important;
-        }
-
-        /* SweetAlert cancel button */
-        .swal-cancel {
-            font-family: "Poppins", sans-serif !important;
-        }
-
-        /* Chat styles */
-        .navbar .profile-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .chat-icon {
-            font-size: 20px;
-            color: #333;
-            text-decoration: none;
-            position: relative; /* To position the badge correctly */
-            margin-right: 30px;
-            margin-top: 8px;
-            margin-left: -37px;
-        }
-
-        .notification-badge {
-            display: inline-block;
-            background-color: red; /* Change this to your preferred color */
-            color: white;
-            border-radius: 50%;
-            width: 20px; /* Width of the badge */
-            height: 20px; /* Height of the badge */
-            text-align: center;
-            font-weight: bold;
-            position: absolute; /* Position it relative to the chat icon */
-            top: -5px; /* Adjust as needed */
-            right: -10px; /* Adjust as needed */
-            font-size: 14px; /* Size of the exclamation point */
-        }
-
-        .smaller-alert {
-            font-size: 14px; /* Adjust text size for a compact look */
-            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
-        }
-    </style>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>CES PLP</title>
+
+        <link rel="icon" href="images/icoon.png">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap');
+            @import url('https://fonts.cdnfonts.com/css/glacial-indifference-2');
+            @import url('https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500&display=swap');
+
+            body {
+                margin: 0;
+                background-color: #F6F5F5; /* Light gray background color */
+            }
+
+            .navbar {
+                background-color: #E7F0DC; /* Dirty white color */
+                color: black;
+                padding: 10px;
+                display: flex;
+                justify-content: space-between; /* Space between heading and profile */
+                align-items: center;
+                position: fixed;
+                width: calc(96.2% - 270px); /* Adjusted width considering the sidebar */
+                height: 80px;
+                margin-left: 320px; /* Align with the sidebar */
+                border-radius: 10px;
+                z-index: 5;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Added box shadow */
+            }
+
+            .navbar h2 {
+                font-family: "Glacial Indifference", sans-serif;
+                margin: 0; /* Remove default margin */
+                font-size: 32px; /* Adjust font size if needed */
+                color: black; /* Set text color */
+                margin-left: 20px;
+            }
+
+            .profile {
+                position: relative;
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                margin-right: 20px; /* Space from the right edge */
+            }
+
+            .profile img, .profile-placeholder {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                margin-right: 10px;
+            }
+
+            .profile-placeholder {
+                font-family: "Poppins", sans-serif;
+                width: 50px; /* Adjust as needed */
+                height: 50px;
+                border-radius: 50%;
+                background-color: #ccc; /* Placeholder background color */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px; /* Adjust text size */
+                color: green;
+                font-weight: bold;
+                margin-right: 20px; /* Space between profile picture and name */
+            }
+
+            span {
+                font-family: "Poppins", sans-serif;
+                font-size: 17px;
+                color: black; /* Set text color */
+                white-space: nowrap; /* Prevent line breaks */
+                overflow: hidden; /* Hide overflow */
+                text-overflow: ellipsis; /* Show ellipsis if the text overflows */
+                flex-grow: 1; /* Allow the username to take available space */
+            }
+
+            .dropdown-icon {
+                width:22px !important; /* Adjust size of the down-arrow icon */
+                height: 15px !important;
+                margin-left: 10px; /* Space between name and icon */
+            }
+
+            .dropdown-menu {
+                font-family: "Poppins", sans-serif;
+                display: none; /* Hidden by default */
+                position: absolute;
+                width: 198px;
+                top: 60px; /* Adjust based on the profile's height */
+                right: 0;
+                background-color: white;
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                padding: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                z-index: 1;
+            }
+
+            .dropdown-menu a {
+                text-decoration: none;
+                border-radius: 10px;
+                color: black;
+                display: block;
+                padding: 10px;
+            }
+
+            .dropdown-menu a:hover {
+                background-color: #218838;
+                color: white;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 278px;
+                background-color: #FFF8A5; /* Light yellow */
+                color: black;
+                padding: 20px;
+                z-index: 1000;
+                box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Added box shadow */
+            }
+
+            .logo {
+                display: flex;
+                align-items: center;
+                margin-bottom: 25px; /* Increased margin bottom */
+            }
+
+            .logo img {
+                height: 80px; /* Increased logo size */
+                margin-left: 25px; /* Adjusted margin */
+            }
+
+            .logo span {
+                font-size: 30px; /* Increased font size */
+                margin-left: -15px;
+                font-family: 'Glacial Indifference', sans-serif;
+                font-weight: bold;
+            }
+
+            .menu {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .menu li {
+                margin: 6px; /* Increased margin for spacing between items */
+                display: flex;
+                align-items: center;
+            }
+
+            .menu a {
+                color: black;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                padding: 10.5px; /* Increased padding for better click area */
+                border-radius: 5px; /* Increased border-radius for rounded corners */
+                width: 94%;
+                font-size: 17px; /* Increased font size */
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .menu a:hover {
+                background-color: #22901C;
+                transition: 0.3s;
+                color: white; /* Ensure the text color is white when hovered */
+            }
+
+                /* Style the sidenav links and the dropdown button */
+                .menu .dropdown-btn {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                text-decoration: none !important;
+                display: flex;
+                align-items: center;
+                padding: 10.5px; /* Increased padding for better click area */
+                border-radius: 5px; /* Increased border-radius for rounded corners */
+                width: 100%;
+                font-size: 17px; /* Increased font size */
+                font-family: 'Poppins', sans-serif;
+                background-color: transparent; /* Set background to transparent */
+                border: none; /* Remove border */
+                cursor: pointer; /* Change cursor to pointer */
+            }
+
+            /* On mouse-over */
+            .menu .dropdown-btn:hover {
+                background-color: #22901C;
+                transition: 0.3s;
+                color: white;
+            }
+
+            .dropdown-btn img {
+                height: 30px; /* Increased icon size */
+                margin-left: 6px; /* Adjusted space between icon and text */
+            }
+
+            /* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
+            .dropdown-container {
+                display: none;
+                padding-left: 8px;
+                margin-top: -2px;
+                width: 85%;
+                margin-left: 25px;
+                margin-bottom: -5px;
+            }
+
+            /* Optional: Style the caret down icon */
+            .fa-chevron-down {
+                float: right;
+                margin-left: 15px;
+            }
+            .menu img {
+                height: 30px; /* Increased icon size */
+                margin-right: 15px; /* Adjusted space between icon and text */
+            }
+
+            .menu li a.active {
+                background-color: green; /* Change background color */
+                color: white; /* Change text color */
+            }
+
+            .content-settings {
+                margin-left: 290px; /* Align content with sidebar */
+                padding-top: 90px; /* Space for navbar */
+                padding: 20px;
+                display: flex; /* Use flexbox to center the content */
+                justify-content: center; /* Center the content horizontally */
+                align-items: center; /* Center the content vertically */
+                height: calc(100vh - 90px); /* Full height minus navbar */
+            }
+
+            .profile-section {
+                background-color: #fff; /* White background */
+                border-radius: 10px; /* Rounded corners */
+                padding: 40px; /* Increased padding for bigger look */
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Larger box shadow */
+                display: flex; /* Flexbox for alignment */
+                align-items: center; /* Center align items vertically */
+                gap: 40px; /* Increased space between items */
+                max-width: 800px; /* Increased max width for the section */
+                width: 100%; /* Allow full width utilization */
+                margin: auto; /* Center the section */
+            }
+
+            .profile-section img {
+                width: 150px; /* Increased size of the profile picture */
+                height: 150px; /* Set the size of the profile picture */
+                border-radius: 50%; /* Circular frame */
+            }
+            
+            .profile img {
+                margin-right: 10px; /* Adjust the value to increase/decrease space */
+            }
+
+
+            .profile-info {
+                font-family: "Poppins", sans-serif;
+                color: black;
+            }
+
+            .profile-info h3 {
+                margin: 0; /* Remove default margin */
+                font-size: 28px; /* Increased font size for name */
+            }
+
+            .profile-info p {
+                margin: 10px 0; /* Space between paragraphs */
+                font-size: 20px; /* Increased font size for role and ID */
+            }
+
+            .change-password-button,
+            .edit-profile-button {
+                background-color: #22901C; /* Button color */
+                color: white; /* Text color */
+                border: none; /* Remove border */
+                border-radius: 5px; /* Rounded corners */
+                padding: 15px 20px; /* Increased padding for button */
+                cursor: pointer; /* Cursor change on hover */
+                font-size: 18px; /* Increased font size */
+                font-family: "Poppins", sans-serif; /* Font family */
+                margin-top: 10px; /* Space above the button */
+                transition: background-color 0.3s; /* Smooth transition for hover effect */
+            }
+
+            .change-password-button:hover,
+            .edit-profile-button:hover {
+                background-color: #1a7d13; /* Darker green on hover */
+            }
+
+            .content-editor{
+                margin-left: 340px; /* Align with the sidebar */
+                padding: 20px;
+            }
+
+            .content-editor h2 {
+                font-family: 'Poppins', sans-serif;
+                font-size: 28px; /* Adjust the font size as needed */
+                margin-bottom: 20px; /* Space below the heading */
+                color: black; /* Adjust text color */
+                margin-top: 110px;
+            }
+
+            .form-container {
+                font-family: 'Glacial Indifference', sans-serif;
+                margin-left: -20px;
+                margin-top:110px;
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            .form-container h3 {
+                margin-top: 0;
+                font-family: 'Poppins', sans-serif;
+                font-size: 24px;
+                color: black;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-group label {
+                font-family: 'Poppins', sans-serif;
+                display: block;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            .form-group select, .form-group input[type="text"] {
+                width: 100%;
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-size: 16px;
+                box-sizing: border-box;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .button-container {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 20px;
+            }
+
+            .button-container button {
+                font-family: 'Poppins', sans-serif;
+                background-color: #22901C;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+            .button-container button:hover {
+                background-color: #1b7a0f;
+            }
+
+            /* Custom styles for SweetAlert success popup */
+            .custom-popupcp {
+                font-family: 'Poppins', sans-serif;
+                font-size: 16px; /* Increase the font size */
+                width: 400px !important; /* Set a larger width */
+            }
+
+            .custom-confirmcp {
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #089451;
+                border: 0.5px #089451 !important;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none !important; /* Remove default focus outline */
+            }
+
+            /* Custom styles for SweetAlert error popup */
+            .custom-popuper {
+                font-family: 'Poppins', sans-serif;
+                width: 400px !important; /* Set a larger width */
+            }
+
+            .custom-confirmer {
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #e74c3c;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none; /* Remove default focus outline */
+            }
+
+            /* Style the popup container */
+            .my-popup {
+                font-family: 'Poppins', sans-serif;
+                font-size: 16px; /* Increase the font size */
+                width: 400px !important; /* Set a larger width */
+            }
+
+            /* Style the confirm button */
+            .my-confirm-btn {
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #089451;
+                border: 0.5px #089451 !important;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none !important; /* Remove default focus outline */
+            }
+
+            /* Style the cancel button */
+            .my-cancel-btn {
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #e74c3c;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none; /* Remove default focus outline */
+            }
+
+            .delete-picture-btn {
+                font-family: 'Poppins', sans-serif;
+                background-color: #d33; /* Custom color */
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 14px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+            ..delete-picture-btn button:hover {
+                background-color: #1b7a0f;
+            }
+
+            .file-upload-container {
+                display: flex;
+                align-items: center;
+                margin: 10px 0;
+            }
+
+            .file-upload-label {
+                font-size: 14px; /* Font size for the file name */
+                display: inline-block;
+                background-color: #3085d6; /* Custom background color */
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                font-weight: normal !important; /* Ensure the text is not bold */
+            }
+
+            .file-upload-label:hover {
+                background-color: #2579a8; /* Darker shade on hover */
+            }
+
+            .file-input {
+                display: none; /* Hide the default file input */
+            }
+
+            .file-name-display {
+                margin-left: 10px;
+                font-size: 14px;
+                color: #333; /* Text color */
+                display: inline-block; /* Align with the label */
+            }
+
+            .file-name-display {
+                margin-left: 10px; /* Add some space between the image and the file name */
+                font-size: 14px; /* Font size for the file name */
+                color: #333; /* Text color */
+                display: inline-block; /* Keep it inline with the image */
+                vertical-align: top; /* Align it to the top of the image */
+            }
+
+            .swal-popup {
+                font-family: "Poppins", sans-serif !important;
+                width: 400px;
+            }
+
+            /* SweetAlert confirm button */
+            .swal-confirm {
+                font-family: "Poppins", sans-serif !important;
+            }
+
+            /* SweetAlert cancel button */
+            .swal-cancel {
+                font-family: "Poppins", sans-serif !important;
+            }
+
+            /* Chat styles */
+            .navbar .profile-container {
+                display: flex;
+                align-items: center;
+            }
+
+            .chat-icon {
+                font-size: 20px;
+                color: #333;
+                text-decoration: none;
+                position: relative; /* To position the badge correctly */
+                margin-right: 30px;
+                margin-top: 8px;
+                margin-left: -37px;
+            }
+
+            .notification-badge {
+                display: inline-block;
+                background-color: red; /* Change this to your preferred color */
+                color: white;
+                border-radius: 50%;
+                width: 20px; /* Width of the badge */
+                height: 20px; /* Height of the badge */
+                text-align: center;
+                font-weight: bold;
+                position: absolute; /* Position it relative to the chat icon */
+                top: -5px; /* Adjust as needed */
+                right: -10px; /* Adjust as needed */
+                font-size: 14px; /* Size of the exclamation point */
+            }
+
+            .smaller-alert {
+                font-size: 14px; /* Adjust text size for a compact look */
+                padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
+        </style>
+    </head>
 
     <body>
         <nav class="navbar">
@@ -836,7 +836,7 @@ $conn->close();
                 function resetTimer() {
                     clearTimeout(time);
                     // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
                 }
 
                 // Check if the user is logged in and clear the loggedOut flag
