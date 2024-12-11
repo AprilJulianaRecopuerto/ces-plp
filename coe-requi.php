@@ -4,11 +4,37 @@ session_start(); // Start the session
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
     // Redirect to login page if the session variable is not set
-    header("Location: loginpage.php");
+    header("Location: roleaccount.php");
     exit;
 }
-?>
 
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
+// Fetch the profile picture from the colleges table in user_registration
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
+}
+
+$uname = $_SESSION['uname'];
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $uname);
+$stmt->execute();
+$result_profile = $stmt->get_result();
+
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
+}
+
+$stmt->close();
+$conn_profile->close();
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -304,6 +330,7 @@ if (!isset($_SESSION['uname'])) {
             .crud-table tr:hover {
                 background-color: #f1f1f1;
             }
+            
             .button-container {
                 display: flex;
                 justify-content: left; /* Align buttons to the right */
@@ -375,11 +402,6 @@ if (!isset($_SESSION['uname'])) {
                 width: 400px !important; /* Set a larger width */
             }
 
-            .custom-swal-title {
-                font-family: 'Poppins', sans-serif;
-                color: #3085d6; /* Custom title color */
-            }
-
             .custom-swal-confirm {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
@@ -411,11 +433,6 @@ if (!isset($_SESSION['uname'])) {
                 width: 400px !important; /* Set a larger width */
             }
 
-            .custom-error-title {
-                font-family: 'Poppins', sans-serif;
-                color: #e74c3c; /* Custom title color for error */
-            }
-
             .custom-error-confirm {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
@@ -433,13 +450,6 @@ if (!isset($_SESSION['uname'])) {
                 border-radius: 8px; /* Rounded corners */
                 padding: 15px; /* Padding inside the popup */
                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-            }
-
-            .custom-event-title {
-                font-family: 'Poppins', sans-serif;
-                color: #343a40; /* Dark color for the title */
-                font-size: 1.5em; /* Font size for the title */
-                margin-bottom: 10px; /* Spacing below the title */
             }
 
             .custom-event-confirm {
@@ -511,6 +521,57 @@ if (!isset($_SESSION['uname'])) {
             .pagination-link:hover {
                 background-color: #45a049; /* Darker green on hover */
             }
+
+            .swal-popup {
+                font-family: "Poppins", sans-serif !important;
+                width: 400px;
+            }
+
+            /* SweetAlert confirm button */
+            .swal-confirm {
+                font-family: "Poppins", sans-serif !important;
+            }
+
+            /* SweetAlert cancel button */
+            .swal-cancel {
+                font-family: "Poppins", sans-serif !important;
+            }
+
+            /* Chat styles */
+            .navbar .profile-container {
+                display: flex;
+                align-items: center;
+            }
+
+            .chat-icon {
+                font-size: 20px;
+                color: #333;
+                text-decoration: none;
+                position: relative; /* To position the badge correctly */
+                margin-right: 30px;
+                margin-top: 8px;
+                margin-left: -37px;
+            }
+
+            .notification-badge {
+                display: inline-block;
+                background-color: red; /* Change this to your preferred color */
+                color: white;
+                border-radius: 50%;
+                width: 20px; /* Width of the badge */
+                height: 20px; /* Height of the badge */
+                text-align: center;
+                font-weight: bold;
+                position: absolute; /* Position it relative to the chat icon */
+                top: -5px; /* Adjust as needed */
+                right: -10px; /* Adjust as needed */
+                font-size: 14px; /* Size of the exclamation point */
+            }
+            .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
+            
         </style>
     </head>
 
@@ -518,25 +579,33 @@ if (!isset($_SESSION['uname'])) {
         <nav class="navbar">
             <h2>Requisition (for Materials)</h2> 
 
-            <div class="profile" id="profileDropdown">
-                <?php
-                    // Check if a profile picture is set in the session
-                    if (!empty($_SESSION['picture'])) {
-                        // Show the profile picture
-                        echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
-                    } else {
-                        // Get the first letter of the username for the placeholder
-                        $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
-                        echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
-                    }
-                ?>
+            <div class="profile-container">
+                <!-- Chat Icon with Notification Badge -->
+                <a href="coe-chat.php" class="chat-icon" onclick="resetNotifications()">
+                    <i class="fa fa-comments"></i>
+                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+                </a>
 
-                <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+                <div class="profile" id="profileDropdown">
+                    <?php
+                        // Check if a profile picture is set in the session
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
+                        } else {
+                            // Get the first letter of the username for the placeholder
+                            $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
+                            echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
+                        }
+                    ?>
 
-                <i class="fa fa-chevron-down dropdown-icon"></i>
-                <div class="dropdown-menu">
-                    <a href="coe-your-profile.php">Profile</a>
-                    <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+
+                    <i class="fa fa-chevron-down dropdown-icon"></i>
+                    <div class="dropdown-menu">
+                        <a href="coe-your-profile.php">Profile</a>
+                        <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -565,168 +634,162 @@ if (!isset($_SESSION['uname'])) {
                 <li><a href="coe-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="coe-task.php">Upload Files</a>
-                    <a href="coe-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="coe-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="responses.php"><img src="images/setting.png">Responses</a></li>
+                <li><a href="coe-responses.php"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
-                    <img src="images/resource.png"> Audit Trails
+                    <img src="images/logs.png"> Audit Trails
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="coe-login.php">Log In History</a>
+                    <a href="coe-history.php">Log In History</a>
                     <a href="coe-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>
         </div>
 
         <div class="content-requi">
-                <div class="button-container">
-                    <button onclick="window.location.href='coe-add-requi.php'">Requisition Form</button>
+            <div class="button-container">
+                    <button onclick="logAndRedirect('Add Requisition', 'coe-requi-list.php')">Requisition Form</button>
+            </div>
+
+            <?php
+            // Database credentials
+            $servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+            $username_resource = "dnr20srzjycb99tw";
+            $password_resource = "ndfnpz4j74v8t0p7";
+            $dbname_resource = "x8uwt594q5jy7a7o";
+
+            // Create connection
+            $conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
+
+            // Check connection
+            if ($conn->connect_error) {
+                die("Connection failed: " . $conn->connect_error);
+            }
+            ?>
+
+            <div class="data-details">
+                <h3>Requisition Form Details</h3>
+
+                <div class="table-container">
+                    <table class="crud-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Position</th>
+                                <th>College Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            // Pagination variables for requisitions
+                            $limit = 5; // Number of records per page
+                            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
+                            $offset = ($page - 1) * $limit; // Offset for SQL query
+
+                            // Count total requisition records
+                            $countSql = "SELECT COUNT(*) as total FROM coe_requisition";
+                            $countResult = $conn->query($countSql);
+                            $totalRecords = $countResult->fetch_assoc()['total'];
+                            $totalPages = ceil($totalRecords / $limit); // Calculate total pages
+
+                            // Fetch paginated requisition details
+                            $requisitionSql = "SELECT * FROM coe_requisition ORDER BY requisition_id DESC LIMIT $limit OFFSET $offset";
+                            $resultRequisitions = $conn->query($requisitionSql);
+
+                            if ($resultRequisitions && $resultRequisitions->num_rows > 0) {
+                                while ($row = $resultRequisitions->fetch_assoc()) {
+                                    echo "<tr>
+                                        <td>" . $row["requisition_id"] . "</td>
+                                        <td>" . $row["date"] . "</td>
+                                        <td>" . $row["name"] . "</td>
+                                        <td>" . $row["position"] . "</td>
+                                        <td>" . $row["college_name"] . "</td>
+                                        <td class='edit'>
+                                            <a href='coe-edit-requisition.php?requisition_id=" . $row["requisition_id"] . "'>EDIT</a>
+                                            <button class='delete-button' data-id='" . $row["requisition_id"] . "'>DELETE</button>
+                                            <a href='coe-requi-download.php?id=" . $row["requisition_id"] . "' class='download-button'>Download Report</a>
+                                        </td>
+                                    </tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='6'>No requisitions found.</td></tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
                 </div>
 
-                <?php
-                // Database connection
-                $servername = "localhost";
-                $username = "root";
-                $password = "";
-                $dbname = "resource_utilization"; // Change to your actual database name
+                <h3>Items for Requisitions</h3>
+                <div class="table-container">
+                    <table class="crud-table">
+                        <thead>
+                            <tr>
+                                <th>Requisition ID</th>
+                                <th>Item Name</th>
+                                <th>Total Items Requested</th>
+                                <th>Total Usage</th>
+                                <th>Utilization %</th>
+                            
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            // Pagination variables for requisitions
+                            $limit = 5; // Number of records per page
+                            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
+                            $offset = ($page - 1) * $limit; // Offset for SQL query
 
-                // Create connection
-                $conn = new mysqli($servername, $username, $password, $dbname);
+                            // Fetch all items details (removing pagination for items)
+                            $itemsSql = "SELECT * FROM coe_items ORDER BY requisition_id DESC";
+                            $resultItems = $conn->query($itemsSql);
 
-                // Check connection
-                if ($conn->connect_error) {
-                    die("Connection failed: " . $conn->connect_error);
-                }
-                ?>
-
-                <div class="data-details">
-                    <h3>Requisition Form Details</h3>
-
-                    <div class="table-container">
-                        <table class="crud-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Date</th>
-                                    <th>Name</th>
-                                    <th>Position</th>
-                                    <th>College Name</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                // Pagination variables for requisitions
-                                $limit = 5; // Number of records per page
-                                $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
-                                $offset = ($page - 1) * $limit; // Offset for SQL query
-
-                                // Count total requisition records
-                                $countSql = "SELECT COUNT(*) as total FROM coe_requisition";
-                                $countResult = $conn->query($countSql);
-                                $totalRecords = $countResult->fetch_assoc()['total'];
-                                $totalPages = ceil($totalRecords / $limit); // Calculate total pages
-
-                                // Fetch paginated requisition details
-                                $requisitionSql = "SELECT * FROM coe_requisition ORDER BY requisition_id LIMIT $limit OFFSET $offset";
-                                $resultRequisitions = $conn->query($requisitionSql);
-
-                                if ($resultRequisitions && $resultRequisitions->num_rows > 0) {
-                                    while ($row = $resultRequisitions->fetch_assoc()) {
-                                        echo "<tr>
-                                            <td>" . $row["requisition_id"] . "</td>
-                                            <td>" . $row["date"] . "</td>
-                                            <td>" . $row["name"] . "</td>
-                                            <td>" . $row["position"] . "</td>
-                                            <td>" . $row["college_name"] . "</td>
-                                            <td class='edit'>
-                                                <a href='coe-edit-requisition.php?requisition_id=" . $row["requisition_id"] . "'>EDIT</a>
-                                                <button class='delete-button' data-id='" . $row["requisition_id"] . "'>DELETE</button>
-                                            </td>
-                                        </tr>";
-                                    }
-                                } else {
-                                    echo "<tr><td colspan='6'>No requisitions found.</td></tr>";
+                            if ($resultItems && $resultItems->num_rows > 0) {
+                                $itemsData = [];
+                                
+                                // Group items by requisition_id
+                                while ($row = $resultItems->fetch_assoc()) {
+                                    $itemsData[$row['requisition_id']][] = $row; // Grouping items by requisition_id
                                 }
-                                ?>
-                            </tbody>
-                        </table>
-                    </div>
 
-                    <h3>Items for Requisitions</h3>
-                    <div class="table-container">
-                        <table class="crud-table">
-                            <thead>
-                                <tr>
-                                    <th>Requisition ID</th>
-                                    <th>Item Name</th>
-                                    <th>Total Items Requested</th>
-                                    <th>Total Usage</th>
-                                    <th>Utilization %</th>
-                               
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                // Pagination variables for requisitions
-                                $limit = 5; // Number of records per page
-                                $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
-                                $offset = ($page - 1) * $limit; // Offset for SQL query
+                                // Output rows with calculated rowspans for requisition_id
+                                foreach ($itemsData as $requisitionId => $items) {
+                                    $firstRow = true; // Track the first row for requisition_id
 
-                                // Fetch all items details (removing pagination for items)
-                                $itemsSql = "SELECT * FROM coe_items ORDER BY requisition_id LIMIT $limit OFFSET $offset"; // Removed LIMIT and OFFSET for items
-                                $resultItems = $conn->query($itemsSql);
+                                    foreach ($items as $index => $item) {
+                                        echo "<tr>";
 
-                                if ($resultItems && $resultItems->num_rows > 0) {
-                                    $itemsData = [];
-                                    
-                                    // Group items by requisition_id
-                                    while ($row = $resultItems->fetch_assoc()) {
-                                        $itemsData[$row['requisition_id']][] = $row; // Grouping items by requisition_id
-                                    }
-
-                                    // Output rows with calculated rowspans for requisition_id
-                                    foreach ($itemsData as $requisitionId => $items) {
-                                        $firstRow = true; // Track the first row for requisition_id
-
-                                        foreach ($items as $index => $item) {
-                                            echo "<tr>";
-
-                                            // Display Requisition ID only once per unique requisition_id
-                                            if ($firstRow) {
-                                                echo "<td rowspan='" . count($items) . "'>" . $requisitionId . "</td>";
-                                                $firstRow = false; // Set to false after the first row
-                                            }
-
-                                            // Output remaining columns for the current item
-                                            echo "<td>" . htmlspecialchars($item["item_name"]) . "</td>
-                                                <td>" . htmlspecialchars($item["total_items"]) . "</td>
-                                                <td>" . htmlspecialchars($item["total_usage"]) . "</td>
-                                                <td>" . htmlspecialchars($item["utilization_percentage"]) . '%'. "</td>
-                                               
-                                                </tr>";
+                                        // Display Requisition ID only once per unique requisition_id
+                                        if ($firstRow) {
+                                            echo "<td rowspan='" . count($items) . "'>" . $requisitionId . "</td>";
+                                            $firstRow = false; // Set to false after the first row
                                         }
+
+                                        // Output remaining columns for the current item
+                                        echo "<td>" . htmlspecialchars($item["item_name"]) . "</td>
+                                            <td>" . htmlspecialchars($item["total_items"]) . "</td>
+                                            <td>" . htmlspecialchars($item["total_usage"]) . "</td>
+                                            <td>" . htmlspecialchars($item["utilization_percentage"]) . '%'. "</td>
+                                            
+                                            </tr>";
                                     }
-                                } else {
-                                    echo "<tr><td colspan='4'>No items found.</td></tr>";
                                 }
-                                ?>
+                            } else {
+                                echo "<tr><td colspan='4'>No items found.</td></tr>";
+                            }
+                            ?>
 
-                            </tbody>
-                        </table>
-                    </div>
+                        </tbody>
+                    </table>
+                </div>
 
-                    <div class="pagination-info">
+                <div class="pagination-info">
                     <div>
                         <p><?php echo "$totalRecords RECORDS FOUND"; ?></p>
                     </div>
@@ -745,30 +808,106 @@ if (!isset($_SESSION['uname'])) {
                         </p>
                     </div>
                 </div>
-                </div>
             </div>
         </div>
 
         <script>
+            let inactivityTime = function () {
+            let time;
+
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
+
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
+
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
+                }
+            };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
             function confirmLogout(event) {
-                event.preventDefault(); // Prevent the default link behavior
+                event.preventDefault();
                 Swal.fire({
                     title: 'Are you sure?',
                     text: "Do you really want to log out?",
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
                     confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
                     customClass: {
-                        popup: 'custom-swal-popup',
-                        confirmButton: 'custom-swal-confirm',
-                        cancelButton: 'custom-swal-cancel'
-                    }
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = 'roleaccount.php'; // Redirect to the logout page
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('college-logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
                     }
                 });
+            }
+
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, '', window.location.href);
+                };
             }
 
             // Dropdown menu toggle
@@ -952,25 +1091,95 @@ if (!isset($_SESSION['uname'])) {
                 }
             });
 
-            var dropdowns = document.getElementsByClassName("dropdown-btn");
-
-            for (let i = 0; i < dropdowns.length; i++) {
-                dropdowns[i].addEventListener("click", function () {
-                    // Close all dropdowns first
-                    let dropdownContents = document.getElementsByClassName("dropdown-container");
-                    for (let j = 0; j < dropdownContents.length; j++) {
-                        dropdownContents[j].style.display = "none";
-                    }
-
-                    // Toggle the clicked dropdown's visibility
-                    let dropdownContent = this.nextElementSibling;
-                    if (dropdownContent.style.display === "block") {
-                        dropdownContent.style.display = "none";
-                    } else {
-                        dropdownContent.style.display = "block";
-                    }
-                });
+            function logAction(actionDescription) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "college_logs.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.send("action=" + encodeURIComponent(actionDescription));
             }
+
+            function logAndRedirect(actionDescription, url) {
+                logAction(actionDescription); // Log the action
+                setTimeout(function() {
+                    window.location.href = url; // Redirect after logging
+                }, 100); // Delay to ensure logging completes
+            }
+
+            // Add event listeners when the page is fully loaded
+            document.addEventListener("DOMContentLoaded", function() {
+                // Log clicks on main menu links
+                document.querySelectorAll(".menu > li > a").forEach(function(link) {
+                    link.addEventListener("click", function() {
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+                // Handle dropdown button clicks
+                var dropdowns = document.getElementsByClassName("dropdown-btn");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].addEventListener("click", function () {
+                        let dropdownContents = document.getElementsByClassName("dropdown-container");
+                        for (let j = 0; j < dropdownContents.length; j++) {
+                            dropdownContents[j].style.display = "none";
+                        }
+                        let dropdownContent = this.nextElementSibling;
+                        if (dropdownContent.style.display === "block") {
+                            dropdownContent.style.display = "none";
+                        } else {
+                            dropdownContent.style.display = "block";
+                        }
+                    });
+                }
+
+                // Log clicks on dropdown links
+                document.querySelectorAll(".dropdown-container a").forEach(function(link) {
+                    link.addEventListener("click", function(event) {
+                        event.stopPropagation();
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+                document.querySelectorAll("td.edit a").forEach(function(link) {
+                link.addEventListener("click", function(event) {
+                    event.preventDefault(); // Prevent the default action
+                    var url = this.href; // Get the URL from the href attribute
+                    logAndRedirect("Edit Requisition", url); // Log the action and redirect
+                });
+            });
+
+            // Log clicks on action buttons (Delete)
+            document.querySelectorAll(".delete-button").forEach(function(button) {
+                button.addEventListener("click", function() {
+                    logAction("Delete Requistion"); // Log deletion action
+                    // Additional logic for deletion can be added here if needed
+                });
+            });
+
+            // Log clicks on the "Profile" link
+            document.querySelector('.dropdown-menu a[href="coe-your-profile.php"]').addEventListener("click", function() {
+                logAction("Profile");
+            });
+        });
+
+            document.addEventListener("DOMContentLoaded", () => {
+                function checkNotifications() {
+                    fetch('coe-check_notifications.php')
+                        .then(response => response.json())
+                        .then(data => {
+                            const chatNotification = document.getElementById('chatNotification');
+                            if (data.unread_count > 0) {
+                                chatNotification.style.display = 'inline-block';
+                            } else {
+                                chatNotification.style.display = 'none';
+                            }
+                        })
+                        .catch(error => console.error('Error checking notifications:', error));
+                }
+
+                // Check for notifications every 2 seconds
+                setInterval(checkNotifications, 2000);
+                checkNotifications(); // Initial check when page loads
+            });
         </script>
     </body>
 </html>

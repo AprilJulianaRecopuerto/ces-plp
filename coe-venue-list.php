@@ -1,11 +1,5 @@
 <?php
-session_start(); // Start the session
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-// Load Composer's autoloader
-require 'vendor/autoload.php';
+session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
@@ -14,19 +8,11 @@ if (!isset($_SESSION['uname'])) {
     exit;
 }
 
-// Database credentials for proj_list
 $servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username_proj = "zf8r3n4qqjyrfx7o";
 $password_proj = "su6qmqa0gxuerg98";
 $dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-// Database connection details
-$servername_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_ur = "equ6v8i5llo3uhjm"; // replace with your database username
-$password_ur = "vkfaxm2are5bjc3q"; // replace with your database password
-$dbname_user_registration = "ylwrjgaks3fw5sdj";
-
-// Create connection to proj_list database
 $conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
 // Check connection
@@ -34,140 +20,28 @@ if ($conn_proj_list->connect_error) {
     die("Connection failed: " . $conn_proj_list->connect_error);
 }
 
-// Database credentials for 'mov' (notifications)
-$servername_mov = "arfo8ynm6olw6vpn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_mov = "tz8thfim1dq7l3rf";
-$password_mov = "wzt4gssgou2ofyo7";
-$dbname_mov = "uv1qyvm0b8oicg0v";
+// Database credentials
+$servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_resource = "dnr20srzjycb99tw";
+$password_resource = "ndfnpz4j74v8t0p7";
+$dbname_resource = "x8uwt594q5jy7a7o";
 
-$conn_mov = new mysqli($servername_mov, $username_mov, $password_mov, $dbname_mov);
-
-// Check connection for 'mov'
-if ($conn_mov->connect_error) {
-    die("Connection to 'mov' database failed: " . $conn_mov->connect_error);
-}
-
-// Handle deletion if project ID is provided
-if (isset($_POST['delete_id'])) {
-    $project_id = intval($_POST['delete_id']);
-    $sql_fetch = "SELECT proj_title FROM coe WHERE id = ?";
-    $stmt_fetch = $conn_proj_list->prepare($sql_fetch);
-    $stmt_fetch->bind_param("i", $project_id);
-    $stmt_fetch->execute();
-    $stmt_fetch->bind_result($proj_title);
-    $stmt_fetch->fetch();
-    $stmt_fetch->close();
-    
-    // Proceed with deletion
-    $sql = "DELETE FROM coe WHERE id = ?";
-    $stmt = $conn_proj_list->prepare($sql);
-    $stmt->bind_param("i", $project_id);
-    if ($stmt->execute()) {
-        $_SESSION['message'] = "Data deleted successfully";
-
-        $notification_message = "$proj_title has been deleted";
-
-        // Prepare and execute the notification insert for 'mov' database
-        $notification_sql = "INSERT INTO notifications (project_name, notification_message) VALUES (?, ?)";
-        $stmt_notification = $conn_mov->prepare($notification_sql);
-        $stmt_notification->bind_param("ss", $proj_title, $notification_message);
-        $stmt_notification->execute();
-        $stmt_notification->close();
-
-        // Now send the email notification to the admin
-        // Database connection to fetch admin email (user_registration database)
-        $user_dbname = "ylwrjgaks3fw5sdj"; // For user data
-        $conn_users = new mysqli($servername_ur, $username_ur, $password_ur, $user_dbname);
-
-        if ($conn_users->connect_error) {
-            die("Connection to 'user_registration' database failed: " . $conn_users->connect_error);
-        }
-
-        // Fetch the admin email
-        $user_sql = "SELECT email FROM users WHERE roles = 'Head Coordinator' LIMIT 1";
-        $result = $conn_users->query($user_sql);
-
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            $recipientEmail = $row['email'];
-
-            // Send email using PHPMailer
-            $mail = new PHPMailer(true);
-            try {
-                // Server settings
-                $mail->isSMTP();                                            // Send using SMTP
-                $mail->Host       = 'smtp.gmail.com';                         // Set the SMTP server to send through
-                $mail->SMTPAuth   = true;                                     // Enable SMTP authentication
-                $mail->Username   = 'communityextensionservices1@gmail.com'; // SMTP username
-                $mail->Password   = 'ctpy rvsc tsiv fwix';                    // SMTP password
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;          // Enable TLS encryption
-                $mail->Port       = 587;                                     // TCP port to connect to
-
-                // Recipients
-                $mail->setFrom('communityextensionservices1@gmail.com', 'PLP CES');
-                $mail->addAddress($recipientEmail); // Add the admin email fetched from the database
-
-                // Content
-                $mail->isHTML(true);                                   // Set email format to HTML
-                $mail->Subject = 'Task Deletion Notification';
-                $mail->Body    = "The project <strong>$project_name</strong> has been deleted.<br><br>Best regards,<br>PLP CES";
-
-                $mail->send();
-                $mail->send();
-            } catch (Exception $e) {
-                $_SESSION['error'] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-                header("Location: coe-projlist.php");
-                exit;
-            }
-        } else {
-            $_SESSION['error'] = "No admin user found for email notification.";
-            header("Location: coe-projlist.php");
-            exit;
-        }
-    } else {
-        $_SESSION['message'] = "Error deleting data";
-    }
-
-    $stmt->close();
-    header("Location: coe-projlist.php"); // Redirect back to project list page
-    exit();
-}
-
-// Fetch projects
-$sql = "SELECT * FROM coe";
-$result = $conn_proj_list->query($sql);
-
-$message = isset($_SESSION['message']) ? $_SESSION['message'] : '';
-unset($_SESSION['message']); // Clear the message after displaying it
-
-$conn_proj_list->close();
-
-// Database credentials for user_registration
-$dbname_user_registration = "ylwrjgaks3fw5sdj";
-
-// Create connection to user_registration database
-$conn_user_registration = new mysqli($servername_ur, $username_ur, $password_ur, $dbname_user_registration);
+// Create connection
+$conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
 
 // Check connection
-if ($conn_user_registration->connect_error) {
-    die("Connection failed: " . $conn_user_registration->connect_error);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch the department name from user_registration
-$username = $_SESSION['uname'];
-$sql = "SELECT department FROM colleges WHERE uname = ?";
-$stmt = $conn_user_registration->prepare($sql);
-$stmt->bind_param("s", $username);
-$stmt->execute();
-$stmt->bind_result($departmentName);
-$stmt->fetch();
-$stmt->close();
-$conn_user_registration->close();
-
-$departmentName = htmlspecialchars($departmentName);
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
 // Fetch the profile picture from the colleges table in user_registration
-$conn_profile = new mysqli($servername_ur, $username_ur, $password_ur, $dbname_user_registration);
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+
 if ($conn_profile->connect_error) {
     die("Connection failed: " . $conn_profile->connect_error);
 }
@@ -186,7 +60,6 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
 
 $stmt->close();
 $conn_profile->close();
-
 ?>
 
 <!DOCTYPE html>
@@ -194,7 +67,7 @@ $conn_profile->close();
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+        
         <title>CES PLP</title>
 
         <link rel="icon" href="images/logoicon.png">
@@ -213,6 +86,7 @@ $conn_profile->close();
             body {
                 margin: 0;
                 background-color: #F6F5F5; /* Light gray background color */
+                font-family: 'Poppins', sans-serif;
             }
 
             .navbar {
@@ -419,7 +293,6 @@ $conn_profile->close();
                 float: right;
                 margin-left: 15px;
             }
-            
             .menu img {
                 height: 30px; /* Increased icon size */
                 margin-right: 15px; /* Adjusted space between icon and text */
@@ -430,24 +303,61 @@ $conn_profile->close();
                 color: white; /* Change text color */
             }
 
-            .content-projectlist {
-                margin-left: 340px; /* Align with the sidebar */
+            .content-resource {
+                margin-left: 320px; /* Align with the sidebar */
                 padding: 20px;
             }
+            
+            .form-container {
+                margin-top:110px;
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
 
-            .content-projectlist h2 {
+            .form-container h3 {
+                margin-top: 0;
                 font-family: 'Poppins', sans-serif;
-                font-size: 28px; /* Adjust the font size as needed */
-                margin-bottom: 20px; /* Space below the heading */
-                color: black; /* Adjust text color */
-                margin-top: 110px;
+                font-size: 24px;
+                color: black;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-group label {
+                display: block;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            .form-group select, .form-group input[type="text"], .form-group input[type="date"], 
+            .form-group input[type="time"], .form-group input[type="number"] {
+                width: 100%;
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-size: 16px;
+                box-sizing: border-box;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .form-group input::placeholder {
+                font-family: 'Poppins', sans-serif;
+                color: #999;
+                font-style: italic;
+            }
+
+            .form-group select {
+                background: #f9f9f9;
             }
 
             .button-container {
                 display: flex;
                 justify-content: flex-end; /* Align buttons to the right */
-                margin-bottom: 20px; /* Space below the buttons */
-                margin-right: 20px;
+                margin-top: 20px; /* Space above the buttons */
             }
 
             .button-container button {
@@ -456,7 +366,6 @@ $conn_profile->close();
                 color: white;
                 padding: 10px 20px;
                 margin-left: 10px;
-                margin-top: 110px;
                 border-radius: 5px;
                 font-size: 16px;
                 cursor: pointer;
@@ -468,70 +377,9 @@ $conn_profile->close();
                 background-color: #45a049; /* Darker green on hover */
             }
 
-            .table-container {
-                width: 100%;
-                margin-left: -12px;
-                overflow-x: auto;
-                margin-top: 20px; /* Space above the table */
-            }
-
-            .crud-table {
-                width: 100%;
-                border-collapse: collapse;
-                font-family: 'Poppins', sans-serif;
-                background-color: #ffffff;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                overflow: hidden;
-            }
-
-            .crud-table th, .crud-table td {
-                border: 1px solid #ddd;
-                padding: 10px;
-                text-align: left;
-                white-space: nowrap; /* Prevent text from wrapping */
-            }
-
-            .crud-table th {
-                text-align: center; 
-                background-color: #4CAF50;
-                color: white;
-                height: 40px;
-                width: 14px; /* Set a fixed width for table headers */
-            }
-
-            .crud-table td {
-                height: 50px;
-                background-color: #fafafa;
-            }
-
-            .crud-table tr:hover {
-                background-color: #f1f1f1;
-            }
-
-            .custom-suc-popup {
-                font-family: "Poppins", sans-serif !important;
-                width: 400px;
-            }
-
-            .custom-popup {
-                font-family: 'Poppins', sans-serif;
-                font-size: 16px; /* Increase the font size */
-                width: 400px !important; /* Set a larger width */
-            }
-
-            .custom-title {
-                font-family: 'Poppins', sans-serif;
-                color: #3085d6; /* Custom title color */
-            }
-
-            .custom-content {
-                font-size: 16px; /* Font size for the content text */
-                color: #666; /* Content text color */
-            }
-
-         
             .custom-swal-popup {
                 font-family: 'Poppins', sans-serif;
+                font-size: 16px; /* Increase the font size */
                 width: 400px !important; /* Set a larger width */
             }
 
@@ -556,11 +404,6 @@ $conn_profile->close();
                 outline: none; /* Remove default focus outline */
             }
 
-            .custom-swal-input {
-                font-family: 'Poppins', sans-serif;
-                font-size: 17px;
-            }
-
             .custom-error-popup {
                 font-family: 'Poppins', sans-serif;
                 width: 400px !important; /* Set a larger width */
@@ -576,67 +419,6 @@ $conn_profile->close();
                 outline: none; /* Remove default focus outline */
             }
 
-            .edit a {
-                font-family: 'Poppins', sans-serif;
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                text-align: center;
-                transition: background-color 0.3s;
-                text-decoration: none;
-            }
-
-            .edit a:hover {
-                background-color: #45a049; /* Darker green on hover */
-            }
-
-            .delete-project-button {
-                font-family: 'Poppins', sans-serif;
-                background-color: #e74c3c;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-            }
-
-            .delete-project-button:hover {
-                background-color: #ef233c; /* Darker green on hover */
-            }
-
-            .pagination-info {
-                font-family: 'Poppins', sans-serif;
-                display: flex; 
-                justify-content: space-between; 
-                align-items: center; 
-                margin-top: 10px;"
-            }
-
-            .pagination-link {
-                font-family: 'Poppins', sans-serif;
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 14px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                text-decoration: none;
-            }
-
-            .pagination-link:hover {
-                background-color: #45a049; /* Darker green on hover */
-            }
             .swal-popup {
                 font-family: "Poppins", sans-serif !important;
                 width: 400px;
@@ -682,6 +464,64 @@ $conn_profile->close();
                 right: -10px; /* Adjust as needed */
                 font-size: 14px; /* Size of the exclamation point */
             }
+
+            .table-container {
+                width: 100%;
+                margin-left: -12px;
+                overflow-x: auto;
+                margin-top: 20px; /* Space above the table */
+            }
+
+            .crud-table {
+                margin-top: 110px;
+                width: 100%;
+                border-collapse: collapse;
+                font-family: 'Poppins', sans-serif;
+                background-color: #ffffff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .crud-table th, .crud-table td {
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+                white-space: nowrap; /* Prevent text from wrapping */
+            }
+
+            .crud-table th {
+                text-align: center; 
+                background-color: #4CAF50;
+                color: white;
+                height: 40px;
+                width: 14px; /* Set a fixed width for table headers */
+            }
+
+            .crud-table td {
+                height: 50px;
+                background-color: #fafafa;
+            }
+
+            .crud-table tr:hover {
+                background-color: #f1f1f1;
+            }
+
+            .add a {
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                text-decoration: none;
+                transition: background-color 0.3s;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .add a:hover {
+                background-color: #45a049; /* Darker green on hover */
+            }
             .smaller-alert {
             font-size: 14px; /* Adjust text size for a compact look */
             padding: 20px;   /* Adjust padding to mimic a smaller alert box */
@@ -691,9 +531,7 @@ $conn_profile->close();
 
     <body>
         <nav class="navbar">
-            <h2>
-                <span style="color: purple; font-size: 28px;"><?php echo htmlspecialchars($departmentName); ?></span> Projects
-            </h2>
+            <h2>All Projects in COE</h2>
 
             <div class="profile-container">
                 <!-- Chat Icon with Notification Badge -->
@@ -733,7 +571,7 @@ $conn_profile->close();
 
             <ul class="menu">
                 <li><a href="coe-dash.php"><img src="images/home.png">Dashboard</a></li>
-                <li><a href="coe-projlist.php" class="active"><img src="images/project-list.png">Project List</a></li>
+                <li><a href="coe-projlist.php"><img src="images/project-list.png">Project List</a></li>
                 <li><a href="coe-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
 
                 <!-- Dropdown for Resource Utilization -->
@@ -765,246 +603,75 @@ $conn_profile->close();
                 </div>
             </ul>
         </div>
-        
-        <div class="content-projectlist">
-            <div class="button-container">
-                <button onclick="logAndRedirect('Add Project', 'coe-addproj.php')">Add Project</button>
-            </div>
 
-            <div class="table-container">
-                <table class="crud-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Date of Submission</th>
-                            <th>Semester</th>
-                            <th>Lead Person</th>
-                            <th>Department</th>
-                            <th>Implementor</th>
-                            <th>Number of Target Participants</th>
-                            <th>Project Title</th>
-                            <th>Sustainable Development Goals</th>
-                            <th>Specific Activity</th>
-                            <th>Date of Implementation</th>
-                            <th>Time From</th>
-                            <th>Time To</th>
-                            <th>District</th>
-                            <th>Barangay</th>
-                            <th>Beneficiary</th>
-                            <th>Duration of Project</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
+        <div class="content-resource">
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Project Title</th>
+                        <th>Semester</th>
+                        <th>Department</th>
+                        <th>Date of Event</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Fetch all projects from the coe table
+                    $sql = "SELECT * FROM coe";
+                    $result = $conn_proj_list->query($sql);
 
-                    <tbody>
-                        <?php
-                        // Database credentials
-                        $servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-                        $username_proj = "zf8r3n4qqjyrfx7o";
-                        $password_proj = "su6qmqa0gxuerg98";
-                        $dbname_proj_list = "hpvs3ggjc4qfg9jp";
+                    // Initialize a flag to check if any rows are displayed
+                    $has_records = false;
 
-                        // Create connection
-                        $conn = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
+                    if ($result && $result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            $project_id = $row["id"];
 
-                        // Check connection
-                        if ($conn->connect_error) {
-                            die("Connection failed: " . $conn->connect_error);
-                        }
+                            // Check if the project_id already exists in the coe_tor table
+                            $check_sql = "SELECT * FROM coe_reservation WHERE venue_sub = ?";
+                            $check_stmt = $conn->prepare($check_sql);
+                            $check_stmt->bind_param("i", $project_id);
+                            $check_stmt->execute();
+                            $check_result = $check_stmt->get_result();
 
-                        // Pagination variables
-                        $limit = 5; // Number of records per page
-                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
-                        $offset = ($page - 1) * $limit; // Offset for SQL query
-
-                        // Count total records
-                        $countSql = "SELECT COUNT(*) as total FROM coe";
-                        $countResult = $conn->query($countSql);
-                        $totalRecords = $countResult->fetch_assoc()['total'];
-                        $totalPages = ceil($totalRecords / $limit); // Calculate total pages
-
-                        // Fetch projects with LIMIT, OFFSET, and ORDER BY DESC for pagination
-                        $sql = "SELECT * FROM coe ORDER BY id DESC LIMIT $limit OFFSET $offset";
-                        $result = $conn->query($sql);
-
-                        if ($result->num_rows > 0) {
-                            // Output data of each row
-                            while ($row = $result->fetch_assoc()) {
-                                echo "<tr>
-                                         <td>" . $row["id"] . "</td>
-                                        <td>" . $row["date_of_sub"] . "</td>
-                                        <td>" . $row["semester"] . "</td>
-                                        <td>" . $row["lead_person"] . "</td>
-                                        <td>" . $row["dept"] . "</td>
-                                        <td>" . $row["implementor"] . "</td>
-                                        <td>" . $row["attendees"] . "</td>
-                                        <td>" . $row["proj_title"] . "</td>
-                                        <td>" . $row["sdg"] . "</td>
-                                        <td>" . $row["specific_activity"] . "</td>
-                                        <td>" . $row["dateof_imple"] . "</td>
-                                        <td>" . $row["time_from"] . "</td>
-                                        <td>" . $row["time_to"] . "</td>
-                                        <td>" . $row["district"] . "</td>
-                                        <td>" . $row["barangay"] . "</td>
-                                        <td>" . $row["beneficiary"] . "</td>
-                                        <td>" . $row["duration"] . "</td>
-                                        <td>" . $row["status"] . "</td>
-                                        <td class='edit'>
-                                            <a href='coe-editproj.php?id=" . $row["id"] . "'>EDIT</a>
-                                            <button class='delete-project-button' data-id='" . $row["id"] . "'>DELETE</button>
-                                        </td>
-                                    </tr>";
+                            // If the project is already added in coe_tor, skip it
+                            if ($check_result && $check_result->num_rows > 0) {
+                                continue; // Skip this project if it exists in coe_tor
                             }
-                        } else {
-                            echo "<tr><td colspan='17'>No records found</td></tr>";
+
+                            // If not already added, display the project
+                            echo "<tr>
+                                    <td>" . $project_id . "</td>
+                                    <td>" . $row["proj_title"] . "</td>
+                                    <td>" . $row["semester"] . "</td>
+                                    <td>" . $row["dept"] . "</td>
+                                    <td>" . $row["dateof_imple"] . "</td>
+                                    <td class='add'>
+                                        <a href='coe-add-venue.php?id=" . $project_id . "'>Add</a>
+                                    </td>
+                                </tr>";
+
+                            // Set the flag to true since we displayed at least one record
+                            $has_records = true;
                         }
+                    }
 
-                        $conn->close();
-                        ?>
-                    </tbody>
-                </table>
-            </div>
+                    // Display a fallback message if no records were displayed
+                    if (!$has_records) {
+                        echo "<tr><td colspan='6'>No records found</td></tr>";
+                    }
 
-            <div class="pagination-info">
-                <div>
-                    <p><?php echo "$totalRecords RECORDS FOUND"; ?></p>
-                </div>
-
-                <div class="page">
-                    <p>
-                        <?php if ($page > 1): ?>
-                            <a class="pagination-link" href="?page=<?php echo $page - 1; ?>">PREV</a>
-                        <?php endif; ?>
-
-                        <span class="pagination-text">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
-                        
-                        <?php if ($page < $totalPages): ?>
-                            <a class="pagination-link" href="?page=<?php echo $page + 1; ?>">NEXT</a>
-                        <?php endif; ?>
-                    </p>
-                </div>
-            </div>
+                    $conn_proj_list->close();
+                    ?>
+                </tbody>
+            </table>
         </div>
 
-        <form id="delete-form" method="post" style="display:none;">
-            <input type="hidden" name="delete_id" id="delete_id">
-        </form>
-
         <script>
-            function logAction(actionDescription) {
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", "college_logs.php", true);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                xhr.send("action=" + encodeURIComponent(actionDescription));
-            }
-
-            function logAndRedirect(actionDescription, url) {
-                logAction(actionDescription); // Log the action
-                setTimeout(function() {
-                    window.location.href = url; // Redirect after logging
-                }, 100); // Delay to ensure logging completes
-            }
-
-            // Add event listeners when the page is fully loaded
-            document.addEventListener("DOMContentLoaded", function() {
-                // Log clicks on main menu links
-                document.querySelectorAll(".menu > li > a").forEach(function(link) {
-                    link.addEventListener("click", function() {
-                        logAction(link.textContent.trim());
-                    });
-                });
-
-                // Handle dropdown button clicks
-                var dropdowns = document.getElementsByClassName("dropdown-btn");
-                for (let i = 0; i < dropdowns.length; i++) {
-                    dropdowns[i].addEventListener("click", function () {
-                        let dropdownContents = document.getElementsByClassName("dropdown-container");
-                        for (let j = 0; j < dropdownContents.length; j++) {
-                            dropdownContents[j].style.display = "none";
-                        }
-                        let dropdownContent = this.nextElementSibling;
-                        if (dropdownContent.style.display === "block") {
-                            dropdownContent.style.display = "none";
-                        } else {
-                            dropdownContent.style.display = "block";
-                        }
-                    });
-                }
-
-                // Log clicks on dropdown links
-                document.querySelectorAll(".dropdown-container a").forEach(function(link) {
-                    link.addEventListener("click", function(event) {
-                        event.stopPropagation();
-                        logAction(link.textContent.trim());
-                    });
-                });
-
-                document.querySelectorAll("td.edit a").forEach(function(link) {
-                link.addEventListener("click", function(event) {
-                    event.preventDefault(); // Prevent the default action
-                    var url = this.href; // Get the URL from the href attribute
-                    logAndRedirect("Edit Project", url); // Log the action and redirect
-                });
-            });
-
-            // Log clicks on action buttons (Delete)
-            document.querySelectorAll(".delete-project-button").forEach(function(button) {
-                button.addEventListener("click", function() {
-                    logAction("Delete Project"); // Log deletion action
-                    // Additional logic for deletion can be added here if needed
-                });
-            });
-
-            // Log clicks on the "Profile" link
-            document.querySelector('.dropdown-menu a[href="coe-your-profile.php"]').addEventListener("click", function() {
-                logAction("Profile");
-            });
-        });
-
-                document.addEventListener('DOMContentLoaded', function() {
-                <?php if ($message): ?>
-                    Swal.fire({
-                        title: 'Success',
-                        text: "<?php echo $message; ?>",
-                        icon: 'success',
-                        confirmButtonColor: '#089451',
-                        confirmButtonText: 'OK',
-                        customClass: {
-                            popup: 'custom-suc-popup'
-                        }
-                    });
-                <?php endif; ?>
-
-                // Attach click event listener to all delete buttons
-                document.querySelectorAll('.delete-project-button').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const projectId = this.getAttribute('data-id');
-                        Swal.fire({
-                            title: 'Are you sure?',
-                            text: "You won't be able to restore this!",
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#e74c3c',
-                            cancelButtonColor: '#089451',
-                            confirmButtonText: 'Yes, delete it!',
-                            customClass: {
-                                popup: 'custom-swal-popup',
-                                confirmButton: 'custom-swal-confirm',
-                                cancelButton: 'custom-swal-cancel'
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                document.getElementById('delete_id').value = projectId;
-                                document.getElementById('delete-form').submit();
-                            }
-                        });
-                    });
-                });
-                });
-
-                let inactivityTime = function () {
-                let time;
+            let inactivityTime = function () {
+            let time;
 
                 // List of events to reset the inactivity timer
                 window.onload = resetTimer;
@@ -1101,20 +768,75 @@ $conn_profile->close();
                 };
             }
 
+            // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
-            var dropdownMenu = document.querySelector('.dropdown-menu');
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+                const dropdown = this.querySelector('.dropdown-menu');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
             });
 
-            // Optional: Close the dropdown if clicking outside the profile area
-            window.onclick = function(event) {
-                if (!event.target.closest('#profileDropdown')) {
-                    var dropdownMenu = document.querySelector('.dropdown-menu');
-                    if (dropdownMenu.style.display === 'block') {
-                        dropdownMenu.style.display = 'none';
+            // Close dropdown if clicked outside
+            window.addEventListener('click', function(event) {
+                if (!document.getElementById('profileDropdown').contains(event.target)) {
+                    const dropdown = document.querySelector('.dropdown-menu');
+                    if (dropdown) {
+                        dropdown.style.display = 'none';
                     }
                 }
-            };
+            });
+           
+            function logAction(actionDescription) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "college_logs.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.send("action=" + encodeURIComponent(actionDescription));
+            }
+
+            function logAndRedirect(actionDescription, url) {
+                logAction(actionDescription); // Log the action
+                setTimeout(function() {
+                    window.location.href = url; // Redirect after logging
+                }, 100); // Delay to ensure logging completes
+            }
+
+            // Add event listeners when the page is fully loaded
+            document.addEventListener("DOMContentLoaded", function() {
+                // Log clicks on main menu links
+                document.querySelectorAll(".menu > li > a").forEach(function(link) {
+                    link.addEventListener("click", function() {
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+                // Handle dropdown button clicks
+                var dropdowns = document.getElementsByClassName("dropdown-btn");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].addEventListener("click", function () {
+                        let dropdownContents = document.getElementsByClassName("dropdown-container");
+                        for (let j = 0; j < dropdownContents.length; j++) {
+                            dropdownContents[j].style.display = "none";
+                        }
+                        let dropdownContent = this.nextElementSibling;
+                        if (dropdownContent.style.display === "block") {
+                            dropdownContent.style.display = "none";
+                        } else {
+                            dropdownContent.style.display = "block";
+                        }
+                    });
+                }
+
+                // Log clicks on dropdown links
+                document.querySelectorAll(".dropdown-container a").forEach(function(link) {
+                    link.addEventListener("click", function(event) {
+                        event.stopPropagation();
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+            // Log clicks on the "Profile" link
+            document.querySelector('.dropdown-menu a[href="coe-your-profile.php"]').addEventListener("click", function() {
+                logAction("Profile");
+            });
+        });
 
             document.addEventListener("DOMContentLoaded", () => {
                 function checkNotifications() {
