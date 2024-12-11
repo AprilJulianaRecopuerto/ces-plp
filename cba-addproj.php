@@ -741,7 +741,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     <div class="form-group">
                         <label for="dept">Department:</label>
-                        <input type="text" id="dept" name="dept" value="College of Arts and Science" readonly>
+                        <input type="text" id="dept" name="dept" value="College of Business Administration" readonly>
                     </div>
 
                     <div class="form-group">

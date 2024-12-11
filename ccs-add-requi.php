@@ -715,7 +715,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     <div class="form-group">
                         <label for="college_name">Office/College:</label>
-                        <input type="text" id="college_name" name="college_name" value="College of Computer Studies" placeholder="Enter College Name" required>
+                        <input type="text" id="college_name" name="college_name" value="College of Arts and Science" placeholder="Enter College Name" required>
                     </div>
 
                     <h2>Item/s Requested</h2>
@@ -753,7 +753,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
 
         <script>
-
             // Set the current date in YYYY-MM-DD format
             window.onload = function() {
             var today = new Date();
@@ -813,7 +812,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 function resetTimer() {
                     clearTimeout(time);
                     // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
                 }
 
                 // Check if the user is logged in and clear the loggedOut flag

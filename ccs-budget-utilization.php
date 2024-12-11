@@ -86,8 +86,8 @@ if ($conn_budget_allotment->connect_error) {
     die("Connection failed: " . $conn_budget_allotment->connect_error);
 }
 
-// Fetch the allotted budget for ccs (you can also dynamically change this for other departments)
-$sql_allotted_budget = "SELECT allotted_budget FROM allotted_budget WHERE department_name = 'ccs'";
+// Fetch the allotted budget for CCS (you can also dynamically change this for other departments)
+$sql_allotted_budget = "SELECT allotted_budget FROM allotted_budget WHERE department_name = 'CCS'";
 $result_allotted_budget = $conn_budget_allotment->query($sql_allotted_budget);
 
 $allottedBudget = 0;  // Default if not found
@@ -842,7 +842,7 @@ $conn_profile->close();
                 function resetTimer() {
                     clearTimeout(time);
                     // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
                 }
 
                 // Check if the user is logged in and clear the loggedOut flag

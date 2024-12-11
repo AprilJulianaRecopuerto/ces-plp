@@ -606,7 +606,7 @@ $conn_profile->close();
         </div>
 
         <div class="content-budget">
-            <h2>All Projects in cba</h2>
+            <h2>All Projects in CBA</h2>
             <table class="crud-table">
                 <thead>
                     <tr>
