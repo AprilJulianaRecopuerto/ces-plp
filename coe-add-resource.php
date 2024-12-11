@@ -1,10 +1,23 @@
 <?php
-session_start(); // Start the session
+session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
+    // Redirect to login page if the session variable is not set
     header("Location: roleaccount.php");
     exit;
+}
+
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
+$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
+
+// Check connection
+if ($conn_proj_list->connect_error) {
+    die("Connection failed: " . $conn_proj_list->connect_error);
 }
 
 // Database credentials
@@ -47,123 +60,17 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
 
 $stmt->close();
 $conn_profile->close();
-
-// Database credentials for proj_list
-$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_proj = "zf8r3n4qqjyrfx7o";
-$password_proj = "su6qmqa0gxuerg98";
-$dbname_proj_list = "hpvs3ggjc4qfg9jp";
-
-$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
-
-// Check connection
-if ($conn_proj_list->connect_error) {
-    die("Connection failed: " . $conn_proj_list->connect_error);
-}
-
-
-// Ensure the ID is passed and valid
-if (isset($_GET['id'])) {
-    $project_id = $_GET['id']; // Retrieve the ID from the URL
-
-    // Use this ID to fetch the project details from the database or perform other actions
-    $sql = "SELECT * FROM coe WHERE id = ?";
-    $stmt = $conn_proj_list->prepare($sql);
-    $stmt->bind_param("i", $project_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows > 0) {
-        $project = $result->fetch_assoc();
-        // You can now use $project to display information about the selected project
-    } else {
-        echo "Project not found!";
-    }
-} else {
-    echo "No project ID provided.";
-}
-
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Gather main form data
-    $college_name = $_POST['college_name'];
-    $procurement_title = $_POST['procurement_title'];
-    $agency = $_POST['agency'];
-    $date_of_delivery = $_POST['dateof_delivery'];
-
-    // Assign project_id to tor_sub
-    $tor_sub = $project_id; // Assuming the project ID is meant to be used as tor_sub
-
-    // Insert into coe_tor
-    $stmt = $conn->prepare("INSERT INTO coe_tor (tor_sub, college_name, procurement_title, agency, date_of_delivery) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("issss", $tor_sub, $college_name, $procurement_title, $agency, $date_of_delivery);
-
-    if ($stmt->execute()) {
-        // Get the last inserted ID for coe_tor
-        $coe_tor_id = $conn->insert_id;
-    
-        // Gather event details arrays
-        $event_dates = $_POST['event_date'];
-        $event_titles = $_POST['event_title'];
-        $meal_types = $_POST['meal_type'];
-        $menus = $_POST['menu'];
-        $total_meals = $_POST['total_meals'];
-        $total_usage = $_POST['total_usage'];
-    
-        // Insert into coe_food
-        for ($i = 0; $i < count($event_dates); $i++) {
-            $event_date = $event_dates[$i];
-            $event_title = $event_titles[$i];
-            $meal_type = $meal_types[$i];
-            $menu = $menus[$i];
-            $meal_count = $total_meals[$i]; 
-            $usage_count = $total_usage[$i]; 
-    
-            // Log values being inserted
-            error_log("Inserting: $coe_tor_id, $event_date, $event_title, $meal_type, $menu, $meal_count, $usage_count");
-    
-            // Insert into coe_food
-            $food_stmt = $conn->prepare("INSERT INTO coe_food (coe_tor_id, event_date, event_title, meal_type, menu, total_meals, total_usage) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $food_stmt->bind_param("issssii", $coe_tor_id, $event_date, $event_title, $meal_type, $menu, $meal_count, $usage_count);
-    
-            // Execute and check for errors
-            if (!$food_stmt->execute()) {
-                error_log("Failed to insert into coe_food: " . $food_stmt->error);
-            } else {
-                error_log("Inserted successfully into coe_food");
-            }
-        }
-    
-        // Close food statement
-        $food_stmt->close();
-
-        // Set success message in session
-        $_SESSION['success'] = 'Events saved successfully.';
-    } else {
-        // Set error message in session
-        $_SESSION['error'] = 'Error: ' . $stmt->error;
-        header("Location: coe-tor.php"); // Redirect back to the coe-tor page
-        exit;
-    }
-
-    // Close the main statement
-    $stmt->close();
-}
-
-// Close the connection
-$conn->close();
 ?>
 
-
 <!DOCTYPE html>
-<html lang="en">
+    <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+        
         <title>CES PLP</title>
 
-        <link rel="icon" href="images/icoon.png">
+        <link rel="icon" href="images/logoicon.png">
 
         <!-- SweetAlert CSS and JavaScript -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -179,6 +86,7 @@ $conn->close();
             body {
                 margin: 0;
                 background-color: #F6F5F5; /* Light gray background color */
+                font-family: 'Poppins', sans-serif;
             }
 
             .navbar {
@@ -395,35 +303,12 @@ $conn->close();
                 color: white; /* Change text color */
             }
 
-            .menu li a.active {
-                background-color: green; /* Change background color */
-                color: white; /* Change text color */
-            }
-
-            .content-tor {
+            .content-resource {
                 margin-left: 320px; /* Align with the sidebar */
                 padding: 20px;
             }
-
-            .content-tor h2 {
-                font-family: 'Poppins', sans-serif;
-                font-size: 28px; /* Adjust the font size as needed */
-                margin-bottom: 20px; /* Space below the heading */
-                color: black; /* Adjust text color */
-                margin-top: 110px;
-            }
-
-            .content-tor p {
-                font-family: 'Poppins', sans-serif;
-                font-size: 16px;
-                font-style: Italic;
-                margin-top: 110px;
-                margin-left: 620px;
-                margin-bottom: 20px;
-            }
-
+            
             .form-container {
-                font-family: 'Poppins', sans-serif;
                 margin-top:110px;
                 background-color: #ffffff;
                 padding: 20px;
@@ -431,7 +316,7 @@ $conn->close();
                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             }
 
-            .form-container h2 {
+            .form-container h3 {
                 margin-top: 0;
                 font-family: 'Poppins', sans-serif;
                 font-size: 24px;
@@ -443,13 +328,13 @@ $conn->close();
             }
 
             .form-group label {
-                font-family: 'Poppins', sans-serif;
                 display: block;
                 font-weight: bold;
                 margin-bottom: 5px;
             }
 
-            .form-group select, .form-group input[type="text"], .form-group input[type="date"], textarea,  .form-group input[type="number"] {
+            .form-group select, .form-group input[type="text"], .form-group input[type="date"], 
+            .form-group input[type="time"], .form-group input[type="number"] {
                 width: 100%;
                 padding: 8px;
                 border: 1px solid #ddd;
@@ -457,7 +342,6 @@ $conn->close();
                 font-size: 16px;
                 box-sizing: border-box;
                 font-family: 'Poppins', sans-serif;
-                margin-bottom: 10px;
             }
 
             .form-group input::placeholder {
@@ -473,7 +357,7 @@ $conn->close();
             .button-container {
                 display: flex;
                 justify-content: flex-end; /* Align buttons to the right */
-                margin-bottom: 20px; /* Space below the buttons */
+                margin-top: 20px; /* Space above the buttons */
             }
 
             .button-container button {
@@ -494,8 +378,9 @@ $conn->close();
             }
 
             .custom-swal-popup {
-                font-family: "Poppins", sans-serif !important;
-                width: 400px;
+                font-family: 'Poppins', sans-serif;
+                font-size: 16px; /* Increase the font size */
+                width: 400px !important; /* Set a larger width */
             }
 
             .custom-swal-confirm {
@@ -524,11 +409,6 @@ $conn->close();
                 width: 400px !important; /* Set a larger width */
             }
 
-            .custom-error-title {
-                font-family: 'Poppins', sans-serif;
-                color: #e74c3c; /* Custom title color for error */
-            }
-
             .custom-error-confirm {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
@@ -537,45 +417,6 @@ $conn->close();
                 border-radius: 10px;
                 cursor: pointer;
                 outline: none; /* Remove default focus outline */
-            }
-
-            .event-section {
-                border: 1px solid #ccc;
-                padding: 15px;
-                margin: 10px 0;
-            }
-            .remove-btn {
-                background-color: #e74c3c;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-
-            .remove-btn:hover {
-                background-color: #e74c1c;
-                color: white;
-            }
-
-            .add-btn {
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-            .add-btn:hover {
-                background-color: #45a049; /* Darker green on hover */
             }
 
             .swal-popup {
@@ -623,16 +464,75 @@ $conn->close();
                 right: -10px; /* Adjust as needed */
                 font-size: 14px; /* Size of the exclamation point */
             }
+
+            .table-container {
+                width: 100%;
+                margin-left: -12px;
+                overflow-x: auto;
+                margin-top: 20px; /* Space above the table */
+            }
+
+            .crud-table {
+                margin-top: 110px;
+                width: 100%;
+                border-collapse: collapse;
+                font-family: 'Poppins', sans-serif;
+                background-color: #ffffff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .crud-table th, .crud-table td {
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+                white-space: nowrap; /* Prevent text from wrapping */
+            }
+
+            .crud-table th {
+                text-align: center; 
+                background-color: #4CAF50;
+                color: white;
+                height: 40px;
+                width: 14px; /* Set a fixed width for table headers */
+            }
+
+            .crud-table td {
+                height: 50px;
+                background-color: #fafafa;
+            }
+
+            .crud-table tr:hover {
+                background-color: #f1f1f1;
+            }
+
+            .add a {
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                text-decoration: none;
+                transition: background-color 0.3s;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .add a:hover {
+                background-color: #45a049; /* Darker green on hover */
+            }
+
             .smaller-alert {
-            font-size: 14px; /* Adjust text size for a compact look */
-            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+                font-size: 14px; /* Adjust text size for a compact look */
+                padding: 20px;   /* Adjust padding to mimic a smaller alert box */
             }
         </style>
     </head>
 
     <body>
         <nav class="navbar">
-            <h2>Terms of Reference Form</h2> 
+            <h2>All Projects in COE</h2>
 
             <div class="profile-container">
                 <!-- Chat Icon with Notification Badge -->
@@ -705,90 +605,71 @@ $conn->close();
             </ul>
         </div>
 
-        <div class="content-tor">
-            <div class="form-container">
+        <div class="content-resource">
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Project Title</th>
+                        <th>Semester</th>
+                        <th>Department</th>
+                        <th>Date of Event</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Fetch all projects from the coe table
+                    $sql = "SELECT * FROM coe";
+                    $result = $conn_proj_list->query($sql);
 
-                <div class="form-group">
-                    <label for="tor_sub">ID:</label>
-                    <input type="text"  id="tor_sub" name="project_id" value="<?= $project['id']; ?>" readonly>
-                </div>
+                    // Initialize a flag to check if any rows are displayed
+                    $has_records = false;
 
-                <h2>Event Submission Form</h2>
-                <form id="eventForm" action="" method="POST">
-                    <div class="form-group">
-                        <label for="college_name">College Name:</label>
-                        <input type="text" id="college_name" name="college_name" value="College of Engineering" placeholder="Enter College Name" required>
-                    </div>
+                    if ($result && $result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            $project_id = $row["id"];
 
-                    <div class="form-group">
-                        <label for="procurement_title">Procurement Title:</label>
-                        <input type="text" id="procurement_title" name="procurement_title" value="<?= $project['proj_title']; ?>"  required>
-                    </div>
+                            // Check if the project_id already exists in the coe_tor table
+                            $check_sql = "SELECT * FROM coe_tor WHERE tor_sub = ?";
+                            $check_stmt = $conn->prepare($check_sql);
+                            $check_stmt->bind_param("i", $project_id);
+                            $check_stmt->execute();
+                            $check_result = $check_stmt->get_result();
 
-                    <div class="form-group">
-                        <label for="agency">Propopent and Implementing Agency:</label>
-                        <input type="text" id="agency" name="agency" placeholder="Enter Propopent and Implementing Agency" required>
-                    </div>
+                            // If the project is already added in coe_tor, skip it
+                            if ($check_result && $check_result->num_rows > 0) {
+                                continue; // Skip this project if it exists in coe_tor
+                            }
 
-                    <div class="form-group">
-                        <label for="dateof_delivery">Date of Delivery:</label>
-                        <input type="date" id="date_of_delivery" name="dateof_delivery" required>
-                    </div>
+                            // If not already added, display the project
+                            echo "<tr>
+                                    <td>" . $project_id . "</td>
+                                    <td>" . $row["proj_title"] . "</td>
+                                    <td>" . $row["semester"] . "</td>
+                                    <td>" . $row["dept"] . "</td>
+                                    <td>" . $row["dateof_imple"] . "</td>
+                                    <td class='add'>
+                                        <a href='coe-add-tor.php?id=" . $project_id . "'>Add</a>
+                                    </td>
+                                </tr>";
 
-                    <h2>Food Details</h2>
-                    <div id="eventContainer">
-                        <div class="event-section">
+                            // Set the flag to true since we displayed at least one record
+                            $has_records = true;
+                        }
+                    }
 
-                            <h3>Event 1</h3>
-                            <div class="form-group">
-                                <label for="event_date_1">Event Date:</label>
-                                <input type="date" id="event_date_1" name="event_date[]"  onblur="checkEventDate()" required>
-                            </div>
+                    // Display a fallback message if no records were displayed
+                    if (!$has_records) {
+                        echo "<tr><td colspan='6'>No records found</td></tr>";
+                    }
 
-                            <div class="form-group">
-                                <label for="event_title_1">Event Title:</label>
-                                <input type="text" id="event_title_1" name="event_title[]" placeholder="Enter Event Title" required>
-                            </div>
-
-
-                            <div class="form-group">
-                                <label for="meal_type_1">Food Category:</label>
-                                <select id="meal_type_1" name="meal_type[]" required>
-                                    <option value="" disabled selected>Select Meal Type</option>
-                                    <option value="Packed Meals">Packed Meals</option>
-                                    <option value="Catering Services">Catering Services</option>
-                                    <option value="Boxed Meals">Boxed Meals</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="menu_1">Menu:</label>
-                                <textarea id="menu_1" name="menu[]" placeholder="Enter Menu Details" required></textarea>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="total_meals_1">Total of Meals:</label>
-                                <input type="text" id="total_meals_1" name="total_meals[]" placeholder="Enter Total of Meals (e.g 500 meals)" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="total_usage_1">Total Usage:</label>
-                                <input type="text" id="total_usage_1" name="total_usage[]" placeholder="Enter Total Usage (e.g 450 meals)" required>
-                            </div>
-
-                            <button type="button" class="remove-btn" onclick="removeEvent(this)">Remove Event</button>
-                        </div>
-                    </div>
-
-                    <button type="button" class="add-btn" onclick="addEvent()">Add Another Event</button><br><br>
-
-                    <div class="button-container">
-                        <button type="submit">Submit</button>
-                        <button type="reset">Reset</button>
-                    </div>
-                </form>
-            </div>
+                    $conn_proj_list->close();
+                    ?>
+                </tbody>
+            </table>
         </div>
+
 
         <script>
             let inactivityTime = function () {
@@ -904,106 +785,7 @@ $conn->close();
                     }
                 }
             });
-
-            // Function to show success SweetAlert
-            function showSuccessAlert() {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Events saved successfully.',
-                    confirmButtonColor: '#089451',
-                    confirmButtonText: 'Continue',
-                    customClass: {
-                        popup: 'custom-swal-popup',
-                        title: 'custom-swal-title',
-                        confirmButton: 'custom-swal-confirm'
-                    }
-                }).then(() => {
-                    window.location.href = "coe-tor.php"; // Redirect to the dashboard or desired page
-                });
-            }
-
-            // Function to show error SweetAlert
-            function showErrorAlert(message) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: message,
-                    confirmButtonColor: '#e74c3c',
-                    confirmButtonText: 'Try Again',
-                    customClass: {
-                        popup: 'custom-error-popup',
-                        title: 'custom-error-title',
-                        confirmButton: 'custom-error-confirm'
-                    }
-                });
-            }
-
-            // Check for success message in session and show alert
-            <?php if (isset($_SESSION['success'])): ?>
-                showSuccessAlert();
-                <?php unset($_SESSION['success']); ?> // Clear the message after displaying
-            <?php endif; ?>
-
-            // Check for error message in session and show alert
-            <?php if (isset($_SESSION['error'])): ?>
-                showErrorAlert('<?php echo addslashes($_SESSION['error']); ?>');
-                <?php unset($_SESSION['error']); ?> // Clear the message after displaying
-            <?php endif; ?>
-
-            let eventCount = 1;
-
-            function addEvent() {
-                eventCount++;
-                const eventContainer = document.getElementById('eventContainer');
-                const newEventSection = document.createElement('div');
-                newEventSection.className = 'event-section';
-                newEventSection.innerHTML = `
-                    <h3>Event ${eventCount}</h3>
-                    <div class="form-group">
-                        <label for="event_date_${eventCount}">Event Date:</label>
-                        <input type="date" id="event_date_${eventCount}" name="event_date[]" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="event_title_${eventCount}">Event Title:</label>
-                        <input type="text" id="event_title_${eventCount}" name="event_title[]" placeholder="Enter Event Title" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="meal_type_${eventCount}">Food Category:</label>
-                        <select id="meal_type_${eventCount}" name="meal_type[]" required>
-                            <option value="" disabled selected>Select Meal Type</option>
-                            <option value="Packed Meals">Packed Meals</option>
-                            <option value="Catering Services">Catering Services</option>
-                            <option value="Boxed Meals">Boxed Meals</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="menu_${eventCount}">Menu:</label>
-                        <textarea id="menu_${eventCount}" name="menu[]" placeholder="Enter Menu Details" required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="total_meals_${eventCount}">Total of Meals:</label>
-                        <input type="text" id="total_meals_${eventCount}" name="total_meals[]" placeholder="Enter Total of Meals (e.g. 500 meals)" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="total_usage_${eventCount}">Total Usage:</label>
-                        <input type="text" id="total_usage_${eventCount}" name="total_usage[]" placeholder="Enter Total Usage (e.g. 450 meals)" required>
-                    </div>
-                    
-                    <button type="button" class="remove-btn" onclick="removeEvent(this)">Remove Event</button>
-                `;
-                eventContainer.appendChild(newEventSection);
-            }
-
-            function removeEvent(element) {
-                element.parentElement.remove();
-            }
-
+           
             function logAction(actionDescription) {
                 var xhr = new XMLHttpRequest();
                 xhr.open("POST", "college_logs.php", true);
@@ -1057,7 +839,7 @@ $conn->close();
                 logAction("Profile");
             });
         });
-        
+
             document.addEventListener("DOMContentLoaded", () => {
                 function checkNotifications() {
                     fetch('coe-check_notifications.php')

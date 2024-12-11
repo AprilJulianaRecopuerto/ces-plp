@@ -187,12 +187,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $mail->send();
                     } catch (Exception $e) {
                         $_SESSION['error'] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-                        header("Location: ccs-addtask.php");
+                        header("Location: ccs-addproj.php");
                         exit;
                     }
                 } else {
                     $_SESSION['error'] = "No admin user found for email notification.";
-                    header("Location: ccs-addtask.php");
+                    header("Location: ccs-addproj.php");
                     exit;
                 }
 
@@ -200,7 +200,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $conn_users->close();
             } else {
                 $_SESSION['error'] = "Error inserting notification: " . $conn_mov->error;
-                header("Location: ccs-addtask.php");
+                header("Location: ccs-addproj.php");
                 exit;
             }
 
