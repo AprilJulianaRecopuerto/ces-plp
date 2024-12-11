@@ -1,11 +1,23 @@
 <?php
-session_start(); // Start the session
+session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
     // Redirect to login page if the session variable is not set
     header("Location: roleaccount.php");
     exit;
+}
+
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
+$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
+
+// Check connection
+if ($conn_proj_list->connect_error) {
+    die("Connection failed: " . $conn_proj_list->connect_error);
 }
 
 // Database credentials
@@ -48,149 +60,17 @@ if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
 
 $stmt->close();
 $conn_profile->close();
-
-// Database credentials for proj_list
-$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_proj = "zf8r3n4qqjyrfx7o";
-$password_proj = "su6qmqa0gxuerg98";
-$dbname_proj_list = "hpvs3ggjc4qfg9jp";
-
-$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
-
-// Check connection
-if ($conn_proj_list->connect_error) {
-    die("Connection failed: " . $conn_proj_list->connect_error);
-}
-
-// Ensure the ID is passed and valid
-if (isset($_GET['id'])) {
-    $project_id = $_GET['id']; // Retrieve the ID from the URL
-
-    // Use this ID to fetch the project details from the database or perform other actions
-    $sql = "SELECT * FROM cihm WHERE id = ?";
-    $stmt = $conn_proj_list->prepare($sql);
-    $stmt->bind_param("i", $project_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows > 0) {
-        $project = $result->fetch_assoc();
-        // You can now use $project to display information about the selected project
-    } else {
-        echo "Project not found!";
-    }
-} else {
-    echo "No project ID provided.";
-}
-
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Step 1: Set venue_sub as the project ID
-    $venue_sub = $project_id;  // Make sure $project_id is valid
-
-    // Step 2: Insert into cihm_reservation with venue_sub
-    $stmt = $conn->prepare("INSERT INTO cihm_reservation (venue_sub, date_of_request, name, college_name, event_activity, event_date, time_of_event) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("issssss", $venue_sub, $_POST['date'], $_POST['name'], $_POST['college_name'], $_POST['event'], $_POST['event_date'], $_POST['time_of_event']);
-
-    if ($stmt->execute()) {
-        $reservation_id = $conn->insert_id;
-
-        // Step 3: Insert venue requests
-        if (isset($_POST['venue_requests'])) {
-            // Corrected the SQL statement to match your database schema
-            $venue_stmt = $conn->prepare("INSERT INTO cihm_venue_request (reservation_id, venue_name) VALUES (?, ?)");
-            if (!$venue_stmt) {
-                $_SESSION['error'] = "Preparation failed for venue request: " . $conn->error;
-                header("Location: cihm-venue.php"); // Redirect back to the form page
-                exit;
-            }
-
-            foreach ($_POST['venue_requests'] as $venue) {
-                if ($venue === "Other" && isset($_POST['other_venue'])) {
-                    foreach ($_POST['other_venue'] as $custom_venue) {
-                        if (!empty($custom_venue)) {
-                            $venue_stmt->bind_param("is", $reservation_id, $custom_venue);
-                            if (!$venue_stmt->execute()) {
-                                $_SESSION['error'] = "Execution failed for custom venue: " . $venue_stmt->error;
-                                header("Location: cihm-venue.php"); // Redirect back to the form page
-                                exit;
-                            }
-                        }
-                    }
-                } else {
-                    $venue_stmt->bind_param("is", $reservation_id, $venue);
-                    if (!$venue_stmt->execute()) {
-                        $_SESSION['error'] = "Execution failed for venue: " . $venue_stmt->error;
-                        header("Location: cihm-venue.php"); // Redirect back to the form page
-                        exit;
-                    }
-                }
-            }
-            $venue_stmt->close(); // Close the venue statement after the loop
-        }
-
-        // Step 4: Insert additional requests
-        if (isset($_POST['additional_requests'])) {
-            $request_stmt = $conn->prepare("INSERT INTO cihm_addedrequest (reservation_id, additional_request, quantity) VALUES (?, ?, ?)");
-            if (!$request_stmt) {
-                $_SESSION['error'] = "Preparation failed for additional request: " . $conn->error;
-                header("Location: cihm-venue.php"); // Redirect back to the form page
-                exit;
-            }
-
-            foreach ($_POST['additional_requests'] as $request) {
-                if ($request === "Other" && isset($_POST['other_request']) && isset($_POST['quantityOther'])) {
-                    foreach ($_POST['other_request'] as $key => $custom_request) {
-                        $quantity = is_numeric($_POST['quantityOther'][$key]) ? intval($_POST['quantityOther'][$key]) : 0;
-
-                        if (!empty($custom_request)) {
-                            $request_stmt->bind_param("isi", $reservation_id, $custom_request, $quantity);
-                            if (!$request_stmt->execute()) {
-                                $_SESSION['error'] = "Execution failed for custom request: " . $request_stmt->error;
-                                header("Location: cihm-venue.php"); // Redirect back to the form page
-                                exit;
-                            }
-                        }
-                    }
-                } else {
-                    $quantityName = "quantity" . str_replace([' ', '(', ')'], '', $request);
-                    $quantity = isset($_POST[$quantityName]) && is_numeric($_POST[$quantityName]) ? intval($_POST[$quantityName]) : 0;
-                    $request_stmt->bind_param("isi", $reservation_id, $request, $quantity);
-                    if (!$request_stmt->execute()) {
-                        $_SESSION['error'] = "Execution failed for additional request: " . $request_stmt->error;
-                        header("Location: cihm-venue.php"); // Redirect back to the form page
-                        exit;
-                    }
-                }
-            }
-            $request_stmt->close(); // Close the request statement after the loop
-        }
-
-        $_SESSION['success'] = "Reservation submitted successfully!";
-    } else {
-        $_SESSION['error'] = "Error inserting reservation: " . $stmt->error;
-        header("Location: cihm-venue.php"); // Redirect back to the form page
-        exit;
-    }
-
-    // Close the main statement
-    $stmt->close();
-}
-
-// Close the database connection
-$conn->close();
 ?>
 
-
 <!DOCTYPE html>
-<html lang="en">
+    <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+        
         <title>CES PLP</title>
 
-        <link rel="icon" href="images/icoon.png">
+        <link rel="icon" href="images/logoicon.png">
 
         <!-- SweetAlert CSS and JavaScript -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -206,6 +86,7 @@ $conn->close();
             body {
                 margin: 0;
                 background-color: #F6F5F5; /* Light gray background color */
+                font-family: 'Poppins', sans-serif;
             }
 
             .navbar {
@@ -422,30 +303,12 @@ $conn->close();
                 color: white; /* Change text color */
             }
 
-            .content-venue {
-                margin-left: 320px;
+            .content-resource {
+                margin-left: 320px; /* Align with the sidebar */
                 padding: 20px;
             }
-
-            .content-venue h2 {
-                font-family: 'Poppins', sans-serif;
-                font-size: 28px; /* Adjust the font size as needed */
-                margin-bottom: 20px; /* Space below the heading */
-                color: black; /* Adjust text color */
-                margin-top: 110px;
-            }
-
-            .content-venue p {
-                font-family: 'Poppins', sans-serif;
-                font-size: 16px;
-                font-style: Italic;
-                margin-top: 110px;
-                margin-left: 620px;
-                margin-bottom: 20px;
-            }
-
+            
             .form-container {
-                font-family: 'Poppins', sans-serif;
                 margin-top:110px;
                 background-color: #ffffff;
                 padding: 20px;
@@ -453,7 +316,7 @@ $conn->close();
                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             }
 
-            .form-container h2 {
+            .form-container h3 {
                 margin-top: 0;
                 font-family: 'Poppins', sans-serif;
                 font-size: 24px;
@@ -465,13 +328,13 @@ $conn->close();
             }
 
             .form-group label {
-                font-family: 'Poppins', sans-serif;
                 display: block;
                 font-weight: bold;
                 margin-bottom: 5px;
             }
 
-            .form-group select, .form-group input[type="text"], .form-group input[type="date"], .form-group input[type="number"] {
+            .form-group select, .form-group input[type="text"], .form-group input[type="date"], 
+            .form-group input[type="time"], .form-group input[type="number"] {
                 width: 100%;
                 padding: 8px;
                 border: 1px solid #ddd;
@@ -479,7 +342,6 @@ $conn->close();
                 font-size: 16px;
                 box-sizing: border-box;
                 font-family: 'Poppins', sans-serif;
-                margin-bottom: 10px;
             }
 
             .form-group input::placeholder {
@@ -495,7 +357,7 @@ $conn->close();
             .button-container {
                 display: flex;
                 justify-content: flex-end; /* Align buttons to the right */
-                margin-bottom: 20px; /* Space below the buttons */
+                margin-top: 20px; /* Space above the buttons */
             }
 
             .button-container button {
@@ -516,8 +378,9 @@ $conn->close();
             }
 
             .custom-swal-popup {
-                font-family: "Poppins", sans-serif !important;
-                width: 400px;
+                font-family: 'Poppins', sans-serif;
+                font-size: 16px; /* Increase the font size */
+                width: 400px !important; /* Set a larger width */
             }
 
             .custom-swal-confirm {
@@ -546,11 +409,6 @@ $conn->close();
                 width: 400px !important; /* Set a larger width */
             }
 
-            .custom-error-title {
-                font-family: 'Poppins', sans-serif;
-                color: #e74c3c; /* Custom title color for error */
-            }
-
             .custom-error-confirm {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
@@ -559,74 +417,6 @@ $conn->close();
                 border-radius: 10px;
                 cursor: pointer;
                 outline: none; /* Remove default focus outline */
-            }
-
-            .item-section {
-                border: 1px solid #ccc;
-                padding: 15px;
-                margin: 10px 0;
-            }
-            .remove-btn {
-                background-color: #e74c3c;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-
-            .remove-btn:hover {
-                background-color: #e74c1c;
-                color: white;
-            }
-
-            .add-btn {
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-            .add-btn:hover {
-                background-color: #45a049; /* Darker green on hover */
-            }
-
-            #addMoreVenueButton, #addMoreButton {
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 15px;
-                margin-top:10px;
-                border-radius: 5px;
-                font-size: 14px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-
-            .delete {
-                background-color: #e74c3c;
-                border: none;
-                color: white;
-                padding: 10px 15px;
-                border-radius: 5px;
-                font-size: 14px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-
-            .checkbox-options label {
-                font-weight: normal;
             }
 
             .swal-popup {
@@ -674,6 +464,65 @@ $conn->close();
                 right: -10px; /* Adjust as needed */
                 font-size: 14px; /* Size of the exclamation point */
             }
+
+            .table-container {
+                width: 100%;
+                margin-left: -12px;
+                overflow-x: auto;
+                margin-top: 20px; /* Space above the table */
+            }
+
+            .crud-table {
+                margin-top: 110px;
+                width: 100%;
+                border-collapse: collapse;
+                font-family: 'Poppins', sans-serif;
+                background-color: #ffffff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .crud-table th, .crud-table td {
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+                white-space: nowrap; /* Prevent text from wrapping */
+            }
+
+            .crud-table th {
+                text-align: center; 
+                background-color: #4CAF50;
+                color: white;
+                height: 40px;
+                width: 14px; /* Set a fixed width for table headers */
+            }
+
+            .crud-table td {
+                height: 50px;
+                background-color: #fafafa;
+            }
+
+            .crud-table tr:hover {
+                background-color: #f1f1f1;
+            }
+
+            .add a {
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                text-decoration: none;
+                transition: background-color 0.3s;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .add a:hover {
+                background-color: #45a049; /* Darker green on hover */
+            }
+
             .smaller-alert {
                 font-size: 14px; /* Adjust text size for a compact look */
                 padding: 20px;   /* Adjust padding to mimic a smaller alert box */
@@ -683,7 +532,7 @@ $conn->close();
 
     <body>
         <nav class="navbar">
-            <h2>Add Venue Details</h2> 
+            <h2>All Projects in CIHM</h2>
 
             <div class="profile-container">
                 <!-- Chat Icon with Notification Badge -->
@@ -756,153 +605,73 @@ $conn->close();
             </ul>
         </div>
 
-        <div class="content-venue">
-            <div class="form-container">
+        <div class="content-resource">
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Project Title</th>
+                        <th>Semester</th>
+                        <th>Department</th>
+                        <th>Date of Event</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Fetch all projects from the cihm table
+                    $sql = "SELECT * FROM cihm";
+                    $result = $conn_proj_list->query($sql);
 
-                <div class="form-group">
-                    <label for="requi_sub">ID:</label>
-                    <input type="text"  id="requi_sub" name="project_id" value="<?= $project['id']; ?>" readonly>
-                </div>
+                    // Initialize a flag to check if any rows are displayed
+                    $has_records = false;
 
-                <h2>Facilities Reservation Form</h2>
-                
-                <form id="venueForm" action="" method="POST">
+                    if ($result && $result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            $project_id = $row["id"];
 
-                    <div class="form-group">
-                        <label for="date">Date of Request:</label>
-                        <input type="date" id="date" name="date" required>
-                    </div>
+                            // Check if the project_id already exists in the cihm_tor table
+                            $check_sql = "SELECT * FROM cihm_tor WHERE tor_sub = ?";
+                            $check_stmt = $conn->prepare($check_sql);
+                            $check_stmt->bind_param("i", $project_id);
+                            $check_stmt->execute();
+                            $check_result = $check_stmt->get_result();
 
-                    <h3>Requested made by:</h3>
-                    <div class="form-group">
-                        <label for="name">Name:</label>
-                        <input type="text" id="name" name="name" placeholder="Enter your Name" required>
-                    </div>
+                            // If the project is already added in cihm_tor, skip it
+                            if ($check_result && $check_result->num_rows > 0) {
+                                continue; // Skip this project if it exists in cihm_tor
+                            }
 
-                    <div class="form-group">
-                        <label for="college_name">Office/College:</label>
-                        <input type="text" id="college_name" name="college_name" value="College of Computer Studies" placeholder="Enter College Name" required>
-                    </div>
+                            // If not already added, display the project
+                            echo "<tr>
+                                    <td>" . $project_id . "</td>
+                                    <td>" . $row["proj_title"] . "</td>
+                                    <td>" . $row["semester"] . "</td>
+                                    <td>" . $row["dept"] . "</td>
+                                    <td>" . $row["dateof_imple"] . "</td>
+                                    <td class='add'>
+                                        <a href='cihm-add-tor.php?id=" . $project_id . "'>Add</a>
+                                    </td>
+                                </tr>";
 
-                    <div class="form-group">
-                        <label for="event">Event/Activity:</label>
-                        <input type="text" id="event" name="event"   value="<?= $project['proj_title']; ?>" required >
-                    </div>
+                            // Set the flag to true since we displayed at least one record
+                            $has_records = true;
+                        }
+                    }
 
-                    <div class="form-group">
-                        <label for="event_date">Date of Event:</label>
-                        <input type="date" id="event_date" name="event_date" value="<?= $project['dateof_imple']; ?>" required>
-                    </div>
+                    // Display a fallback message if no records were displayed
+                    if (!$has_records) {
+                        echo "<tr><td colspan='6'>No records found</td></tr>";
+                    }
 
-                    <div class="form-group">
-                        <label for="time_of_event">Time of Event:</label>
-                        <input type="text" id="time_of_event" name="time_of_event" value="<?= $project['time_from']; ?>" required >
-                    </div>
-
-                    <div class="form-group">
-                        <h3>Facility/Venue Requested</h3>
-
-                        <!-- Checkbox options for facility/venue requests -->
-                        <div class="checkbox-options" id="venueRequestsContainer">
-                            <label>
-                                <input type="checkbox" name="venue_requests[]" value="HM Function Hall" onclick="toggleVenueInput(this)"> HM Function Hall
-                            </label>
-                            <label>
-                                <input type="checkbox" name="venue_requests[]" value="HM Banquet Hall" onclick="toggleVenueInput(this)"> HM Banquet Hall
-                            </label>
-                            <label>
-                                <input type="checkbox" name="venue_requests[]" value="PLP Auditorium" onclick="toggleVenueInput(this)"> PLP Auditorium
-                            </label>
-                            <label>
-                                <input type="checkbox" name="venue_requests[]" value="PLP Gymnasium" onclick="toggleVenueInput(this)"> PLP Gymnasium
-                            </label>
-                            <label>
-                                <input type="checkbox" name="venue_requests[]" value="AVR 1" onclick="toggleVenueInput(this)"> AVR 1
-                            </label>
-                            <label>
-                                <input type="checkbox" name="venue_requests[]" value="AVR 2" onclick="toggleVenueInput(this)"> AVR 2
-                            </label>
-                            <label>
-                                <input type="checkbox" name="venue_requests[]" value="AVR 3" onclick="toggleVenueInput(this)"> AVR 3
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <h3>Materials Requested</h3>
-
-                        <!-- Checkbox options for additional items -->
-                        <div class="checkbox-options">
-                            <label>
-                                <input type="checkbox" name="additional_requests[]" value="Projector" onclick="toggleQuantityInput(this)"> Projector
-                                <input type="number" name="quantityProjector" class="quantity-input" placeholder="Quantity" style="display: none;">
-                            </label>
-                            <label>
-                                <input type="checkbox" name="additional_requests[]" value="Widescreen" onclick="toggleQuantityInput(this)"> Widescreen
-                                <input type="number" name="quantityWidescreen" class="quantity-input" placeholder="Quantity" style="display: none;">
-                            </label>
-                            <label>
-                                <input type="checkbox" name="additional_requests[]" value="InternetConnectivityWiFi" onclick="toggleQuantityInput(this)"> Internet Connectivity (WiFi)
-                                <input type="number" name="quantityInternetConnectivityWiFi" class="quantity-input" placeholder="Quantity" style="display: none;">
-                            </label>
-                            <label>
-                                <input type="checkbox" name="additional_requests[]" value="SoundSystem" onclick="toggleQuantityInput(this)"> Sound System
-                                <input type="number" name="quantitySoundSystem" class="quantity-input" placeholder="Quantity" style="display: none;">
-                            </label>
-                            <label>
-                                <input type="checkbox" name="additional_requests[]" value="Microphone" onclick="toggleQuantityInput(this)"> Microphone
-                                <input type="number" name="quantityMicrophone" class="quantity-input" placeholder="Quantity" style="display: none;">
-                            </label>
-                            <label>
-                                <input type="checkbox" name="additional_requests[]" value="TablesRound" onclick="toggleQuantityInput(this)"> Tables (Round)
-                                <input type="number" name="quantityTablesRound" class="quantity-input" placeholder="Quantity" style="display: none;">
-                            </label>
-                            <label>
-                                <input type="checkbox" name="additional_requests[]" value="TablesSquare" onclick="toggleQuantityInput(this)"> Tables (Square)
-                                <input type="number" name="quantityTablesSquare" class="quantity-input" placeholder="Quantity" style="display: none;">
-                            </label>
-                            <label>
-                                <input type="checkbox" name="additional_requests[]" value="ChairsMonoblock" onclick="toggleQuantityInput(this)"> Chairs (Monoblock)
-                                <input type="number" name="quantityChairsMonoblock" class="quantity-input" placeholder="Quantity" style="display: none;">
-                            </label>
-                            <label>
-                                <input type="checkbox" name="additional_requests[]" value="ChairsTiffany" onclick="toggleQuantityInput(this)"> Chairs (Tiffany)
-                                <input type="number" name="quantityChairsTiffany" class="quantity-input" placeholder="Quantity" style="display: none;">
-                            </label>
-                            <label>
-                                <input type="checkbox" name="additional_requests[]" value="Rostrum" onclick="toggleQuantityInput(this)"> Rostrum
-                                <input type="number" name="quantityRostrum" class="quantity-input" placeholder="Quantity" style="display: none;">
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="button-container">
-                        <button type="submit">Submit</button>
-                        <button type="reset">Reset</button>
-                    </div>
-                </form>
-            </div>
+                    $conn_proj_list->close();
+                    ?>
+                </tbody>
+            </table>
         </div>
 
+
         <script>
-            // Set the current date in YYYY-MM-DD format
-            window.onload = function() {
-                var today = new Date();
-                var yyyy = today.getFullYear();
-                var mm = today.getMonth() + 1; // Months are zero-based
-                var dd = today.getDate();
-
-                // Add leading zero for single-digit day/month
-                if (mm < 10) mm = '0' + mm;
-                if (dd < 10) dd = '0' + dd;
-
-                // Format the date to match input type="date"
-                var formattedDate = yyyy + '-' + mm + '-' + dd;
-
-                // Set the value of the date input field
-                document.getElementById('date').value = formattedDate;
-            };
-
             let inactivityTime = function () {
             let time;
 
@@ -1001,7 +770,6 @@ $conn->close();
                 };
             }
 
-
             // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
                 const dropdown = this.querySelector('.dropdown-menu');
@@ -1017,7 +785,7 @@ $conn->close();
                     }
                 }
             });
-
+           
             function logAction(actionDescription) {
                 var xhr = new XMLHttpRequest();
                 xhr.open("POST", "college_logs.php", true);
@@ -1071,169 +839,6 @@ $conn->close();
                 logAction("Profile");
             });
         });
-
-            function toggleQuantityInput(checkbox) {
-                const quantityInput = checkbox.nextElementSibling;
-                if (checkbox.checked) {
-                    quantityInput.style.display = 'inline-block'; // Show the quantity input
-                } else {
-                    quantityInput.style.display = 'none'; // Hide the quantity input
-                    quantityInput.value = ''; // Clear the quantity value when unchecked
-                }
-            }
-
-           // Function to toggle the visibility of additional requests
-            function toggleOtherInput() {
-                const otherCheckbox = document.getElementById('otherCheckbox');
-                const otherInputsContainer = document.getElementById('otherInputsContainer');
-                const addMoreButton = document.getElementById('addMoreButton');
-
-                if (otherCheckbox.checked) {
-                    otherInputsContainer.style.display = 'block'; // Show the container
-                    addMoreButton.style.display = 'block'; // Show the Add More button
-                } else {
-                    otherInputsContainer.style.display = 'none'; // Hide the container
-                    addMoreButton.style.display = 'none'; // Hide the Add More button
-
-                    // Clear all other request inputs when unchecked
-                    const otherRequests = document.querySelectorAll('.other-request');
-                    otherRequests.forEach((request) => {
-                        request.querySelector('input[type="text"]').value = ''; // Clear text input
-                        request.querySelector('input[type="number"]').value = ''; // Clear quantity input
-                    });
-                }
-            }
-
-            // Function to add more request inputs
-            function addMoreRequest() {
-                const container = document.getElementById('addedRequestsContainer'); // Get the added requests container
-                const newRequestDiv = document.createElement('div');
-                newRequestDiv.classList.add('other-request');
-                newRequestDiv.innerHTML = `
-                    <input type="text" name="other_request[]" placeholder="Please specify">
-                    <input type="number" name="quantityOther[]" class="quantity-input" placeholder="Quantity">
-                    <button type="button" class="delete" onclick="deleteRequest(this)">Delete Request</button>
-                `;
-                container.appendChild(newRequestDiv); // Append new request at the end of the container
-
-                // Show the Add More button if the Other checkbox is checked
-                const otherCheckbox = document.getElementById('otherCheckbox');
-                if (otherCheckbox.checked) {
-                    document.getElementById('addMoreButton').style.display = 'block'; // Show the button if checkbox is checked
-                }
-            }
-
-            // Function to delete a request input
-            function deleteRequest(button) {
-                const requestDiv = button.parentElement; // Get the parent div of the button
-                requestDiv.remove(); // Remove the request div
-
-                // Check if there are any requests left
-                const addedRequestsContainer = document.getElementById('addedRequestsContainer');
-                if (addedRequestsContainer.querySelectorAll('.other-request').length === 0) {
-                    document.getElementById('addMoreButton').style.display = 'none'; // Hide the Add More button if no requests left
-                }
-            }
-
-
-            // Function to toggle the visibility of other venue inputs
-            function toggleOtherVenueInput() {
-                const otherCheckbox = document.getElementById('otherVenueCheckbox');
-                const otherVenueInputsContainer = document.getElementById('otherVenueInputsContainer');
-                const addMoreVenueButton = document.getElementById('addMoreVenueButton');
-
-                if (otherCheckbox.checked) {
-                    otherVenueInputsContainer.style.display = 'block'; // Show the container
-                    addMoreVenueButton.style.display = 'block'; // Ensure the Add More button is shown
-                } else {
-                    otherVenueInputsContainer.style.display = 'none'; // Hide the container
-
-                    // Clear all other request inputs when unchecked
-                    const otherRequests = document.querySelectorAll('.other-request');
-                    otherRequests.forEach((request) => {
-                        request.querySelector('input[type="text"]').value = ''; // Clear input
-                    });
-                }
-            }
-
-            // Function to add more venue requests
-            function addMoreVenueRequest() {
-                const container = document.getElementById('venueRequestsContainer');
-                const newRequestDiv = document.createElement('div');
-                newRequestDiv.classList.add('other-request'); // Add class for styling
-
-                newRequestDiv.innerHTML = `
-                    <input type="text" name="other_venue[]" placeholder="Please specify">
-                    <button type="button" class="delete" onclick="deleteVenueRequest(this)">Delete Request</button>
-                `;
-
-                // Insert the new request above the Add More button
-                container.appendChild(newRequestDiv); // Append new request at the end of the container
-
-                // Move the Add More button after the new request
-                const addMoreButton = document.getElementById('addMoreVenueButton');
-                container.appendChild(addMoreButton); // Place the button below the last added request
-            }
-
-            // Function to delete a venue request
-            function deleteVenueRequest(button) {
-                const requestDiv = button.parentElement; // Get the parent div of the button
-                requestDiv.remove(); // Remove the request div
-
-                // Check if there are no venue requests left
-                const venueRequestsContainer = document.getElementById('venueRequestsContainer');
-
-                // If no venue requests are left, hide the Add More button
-                if (venueRequestsContainer.querySelectorAll('.other-request').length === 0) {
-                    document.getElementById('addMoreVenueButton').style.display = 'none'; // Hide the Add More button
-                }
-            }
-
-            // Function to show success SweetAlert
-            function showSuccessAlert() {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Events saved successfully.',
-                    confirmButtonColor: '#089451',
-                    confirmButtonText: 'Continue',
-                    customClass: {
-                        popup: 'custom-swal-popup',
-                        title: 'custom-swal-title',
-                        confirmButton: 'custom-swal-confirm'
-                    }
-                }).then(() => {
-                    window.location.href = "cihm-venue.php"; // Redirect to the dashboard or desired page
-                });
-            }
-
-            // Function to show error SweetAlert
-            function showErrorAlert(message) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: message,
-                    confirmButtonColor: '#e74c3c',
-                    confirmButtonText: 'Try Again',
-                    customClass: {
-                        popup: 'custom-error-popup',
-                        title: 'custom-error-title',
-                        confirmButton: 'custom-error-confirm'
-                    }
-                });
-            }
-
-            // Check for success message in session and show alert
-            <?php if (isset($_SESSION['success'])): ?>
-                showSuccessAlert();
-                <?php unset($_SESSION['success']); ?> // Clear the message after displaying
-            <?php endif; ?>
-
-            // Check for error message in session and show alert
-            <?php if (isset($_SESSION['error'])): ?>
-                showErrorAlert('<?php echo addslashes($_SESSION['error']); ?>');
-                <?php unset($_SESSION['error']); ?> // Clear the message after displaying
-            <?php endif; ?>
 
             document.addEventListener("DOMContentLoaded", () => {
                 function checkNotifications() {
