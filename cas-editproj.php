@@ -269,12 +269,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $mail->send();
             } catch (Exception $e) {
                 $_SESSION['error'] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-                header("Location: cas-addproj.php");
+                header("Location: cas-editproj.php");
                 exit;
             }
         } else {
             $_SESSION['error'] = "No admin user found for email notification.";
-            header("Location: cas-addproj.php");
+            header("Location: cas-editproj.php");
             exit;
         }
 
