@@ -913,23 +913,21 @@ $conn->close();
             }
 
             table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    th, td {
-        padding: 8px 12px;
-        text-align: left;
-        border: 1px solid #ddd;
-    }
-    th {
-        background-color: #f4f4f4;
-    }
-    .smaller-alert {
-        font-size: 14px; /* Adjust text size for a compact look */
-        padding: 20px;   /* Adjust padding to mimic a smaller alert box */
-    }
-
-
+                width: 100%;
+                border-collapse: collapse;
+            }
+            th, td {
+                padding: 8px 12px;
+                text-align: left;
+                border: 1px solid #ddd;
+            }
+            th {
+                background-color: #f4f4f4;
+            }
+            .smaller-alert {
+                font-size: 14px; /* Adjust text size for a compact look */
+                padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
         </style>
     </head>
 

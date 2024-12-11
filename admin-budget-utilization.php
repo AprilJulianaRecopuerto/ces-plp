@@ -26,7 +26,6 @@ if (!isset($_SESSION['username'])) {
         <!-- SweetAlert 2 CDN -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap');
             @import url('https://fonts.cdnfonts.com/css/glacial-indifference-2');
@@ -533,315 +532,312 @@ if (!isset($_SESSION['username'])) {
         </div>
 
         <div class="content-budget">
-    <div class="button-container">
-        <button class="filter-button" onclick="filterTable('cas')">CAS</button>
-        <button class="filter-button" onclick="filterTable('cba')">CBA</button>
-        <button class="filter-button" onclick="filterTable('ccs')">CCS</button>
-        <button class="filter-button" onclick="filterTable('coed')">COED</button>
-        <button class="filter-button" onclick="filterTable('coe')">COE</button>
-        <button class="filter-button" onclick="filterTable('cihm')">CIHM</button>
-        <button class="filter-button" onclick="filterTable('con')">CON</button>
-    </div>
-    <?php
-// Database credentials
-$servername = "alv4v3hlsipxnujn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username = "ctk6gpo1v7sapq1l";
-$password = "u1cgfgry8lu5rliz";
-$dbname = "oshzbyiasuos5kn4"; // Database name
+            <div class="button-container">
+                <button class="filter-button" onclick="filterTable('cas')">CAS</button>
+                <button class="filter-button" onclick="filterTable('cba')">CBA</button>
+                <button class="filter-button" onclick="filterTable('ccs')">CCS</button>
+                <button class="filter-button" onclick="filterTable('coed')">COED</button>
+                <button class="filter-button" onclick="filterTable('coe')">COE</button>
+                <button class="filter-button" onclick="filterTable('cihm')">CIHM</button>
+                <button class="filter-button" onclick="filterTable('con')">CON</button>
+            </div>
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+            <?php
+            // Database credentials
+            $servername = "alv4v3hlsipxnujn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+            $username = "ctk6gpo1v7sapq1l";
+            $password = "u1cgfgry8lu5rliz";
+            $dbname = "oshzbyiasuos5kn4"; // Database name
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+            // Create connection
+            $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Fetch allotted budget for each department
-$allottedBudgetSql = "SELECT department_name, allotted_budget FROM allotted_budget";
-$allottedBudgetResult = $conn->query($allottedBudgetSql);
-$allottedBudgets = [];
+            // Check connection
+            if ($conn->connect_error) {
+                die("Connection failed: " . $conn->connect_error);
+            }
 
-if ($allottedBudgetResult && $allottedBudgetResult->num_rows > 0) {
-    while ($row = $allottedBudgetResult->fetch_assoc()) {
-        $allottedBudgets[$row['department_name']] = $row['allotted_budget'];
-    }
-}
+            // Fetch allotted budget for each department
+            $allottedBudgetSql = "SELECT department_name, allotted_budget FROM allotted_budget";
+            $allottedBudgetResult = $conn->query($allottedBudgetSql);
+            $allottedBudgets = [];
 
-$colleges = [
-    'cas' => 'cas_budget',
-    'cba' => 'cba_budget',
-    'ccs' => 'ccs_budget',
-    'coed' => 'coed_budget',
-    'coe' => 'coe_budget',
-    'cihm' => 'cihm_budget',
-    'con' => 'con_budget'
-];
-foreach ($colleges as $college => $budgetTable) {
-    echo "<div id='{$college}_section' class='college-section' style='display: none;'>"; // Hidden by default
+            if ($allottedBudgetResult && $allottedBudgetResult->num_rows > 0) {
+                while ($row = $allottedBudgetResult->fetch_assoc()) {
+                    $allottedBudgets[$row['department_name']] = $row['allotted_budget'];
+                }
+            }
 
-    // Title for the College
-    echo "<h3 style = 'font-size:30px;'>" . strtoupper($college) . " - Budget Allocation</h3>";
+            $colleges = [
+                'cas' => 'cas_budget',
+                'cba' => 'cba_budget',
+                'ccs' => 'ccs_budget',
+                'coed' => 'coed_budget',
+                'coe' => 'coe_budget',
+                'cihm' => 'cihm_budget',
+                'con' => 'con_budget'
+            ];
+            foreach ($colleges as $college => $budgetTable) {
+                echo "<div id='{$college}_section' class='college-section' style='display: none;'>"; // Hidden by default
 
-    // Fetch the allotted budget for the current college
-    $allottedBudget = isset($allottedBudgets[strtoupper($college)]) ? number_format($allottedBudgets[strtoupper($college)], 2) : 'Not Available';
+                // Title for the College
+                echo "<h3 style = 'font-size:30px;'>" . strtoupper($college) . " - Budget Allocation</h3>";
 
-    // Calculate the total expenses for the current college
-    $expensesSql = "SELECT SUM(expenses) AS total_expenses FROM $budgetTable";
-    $expensesResult = $conn->query($expensesSql);
-    $remainingBudget = 0;
+                // Fetch the allotted budget for the current college
+                $allottedBudget = isset($allottedBudgets[strtoupper($college)]) ? number_format($allottedBudgets[strtoupper($college)], 2) : 'Not Available';
 
-    if ($expensesResult && $expensesResult->num_rows > 0) {
-        $expenseRow = $expensesResult->fetch_assoc();
-        $totalExpenses = $expenseRow['total_expenses'] ? $expenseRow['total_expenses'] : 0;
-        $remainingBudget = $allottedBudgets[strtoupper($college)] - $totalExpenses;
-    }
+                // Calculate the total expenses for the current college
+                $expensesSql = "SELECT SUM(expenses) AS total_expenses FROM $budgetTable";
+                $expensesResult = $conn->query($expensesSql);
+                $remainingBudget = 0;
 
-    // Display the allotted budget
-    echo "<p class='allotted-budget'><strong>Allotted Budget: </strong>
-            <input type='text' class='allotted-budget' id='{$college}_budget' value='" . $allottedBudget . "' />
-            <button class='update-budget-btn' onclick='updateBudget(\"{$college}\")'>Update</button>
-          </p>";
-
-    // Display the remaining budget
-    echo "<p class='remaining-budget'><strong>Remaining Budget: </strong>
-            <input type='text' class='remaining-budget' id='{$college}_remaining_budget' value='" . number_format($remainingBudget, 2) . "' disabled />
-          </p>";
-    
-    // Fetch budget records for the budget table
-    $budgetSql = "SELECT * FROM $budgetTable ORDER BY details_id";
-    $budgetResult = $conn->query($budgetSql);
-
-    // Budget Table: Event Budget Details
-    echo "<div class='table-container'>";
-    echo "<table class='crud-table'>";
-    echo "<thead>
-            <tr>
-                <th>ID</th>
-                <th>Event Title</th>
-                <th>Semester</th>
-                <th>Expenses</th>
-            </tr>
-        </thead>
-        <tbody>";
-
-    if ($budgetResult && $budgetResult->num_rows > 0) {
-        $budgetData = [];
-
-        // Group budget details by details_id
-        while ($row = $budgetResult->fetch_assoc()) {
-            $budgetData[$row['details_id']][] = $row; // Grouping items by details_id
-        }
-
-        // Output rows with calculated rowspans for details_id
-        foreach ($budgetData as $detailsId => $items) {
-            $firstRow = true; // Track the first row for details_id
-
-            foreach ($items as $index => $item) {
-                echo "<tr>";
-
-                // Display Details ID only once per unique details_id
-                if ($firstRow) {
-                    echo "<td rowspan='" . count($items) . "'>{$detailsId}</td>";
-                    $firstRow = false; // Set to false after the first row
+                if ($expensesResult && $expensesResult->num_rows > 0) {
+                    $expenseRow = $expensesResult->fetch_assoc();
+                    $totalExpenses = $expenseRow['total_expenses'] ? $expenseRow['total_expenses'] : 0;
+                    $remainingBudget = $allottedBudgets[strtoupper($college)] - $totalExpenses;
                 }
 
-                // Output remaining columns for the current item
-                echo "<td>{$item['proj_title']}</td>
-                      <td>{$item['semester']}</td>
-                      <td>" . number_format((float)str_replace(',', '', $item['expenses']), 2) . "</td>
-                      </tr>";
+                // Display the allotted budget
+                echo "<p class='allotted-budget'><strong>Allotted Budget: </strong>
+                        <input type='text' class='allotted-budget' id='{$college}_budget' value='" . $allottedBudget . "' />
+                        <button class='update-budget-btn' onclick='updateBudget(\"{$college}\")'>Update</button>
+                    </p>";
+
+                // Display the remaining budget
+                echo "<p class='remaining-budget'><strong>Remaining Budget: </strong>
+                        <input type='text' class='remaining-budget' id='{$college}_remaining_budget' value='" . number_format($remainingBudget, 2) . "' disabled />
+                    </p>";
+                
+                // Fetch budget records for the budget table
+                $budgetSql = "SELECT * FROM $budgetTable ORDER BY details_id";
+                $budgetResult = $conn->query($budgetSql);
+
+                // Budget Table: Event Budget Details
+                echo "<div class='table-container'>";
+                echo "<table class='crud-table'>";
+                echo "<thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Event Title</th>
+                            <th>Semester</th>
+                            <th>Expenses</th>
+                        </tr>
+                    </thead>
+                    <tbody>";
+
+                if ($budgetResult && $budgetResult->num_rows > 0) {
+                    $budgetData = [];
+
+                    // Group budget details by details_id
+                    while ($row = $budgetResult->fetch_assoc()) {
+                        $budgetData[$row['details_id']][] = $row; // Grouping items by details_id
+                    }
+
+                    // Output rows with calculated rowspans for details_id
+                    foreach ($budgetData as $detailsId => $items) {
+                        $firstRow = true; // Track the first row for details_id
+
+                        foreach ($items as $index => $item) {
+                            echo "<tr>";
+
+                            // Display Details ID only once per unique details_id
+                            if ($firstRow) {
+                                echo "<td rowspan='" . count($items) . "'>{$detailsId}</td>";
+                                $firstRow = false; // Set to false after the first row
+                            }
+
+                            // Output remaining columns for the current item
+                            echo "<td>{$item['proj_title']}</td>
+                                <td>{$item['semester']}</td>
+                                <td>" . number_format((float)str_replace(',', '', $item['expenses']), 2) . "</td>
+                                </tr>";
+                        }
+                    }
+                } else {
+                    echo "<tr><td colspan='5'>No budget event details found for this college</td></tr>";
+                }
+
+                echo "</tbody></table></div>";
+
+                echo "</div>"; // End of college section
             }
-        }
-    } else {
-        echo "<tr><td colspan='5'>No budget event details found for this college</td></tr>";
-    }
-
-    echo "</tbody></table></div>";
-
-    echo "</div>"; // End of college section
-}
 
 
-$conn->close(); // Close the connection after processing
-?>
+            $conn->close(); // Close the connection after processing
+            ?>
+        </div>
 
-</div>
+        <script>
+            let inactivityTime = function () {
+                let time;
 
-<script>
-    let inactivityTime = function () {
-    let time;
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
 
-    // List of events to reset the inactivity timer
-    window.onload = resetTimer;
-    document.onmousemove = resetTimer;
-    document.onkeypress = resetTimer;
-    document.onscroll = resetTimer;
-    document.onclick = resetTimer;
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
 
-    // If logged out due to inactivity, prevent user from accessing dashboard
-    if (sessionStorage.getItem('loggedOut') === 'true') {
-        // Ensure the user cannot access the page and is redirected
-        window.location.replace('loadingpage.php');
-    }
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'smaller-alert' // Custom class for further styling if needed
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
 
-    function logout() {
-        // SweetAlert2 popup styled similar to the standard alert
-        Swal.fire({
-            title: 'Session Expired',
-            text: 'You have been logged out due to inactivity.',
-            icon: 'warning',
-            confirmButtonText: 'OK',
-            width: '400px',   // Adjust width (close to native alert size)
-            heightAuto: false, // Prevent automatic height adjustment
-            customClass: {
-                popup: 'smaller-alert' // Custom class for further styling if needed
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
+                }
+            };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
+            function confirmLogout(event) {
+                event.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to log out?",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
+                    confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                        .catch(error => console.error('Error:', error));
+                    }
+                });
             }
-        }).then(() => {
-            // Set sessionStorage to indicate user has been logged out due to inactivity
-            sessionStorage.setItem('loggedOut', 'true');
 
-            // Redirect to loadingpage.php
-            window.location.replace('loadingpage.php');
-        });
-    }
-
-    function resetTimer() {
-        clearTimeout(time);
-        // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-        time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
-    }
-
-    // Check if the user is logged in and clear the loggedOut flag
-    if (sessionStorage.getItem('loggedOut') === 'false') {
-        sessionStorage.removeItem('loggedOut');
-    }
-};
-
-// Start the inactivity timeout function
-inactivityTime();
-
-function confirmLogout(event) {
-    event.preventDefault();
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you really want to log out?",
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6', // Green confirm button
-        cancelButtonColor: '#dc3545', // Red cancel button
-        confirmButtonText: 'Yes, log me out',
-        cancelButtonText: 'Cancel',
-        customClass: {
-            popup: 'swal-popup',
-            confirmButton: 'swal-confirm',
-            cancelButton: 'swal-cancel'
-        },
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Execute the logout action (send a request to the server to log out)
-            fetch('logout.php?action=logout')
-                .then(response => response.text())
-                .then(data => {
-                    console.log(data); // Log response for debugging
-
-                    // Redirect the user to the role account page after logout
-                    window.location.href = 'roleaccount.php';
-
-                    // Modify the history to prevent back navigation after logout
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
                     window.history.pushState(null, '', window.location.href);
-                    window.onpopstate = function () {
-                        window.history.pushState(null, '', window.location.href);
-                    };
-                })
-                .catch(error => console.error('Error:', error));
-        }
-    });
-}
+                };
+            }
 
-// This should only run when you're on a page where the user has logged out
-if (window.location.href !== 'roleaccount.php') {
-    window.history.pushState(null, '', window.location.href);
-    window.onpopstate = function () {
-        window.history.pushState(null, '', window.location.href);
-    };
-}
+            function filterTable(college) {
+                // Hide all college sections
+                const sections = document.querySelectorAll('.college-section');
+                sections.forEach(section => {
+                    section.style.display = 'none';
+                });
 
+                // Show the selected college section
+                const selectedSection = document.getElementById(`${college}_section`);
+                if (selectedSection) {
+                    selectedSection.style.display = 'block';
+                }
+            }
 
-    function filterTable(college) {
-        // Hide all college sections
-        const sections = document.querySelectorAll('.college-section');
-        sections.forEach(section => {
-            section.style.display = 'none';
-        });
-
-        // Show the selected college section
-        const selectedSection = document.getElementById(`${college}_section`);
-        if (selectedSection) {
-            selectedSection.style.display = 'block';
-        }
-    }
-
-    // Show CAS section by default on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        filterTable('cas');
-    });
-
-    function updateBudget(college) {
-    // Get the updated budget value
-    const updatedBudget = document.getElementById(`${college}_budget`).value;
-
-    // Create an AJAX request to send the updated value to the server
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'admin-update_budget.php', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-    // Send the data (college and updated budget) to the server
-    xhr.send(`college=${college}&updatedBudget=${updatedBudget}`);
-
-    // Handle the response from the server
-    xhr.onload = function() {
-        if (xhr.status == 200) {
-            // Update the remaining budget field based on the updated budget and new expenses
-            updateRemainingBudget(college);
-
-            // Show SweetAlert success message
-            Swal.fire({
-                icon: 'success',
-                title: 'Budget Updated',
-                text: 'The budget has been successfully updated!',
-                confirmButtonText: 'OK'
+            // Show CAS section by default on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                filterTable('cas');
             });
-        } else {
-            // Show SweetAlert error message
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'There was an error updating the budget!',
-                confirmButtonText: 'OK'
-            });
-        }
-    };
-}
 
+            function updateBudget(college) {
+                // Get the updated budget value
+                const updatedBudget = document.getElementById(`${college}_budget`).value;
 
-function updateRemainingBudget(college) {
-    // Fetch the current remaining budget for the selected college
-    const remainingBudgetInput = document.getElementById(`${college}_remaining_budget`);
-    
-    // Get the total expenses for the current college from the server
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', `admin-get_remaining_budget.php?college=${college}`, true);
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            // Update the remaining budget input with the new value
-            remainingBudgetInput.value = xhr.responseText; // Response contains the updated remaining budget
-        } else {
-            alert('Error fetching remaining budget!');
-        }
-    };
-    xhr.send();
-}
+                // Create an AJAX request to send the updated value to the server
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'admin-update_budget.php', true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
+                // Send the data (college and updated budget) to the server
+                xhr.send(`college=${college}&updatedBudget=${updatedBudget}`);
+
+                // Handle the response from the server
+                xhr.onload = function() {
+                    if (xhr.status == 200) {
+                        // Update the remaining budget field based on the updated budget and new expenses
+                        updateRemainingBudget(college);
+
+                        // Show SweetAlert success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Budget Updated',
+                            text: 'The budget has been successfully updated!',
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        // Show SweetAlert error message
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'There was an error updating the budget!',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                };
+            }
+
+            function updateRemainingBudget(college) {
+                // Fetch the current remaining budget for the selected college
+                const remainingBudgetInput = document.getElementById(`${college}_remaining_budget`);
+                
+                // Get the total expenses for the current college from the server
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', `admin-get_remaining_budget.php?college=${college}`, true);
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        // Update the remaining budget input with the new value
+                        remainingBudgetInput.value = xhr.responseText; // Response contains the updated remaining budget
+                    } else {
+                        alert('Error fetching remaining budget!');
+                    }
+                };
+                xhr.send();
+            }
 
             // Add event listeners when the page is fully loaded
             document.addEventListener("DOMContentLoaded", function() {
@@ -878,19 +874,18 @@ function updateRemainingBudget(college) {
                 });
 
                 document.querySelectorAll("td.edit a").forEach(function(link) {
-                link.addEventListener("click", function(event) {
-                    event.preventDefault(); // Prevent the default action
-                    var url = this.href; // Get the URL from the href attribute
-                    logAndRedirect("Edit Budget", url); // Log the action and redirect
+                    link.addEventListener("click", function(event) {
+                        event.preventDefault(); // Prevent the default action
+                        var url = this.href; // Get the URL from the href attribute
+                        logAndRedirect("Edit Budget", url); // Log the action and redirect
+                    });
+                });
+
+                // Log clicks on the "Profile" link
+                document.querySelector('.dropdown-menu a[href="cas-your-profile.php"]').addEventListener("click", function() {
+                    logAction("Profile");
                 });
             });
-
-            // Log clicks on the "Profile" link
-            document.querySelector('.dropdown-menu a[href="cas-your-profile.php"]').addEventListener("click", function() {
-                logAction("Profile");
-            });
-        });
-
-</script>
-</body>
+        </script>
+    </body>
 </html>
