@@ -1,4 +1,7 @@
 <?php
+session_start();
+$isFormClosed = isset($_SESSION['show_event_form']) && $_SESSION['show_event_form'] === false;
+
 // Database connection for evaluation_links table
 $servername = "iwqrvsv8e5fz4uni.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
 $username = "sh9sgtg12c8vyqoa";
@@ -25,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sql = "INSERT INTO submissions (name, email, event, department) VALUES ('$name', '$email', '$event', '$department')";
 
     if ($conn->query($sql) === TRUE) {
-        // Fetch the link from evaluation_links where department = 'cba'
+        // Fetch the link from evaluation_links where department = 'CBA'
         $linkQuery = "SELECT response_link FROM evaluation_links WHERE department = 'CBA'";
         $resultLink = $conn->query($linkQuery);
 
@@ -481,48 +484,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <div style="display: flex; align-items: center; margin-bottom: 5px;">
                 <label for="department">Department:</label>
-                <input type="text" id="department" name="department" value="College of Business Administration" readonly class="dept">
+                <input type="text" id="department" name="department" value="College of Arts and Sciences" readonly class="dept">
             </div>
 
             
             <?php
-// Database connection
-$servername = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_db = "zf8r3n4qqjyrfx7o";
-$password_db = "su6qmqa0gxuerg98";
-$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+            // Database connection
+            $servername = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+            $username_db = "zf8r3n4qqjyrfx7o";
+            $password_db = "su6qmqa0gxuerg98";
+            $dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-$conn_proj = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
+            $conn_proj = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
 
-// Check connection
-if ($conn_proj->connect_error) {
-    die("Connection failed: " . $conn_proj->connect_error);
-}
-
-// Fetch project titles from the cba table
-$sql = "SELECT proj_title FROM cba";
-$result = $conn_proj->query($sql);
-?>
-
-<div style="display: flex; align-items: center; margin-bottom: 10px;">
-    <label for="event">Event:</label>
-    <select id="event" name="event" required>
-        <option value="" disabled selected>Select Event</option>
-        <?php
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                echo '<option value="' . htmlspecialchars($row['proj_title']) . '">' . htmlspecialchars($row['proj_title']) . '</option>';
+            // Check connection
+            if ($conn_proj->connect_error) {
+                die("Connection failed: " . $conn_proj->connect_error);
             }
-        } else {
-            echo '<option value="" disabled>No Events Available</option>';
-        }
-        ?>
-    </select>
-</div>
 
-<?php
-$conn_proj->close();
-?>
+            // Fetch project titles from the cba table
+            $sql = "SELECT proj_title FROM cba";
+            $result = $conn_proj->query($sql);
+            ?>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <label for="event">Event:</label>
+                <select id="event" name="event" required>
+                    <option value="" disabled selected>Select Event</option>
+                    <?php
+                    if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            echo '<option value="' . htmlspecialchars($row['proj_title']) . '">' . htmlspecialchars($row['proj_title']) . '</option>';
+                        }
+                    } else {
+                        echo '<option value="" disabled>No Events Available</option>';
+                    }
+                    ?>
+                </select>
+            </div>
+
+            <?php
+            $conn_proj->close();
+            ?>
             
             <button class="button-submit" type="submit" name="signup">Submit</button>
 
@@ -591,6 +594,11 @@ $conn_proj->close();
                 icon: 'success',
                 showConfirmButton: true,
                 confirmButtonText: 'OK',
+                customClass: {
+                    popup: 'custom-swal-popup',
+                    title: 'custom-swal-title',
+                    confirmButton: 'custom-swal-confirm'
+                },
             }).then(function() {
                 // Check if there's an evaluation link
                 <?php if (!empty($evaluationLink)): ?>
@@ -599,11 +607,15 @@ $conn_proj->close();
                         html: 'Click <a href="<?php echo $evaluationLink; ?>" target="_blank">here</a> to access the evaluation form.',
                         icon: 'info',
                         confirmButtonText: 'Okay',
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            title: 'custom-swal-title',
+                            confirmButton: 'custom-swal-confirm'
+                        },
                     });
                 <?php endif; ?>
             });
         <?php endif; ?>
-
     </script>
 </body>
 </html>

@@ -63,7 +63,7 @@ $conn_profile->close();
 ?>
 
 <!DOCTYPE html>
-    <html lang="en">
+<html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -531,7 +531,7 @@ $conn_profile->close();
 
     <body>
         <nav class="navbar">
-            <h2>All Projects in cba</h2>
+            <h2>All Projects in CBA</h2>
 
             <div class="profile-container">
                 <!-- Chat Icon with Notification Badge -->
@@ -711,7 +711,7 @@ $conn_profile->close();
                 function resetTimer() {
                     clearTimeout(time);
                     // Set the inactivity timeout to 100 seconds (100000 milliseconds)
-                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
                 }
 
                 // Check if the user is logged in and clear the loggedOut flag
