@@ -24,8 +24,8 @@ if (isset($_POST['task_id'])) {
     
     if ($stmt->execute()) {
         // Add a notification for the admin
-        $notification_message = "A task was marked as done by a ccs user.";
-        $project_name = "ccs Task Completion"; // Adjust as needed
+        $notification_message = "A task was marked as done by a CCS user.";
+        $project_name = "CCS Task Completion"; // Adjust as needed
         
         // Insert notification into notifications table
         $sql = "INSERT INTO ccs_notifications (project_name, notification_message, created_at) VALUES (?, ?, NOW())";
