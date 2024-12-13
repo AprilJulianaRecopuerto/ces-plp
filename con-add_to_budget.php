@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $expenses = (int)$_POST['expenses']; // Ensure it's treated as an integer
 
     // Check if the project title already exists in the database
-    $checkSql = "SELECT details_id FROM coe_budget WHERE proj_title = ?";
+    $checkSql = "SELECT details_id FROM con_budget WHERE proj_title = ?";
     $stmtCheck = $conn->prepare($checkSql);
     $stmtCheck->bind_param("s", $projTitle);
     $stmtCheck->execute();
@@ -32,8 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // If project already exists, return a message
         echo "exists";
     } else {
-        // Fetch the allotted budget for coe
-        $allottedBudgetSql = "SELECT allotted_budget FROM allotted_budget WHERE department_name = 'COE'";
+        // Fetch the allotted budget for con
+        $allottedBudgetSql = "SELECT allotted_budget FROM allotted_budget WHERE department_name = 'CON'";
         $allottedBudgetResult = $conn->query($allottedBudgetSql);
         $allottedBudget = ($allottedBudgetResult && $row = $allottedBudgetResult->fetch_assoc()) ? $row['allotted_budget'] : 0;
 
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $remainingBudget = $allottedBudget - $expenses;
 
         // Insert the new project details into the database (excluding remaining_budget if it's a generated column)
-        $insertSql = "INSERT INTO coe_budget (proj_title, lead_person, semester, expenses) VALUES (?, ?, ?, ?)";
+        $insertSql = "INSERT INTO con_budget (proj_title, lead_person, semester, expenses) VALUES (?, ?, ?, ?)";
         $stmtInsert = $conn->prepare($insertSql);
 
         if (!$stmtInsert) {

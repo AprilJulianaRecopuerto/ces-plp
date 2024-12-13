@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "exists";
     } else {
         // Fetch the allotted budget for cihm
-        $allottedBudgetSql = "SELECT allotted_budget FROM allotted_budget WHERE department_name = 'cihm'";
+        $allottedBudgetSql = "SELECT allotted_budget FROM allotted_budget WHERE department_name = 'CIHM'";
         $allottedBudgetResult = $conn->query($allottedBudgetSql);
         $allottedBudget = ($allottedBudgetResult && $row = $allottedBudgetResult->fetch_assoc()) ? $row['allotted_budget'] : 0;
 

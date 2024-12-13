@@ -1,37 +1,77 @@
 <?php
 session_start(); // Start the session
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Load Composer's autoloader
+require 'vendor/autoload.php';
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
-    // Redirect to login page if the session variable is not set
-    header("Location: collegelogin.php");
+    header("Location: roleaccount.php");
     exit;
 }
 
-// Database credentials
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "proj_list";
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
 // Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Check if the form is submitted
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
+// Fetch the profile picture from the colleges table in user_registration
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
+}
+
+$uname = $_SESSION['uname'];
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $uname);
+$stmt->execute();
+$result_profile = $stmt->get_result();
+
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
+}
+
+$stmt->close();
+$conn_profile->close();
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Retrieve form data
     $date_of_sub = $_POST['date_of_sub'];
     $semester = $_POST['semester'];
+    
+    // For Lead Person
     $lead_person = $_POST['lead_person'];
+    if ($lead_person == "Others") {
+        $lead_person = $_POST['other_lead_person'];  // Use the 'Other' field value
+    }
+    
+    // For Classification
+    $sdg = $_POST['sdg'];
+    if ($sdg == "Others") {
+        $sdg = $_POST['other_classification'];  // Use the 'Other' field value
+    }
+
     $dept = $_POST['dept'];
     $implementor = $_POST['implementor'];
+    $attendees = $_POST['attendees'];
     $proj_title = $_POST['proj_title'];
-    $classification = $_POST['classification'];
     $specific_activity = $_POST['specific_activity'];
     $dateof_imple = $_POST['dateof_imple'];
     $time_from = $_POST['time_from'];
@@ -42,20 +82,131 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $duration = $_POST['duration'];
     $status = $_POST['status'];
 
-    // Prepare and bind the SQL statement
-    $stmt = $conn->prepare("INSERT INTO con (date_of_sub, semester, lead_person, dept, implementor, proj_title, classification, specific_activity, dateof_imple, time_from, time_to, district, barangay, beneficiary, duration, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    // Prepare the SQL statement for inserting the data
+    $stmt = $conn->prepare("INSERT INTO con (
+        date_of_sub, semester, lead_person, dept, implementor, attendees, proj_title, 
+        sdg, specific_activity, dateof_imple, time_from, time_to, district, 
+        barangay, beneficiary, duration, status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
     if ($stmt === false) {
         $_SESSION['error'] = "Prepare statement failed: " . $conn->error;
         $redirect_url = 'con-addproj.php';
     } else {
-        // Bind parameters
-        $stmt->bind_param("ssssssssssssssss", $date_of_sub, $semester, $lead_person, $dept, $implementor, $proj_title, $classification, $specific_activity, $dateof_imple, $time_from, $time_to, $district, $barangay, $beneficiary, $duration, $status);
+        $stmt->bind_param(
+            "sssssssssssssssss", 
+            $date_of_sub, 
+            $semester, 
+            $lead_person, 
+            $dept, 
+            $implementor, 
+            $attendees, 
+            $proj_title, 
+            $sdg, 
+            $specific_activity, 
+            $dateof_imple, 
+            $time_from, 
+            $time_to, 
+            $district, 
+            $barangay, 
+            $beneficiary, 
+            $duration, 
+            $status
+        );        
 
         // Execute the statement
         if ($stmt->execute()) {
             $_SESSION['add_success'] = true; // Set session variable for success
             $redirect_url = 'con-projlist.php'; // Redirect URL
+
+            // Database credentials for 'mov' (notifications)
+            $servername_mov = "arfo8ynm6olw6vpn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+            $username_mov = "tz8thfim1dq7l3rf";
+            $password_mov = "wzt4gssgou2ofyo7";
+            $dbname_mov = "uv1qyvm0b8oicg0v";
+
+            $conn_mov = new mysqli($servername_mov, $username_mov, $password_mov, $dbname_mov);
+
+            // Check connection for 'mov'
+            if ($conn_mov->connect_error) {
+                die("Connection to 'mov' database failed: " . $conn_mov->connect_error);
+            }
+
+            // Prepare the notification message
+            $notification_message = "A new project has been submitted by $dept for project: $proj_title.";
+
+            // Insert notification into the notifications table
+            $notification_sql = "INSERT INTO notifications (project_name, department, notification_message) 
+                                 VALUES ('$proj_title', '$dept',  '$notification_message')";
+
+            if ($conn_mov->query($notification_sql) === TRUE) {
+                // Now send an email notification to the admin (Head Coordinator)
+
+                // Database connection to fetch admin email (user_registration database)
+                // Database connection details
+                $servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+                $username = "equ6v8i5llo3uhjm"; // replace with your database username
+                $password = "vkfaxm2are5bjc3q"; // replace with your database password
+                $user_dbname = "ylwrjgaks3fw5sdj"; // For user data
+                
+                $conn_users = new mysqli($servername, $username, $password, $user_dbname);
+
+                if ($conn_users->connect_error) {
+                    die("Connection to 'user_registration' database failed: " . $conn_users->connect_error);
+                }
+
+                // Fetch the admin email
+                $user_sql = "SELECT email FROM users WHERE roles = 'Head Coordinator' LIMIT 1";
+                $result = $conn_users->query($user_sql);
+
+                if ($result->num_rows > 0) {
+                    $row = $result->fetch_assoc();
+                    $recipientEmail = $row['email'];
+
+                    $mail = new PHPMailer(true);
+
+                    try {
+                        // Server settings
+                        $mail->isSMTP();                                            // Send using SMTP
+                        $mail->Host       = 'smtp.gmail.com';                         // Set the SMTP server to send through
+                        $mail->SMTPAuth   = true;                                     // Enable SMTP authentication
+                        $mail->Username   = 'communityextensionservices1@gmail.com'; // SMTP username
+                        $mail->Password   = 'ctpy rvsc tsiv fwix';                    // SMTP password
+                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;          // Enable TLS encryption
+                        $mail->Port       = 587;                                     // TCP port to connect to
+
+                        // Recipients
+                        $mail->setFrom('communityextensionservices1@gmail.com', 'PLP CES');
+                        $mail->addAddress($recipientEmail); // Add the admin email fetched from the database
+
+                        // Content
+                        $mail->isHTML(true);                                   // Set email format to HTML
+                        $mail->Subject = 'New Task Notification';
+                        $mail->Body    = "A new task has been submitted by <strong>$dept</strong>.<br>Project Name: $proj_title<br>Due Date: $dateof_imple<br><br>Best regards,<br>PLP CES";
+
+                        $mail->send();
+                    } catch (Exception $e) {
+                        $_SESSION['error'] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+                        header("Location: con-addproj.php");
+                        exit;
+                    }
+                } else {
+                    $_SESSION['error'] = "No admin user found for email notification.";
+                    header("Location: con-addproj.php");
+                    exit;
+                }
+
+                // Close the user database connection
+                $conn_users->close();
+            } else {
+                $_SESSION['error'] = "Error inserting notification: " . $conn_mov->error;
+                header("Location: con-addproj.php");
+                exit;
+            }
+
+            // Close the notifications connection
+            $conn_mov->close();
+
         } else {
             $_SESSION['error'] = "Error: " . $stmt->error; // Set session variable for error
             $redirect_url = 'con-addproj.php'; // Redirect URL
@@ -70,7 +221,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-    <!DOCTYPE html>
+<!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -428,6 +579,56 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 font-family: "Poppins", sans-serif !important;
             }
 
+            .swal-popup {
+                font-family: "Poppins", sans-serif !important;
+                width: 400px;
+            }
+
+            /* SweetAlert confirm button */
+            .swal-confirm {
+                font-family: "Poppins", sans-serif !important;
+            }
+
+            /* SweetAlert cancel button */
+            .swal-cancel {
+                font-family: "Poppins", sans-serif !important;
+            }
+
+            /* Chat styles */
+            .navbar .profile-container {
+                display: flex;
+                align-items: center;
+            }
+
+            .chat-icon {
+                font-size: 20px;
+                color: #333;
+                text-decoration: none;
+                position: relative; /* To position the badge correctly */
+                margin-right: 30px;
+                margin-top: 8px;
+                margin-left: -37px;
+            }
+
+            .notification-badge {
+                display: inline-block;
+                background-color: red; /* Change this to your preferred color */
+                color: white;
+                border-radius: 50%;
+                width: 20px; /* Width of the badge */
+                height: 20px; /* Height of the badge */
+                text-align: center;
+                font-weight: bold;
+                position: absolute; /* Position it relative to the chat icon */
+                top: -5px; /* Adjust as needed */
+                right: -10px; /* Adjust as needed */
+                font-size: 14px; /* Size of the exclamation point */
+            }
+            .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
+
         </style>
     </head>
 
@@ -435,25 +636,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <nav class="navbar">
             <h2>Add Project</h2> 
 
-            <div class="profile" id="profileDropdown">
-                <?php
-                    // Check if a profile picture is set in the session
-                    if (!empty($_SESSION['picture'])) {
-                        // Show the profile picture
-                        echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
-                    } else {
-                        // Get the first letter of the username for the placeholder
-                        $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
-                        echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
-                    }
-                ?>
+            <div class="profile-container">
+                <!-- Chat Icon with Notification Badge -->
+                <a href="con-chat.php" class="chat-icon" onclick="resetNotifications()">
+                    <i class="fa fa-comments"></i>
+                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+                </a>
+                
+                <div class="profile" id="profileDropdown">
+                    <?php
+                        // Check if a profile picture is set in the session
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
+                        } else {
+                            // Get the first letter of the username for the placeholder
+                            $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
+                            echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
+                        }
+                    ?>
 
-                <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+                    <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
 
-                <i class="fa fa-chevron-down dropdown-icon"></i>
-                <div class="dropdown-menu">
-                    <a href="con-your-profile.php">Profile</a>
-                    <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    <i class="fa fa-chevron-down dropdown-icon"></i>
+                    <div class="dropdown-menu">
+                        <a href="con-your-profile.php">Profile</a>
+                        <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -482,24 +691,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <li><a href="con-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="con-task.php">Upload Files</a>
-                    <a href="con-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="con-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="responses.php"><img src="images/setting.png">Responses</a></li>
+                <li><a href="con-responses.php"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
-                    <img src="images/resource.png"> Audit Trails
+                    <img src="images/logs.png"> Audit Trails
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="con-login.php">Log In History</a>
+                    <a href="con-history.php">Log In History</a>
                     <a href="con-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>
@@ -513,26 +715,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     <div class="form-group">
                         <label for="date_of_sub">Date of Submission:</label>
-                        <input type="date" id="date_of_sub" name="date_of_sub" placeholder="Enter Date of Submission" required>
+                        <input type="date" id="date_of_sub" name="date_of_sub" placeholder="Enter Date of Submission">
                     </div>
 
                     <div class="form-group">
                         <label for="semester">Semester:</label>
-                        <select id="semester" name="semester" required>
+                        <select id="semester" name="semester">
                             <option value="" disabled selected>Select Semester</option>
-                            <option value="1st">1st Semester</option>
-                            <option value="2nd">2nd Semester</option>
+                            <option value="1st Semester">1st Semester</option>
+                            <option value="2nd Semester">2nd Semester</option>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label for="lead_person">Lead Person:</label>
-                        <input type="text" id="lead_person" name="lead_person" placeholder="Enter Lead Person" required>
+                        <select id="lead_person" name="lead_person" onchange="toggleOtherInput()" required>
+                            <option value="" disabled selected>Select Lead Person</option>
+                            <option value="CON Coordinator">CON Coordinator</option>
+                            <option value="Others">Others (Please specify)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="other_lead_person_group" style="display: none;">
+                        <input type="text" id="other_lead_person" name="other_lead_person" placeholder="Enter Lead Person">
                     </div>
 
                     <div class="form-group">
                         <label for="dept">Department:</label>
-                        <input type="text" id="dept" name="dept" value="College of Nursing" readonly>
+                        <input type="text" id="dept" name="dept" value="College of Education" readonly>
                     </div>
 
                     <div class="form-group">
@@ -546,33 +755,62 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
 
                     <div class="form-group">
-                        <label for="proj_title">Project Title:</label>
-                        <input type="text" id="proj_title" name="proj_title" placeholder="Enter Project Title" required>
+                        <label for="attendees">Target Number of Participants:</label>
+                        <input type="text" id="attendees" name="attendees" placeholder="Enter Number of Participants:" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="classification">Classification:</label>
-                        <input type="text" id="classification" name="classification" placeholder="Enter Classification" required>
+                        <label for="proj_title">Project Title:</label>
+                        <input type="text" id="proj_title" name="proj_title" placeholder="Enter Project Title">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sdg">Sustainable Development Goals:</label>
+                        <select id="sdg" name="sdg" onchange="toggleOtherClassificationInput()" required>
+                            <option value="" disabled selected>Select Sustainable Development Goals</option>
+                            <option value="SDG 1: No Poverty">SDG 1: No Poverty</option>
+                            <option value="SDG 2: Zero Hunger">SDG 2: Zero Hunger</option>
+                            <option value="SDG 3: Good Health and Well-being">SDG 3: Good Health and Well-Being</option>
+                            <option value="SDG 4: Quality Education">SDG 4: Quality Education</option>
+                            <option value="SDG 5: Gender Equality">SDG 5: Gender Equality </option>
+                            <option value="SDG 6: Clean Water and Sanitation">SDG 6: Clean Water and Sanitation</option>
+                            <option value="SDG 7: Affordable and Clean Energy">SDG 7: Affordable and Clean Energy</option>
+                            <option value="SDG 8: Decent Work and Economic Growth">SDG 8: Decent Work and Economic Growth</option>
+                            <option value="SDG 9: Industry, Innovation, and Infrastructure">SDG 9: Industry, Innovation, and Infrastructureonment</option>
+                            <option value="SDG 10: Reduced Inequalities">SDG 10: Reduced Inequalities</option>
+                            <option value="SDG 11: Sustainable Cities and Communities">SDG 11: Sustainable Cities and Communities</option>
+                            <option value="SDG 12: Responsible Consumption and Production">SDG 12: Responsible Consumption and Production</option>
+                            <option value="SDG 13: Climate Action">SDG 13: Climate Action</option>
+                            <option value="SDG 14: Life Below Water">SDG 14: Life Below Water</option>
+                            <option value="SDG 15: Life on Land">SDG 15: Life on Land</option>
+                            <option value="SDG 16: Peace, Justice, and Strong Institutions">SDG 16: Peace, Justice, and Strong Institutions</option>
+                            <option value="SDG 17: Partnerships for the Goals">SDG 17: Partnerships for the Goals</option>
+                            <option value="Others">Others (Please specify)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="other_classification_group" style="display: none;">
+                        <input type="text" id="other_classification" name="other_classification" placeholder="Enter Classification">
                     </div>
 
                     <div class="form-group">
                         <label for="specific_activity">Specific Activity:</label>
-                        <input type="text" id="specific_activity" name="specific_activity" placeholder="Enter Activity" required>
+                        <input type="text" id="specific_activity" name="specific_activity" placeholder="Enter Activity">
                     </div>
 
                     <div class="form-group">
                         <label for="dateof_imple_from">Date of Implementation:</label>
-                        <input type="date" id="dateof_imple" name="dateof_imple" required onchange="checkImplementationDate()">
+                        <input type="date" id="dateof_imple" name="dateof_imple" onchange="checkImplementationDate()">
                     </div>
 
                     <div class="form-group">
                         <label for="time_from">Time From:</label>
-                        <input type="text" id="time_from" name="time_from" placeholder="hh:mm AM/PM" required>
+                        <input type="text" id="time_from" name="time_from" placeholder="hh:mm AM/PM">
                     </div>
 
                     <div class="form-group">
                         <label for="time_to">Time To:</label>
-                        <input type="text" id="time_to" name="time_to" placeholder="hh:mm AM/PM" required>
+                        <input type="text" id="time_to" name="time_to" placeholder="hh:mm AM/PM">
                     </div>
 
                     <div class="form-group">
@@ -593,7 +831,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     <div class="form-group">
                         <label for="beneficiary">Beneficiary:</label>
-                        <input type="text" id="beneficiary" name="beneficiary" placeholder="Enter Beneficiary" required>
+                        <input type="text" id="beneficiary" name="beneficiary" placeholder="Enter Beneficiary">
                     </div>
 
                     <div class="form-group">
@@ -619,6 +857,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
 
         <script>
+            function toggleOtherClassificationInput() {
+                var classificationSelect = document.getElementById("sdg");
+                var otherClassificationGroup = document.getElementById("other_classification_group");
+
+                if (classificationSelect.value === "Others") {
+                    otherClassificationGroup.style.display = "block";
+                } else {
+                    otherClassificationGroup.style.display = "none";
+                }
+            }
+
+            function toggleOtherInput() {
+                var leadPersonSelect = document.getElementById("lead_person");
+                var otherInputGroup = document.getElementById("other_lead_person_group");
+
+                if (leadPersonSelect.value === "Others") {
+                    otherInputGroup.style.display = "block";
+                } else {
+                    otherInputGroup.style.display = "none";
+                }
+            }
+
             function updateBarangays() {
             const district = document.getElementById('district').value;
             const barangaySelect = document.getElementById('barangay');
@@ -665,7 +925,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             updateBarangays();
         });
 
-                document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => {
                 <?php if (isset($_SESSION['add_success']) && $_SESSION['add_success'] === true) : ?>
                     showSuccessAlert();
                     <?php unset($_SESSION['add_success']); // Unset the session variable ?>
@@ -711,26 +971,105 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 });
             }
 
+            // Function to show success SweetAlert
+            let inactivityTime = function () {
+                let time;
+
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
+
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
+
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
+                }
+            };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
             function confirmLogout(event) {
-                event.preventDefault(); // Prevent the default link behavior
+                event.preventDefault();
                 Swal.fire({
                     title: 'Are you sure?',
                     text: "Do you really want to log out?",
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
                     confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
                     customClass: {
-                        popup: 'custom-swal-popup',
-                        confirmButton: 'custom-swal-confirm',
-                        cancelButton: 'custom-swal-cancel'
-                    }
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = 'roleaccount.php'; // Redirect to the logout page
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('college-logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
                     }
                 });
             }
+
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, '', window.location.href);
+                };
+            }
+
 
             document.getElementById('profileDropdown').addEventListener('click', function() {
             var dropdownMenu = document.querySelector('.dropdown-menu');
@@ -770,25 +1109,79 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
-            var dropdowns = document.getElementsByClassName("dropdown-btn");
-
-            for (let i = 0; i < dropdowns.length; i++) {
-                dropdowns[i].addEventListener("click", function () {
-                    // Close all dropdowns first
-                    let dropdownContents = document.getElementsByClassName("dropdown-container");
-                    for (let j = 0; j < dropdownContents.length; j++) {
-                        dropdownContents[j].style.display = "none";
-                    }
-
-                    // Toggle the clicked dropdown's visibility
-                    let dropdownContent = this.nextElementSibling;
-                    if (dropdownContent.style.display === "block") {
-                        dropdownContent.style.display = "none";
-                    } else {
-                        dropdownContent.style.display = "block";
-                    }
-                });
+            function logAction(actionDescription) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "college_logs.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.send("action=" + encodeURIComponent(actionDescription));
             }
+
+            function logAndRedirect(actionDescription, url) {
+                logAction(actionDescription); // Log the action
+                setTimeout(function() {
+                    window.location.href = url; // Redirect after logging
+                }, 100); // Delay to ensure logging completes
+            }
+
+            // Add event listeners when the page is fully loaded
+            document.addEventListener("DOMContentLoaded", function() {
+                // Log clicks on main menu links
+                document.querySelectorAll(".menu > li > a").forEach(function(link) {
+                    link.addEventListener("click", function() {
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+                // Handle dropdown button clicks
+                var dropdowns = document.getElementsByClassName("dropdown-btn");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].addEventListener("click", function () {
+                        let dropdownContents = document.getElementsByClassName("dropdown-container");
+                        for (let j = 0; j < dropdownContents.length; j++) {
+                            dropdownContents[j].style.display = "none";
+                        }
+                        let dropdownContent = this.nextElementSibling;
+                        if (dropdownContent.style.display === "block") {
+                            dropdownContent.style.display = "none";
+                        } else {
+                            dropdownContent.style.display = "block";
+                        }
+                    });
+                }
+
+                // Log clicks on dropdown links
+                document.querySelectorAll(".dropdown-container a").forEach(function(link) {
+                    link.addEventListener("click", function(event) {
+                        event.stopPropagation();
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+            // Log clicks on the "Profile" link
+            document.querySelector('.dropdown-menu a[href="con-your-profile.php"]').addEventListener("click", function() {
+                logAction("Profile");
+            });
+        });
+
+            document.addEventListener("DOMContentLoaded", () => {
+                function checkNotifications() {
+                    fetch('con-check_notifications.php')
+                        .then(response => response.json())
+                        .then(data => {
+                            const chatNotification = document.getElementById('chatNotification');
+                            if (data.unread_count > 0) {
+                                chatNotification.style.display = 'inline-block';
+                            } else {
+                                chatNotification.style.display = 'none';
+                            }
+                        })
+                        .catch(error => console.error('Error checking notifications:', error));
+                }
+
+                // Check for notifications every 2 seconds
+                setInterval(checkNotifications, 2000);
+                checkNotifications(); // Initial check when page loads
+            });
         </script>
     </body>
 </html>
