@@ -7,14 +7,14 @@ if (!isset($_SESSION['uname'])) {
     exit;
 }
 
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "resource_utilization"; // Change to your actual database name
+// Database credentials
+$servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_resource = "dnr20srzjycb99tw";
+$password_resource = "ndfnpz4j74v8t0p7";
+$dbname_resource = "x8uwt594q5jy7a7o";
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
 
 // Check connection
 if ($conn->connect_error) {
@@ -542,6 +542,24 @@ $conn->close();
             .add-btn:hover {
                 background-color: #45a049; /* Darker green on hover */
             }
+            .swal-popup {
+                font-family: "Poppins", sans-serif !important;
+                width: 400px;
+            }
+
+            /* SweetAlert confirm button */
+            .swal-confirm {
+                font-family: "Poppins", sans-serif !important;
+            }
+
+            /* SweetAlert cancel button */
+            .swal-cancel {
+                font-family: "Poppins", sans-serif !important;
+            }
+            .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
         </style>
     </head>
 
@@ -549,25 +567,33 @@ $conn->close();
         <nav class="navbar">
             <h2>Edit Term of Reference</h2> 
 
-            <div class="profile" id="profileDropdown">
-                <?php
-                    // Check if a profile picture is set in the session
-                    if (!empty($_SESSION['picture'])) {
-                        // Show the profile picture
-                        echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
-                    } else {
-                        // Get the first letter of the username for the placeholder
-                        $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
-                        echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
-                    }
-                ?>
+            <div class="profile-container">
+                <!-- Chat Icon with Notification Badge -->
+                <a href="con-chat.php" class="chat-icon" onclick="resetNotifications()">
+                    <i class="fa fa-comments"></i>
+                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+                </a>
 
-                <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+                <div class="profile" id="profileDropdown">
+                    <?php
+                        // Check if a profile picture is set in the session
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
+                        } else {
+                            // Get the first letter of the username for the placeholder
+                            $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
+                            echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
+                        }
+                    ?>
 
-                <i class="fa fa-chevron-down dropdown-icon"></i>
-                <div class="dropdown-menu">
-                    <a href="con-your-profile.php">Profile</a>
-                    <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+
+                    <i class="fa fa-chevron-down dropdown-icon"></i>
+                    <div class="dropdown-menu">
+                        <a href="con-your-profile.php">Profile</a>
+                        <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -596,24 +622,17 @@ $conn->close();
                 <li><a href="con-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="con-task.php">Upload Files</a>
-                    <a href="con-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="con-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="responses.php"><img src="images/setting.png">Responses</a></li>
+                <li><a href="con-responses.php"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
-                    <img src="images/resource.png"> Audit Trails
+                    <img src="images/logs.png"> Audit Trails
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="con-login.php">Log In History</a>
+                    <a href="con-history.php">Log In History</a>
                     <a href="con-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>
@@ -712,26 +731,102 @@ $conn->close();
         </div>
 
         <script>
-         
+            let inactivityTime = function () {
+            let time;
+
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
+
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
+
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
+                }
+            };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
             function confirmLogout(event) {
-                event.preventDefault(); // Prevent the default link behavior
+                event.preventDefault();
                 Swal.fire({
                     title: 'Are you sure?',
                     text: "Do you really want to log out?",
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
                     confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
                     customClass: {
-                        popup: 'custom-swal-popup',
-                        confirmButton: 'custom-swal-confirm',
-                        cancelButton: 'custom-swal-cancel'
-                    }
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = 'roleaccount.php'; // Redirect to the logout page
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('college-logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
                     }
                 });
+            }
+
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, '', window.location.href);
+                };
             }
 
             document.getElementById('profileDropdown').addEventListener('click', function() {
@@ -819,7 +914,7 @@ $conn->close();
                         confirmButton: 'custom-swal-confirm'
                     }
                 }).then(() => {
-                    window.location.href = "con-tor.php"; // Redirect to con-tor.php
+                    window.location.href = "con-tor.php"; // Redirect to ccs-tor.php
                 });
             }
 
