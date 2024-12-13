@@ -3,99 +3,119 @@ session_start(); // Start the session
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
-    header("Location: collegelogin.php"); // Redirect to login page
+    header("Location: roleaccount.php");
     exit;
 }
 
 // Database credentials
-$servername = "localhost";
-$username_db = "root";
-$password_db = "";
-$dbname_mov = "task_mov";
+$servername = "wp433upk59nnhpoh.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_db = "wbepy9iso2pubu7f";
+$password_db = "l0a6y3bl2x7lfiyy";
+$dbname_mov = "qlajsw6auv4giknn";
+
 
 // Create connection to the database
 $conn_mov = new mysqli($servername, $username_db, $password_db, $dbname_mov);
-
-// Check connection
 if ($conn_mov->connect_error) {
     die("Connection failed: " . $conn_mov->connect_error);
 }
 
-// Define the recycle bin directory
-$recycleBinDir = 'movuploads/coed-recycle/'; // Changed to coed-recycle
+// Define the recycle bin directory and metadata file path
+$recycleBinDir = 'movuploads/coed-recycle/';
+$metadata_file = $recycleBinDir . 'metadata.json'; // Metadata file is inside the recycle bin
 
-// Fetch folders in the recycle bin
-$recycled_folders = array_filter(glob($recycleBinDir . '*'), 'is_dir');
-
-// Fetch all image files from the recycle bin directory
-$recycled_images = glob($recycleBinDir . "*.{jpg,jpeg,png,gif}", GLOB_BRACE);
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($_POST['action'] === 'restore_image') {
-        $itemPath = $_POST['item_path']; // Path to the image or folder in the recycle bin
-        $itemName = basename($itemPath); // Get the item name
-
-        // Check if the restored item is a folder or an image
-        if (is_dir($itemPath)) {
-            // Restoring a folder
-            $restoreFolderPath = 'movuploads/coed-mov/' . $itemName; // Change to coed-mov
-
-            // Check if the original folder exists
-            if (!is_dir($restoreFolderPath)) {
-                // Move the folder from recycle bin to movuploads
-                if (rename($itemPath, $restoreFolderPath)) {
-                    // Insert folder back into the database
-                    $sql = "INSERT INTO coed_mov (folder_name) VALUES ('$itemName')";
-                    if ($conn_mov->query($sql) === TRUE) {
-                        $_SESSION['success_message'] = 'Folder restored successfully!';
-                    } else {
-                        $_SESSION['error_message'] = 'Failed to update database: ' . $conn_mov->error;
-                    }
-                } else {
-                    $_SESSION['error_message'] = 'Failed to restore folder.';
-                }
-            } else {
-                $_SESSION['error_message'] = 'Original folder already exists.';
-            }
-        } else {
-            // Restoring an image
-            // Assuming the original folder name is stored as a prefix in the image name
-            $folderName = explode('_', $itemName)[0]; // Extract folder name from image name
-            $originalFolder = 'movuploads/coed-mov/' . $folderName; // Change to coed-mov
-
-            // Restore the image to the original folder
-            if (is_dir($originalFolder)) {
-                if (is_writable($originalFolder)) {
-                    $restorePath = $originalFolder . '/' . $itemName;
-
-                    // Check if the file exists in the recycle bin before restoring
-                    if (file_exists($itemPath)) {
-                        if (rename($itemPath, $restorePath)) {
-                            $_SESSION['success_message'] = 'Image restored successfully!';
-                        } else {
-                            $_SESSION['error_message'] = 'Failed to move image to original folder.';
-                        }
-                    } else {
-                        $_SESSION['error_message'] = 'Image not found in recycle bin.';
-                    }
-                } else {
-                    $_SESSION['error_message'] = 'Original folder is not writable.';
-                }
-            } else {
-                $_SESSION['error_message'] = 'Original folder not found.';
-            }
-        }
-
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit;
-    }
+// Ensure the metadata file exists
+if (!file_exists($metadata_file)) {
+    file_put_contents($metadata_file, json_encode([], JSON_PRETTY_PRINT)); // Create an empty JSON file
 }
 
-// Fetch folders from the database if needed
-$result = $conn_mov->query("SELECT * FROM coed_mov");
-$conn_mov->close();
-?>
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['restore_file'])) {
+    $file_to_restore = $_POST['restore_file'];  // Get the file name from the form
 
+    if (file_exists($metadata_file)) {
+        $metadata = json_decode(file_get_contents($metadata_file), true);
+
+        if (isset($metadata[$file_to_restore])) {
+            $original_path = $metadata[$file_to_restore];
+            $original_dir = dirname($original_path);
+            if (!is_dir($original_dir)) {
+                mkdir($original_dir, 0777, true);
+            }
+
+            $file_to_restore_path = $recycleBinDir . '/' . $file_to_restore;
+
+            if (file_exists($file_to_restore_path)) {
+                if (rename($file_to_restore_path, $original_path)) {
+                    unset($metadata[$file_to_restore]);
+                    file_put_contents($metadata_file, json_encode($metadata, JSON_PRETTY_PRINT));
+                    $_SESSION['success_message'] = "File restored to its original location!";
+                } else {
+                    $_SESSION['error_message'] = "Error restoring the file.";
+                }
+            } else {
+                $_SESSION['error_message'] = "File not found in the recycle bin.";
+            }
+        }
+    }
+
+    // Redirect to the same page to clear POST data
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+// Get the item path from the form
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_item') {
+    $itemPath = $_POST['item_path'];
+
+    // Check if the file exists and it's an image or PDF (optional validation)
+    if (file_exists($itemPath)) {
+        // If it's an image or PDF, delete it
+        $file_extension = strtolower(pathinfo($itemPath, PATHINFO_EXTENSION));
+
+        if (in_array($file_extension, ['jpg', 'jpeg', 'png', 'gif', 'pdf'])) {
+            if (unlink($itemPath)) {
+                $_SESSION['success_message'] = "File deleted permanently!";
+            } else {
+                $_SESSION['error_message'] = "Error deleting the file.";
+            }
+        } else {
+            $_SESSION['error_message'] = "Invalid file type for deletion.";
+        }
+    } else {
+        $_SESSION['error_message'] = "File not found.";
+    }
+
+    // Redirect to the same page to clear POST data
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+$servername_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_ur = "equ6v8i5llo3uhjm"; 
+$password_ur = "vkfaxm2are5bjc3q"; 
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
+// Fetch profile picture for the logged-in user
+$conn_profile = new mysqli($servername_ur, $username_ur, $password_ur, $dbname_user_registration);
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
+}
+
+$uname = $_SESSION['uname'];
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?";
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $uname);
+$stmt->execute();
+$result_profile = $stmt->get_result();
+
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture'];
+}
+
+$stmt->close();
+$conn_profile->close();
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -476,6 +496,9 @@ $conn_mov->close();
                 font-size: 13px; /* Optional: adjust font size */
                 margin-top: 5px; /* Space above the file name */
                 line-height: 1.2; /* Adjust line height for better readability */
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
             }
 
             .upload-images {
@@ -527,32 +550,90 @@ $conn_mov->close();
                 background-color: #4CAF50;
                 color:white;
             }
+
+            .swal-popup {
+                font-family: "Poppins", sans-serif !important;
+                width: 400px;
+            }
+
+            /* SweetAlert confirm button */
+            .swal-confirm {
+                font-family: "Poppins", sans-serif !important;
+            }
+
+            /* SweetAlert cancel button */
+            .swal-cancel {
+                font-family: "Poppins", sans-serif !important;
+            }
+
+            /* Chat styles */
+            .navbar .profile-container {
+                display: flex;
+                align-items: center;
+            }
+
+            .chat-icon {
+                font-size: 20px;
+                color: #333;
+                text-decoration: none;
+                position: relative; /* To position the badge correctly */
+                margin-right: 30px;
+                margin-top: 8px;
+                margin-left: -37px;
+            }
+
+            .notification-badge {
+                display: inline-block;
+                background-color: red; /* Change this to your preferred color */
+                color: white;
+                border-radius: 50%;
+                width: 20px; /* Width of the badge */
+                height: 20px; /* Height of the badge */
+                text-align: center;
+                font-weight: bold;
+                position: absolute; /* Position it relative to the chat icon */
+                top: -5px; /* Adjust as needed */
+                right: -10px; /* Adjust as needed */
+                font-size: 14px; /* Size of the exclamation point */
+            }
+            .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
         </style>
     </head>
 
     <body>
-    <nav class="navbar">
+        <nav class="navbar">
             <h2>Mode of Verification</h2> 
 
-            <div class="profile" id="profileDropdown">
-                <?php
-                    // Check if a profile picture is set in the session
-                    if (!empty($_SESSION['picture'])) {
-                        // Show the profile picture
-                        echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
-                    } else {
-                        // Get the first letter of the username for the placeholder
-                        $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
-                        echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
-                    }
-                ?>
+            <div class="profile-container">
+                <!-- Chat Icon with Notification Badge -->
+                <a href="coed-chat.php" class="chat-icon" onclick="resetNotifications()">
+                    <i class="fa fa-comments"></i>
+                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+                </a>
 
-                <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+                <div class="profile" id="profileDropdown">
+                    <?php
+                        // Check if a profile picture is set in the session
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
+                        } else {
+                            // Get the first letter of the username for the placeholder
+                            $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
+                            echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
+                        }
+                    ?>
 
-                <i class="fa fa-chevron-down dropdown-icon"></i>
-                <div class="dropdown-menu">
-                    <a href="coed-your-profile.php">Profile</a>
-                    <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+
+                    <i class="fa fa-chevron-down dropdown-icon"></i>
+                    <div class="dropdown-menu">
+                        <a href="coed-your-profile.php">Profile</a>
+                        <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -581,24 +662,17 @@ $conn_mov->close();
                 <li><a href="coed-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="coed-task.php">Upload Files</a>
-                    <a href="coed-mov.php">Mode of Verification</a>
-                </div>
+                <li><a href="coed-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="responses.php"><img src="images/setting.png">Responses</a></li>
+                <li><a href="coed-responses.php"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
-                    <img src="images/resource.png"> Audit Trails
+                    <img src="images/logs.png"> Audit Trails
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="coed-login.php">Log In History</a>
+                    <a href="coed-history.php">Log In History</a>
                     <a href="coed-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>
@@ -613,40 +687,50 @@ $conn_mov->close();
             </div>
 
             <div class="uploaded-images">
-            <h2>Archived Items</h2>
-            <div class="images-and-names">
-                <?php
-                // Combine folders and images
-                $recycled_items = array_merge(
-                    array_filter(glob($recycleBinDir . '*'), 'is_dir'), // Get folders
-                    glob($recycleBinDir . "*.{jpg,jpeg,png,gif}", GLOB_BRACE) // Get images
-                );
+                <h2>Archived Items</h2>
 
-                if (!empty($recycled_items)):
-                    foreach ($recycled_items as $item):
-                        if (is_dir($item)): // Check if it's a folder
-                        ?>
-                            <div class="folder-item" data-folder="<?php echo htmlspecialchars($item); ?>" oncontextmenu="showContextMenu(event, '<?php echo htmlspecialchars($item); ?>')">
-                                <div class="folder-icon">
-                                    <img src="images/folder.png" alt="Folder Icon" class="file-icon">
+                <div class="images-and-names">
+                    <?php
+                    // Combine folders, images, and PDFs
+                    $recycled_items = array_merge(
+                        array_filter(glob($recycleBinDir . '*'), 'is_dir'), // Get folders
+                        glob($recycleBinDir . "*.{jpg,jpeg,png,gif,pdf}", GLOB_BRACE) // Get images and PDFs
+                    );
+
+                    if (!empty($recycled_items)):
+                        foreach ($recycled_items as $item):
+                            if (is_dir($item)): // Check if it's a folder
+                            ?>
+                                <div class="folder-item" data-folder="<?php echo htmlspecialchars($item); ?>" oncontextmenu="showContextMenu(event, '<?php echo htmlspecialchars($item); ?>')">
+                                    <div class="folder-icon">
+                                        <img src="images/folder.png" alt="Folder Icon" class="file-icon">
+                                    </div>
+                                    <p class="file-name"><?php echo htmlspecialchars(basename($item)); ?></p>
                                 </div>
-                                <p class="file-name"><?php echo htmlspecialchars(basename($item)); ?></p>
-                            </div>
-                        <?php
-                        else: // Otherwise, it's an image
-                        ?>
-                            <div class="image-item" data-image="<?php echo htmlspecialchars($item); ?>" oncontextmenu="showContextMenu(event, '<?php echo htmlspecialchars($item); ?>')">
-                                <img src="<?php echo htmlspecialchars($item); ?>" alt="<?php echo basename($item); ?>" class="uploaded-img">
-                                <p class="file-name"><?php echo htmlspecialchars(basename($item)); ?></p>
-                            </div>
-                        <?php
-                        endif;
-                    endforeach;
-                else:
-                ?>
-                    <p>No archived items found.</p>
-                <?php endif; ?>
-            </div>
+                            <?php
+                            elseif (preg_match('/\.(jpg|jpeg|png|gif)$/i', $item)): // Check if it's an image
+                            ?>
+                                <div class="image-item" data-image="<?php echo htmlspecialchars($item); ?>" oncontextmenu="showContextMenu(event, '<?php echo htmlspecialchars($item); ?>')">
+                                    <img src="<?php echo htmlspecialchars($item); ?>" alt="<?php echo basename($item); ?>" class="uploaded-img">
+                                    <p class="file-name"><?php echo htmlspecialchars(basename($item)); ?></p>
+                                </div>
+                            <?php
+                            elseif (preg_match('/\.pdf$/i', $item)): // Check if it's a PDF
+                            ?>
+                                <div class="image-item" data-pdf="<?php echo htmlspecialchars($item); ?>" oncontextmenu="showContextMenu(event, '<?php echo htmlspecialchars($item); ?>')">
+                                    <div class="pdf-icon">
+                                        <img src="images/pdf.png.png" alt="PDF Icon" class="file-icon"> <!-- Add a PDF icon -->
+                                    </div>
+                                    <p class="file-name"><?php echo htmlspecialchars(basename($item)); ?></p>
+                                </div>
+                            <?php
+                            endif;
+                        endforeach;
+                    else:
+                    ?>
+                        <p>No archived items found.</p>
+                    <?php endif; ?>
+                </div>
         </div>
 
         <!-- Context Menu -->
@@ -658,61 +742,172 @@ $conn_mov->close();
         </div>
 
         <script>
+            let inactivityTime = function () {
+            let time;
+
+            // List of events to reset the inactivity timer
+            window.onload = resetTimer;
+            document.onmousemove = resetTimer;
+            document.onkeypress = resetTimer;
+            document.onscroll = resetTimer;
+            document.onclick = resetTimer;
+
+            // If logged out due to inactivity, prevent user from accessing dashboard
+            if (sessionStorage.getItem('loggedOut') === 'true') {
+                // Ensure the user cannot access the page and is redirected
+                window.location.replace('loadingpage.php');
+            }
+
+            function logout() {
+                // SweetAlert2 popup styled similar to the standard alert
+                Swal.fire({
+                    title: 'Session Expired',
+                    text: 'You have been logged out due to inactivity.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK',
+                    width: '400px',   // Adjust width (close to native alert size)
+                    heightAuto: false, // Prevent automatic height adjustment
+                    customClass: {
+                        popup: 'smaller-alert' // Custom class for further styling if needed
+                    }
+                }).then(() => {
+                    // Set sessionStorage to indicate user has been logged out due to inactivity
+                    sessionStorage.setItem('loggedOut', 'true');
+
+                    // Redirect to loadingpage.php
+                    window.location.replace('loadingpage.php');
+                });
+            }
+
+            function resetTimer() {
+                clearTimeout(time);
+                // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                time = setTimeout(logout, 100000);  // 100 seconds = 100000 ms
+            }
+
+            // Check if the user is logged in and clear the loggedOut flag
+            if (sessionStorage.getItem('loggedOut') === 'false') {
+                sessionStorage.removeItem('loggedOut');
+            }
+            };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
             function confirmLogout(event) {
-                event.preventDefault(); // Prevent the default link behavior
+                event.preventDefault();
                 Swal.fire({
                     title: 'Are you sure?',
                     text: "Do you really want to log out?",
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
                     confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
                     customClass: {
-                        popup: 'custom-swal-popup',
-                        confirmButton: 'custom-swal-confirm',
-                        cancelButton: 'custom-swal-cancel'
-                    }
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = 'roleaccount.php'; // Redirect to the logout page
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('college-logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
                     }
                 });
             }
 
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, '', window.location.href);
+                };
+            }
+
+            // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
-            var dropdownMenu = document.querySelector('.dropdown-menu');
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+                const dropdown = this.querySelector('.dropdown-menu');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
             });
 
-            // Optional: Close the dropdown if clicking outside the profile area
-            window.onclick = function(event) {
-                if (!event.target.closest('#profileDropdown')) {
-                    var dropdownMenu = document.querySelector('.dropdown-menu');
-                    if (dropdownMenu.style.display === 'block') {
-                        dropdownMenu.style.display = 'none';
+            // Close dropdown if clicked outside
+            window.addEventListener('click', function(event) {
+                if (!document.getElementById('profileDropdown').contains(event.target)) {
+                    const dropdown = document.querySelector('.dropdown-menu');
+                    if (dropdown) {
+                        dropdown.style.display = 'none';
                     }
                 }
-            }; 
+            });
 
-            var dropdowns = document.getElementsByClassName("dropdown-btn");
-
-            for (let i = 0; i < dropdowns.length; i++) {
-                dropdowns[i].addEventListener("click", function () {
-                    // Close all dropdowns first
-                    let dropdownContents = document.getElementsByClassName("dropdown-container");
-                    for (let j = 0; j < dropdownContents.length; j++) {
-                        dropdownContents[j].style.display = "none";
-                    }
-
-                    // Toggle the clicked dropdown's visibility
-                    let dropdownContent = this.nextElementSibling;
-                    if (dropdownContent.style.display === "block") {
-                        dropdownContent.style.display = "none";
-                    } else {
-                        dropdownContent.style.display = "block";
-                    }
-                });
+            function logAction(actionDescription) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "college_logs.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.send("action=" + encodeURIComponent(actionDescription));
             }
+
+            function logAndRedirect(actionDescription, url) {
+                logAction(actionDescription); // Log the action
+                setTimeout(function() {
+                    window.location.href = url; // Redirect after logging
+                }, 100); // Delay to ensure logging completes
+            }
+
+            // Add event listeners when the page is fully loaded
+            document.addEventListener("DOMContentLoaded", function() {
+                // Log clicks on main menu links
+                document.querySelectorAll(".menu > li > a").forEach(function(link) {
+                    link.addEventListener("click", function() {
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+                // Handle dropdown button clicks
+                var dropdowns = document.getElementsByClassName("dropdown-btn");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].addEventListener("click", function () {
+                        let dropdownContents = document.getElementsByClassName("dropdown-container");
+                        for (let j = 0; j < dropdownContents.length; j++) {
+                            dropdownContents[j].style.display = "none";
+                        }
+                        let dropdownContent = this.nextElementSibling;
+                        if (dropdownContent.style.display === "block") {
+                            dropdownContent.style.display = "none";
+                        } else {
+                            dropdownContent.style.display = "block";
+                        }
+                    });
+                }
+
+                // Log clicks on dropdown links
+                document.querySelectorAll(".dropdown-container a").forEach(function(link) {
+                    link.addEventListener("click", function(event) {
+                        event.stopPropagation();
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+            // Log clicks on the "Profile" link
+            document.querySelector('.dropdown-menu a[href="coed-your-profile.php"]').addEventListener("click", function() {
+                logAction("Profile");
+            });
+        });
 
             // JavaScript code for context menu actions
             const contextMenu = document.getElementById('contextMenu');
@@ -736,12 +931,14 @@ $conn_mov->close();
                 });
             });
 
-            // Attach event listeners to folder items
-            document.querySelectorAll('.folder-item').forEach(folderItem => {
-                folderItem.addEventListener('contextmenu', function(event) {
-                    handleContextMenu(event, folderItem.getAttribute('data-folder'));
+           // Attach event listeners to all items (images and PDFs)
+            document.querySelectorAll('.image-item').forEach(item => {
+                item.addEventListener('contextmenu', function(event) {
+                    const itemPath = item.getAttribute('data-image') || item.getAttribute('data-pdf'); // Handle both images and PDFs
+                    handleContextMenu(event, itemPath);
                 });
             });
+
 
             // Hide context menu when clicking anywhere else
             window.addEventListener('click', function(event) {
@@ -750,7 +947,6 @@ $conn_mov->close();
                 }
             });
 
-            // Restore action
             document.getElementById('restoreImage').onclick = function() {
                 contextMenu.style.display = 'none'; // Hide context menu
                 Swal.fire({
@@ -768,6 +964,9 @@ $conn_mov->close();
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        const selectedItemName = selectedItemPath.split('/').pop(); // Get the file name
+                        console.log("Restoring file:", selectedItemName);
+
                         // Create a hidden form for restoring the item
                         const form = document.createElement('form');
                         form.method = 'POST';
@@ -778,25 +977,19 @@ $conn_mov->close();
                         actionInput.name = 'action';
                         actionInput.value = 'restore_image';
 
-                        const itemPathInput = document.createElement('input');
-                        itemPathInput.type = 'hidden';
-                        itemPathInput.name = 'item_path'; // Generic name for both images and folders
-                        itemPathInput.value = selectedItemPath;
-
-                        // Assuming you have logic to fetch the original folder name
-                        const originalFolderInput = document.createElement('input');
-                        originalFolderInput.type = 'hidden';
-                        originalFolderInput.name = 'original_folder';
-                        originalFolderInput.value = 'movuploads/'; // Update this if the folder path changes
+                        const restoreFileInput = document.createElement('input');
+                        restoreFileInput.type = 'hidden';
+                        restoreFileInput.name = 'restore_file';
+                        restoreFileInput.value = selectedItemName;
 
                         form.appendChild(actionInput);
-                        form.appendChild(itemPathInput);
-                        form.appendChild(originalFolderInput);
+                        form.appendChild(restoreFileInput);
                         document.body.appendChild(form);
                         form.submit(); // Submit the form
                     }
                 });
             };
+
 
             // Delete action
             document.getElementById('deleteImage').onclick = function() {
@@ -882,6 +1075,26 @@ $conn_mov->close();
                 });
                 <?php unset($_SESSION['error_message']); ?>
             <?php endif; ?>
+
+            document.addEventListener("DOMContentLoaded", () => {
+                function checkNotifications() {
+                    fetch('coed-check_notifications.php')
+                        .then(response => response.json())
+                        .then(data => {
+                            const chatNotification = document.getElementById('chatNotification');
+                            if (data.unread_count > 0) {
+                                chatNotification.style.display = 'inline-block';
+                            } else {
+                                chatNotification.style.display = 'none';
+                            }
+                        })
+                        .catch(error => console.error('Error checking notifications:', error));
+                }
+
+                // Check for notifications every 2 seconds
+                setInterval(checkNotifications, 2000);
+                checkNotifications(); // Initial check when page loads
+            });
         </script>
     </body>
 </html>

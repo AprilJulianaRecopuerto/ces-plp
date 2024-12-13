@@ -3,128 +3,62 @@ session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
-    header("Location: collegelogin.php");
+    // Redirect to login page if the session variable is not set
+    header("Location: roleaccount.php");
     exit;
 }
 
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "budget_utilization";
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+// Load Composer's autoloader
+require 'vendor/autoload.php';
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// Database credentials for proj_list and user_registration databases
+$servername = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_db = "zf8r3n4qqjyrfx7o"; // MySQL username (e.g., root for local development)
+$password_db = "su6qmqa0gxuerg98"; // MySQL password (e.g., empty for local development)
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
+// Create connection to the proj_list database
+$conn_proj_list = new mysqli($servername, $username_db, $password_db, $dbname_proj_list);
+
+// Check connection for the proj_list database
+if ($conn_proj_list->connect_error) {
+    die("Connection failed: " . $conn_proj_list->connect_error);
 }
 
-// Get the project ID from the URL
-$project_id = $_GET['id'];
+$sn_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_ur = "equ6v8i5llo3uhjm"; // MySQL username (e.g., root for local development)
+$pass_ur = "vkfaxm2are5bjc3q"; // MySQL password (e.g., empty for local development)
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
-// Fetch the current project details from the database
-$query = "SELECT * FROM coed_budget WHERE id = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $project_id);
+
+// Fetch the profile picture from the colleges table in user_registration
+$conn_profile = new mysqli($sn_ur, $username_ur, $pass_ur, $dbname_user_registration);  
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
+}
+
+$uname = $_SESSION['uname'];
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $uname);
 $stmt->execute();
-$result = $stmt->get_result();
-$project = $result->fetch_assoc();
+$result_profile = $stmt->get_result();
 
-// Check if project exists
-if (!$project) {
-    $_SESSION['error'] = "Project not found.";
-    header("Location: coed-edit-budget.php");
-    exit();
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
 }
 
-// Get the total budget and expenses for the specific project
-$total_budget = floatval($project['total_budget']); // Total budget of the specific project
-$total_expenses = floatval($project['total_expenses']); // Total expenses of the specific project
-$remaining_balance = floatval($project['remaining_balance']); // Remaining balance
-
-// Check if the form is submitted
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Get form values
-    $semester = $_POST['semester'];
-    $project_title = $_POST['project_title'];
-    $district = $_POST['district'];
-    $barangay = $_POST['barangay'];
-    $new_total_expenses = floatval($_POST['total_expenses']); // New total expenses from the form
-
-    // Check if there are changes
-    if ($semester === $project['semester'] &&
-        $project_title === $project['project_title'] &&
-        $district === $project['district'] &&
-        $barangay === $project['barangay'] &&
-        $new_total_expenses === $total_expenses) {
-
-        // No changes made
-        $_SESSION['warning'] = "No changes were made to the project.";
-        header("Location: coed-edit-budget.php?id=" . $project_id); // Redirect with project ID
-        exit();
-    }
-
-    // Calculate the new remaining balance for the current project
-    $new_remaining_balance = $total_budget - $new_total_expenses;
-
-    // Update the current project with new fields and the calculated remaining balance
-    $query = "UPDATE coed_budget SET semester = ?, project_title = ?, district = ?, barangay = ?, total_expenses = ?, remaining_balance = ? WHERE id = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("ssssdii", $semester, $project_title, $district, $barangay, $new_total_expenses, $new_remaining_balance, $project_id);
-    
-    // Execute the statement
-    if ($stmt->execute()) {
-        // Update total budgets of subsequent projects based on the new remaining balance
-        $query = "SELECT id, total_budget, remaining_balance FROM coed_budget WHERE id > ? ORDER BY id ASC";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("i", $project_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        // Update budgets of subsequent projects
-        while ($subsequent_project = $result->fetch_assoc()) {
-            $subsequent_id = $subsequent_project['id'];
-            $subsequent_remaining_balance = floatval($subsequent_project['remaining_balance']);
-            $subsequent_total_budget = floatval($subsequent_project['total_budget']);
-
-            // Update total budget of the subsequent project to the new remaining balance
-            $query = "UPDATE coed_budget SET total_budget = ? WHERE id = ?";
-            $stmt = $conn->prepare($query);
-            $stmt->bind_param("di", $new_remaining_balance, $subsequent_id);
-            $stmt->execute();
-
-            // Calculate the new remaining balance for the subsequent project
-            $new_remaining_balance -= $subsequent_project['total_expenses'];
-
-            // Stop updating if the remaining balance becomes zero or negative
-            if ($new_remaining_balance <= 0) {
-                break;
-            }
-        }
-
-        // Delete subsequent projects with zero remaining balance
-        $query = "DELETE FROM coed_budget WHERE id > ? AND remaining_balance <= 0";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("i", $project_id);
-        $stmt->execute();
-
-        $_SESSION['success'] = "Project updated successfully.";
-        header("Location: coed-edit-budget.php?id=" . $project_id);
-        exit();
-    } else {
-        $_SESSION['error'] = "Error updating project.";
-        header("Location: coed-edit-budget.php?id=" . $project_id);
-        exit();
-    }
-}
-
-// Close the database connection
-$conn->close();
+$stmt->close();
+$conn_profile->close();
 ?>
 
+
 <!DOCTYPE html>
-<html lang="en">
+    <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -364,12 +298,12 @@ $conn->close();
                 color: white; /* Change text color */
             }
 
-            .content-projectlist {
+            .content-budget {
                 margin-left: 320px; /* Align with the sidebar */
                 padding: 20px;
             }
 
-            .content-projectlist h2 {
+            .content-budget h2 {
                 font-family: 'Poppins', sans-serif;
                 font-size: 28px; /* Adjust the font size as needed */
                 margin-bottom: 20px; /* Space below the heading */
@@ -402,912 +336,8 @@ $conn->close();
                 margin-bottom: 5px;
             }
 
-            .form-group select, .form-group input[type="text"], .form-group input[type="date"], .form-group input[type="time"] {
-                width: 100%;
-                padding: 8px;
-                border: 1px solid #ddd;
-                border-radius: 5px;
-                font-size: 16px;
-                box-sizing: border-box;
-                font-family: 'Poppins', sans-serif;
-            }
-
-            .form-group input::placeholder {
-                font-family: 'Poppins', sans-serif;
-                color: #999;
-                font-style: italic;
-            }
-
-            .form-group select {
-                background: #f9f9f9;
-            }
-
-            .button-container {
-                display: flex;
-                justify-content: flex-end; /* Align buttons to the right */
-                margin-top: 20px; /* Space above the buttons */
-            }
-
-            .button-container button {
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-
-            .button-container button:hover {
-                background-color: #45a049; /* Darker green on hover */
-            }
-
-            .custom-swal-popup {
-                font-family: 'Poppins', sans-serif;
-                width: 400px !important; /* Set a larger width */
-            }
-
-            .custom-swal-title {
-                font-family: 'Poppins', sans-serif;
-                color: #3085d6; /* Custom title color */
-            }
-
-            .custom-swal-confirm {
-                font-family: 'Poppins', sans-serif;
-                font-size: 17px;
-                background-color: #089451;
-                border: 0.5px #089451 !important;
-                color: #fff;
-                border-radius: 10px;
-                cursor: pointer;
-                outline: none !important; /* Remove default focus outline */
-            }
-
-            .custom-swal-cancel {
-                font-family: 'Poppins', sans-serif;
-                font-size: 17px;
-                background-color: #e74c3c;
-                color: #fff;
-                border-radius: 10px;
-                cursor: pointer;
-                outline: none; /* Remove default focus outline */
-            }
-
-            .custom-error-popup {
-                font-family: 'Poppins', sans-serif;
-                width: 400px !important; /* Set a larger width */
-            }
-
-            .custom-error-title {
-                font-family: 'Poppins', sans-serif;
-                color: #e74c3c; /* Custom title color for error */
-            }
-
-            .custom-error-confirm {
-                font-family: 'Poppins', sans-serif;
-                font-size: 17px;
-                background-color: #e74c3c;
-                color: #fff;
-                border-radius: 10px;
-                cursor: pointer;
-                outline: none; /* Remove default focus outline */
-            }
-
-            .form-text.text-muted {
-                font-size: 0.875rem; /* Adjust the font size */
-                color: #6c757d; /* Bootstrap's muted color */
-                margin-top: 0.25rem; /* Space above the text */
-            }
-
-            input[type="file"] {
-                font-family: 'Poppins', sans-serif;
-                display: block;
-                width: 100%;
-                height: 38px;
-                margin-top: 5px;
-                padding: 0;
-                border: 1px solid #ced4da;
-                border-radius: 4px;
-                font-size: 16px;
-                color: #495057;
-                background-color: #fff;
-                background-clip: padding-box;
-                transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-            }
-
-            input[type="file"]::file-selector-button {
-                font-family: 'Poppins', sans-serif;
-                width: 120px;
-                padding: 6px 12px;
-                margin-right: 10px;
-                background-color: #3085d6; /* Custom background color */
-                color: white;
-                border: 1px solid #3085d6;;
-                border-radius: 4px;
-                cursor: pointer;
-            }
-
-            input[type="file"]::file-selector-button:hover {
-                background-color: #2579a8;
-            }
-
-            .form-group {
-                margin-bottom: 15px;
-            }
-
-            .form-text {
-                margin-top: 5px;
-                font-size: 0.875em;
-                color: #6c757d;
-            }
-
-            /* Custom styles for SweetAlert error popup */
-            .custom-warning-popup {
-                font-family: 'Poppins', sans-serif;
-                width: 400px !important; /* Set a larger width */
-            }
-
-            .custom-warning-title {
-                font-family: 'Poppins', sans-serif;
-                color: #e74c3c; /* Custom title color for error */
-            }
-
-            .custom-warning-confirm {
-                font-family: 'Poppins', sans-serif;
-                font-size: 17px;
-                background-color: #089451;
-                color: #fff;
-                border-radius: 10px;
-                cursor: pointer;
-                outline: none; /* Remove default focus outline */
-            }
-
-            .custom-warning-cancel {
-                font-family: 'Poppins', sans-serif;
-                font-size: 17px;
-                background-color: #e74c3c;
-                color: #fff;
-                border-radius: 10px;
-                cursor: pointer;
-                outline: none; /* Remove default focus outline */
-            }
-
-        </style>
-    </head>
-
-    <body>
-    <nav class="navbar">
-            <h2>Edit Budget</h2> 
-
-            <div class="profile" id="profileDropdown">
-                <?php
-                    // Check if a profile picture is set in the session
-                    if (!empty($_SESSION['picture'])) {
-                        // Show the profile picture
-                        echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
-                    } else {
-                        // Get the first letter of the username for the placeholder
-                        $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
-                        echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
-                    }
-                ?>
-
-                <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
-
-                <i class="fa fa-chevron-down dropdown-icon"></i>
-                <div class="dropdown-menu">
-                    <a href="coed-your-profile.php">Profile</a>
-                    <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
-                </div>
-            </div>
-        </nav>
-        
-        <div class="sidebar">
-            <div class="logo">
-                <img src="images/logo.png" alt="Logo">
-            </div>
-
-            <ul class="menu">
-                <li><a href="coed-dash.php"><img src="images/home.png">Dashboard</a></li>
-                <li><a href="coed-projlist.php"><img src="images/project-list.png">Project List</a></li>
-                <li><a href="coed-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
-
-                <!-- Dropdown for Resource Utilization -->
-                <button class="dropdown-btn">
-                    <img src="images/resource.png"> Resource Utilization
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="coed-tor.php">Term of Reference</a>
-                    <a href="coed-requi.php">Requisition</a>
-                    <a href="coed-venue.php">Venue</a>
-                </div>
-
-                <li><a href="coed-budget-utilization.php" class="active"><img src="images/budget.png">Budget Allocation</a></li>
-
-                <!-- Dropdown for Task Management -->
-                <button class="dropdown-btn">
-                    <img src="images/task.png">Task Management
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="coed-task.php">Upload Files</a>
-                    <a href="coed-mov.php">Mode of Verification</a>
-                </div>
-
-                <li><a href="responses.php"><img src="images/setting.png">Responses</a></li>
-
-                <!-- Dropdown for Audit Trails -->
-                <button class="dropdown-btn">
-                    <img src="images/resource.png"> Audit Trails
-                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
-                </button>
-                <div class="dropdown-container">
-                    <a href="coed-login.php">Log In History</a>
-                    <a href="coed-activitylogs.php">Activity Logs</a>
-                </div>
-            </ul>
-        </div>
-
-        <div class="content-projectlist">
-            <div class="form-container">
-                <h3>Project Details</h3>
-                
-                <form action="" method="POST" enctype="multipart/form-data">
-
-                    <div class="form-group">
-                        <label for="id">Project ID:</label>
-                        <input type="text" name="id" id="id" value="<?php echo htmlspecialchars($project['id']); ?>" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="dept">Department:</label>
-                        <input type="text" id="department" name="department" value="College of Education" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="semester">Semester:</label>
-                        <select name="semester" id="semester" required>
-                            <option value="1st Semester" <?php echo $project['semester'] == '1st Semester' ? 'selected' : ''; ?>>1st Semester</option>
-                            <option value="2nd Semester" <?php echo $project['semester'] == '2nd Semester' ? 'selected' : ''; ?>>2nd Semester</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="project_title">Project Title:</label>
-                        <input type="text" name="project_title" value="<?php echo htmlspecialchars($project['project_title']); ?>" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="district">District:</label>
-                        <select name="district" id="district" required>
-                            <option value="District 1" <?php echo $project['district'] == 'District 1' ? 'selected' : ''; ?>>District 1</option>
-                            <option value="District 2" <?php echo $project['district'] == 'District 2' ? 'selected' : ''; ?>>District 2</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="barangay">Barangay:</label>
-                        <select id="barangay" name="barangay" required>
-                            
-                            <?php foreach ($barangay as $barangay): ?>
-                                <option value="<?php echo htmlspecialchars($barangay['id']); ?>" <?php echo ($barangay['id'] == $project['barangay']) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($barangay['name']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="total_budget">Total Budget:</label>
-                        <?php 
-                            // Format total budget for display
-                            $formatted_total_budget = number_format($total_budget, 2);
-                        ?>
-                        <input type="text" id="total_budget" name="total_budget" value="<?php echo htmlspecialchars($formatted_total_budget, ENT_QUOTES, 'UTF-8'); ?>" readonly>
-                        <p>You have a total budget of: <strong><?php echo htmlspecialchars($formatted_total_budget, ENT_QUOTES, 'UTF-8'); ?></strong></p>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="total_expenses">Total Expenses:</label>
-                        <?php if ($remaining_balance <= 0): ?>
-                            <p><strong>You have no remaining balance.</strong></p>
-                        <?php else: ?>
-                            <input type="text" id="total_expenses" name="total_expenses" 
-                            value="<?php echo isset($total_expenses) ? htmlspecialchars($total_expenses, ENT_QUOTES, 'UTF-8') : ''; ?>" required>
-                        <?php endif; ?>
-                    </div>
-                    
-                    <div class="button-container">
-                        <button type="submit">Update Budget</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <script>
-            // Function to update barangays based on the selected district
-            function updateBarangays(selectedBarangay = '') {
-                const district = document.getElementById('district').value;
-                const barangaySelect = document.getElementById('barangay');
-
-                // Clear existing options
-                barangaySelect.innerHTML = '';
-
-                let barangays = [];
-
-                if (district === 'District 1') {
-                    barangays = [
-                        'Bagong Ilog', 'Bagong Katipunan', 'Bambang', 'Buting', 'Caniogan',
-                        'Kalawaan', 'Kapasigan', 'Kapitolyo', 'Malinao', 'Oranbo',
-                        'Palatiw', 'Pineda', 'Sagad', 'San Antonio', 'San Joaquin',
-                        'San Jose', 'San Nicolas', 'Sta. Cruz', 'Sta. Rosa', 'Sto. Tomas',
-                        'Sumilang', 'Ugong'
-                    ];
-                } else if (district === 'District 2') {
-                    barangays = [
-                        'Dela Paz', 'Manggahan', 'Maybunga', 'Pinagbuhatan', 'Rosario',
-                        'San Miguel', 'Sta. Lucia', 'Santolan'
-                    ];
-                }
-
-                // Add default option
-                const defaultOption = document.createElement('option');
-                defaultOption.value = '';
-                defaultOption.disabled = true;
-                defaultOption.selected = true;
-                defaultOption.textContent = 'Select Barangay';
-                barangaySelect.appendChild(defaultOption);
-
-                // Add new options and select the correct barangay
-                barangays.forEach(barangay => {
-                    const option = document.createElement('option');
-                    option.value = barangay;
-                    option.textContent = barangay;
-
-                    // Check if this barangay is the one selected for editing
-                    if (barangay === selectedBarangay) {
-                        option.selected = true; // Select this option if it matches
-                    }
-
-                    barangaySelect.appendChild(option);
-                });
-            }
-
-            // Function to initialize barangay options on page load, if editing
-            document.addEventListener('DOMContentLoaded', () => {
-                const initialDistrict = document.getElementById('district').value;
-                const selectedBarangay = '<?php echo htmlspecialchars($project['barangay']); ?>'; // Get the selected barangay from PHP
-                console.log('Selected Barangay:', selectedBarangay); // Debugging line
-                updateBarangays(selectedBarangay); // Pass the selected barangay to the function
-            });
-
-            // Optional: Update barangays when the district changes
-            document.getElementById('district').addEventListener('change', () => {
-                updateBarangays(); // Call this without the selected barangay when changing district
-            });
-
-            document.addEventListener('DOMContentLoaded', (event) => {
-                // Function to show success alert
-                function showSuccessAlert(message) {
-                Swal.fire({
-                    title: 'Success',
-                    text: message,
-                    icon: 'success',
-                    confirmButtonColor: '#089451',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                            popup: 'custom-swal-popup',
-                            title: 'custom-swal-title',
-                            confirmButton: 'custom-swal-confirm'
-                        }
-                }).then(() => {
-                    window.location.href = "coed-budget-utilization.php"; // Redirect to the project list
-                });
-            }
-
-            function showErrorAlert(message) {
-                Swal.fire({
-                    title: 'Error',
-                    text: message,
-                    icon: 'error',
-                    confirmButtonColor: '#e74c3c',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                            popup: 'custom-error-popup',
-                            title: 'custom-error-title',
-                            confirmButton: 'custom-error-confirm'
-                        }
-                });
-            }
-
-            function showWarningAlert(message) {
-                Swal.fire({
-                    title: 'Warning',
-                    text: message,
-                    icon: 'warning',
-                    showCancelButton: true, // Show cancel button
-                    confirmButtonText: 'OK',
-                    cancelButtonText: 'Cancel',
-                    customClass: {
-                        popup: 'custom-warning-popup',
-                        title: 'custom-warning-title',
-                        confirmButton: 'custom-warning-confirm',
-                        cancelButton: 'custom-warning-cancel' 
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Redirect to coed-projlist.php
-                        window.location.href = 'coed-budget-utilization.php';
-                    }
-                    // If Cancel is clicked, do nothing (stay on coed-editproj.php)
-                });
-            }
-
-            // Check for warning message and show alert
-            <?php if (isset($_SESSION['warning'])) : ?>
-                showWarningAlert('<?php echo $_SESSION['warning']; ?>');
-                <?php unset($_SESSION['warning']); // Unset the session variable ?>
-            <?php endif; ?>
-
-            // Check for success message and show alert
-            <?php if (isset($_SESSION['success'])) : ?>
-                showSuccessAlert('<?php echo $_SESSION['success']; ?>');
-                <?php unset($_SESSION['success']); // Unset the session variable ?>
-            <?php endif; ?>
-
-            // Check for error message and show alert
-            <?php if (isset($_SESSION['error'])) : ?>
-                showErrorAlert('<?php echo $_SESSION['error']; ?>');
-                <?php unset($_SESSION['error']); // Unset the session variable ?>
-            <?php endif; ?>
-            });
-            
-            function confirmLogout(event) {
-                event.preventDefault(); // Prevent the default link behavior
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "Do you really want to log out?",
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, log me out',
-                    customClass: {
-                        popup: 'custom-swal-popup',
-                        confirmButton: 'custom-swal-confirm',
-                        cancelButton: 'custom-swal-cancel'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = 'roleaccount.php'; // Redirect to the logout page
-                    }
-                });
-            }
-
-            document.getElementById('profileDropdown').addEventListener('click', function() {
-            var dropdownMenu = document.querySelector('.dropdown-menu');
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-            });
-
-            // Optional: Close the dropdown if clicking outside the profile area
-            window.onclick = function(event) {
-                if (!event.target.closest('#profileDropdown')) {
-                    var dropdownMenu = document.querySelector('.dropdown-menu');
-                    if (dropdownMenu.style.display === 'block') {
-                        dropdownMenu.style.display = 'none';
-                    }
-                }
-            };
-
-            document.addEventListener('DOMContentLoaded', () => {
-            // Add change event listeners to file inputs
-            document.getElementById('budget').addEventListener('change', validateBudgetFile);
-            document.getElementById('tor').addEventListener('change', validateTorFile);
-            });
-
-            function validateBudgetFile() {
-                const budgetFile = this.files[0];
-                const allowedTypes = /(\.docx|\.pdf|\.xls|\.xlsx)$/i;
-                
-
-                if (budgetFile) {
-                    if (!allowedTypes.test(budgetFile.name)) {
-                        Swal.fire({
-                            icon: "error",
-                            title: 'Invalid File Type',
-                            text: 'Budget file must be a DOCX, PDF, XLS, or XLSX file.',
-                            confirmButtonText: 'OK',
-                            customClass: {
-                                popup: 'custom-error-popup',
-                                title: 'custom-error-title',
-                                text: 'custom-error-text',
-                                confirmButton: 'custom-error-confirm'
-                            }
-                        });
-                        this.value = ''; // Clear the input
-                    }
-                }
-            }
-
-            function validateTorFile() {
-                const torFile = this.files[0];
-                const allowedTypes = /(\.docx|\.pdf|\.xls|\.xlsx)$/i;
-
-                if (torFile) {
-                    if (!allowedTypes.test(torFile.name)) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Invalid File Type',
-                            text: 'TOR file must be a DOCX, PDF, XLS, or XLSX file.',
-                            confirmButtonText: 'OK',
-                            customClass: {
-                                popup: 'custom-error-popup',
-                                title: 'custom-error-title',
-                                text: 'custom-error-text',
-                                confirmButton: 'custom-error-confirm'
-                            }
-                        });
-                        this.value = ''; // Clear the input
-                    } 
-                }
-            }
-
-            var dropdowns = document.getElementsByClassName("dropdown-btn");
-
-            for (let i = 0; i < dropdowns.length; i++) {
-                dropdowns[i].addEventListener("click", function () {
-                    // Close all dropdowns first
-                    let dropdownContents = document.getElementsByClassName("dropdown-container");
-                    for (let j = 0; j < dropdownContents.length; j++) {
-                        dropdownContents[j].style.display = "none";
-                    }
-
-                    // Toggle the clicked dropdown's visibility
-                    let dropdownContent = this.nextElementSibling;
-                    if (dropdownContent.style.display === "block") {
-                        dropdownContent.style.display = "none";
-                    } else {
-                        dropdownContent.style.display = "block";
-                    }
-                });
-            }
-        </script>
-    </body>
-</html>
-<?php
-session_start();
-
-// Check if the user is logged in
-if (!isset($_SESSION['uname'])) {
-    header("Location: collegelogin.php");
-    exit;
-}
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Get form inputs
-    $semester = $_POST['semester'];
-    $department = $_POST['department'];
-    $project_title = $_POST['project_title'];
-    $district = $_POST['district'];
-    $barangay = $_POST['barangay'];
-
-    // Directory for uploads
-    $target_dir = "uploadsfile/";
-
-    // Allowed file types for both budget and TOR
-    $allowed_types = array("docx", "pdf", "xls", "xlsx");
-    $image_types = array("jpeg", "jpg", "png", "jfif", "gif");
-
-    // Handling budget file upload
-    if (isset($_FILES["budget"]) && $_FILES["budget"]["error"] == 0) {
-        $budget_full_path = $target_dir . basename($_FILES["budget"]["name"]);
-        $budget_file_type = strtolower(pathinfo($budget_full_path, PATHINFO_EXTENSION));
-
-
-        // Move the uploaded budget file
-        if (!move_uploaded_file($_FILES["budget"]["tmp_name"], $budget_full_path)) {
-            $_SESSION['error'] = "There was an error uploading the budget file.";
-            header("Location: coed-add-budget.php");
-            exit;
-        }
-
-        // Get only the file name, not the full path
-        $budget = basename($_FILES["budget"]["name"]);
-    } else {
-        $_SESSION['error'] = "No budget file uploaded.";
-        header("Location: coed-add-budget.php");
-        exit;
-    }
-
-    // Handling TOR file upload
-    if (isset($_FILES["tor"]) && $_FILES["tor"]["error"] == 0) {
-        $tor_full_path = $target_dir . basename($_FILES["tor"]["name"]);
-        $tor_file_type = strtolower(pathinfo($tor_full_path, PATHINFO_EXTENSION));
-
-        // Move the uploaded TOR file
-        if (!move_uploaded_file($_FILES["tor"]["tmp_name"], $tor_full_path)) {
-            $_SESSION['error'] = "There was an error uploading the TOR file.";
-            header("Location: coed-add-budget.php");
-            exit;
-        }
-
-        // Get only the file name, not the full path
-        $tor = basename($_FILES["tor"]["name"]);
-    } else {
-        $_SESSION['error'] = "No TOR file uploaded.";
-        header("Location: coed-add-budget.php");
-        exit;
-    }
-
-    // Database connection
-    $db_host = "localhost";
-    $db_user = "root";
-    $db_pass = "";
-    $db_name = "budget-utili";
-
-    $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
-
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
-    // Insert the form and file data into the database, now only storing the file name
-    $sql = "INSERT INTO coed_budget (semester, department, project_title, district, barangay, budget, tor) 
-            VALUES ('$semester', '$department', '$project_title', '$district', '$barangay', '$budget', '$tor')";
-
-    if ($conn->query($sql) === TRUE) {
-        $_SESSION['success'] = "New record successfully added!";
-    } else {
-        $_SESSION['error'] = "Error saving your project data: " . $conn->error;
-    }
-
-    $conn->close();
-
-    header("Location: coed-add-budget.php");
-    exit;
-}
-
-?>
-
-
-<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        
-        <title>CES PLP</title>
-
-        <link rel="icon" href="images/logoicon.png">
-
-        <!-- SweetAlert CSS and JavaScript -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;1,500&display=swap');
-            @import url('https://fonts.cdnfonts.com/css/glacial-indifference-2');
-            @import url('https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500&display=swap');
-
-            body {
-                margin: 0;
-                background-color: #F6F5F5; /* Light gray background color */
-                font-family: 'Poppins', sans-serif;
-            }
-
-            .navbar {
-                background-color: #E7F0DC; /* Dirty white color */
-                color: black;
-                padding: 10px;
-                display: flex;
-                justify-content: space-between; /* Space between heading and profile */
-                align-items: center;
-                position: fixed;
-                width: calc(96.2% - 250px); /* Adjusted width considering the sidebar */
-                height: 80px;
-                margin-left: 290px; /* Align with the sidebar */
-                border-radius: 10px;
-                z-index: 5;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Added box shadow */
-            }
-
-            .navbar h2 {
-                font-family: "Glacial Indifference", sans-serif;
-                margin: 0; /* Remove default margin */
-                font-size: 32px; /* Adjust font size if needed */
-                color: black; /* Set text color */
-                margin-left: 20px;
-            }
-
-            .profile {
-                position: relative;
-                display: flex;
-                align-items: center;
-                cursor: pointer;
-                margin-right: 20px; /* Space from the right edge */
-            }
-
-            .profile img, .profile-placeholder {
-                width: 50px;
-                height: 50px;
-                border-radius: 50%;
-                margin-right: 10px;
-            }
-
-            .profile-placeholder {
-                font-family: "Poppins", sans-serif;
-                width: 50px; /* Adjust as needed */
-                height: 50px;
-                border-radius: 50%;
-                background-color: #ccc; /* Placeholder background color */
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 24px; /* Adjust text size */
-                color: green;
-                font-weight: bold;
-                margin-right: 20px; /* Space between profile picture and name */
-            }
-
-            span {
-                font-family: "Poppins", sans-serif;
-                font-size: 17px;
-                color: black; /* Set text color */
-                white-space: nowrap; /* Prevent line breaks */
-                overflow: hidden; /* Hide overflow */
-                text-overflow: ellipsis; /* Show ellipsis if the text overflows */
-                flex-grow: 1; /* Allow the username to take available space */
-            }
-
-            .dropdown-icon {
-                width:22px !important; /* Adjust size of the down-arrow icon */
-                height: 15px !important;
-                margin-left: 10px; /* Space between name and icon */
-            }
-
-            .dropdown-menu {
-                font-family: "Poppins", sans-serif;
-                display: none; /* Hidden by default */
-                position: absolute;
-                width: 198px;
-                top: 60px; /* Adjust based on the profile's height */
-                right: 0;
-                background-color: white;
-                border: 1px solid #ccc;
-                border-radius: 10px;
-                padding: 10px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                z-index: 1;
-            }
-
-            .dropdown-menu a {
-                text-decoration: none;
-                border-radius: 10px;
-                color: black;
-                display: block;
-                padding: 10px;
-            }
-
-            .dropdown-menu a:hover {
-                background-color: #218838;
-                color: white;
-            }
-
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 100%;
-                width: 250px;
-                background-color: #FFF8A5; /* Light yellow */
-                color: black;
-                padding: 20px;
-                z-index: 1000;
-                box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Added box shadow */
-            }
-
-            .logo {
-                display: flex;
-                align-items: center;
-                margin-bottom: 30px; /* Increased margin bottom */
-            }
-
-            .logo img {
-                height: 100px; /* Increased logo size */
-                margin-right: 15px; /* Adjusted margin */
-            }
-
-            .logo span {
-                font-size: 30px; /* Increased font size */
-                margin-left:-15px;
-                font-family: 'Glacial Indifference', sans-serif;
-                font-weight: bold;
-            }
-
-            .menu {
-                list-style: none;
-                padding: 0;
-                margin: 0;
-            }
-
-            .menu li {
-                margin: 6px 0; /* Increased margin for spacing between items */
-                display: flex;
-                align-items: center;
-            }
-
-            .menu a {
-                color: black;
-                text-decoration: none;
-                display: flex;
-                align-items: center;
-                padding: 15px; /* Increased padding for better click area */
-                border-radius: 5px; /* Increased border-radius for rounded corners */
-                width: 100%;
-                font-size: 17px; /* Increased font size */
-                font-family: 'Poppins', sans-serif;
-            }
-
-            .menu a:hover {
-                background-color: #22901C;
-                transition: 0.3s;
-                color: white; /* Ensure the text color is white when hovered */
-            }
-
-            .menu img {
-                height: 30px; /* Increased icon size */
-                margin-right: 15px; /* Adjusted space between icon and text */
-            }
-
-            .menu .signout {
-                margin-top: 35px; /* Pushes Sign Out to the bottom of the sidebar */
-            }
-
-            .content-projectlist {
-                margin-left: 310px; /* Align with the sidebar */
-                padding: 20px;
-            }
-
-            .content-projectlist h2 {
-                font-family: 'Poppins', sans-serif;
-                font-size: 28px; /* Adjust the font size as needed */
-                margin-bottom: 20px; /* Space below the heading */
-                color: black; /* Adjust text color */
-                margin-top: 110px;
-            }
-
-            .form-container {
-                margin-left: -20px;
-                margin-top:110px;
-                background-color: #ffffff;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            }
-
-            .form-container h3 {
-                margin-top: 0;
-                font-family: 'Poppins', sans-serif;
-                font-size: 24px;
-                color: black;
-            }
-
-            .form-group {
-                margin-bottom: 15px;
-            }
-
-            .form-group label {
-                display: block;
-                font-weight: bold;
-                margin-bottom: 5px;
-            }
-
-            .form-group select, .form-group input[type="text"], .form-group input[type="date"], .form-group input[type="time"] {
+            .form-group select, .form-group input[type="text"], .form-group input[type="date"], 
+            .form-group input[type="time"], .form-group input[type="number"] {
                 width: 100%;
                 padding: 8px;
                 border: 1px solid #ddd;
@@ -1356,11 +386,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 width: 400px !important; /* Set a larger width */
             }
 
-            .custom-swal-title {
-                font-family: 'Poppins', sans-serif;
-                color: #3085d6; /* Custom title color */
-            }
-
             .custom-swal-confirm {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
@@ -1387,11 +412,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 width: 400px !important; /* Set a larger width */
             }
 
-            .custom-error-title {
-                font-family: 'Poppins', sans-serif;
-                color: #e74c3c; /* Custom title color for error */
-            }
-
             .custom-error-confirm {
                 font-family: 'Poppins', sans-serif;
                 font-size: 17px;
@@ -1402,80 +422,149 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 outline: none; /* Remove default focus outline */
             }
 
-            .form-text.text-muted {
-                font-size: 0.875rem; /* Adjust the font size */
-                color: #6c757d; /* Bootstrap's muted color */
-                margin-top: 0.25rem; /* Space above the text */
+            .swal-popup {
+                font-family: "Poppins", sans-serif !important;
+                width: 400px;
             }
 
-            input[type="file"] {
-                font-family: 'Poppins', sans-serif;
-                display: block;
-                width: 100%;
-                height: 38px;
-                margin-top: 5px;
-                padding: 0;
-                border: 1px solid #ced4da;
-                border-radius: 4px;
-                font-size: 16px;
-                color: #495057;
-                background-color: #fff;
-                background-clip: padding-box;
-                transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            /* SweetAlert confirm button */
+            .swal-confirm {
+                font-family: "Poppins", sans-serif !important;
             }
 
-            input[type="file"]::file-selector-button {
-                font-family: 'Poppins', sans-serif;
-                width: 120px;
-                padding: 6px 12px;
-                margin-right: 10px;
-                background-color: #3085d6; /* Custom background color */
+            /* SweetAlert cancel button */
+            .swal-cancel {
+                font-family: "Poppins", sans-serif !important;
+            }
+
+            /* Chat styles */
+            .navbar .profile-container {
+                display: flex;
+                align-items: center;
+            }
+
+            .chat-icon {
+                font-size: 20px;
+                color: #333;
+                text-decoration: none;
+                position: relative; /* To position the badge correctly */
+                margin-right: 30px;
+                margin-top: 8px;
+                margin-left: -37px;
+            }
+
+            .notification-badge {
+                display: inline-block;
+                background-color: red; /* Change this to your preferred color */
                 color: white;
-                border: 1px solid #3085d6;;
-                border-radius: 4px;
+                border-radius: 50%;
+                width: 20px; /* Width of the badge */
+                height: 20px; /* Height of the badge */
+                text-align: center;
+                font-weight: bold;
+                position: absolute; /* Position it relative to the chat icon */
+                top: -5px; /* Adjust as needed */
+                right: -10px; /* Adjust as needed */
+                font-size: 14px; /* Size of the exclamation point */
+            }
+
+            .table-container {
+                width: 100%;
+                margin-left: -12px;
+                overflow-x: auto;
+                margin-top: 20px; /* Space above the table */
+            }
+
+            .crud-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-family: 'Poppins', sans-serif;
+                background-color: #ffffff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .crud-table th, .crud-table td {
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+                white-space: nowrap; /* Prevent text from wrapping */
+            }
+
+            .crud-table th {
+                text-align: center; 
+                background-color: #4CAF50;
+                color: white;
+                height: 40px;
+                width: 14px; /* Set a fixed width for table headers */
+            }
+
+            .crud-table td {
+                height: 50px;
+                background-color: #fafafa;
+            }
+
+            .crud-table tr:hover {
+                background-color: #f1f1f1;
+            }
+
+            .add-button {
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 16px;
                 cursor: pointer;
+                transition: background-color 0.3s;
+                font-family: 'Poppins', sans-serif;
             }
 
-            input[type="file"]::file-selector-button:hover {
-                background-color: #2579a8;
+            .add-button:hover {
+                background-color: #45a049; /* Darker green on hover */
             }
-
-            .form-group {
-                margin-bottom: 15px;
-            }
-
-            .form-text {
-                margin-top: 5px;
-                font-size: 0.875em;
-                color: #6c757d;
+            .smaller-alert {
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
             }
         </style>
     </head>
 
     <body>
         <nav class="navbar">
-            <h2>Add New Budget Plan</h2> 
+            <h2>Add Budget</h2> 
 
-            <div class="profile" id="profileDropdown">
-                <?php
-                    // Check if a profile picture is set in the session
-                    if (!empty($_SESSION['picture'])) {
-                        echo '<img src="' . $_SESSION['picture'] . '" alt="Profile Picture">';
-                    } else {
-                        // Get the first letter of the username for the placeholder
-                        $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
-                        echo '<div class="profile-placeholder">' . $firstLetter . '</div>';
-                    }
-                ?>
-                <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+            <div class="profile-container">
+                <!-- Chat Icon with Notification Badge -->
+                <a href="coed-chat.php" class="chat-icon" onclick="resetNotifications()">
+                    <i class="fa fa-comments"></i>
+                    <span class="notification-badge" id="chatNotification" style="display: none;">!</span>
+                </a>
 
-                <i class="fa fa-chevron-down dropdown-icon"></i>
-                <div class="dropdown-menu">
-                    <a href="coed-your-profile.php">Profile</a>
+                <div class="profile" id="profileDropdown">
+                    <?php
+                        // Check if a profile picture is set in the session
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
+                        } else {
+                            // Get the first letter of the username for the placeholder
+                            $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
+                            echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
+                        }
+                    ?>
+
+                    <span><?php echo htmlspecialchars($_SESSION['uname']); ?></span>
+
+                    <i class="fa fa-chevron-down dropdown-icon"></i>
+                    <div class="dropdown-menu">
+                        <a href="coed-your-profile.php">Profile</a>
+                        <a class="signout" href="roleaccount.php" onclick="confirmLogout(event)">Sign out</a>
+                    </div>
                 </div>
             </div>
         </nav>
-
+        
         <div class="sidebar">
             <div class="logo">
                 <img src="images/logo.png" alt="Logo">
@@ -1485,113 +574,224 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <li><a href="coed-dash.php"><img src="images/home.png">Dashboard</a></li>
                 <li><a href="coed-projlist.php"><img src="images/project-list.png">Project List</a></li>
                 <li><a href="coed-calendar.php"><img src="images/calendar.png">Event Calendar</a></li>
-                <li><a href="coed-budget-utilization.php"><img src="images/resource.png">Budget Utilization</a></li>
-                <li><a href="#task-management"><img src="images/task.png">Task Management</a></li>
-                <li><a href="#task-management"><img src="images/report.png">Progress Report</a></li>
-                <li><a href="settings.php"><img src="images/setting.png">Settings</a></li>
-                <li class="signout">
-                    <a href="#" onclick="confirmLogout(event)">
-                        <img src="images/log-out.png">Sign Out
-                    </a>
-                </li>
+
+                <!-- Dropdown for Resource Utilization -->
+                <button class="dropdown-btn">
+                    <img src="images/resource.png"> Resource Utilization
+                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
+                </button>
+                <div class="dropdown-container">
+                    <a href="coed-tor.php">Term of Reference</a>
+                    <a href="coed-requi.php">Requisition</a>
+                    <a href="coed-venue.php">Venue</a>
+                </div>
+
+                <li><a href="coed-budget-utilization.php" class="active"><img src="images/budget.png">Budget Allocation</a></li>
+
+                <!-- Dropdown for Task Management -->
+                <li><a href="coed-mov.php"><img src="images/task.png">Mode of Verification</a></li>
+
+                <li><a href="coed-responses.php"><img src="images/feedback.png">Responses</a></li>
+
+                <!-- Dropdown for Audit Trails -->
+                <button class="dropdown-btn">
+                    <img src="images/logs.png"> Audit Trails
+                    <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
+                </button>
+                <div class="dropdown-container">
+                    <a href="coed-history.php">Log In History</a>
+                    <a href="coed-activitylogs.php">Activity Logs</a>
+                </div>
             </ul>
         </div>
 
-        <div class="content-projectlist">
-            <div class="form-container">
-                <h3>Project Details</h3>
+        <div class="content-budget">
+            <h2>All Projects in COED</h2>
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Project Title</th>
+                        <th>Lead Person</th>
+                        <th>Semester</th>
+                        <th>Date of Submission</th>
+                        <th>Date of Implementation</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
 
-                <form action="" method="post" enctype="multipart/form-data">
+                <tbody>
+                    <?php
+                    $projectsSqlModal = "SELECT id, proj_title, lead_person, semester, date_of_sub, dateof_imple FROM coed ORDER BY id";
+                        
+                    $resultProjectsModal = $conn_proj_list->query($projectsSqlModal);
 
-                    <div class="form-group">
-                        <label for="semester">Semester:</label>
-                        <select id="semester" name="semester">
-                            <option value="" disabled selected>Select Semester</option>
-                            <option value="1st">1st Semester</option>
-                            <option value="2nd">2nd Semester</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="department">Department:</label>
-                        <input type="text" id="department" name="department" value="College of Arts and Science" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="project_title">Project Title:</label>
-                        <input type="text" id="project_title" name="project_title" placeholder="Enter Project Title" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="district">District:</label>
-                        <select id="district" name="district" onchange="updateBarangays()" required>
-                            <option value="" disabled selected>Select District</option>
-                            <option value="District 1">District 1</option>
-                            <option value="District 2">District 2</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="barangay">Barangay:</label>
-                        <select id="barangay" name="barangay" required>
-                            <option value="" disabled selected>Select Barangay</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="budget">Budget Plan:</label>
-                        <input type="file" id="budget" name="budget" class="file-input" required>
-                        <small class="form-text text-muted">File must be a DOCX, PDF, XLS, or XLSX.</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="tor">Term of Reference:</label>
-                        <input type="file" id="tor" name="tor" class="file-input" required>
-                        <small class="form-text text-muted">File must be a DOCX, PDF, XLS, or XLSX.</small>
-                    </div>
-
-                    <div class="button-container">
-                        <button type="submit">Submit</button>
-                        <button type="reset" id="resetButton">Reset</button>
-                    </div>
-                </form>
-            </div>
+                    if ($resultProjectsModal && $resultProjectsModal->num_rows > 0) {
+                        while ($project = $resultProjectsModal->fetch_assoc()) {
+                            echo "<tr>";
+                            echo "<td id='proj_id_" . $project["id"] . "'>" . htmlspecialchars($project["id"]) . "</td>";
+                            echo "<td id='proj_title_" . $project["id"] . "'>" . htmlspecialchars($project["proj_title"]) . "</td>";
+                            echo "<td id='lead_person_" . $project["id"] . "'>" . htmlspecialchars($project["lead_person"]) . "</td>";
+                            echo "<td id='semester_" . $project["id"] . "'>" . htmlspecialchars($project["semester"]) . "</td>";
+                            echo "<td>" . htmlspecialchars($project["date_of_sub"]) . "</td>";
+                            echo "<td>" . htmlspecialchars($project["dateof_imple"]) . "</td>";
+                            echo "<td><button class='add-button' onclick='addProjectToBudget(" . $project["id"] . ")'>Add</button></td>";
+                            echo "</tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='7'>No projects found.</td></tr>";
+                    }
+                    ?>
+                </tbody>
+            </table>
         </div>
 
         <script>
-            function updateBarangays() {
-                const district = document.getElementById('district').value;
-                const barangaySelect = document.getElementById('barangay');
+            function addProjectToBudget(projectId) {
+                var projTitle = document.getElementById("proj_title_" + projectId).innerText;
+                var leadPerson = document.getElementById("lead_person_" + projectId).innerText;
+                var semester = document.getElementById("semester_" + projectId).innerText;
+                var expenses = 0; 
+                var totalBudget = 40000; 
 
-                // Clear existing options
-                barangaySelect.innerHTML = '';
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "coed-add_to_budget.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        alert(xhr.responseText);
+                    }
+                };
 
-                let barangays = [];
+                var data = "projectId=" + projectId + "&projTitle=" + encodeURIComponent(projTitle) +
+                        "&leadPerson=" + encodeURIComponent(leadPerson) +
+                        "&semester=" + encodeURIComponent(semester) +
+                        "&expenses=" + expenses +
+                        "&totalBudget=" + totalBudget;
 
-                if (district === 'District 1') {
-                    barangays = [
-                        'Bagong Ilog', 'Bagong Katipunan', 'Bambang', 'Buting', 'Caniogan',
-                        'Kalawaan', 'Kapasigan', 'Kapitolyo', 'Malinao', 'Oranbo',
-                        'Palatiw', 'Pineda', 'Sagad', 'San Antonio', 'San Joaquin',
-                        'San Jose', 'San Nicolas', 'Sta. Cruz', 'Sta. Rosa', 'Sto. Tomas',
-                        'Sumilang', 'Ugong'
-                    ];
-                } else if (district === 'District 2') {
-                    barangays = [
-                        'Dela Paz', 'Manggahan', 'Maybunga', 'Pinagbuhatan', 'Rosario',
-                        'San Miguel', 'Sta. Lucia', 'Santolan'
-                    ];
+                xhr.send(data);
+            }
+            function addProjectToBudget(projectId) {
+    var projTitle = document.getElementById("proj_title_" + projectId).innerText;
+    var leadPerson = document.getElementById("lead_person_" + projectId).innerText;
+    var semester = document.getElementById("semester_" + projectId).innerText;
+
+    // Use SweetAlert for inputting expenses
+    Swal.fire({
+        title: 'Enter the expenses for the new project:',
+        input: 'text',
+        inputPlaceholder: 'Enter expenses here...',
+        showCancelButton: true,
+        confirmButtonText: 'Submit',
+        cancelButtonText: 'Cancel',
+        preConfirm: (value) => {
+            if (!value || isNaN(value) || value <= 0) {
+                Swal.showValidationMessage('Please enter a valid amount for the expenses');
+            }
+            return value;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var expenses = parseFloat(result.value);
+
+            // Check if the new expense exceeds the allotted budget
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "coed-check_budget_limit.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var response = xhr.responseText.split('|');
+                    if (response[0] === "error") {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Budget Exceeded!',
+                            text: response[1],
+                            showConfirmButton: true
+                        });
+                    } else if (response[0] === "success") {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Budget Check Passed!',
+                            text: response[1],
+                            showConfirmButton: true
+                        }).then(() => {
+                            // Proceed to add project to budget
+                            var xhrAdd = new XMLHttpRequest();
+                            xhrAdd.open("POST", "coed-add_to_budget.php", true);
+                            xhrAdd.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            xhrAdd.onreadystatechange = function () {
+                                if (xhrAdd.readyState == 4 && xhrAdd.status == 200) {
+                                    if (xhrAdd.responseText === "success") {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Project successfully added!',
+                                            showConfirmButton: false,
+                                            timer: 1500
+                                        }).then(function() {
+                                            window.location.href = 'coed-budget-utilization.php';
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error!',
+                                            text: xhrAdd.responseText,
+                                            showConfirmButton: true
+                                        });
+                                    }
+                                }
+                            };
+
+                            var data = "projectId=" + projectId +
+                                       "&projTitle=" + encodeURIComponent(projTitle) +
+                                       "&leadPerson=" + encodeURIComponent(leadPerson) +
+                                       "&semester=" + encodeURIComponent(semester) +
+                                       "&expenses=" + encodeURIComponent(expenses);
+                            xhrAdd.send(data);
+                        });
+                    }
                 }
+            };
 
-                // Add new options
-                barangays.forEach(barangay => {
-                    const option = document.createElement('option');
-                    option.value = barangay;
-                    option.textContent = barangay;
-                    barangaySelect.appendChild(option);
-                });
+            var checkBudgetData = "newExpense=" + expenses;
+            xhr.send(checkBudgetData);
+        }
+    });
+}
 
-                // Add default option
+
+            function updateBarangays() {
+            const district = document.getElementById('district').value;
+            const barangaySelect = document.getElementById('barangay');
+
+            // Clear existing options
+            barangaySelect.innerHTML = '';
+
+            let barangays = [];
+
+            if (district === 'District 1') {
+                barangays = [
+                    'Bagong Ilog', 'Bagong Katipunan', 'Bambang', 'Buting', 'Caniogan',
+                    'Kalawaan', 'Kapasigan', 'Kapitolyo', 'Malinao', 'Oranbo',
+                    'Palatiw', 'Pineda', 'Sagad', 'San Antonio', 'San Joaquin',
+                    'San Jose', 'San Nicolas', 'Sta. Cruz', 'Sta. Rosa', 'Sto. Tomas',
+                    'Sumilang', 'Ugong'
+                ];
+            } else if (district === 'District 2') {
+                barangays = [
+                    'Dela Paz', 'Manggahan', 'Maybunga', 'Pinagbuhatan', 'Rosario',
+                    'San Miguel', 'Sta. Lucia', 'Santolan'
+                ];
+            }
+
+            // Add new options
+            barangays.forEach(barangay => {
+                const option = document.createElement('option');
+                option.value = barangay;
+                option.textContent = barangay;
+                barangaySelect.appendChild(option);
+            });
+
+            // Add default option
                 const defaultOption = document.createElement('option');
                 defaultOption.value = '';
                 defaultOption.disabled = true;
@@ -1605,12 +805,84 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 updateBarangays();
             });
 
+            let entryCount = 1; // Tracks the number of entries
+        let totalBudgetValue = 0; // Holds the total budget from the first entry
+
+        function addEntry() {
+            entryCount++;
+            const entryContainer = document.getElementById('entryContainer');
+            const newEntrySection = document.createElement('div');
+            newEntrySection.className = 'entry-section';
+            newEntrySection.innerHTML = `
+                <h3>Entry ${entryCount}</h3>
+                <div class="form-group">
+                    <label for="event_title_${entryCount}">Event Title:</label>
+                    <input type="text" id="event_title_${entryCount}" name="event_title[]" placeholder="Enter Event Title" required>
+                </div>
+                <div class="form-group">
+                    <label for="total_budget_${entryCount}">Total Budget:</label>
+                    <input type="text" id="total_budget_${entryCount}" name="total_budget[]" value="${totalBudgetValue}" placeholder="Total Budget" readonly />
+                </div>
+                <div class="form-group">
+                    <label for="expenses_${entryCount}">Expenses:</label>
+                    <input type="text" id="expenses_${entryCount}" name="expenses[]" placeholder="Enter Total Expenses" required oninput="updateRemainingBudget(this.parentElement.parentElement)">
+                </div>
+                <div class="form-group">
+                    <label for="remaining_budget_${entryCount}">Remaining Budget:</label>
+                    <input type="text" id="remaining_budget_${entryCount}" name="remaining_budget[]" placeholder="Remaining Budget" readonly />
+                </div>
+                <button type="button" class="remove-btn" onclick="removeEntry(this)">Remove Entry</button>
+            `;
+            entryContainer.appendChild(newEntrySection);
+
+            // Set the total budget value for this entry based on the first entry's total budget
+            if (entryCount > 1) {
+                const firstBudgetInput = document.getElementById('total_budget_1');
+                newEntrySection.querySelector(`input[id^="total_budget_"]`).value = firstBudgetInput.value;
+                updateRemainingBudget(newEntrySection); // Call to update remaining budget when a new entry is added
+            }
+        }
+
+        function updateRemainingBudget(entrySection) {
+            const expensesInput = entrySection.querySelector('input[id^="expenses_"]');
+            const remainingInput = entrySection.querySelector('input[id^="remaining_budget_"]');
+            const firstBudgetInput = document.getElementById('total_budget_1');
+            const totalBudget = parseFloat(firstBudgetInput.value) || 0; // Get total budget for the first entry
+
+            // Calculate total expenses from all entries
+            const totalExpenses = getTotalExpenses();
+
+            // Calculate remaining budget
+            const remainingBudget = totalBudget - totalExpenses; // Subtract total expenses from total budget
+            remainingInput.value = remainingBudget.toFixed(2); // Update the remaining budget display
+        }
+
+        function getTotalExpenses() {
+            const expenseInputs = document.querySelectorAll('[id^="expenses_"]');
+            let totalExpenses = 0;
+            expenseInputs.forEach(input => {
+                totalExpenses += parseFloat(input.value) || 0; // Sum up all expenses
+            });
+            return totalExpenses;
+        }
+
+        function removeEntry(element) {
+            element.parentElement.remove();
+            updateRemainingBudget(); // Recalculate remaining budget after removing an entry
+        }
+
             // Check if there is a success or error message
             <?php if (isset($_SESSION['success'])): ?>
                 Swal.fire({
                     icon: 'success',
                     title: 'Success',
                     text: '<?php echo $_SESSION['success']; ?>',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        popup: 'custom-swal-popup',
+                        title: 'custom-swal-title',
+                        confirmButton: 'custom-swal-confirm'
+                    }
                 }).then((result) => {
                     if (result.isConfirmed) {
                         window.location.href = 'coed-budget-utilization.php';
@@ -1623,6 +895,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     icon: 'error',
                     title: 'Error',
                     text: '<?php echo $_SESSION['error']; ?>',
+                    confirmButtonText: 'Try Again',
+                    customClass: {
+                        popup: 'custom-error-popup',
+                        title: 'custom-error-title',
+                        confirmButton: 'custom-error-confirm'
+                    }
                 }).then((result) => {
                     if (result.isConfirmed) {
                         window.location.href = 'coed-add-budget.php';
@@ -1630,107 +908,194 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 });
             <?php unset($_SESSION['error']); endif; ?>
 
+            let inactivityTime = function () {
+            let time;
+
+                // List of events to reset the inactivity timer
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onscroll = resetTimer;
+                document.onclick = resetTimer;
+
+                // If logged out due to inactivity, prevent user from accessing dashboard
+                if (sessionStorage.getItem('loggedOut') === 'true') {
+                    // Ensure the user cannot access the page and is redirected
+                    window.location.replace('loadingpage.php');
+                }
+
+                function logout() {
+                    // SweetAlert2 popup styled similar to the standard alert
+                    Swal.fire({
+                        title: 'Session Expired',
+                        text: 'You have been logged out due to inactivity.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        width: '400px',   // Adjust width (close to native alert size)
+                        heightAuto: false, // Prevent automatic height adjustment
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm'
+                        }
+                    }).then(() => {
+                        // Set sessionStorage to indicate user has been logged out due to inactivity
+                        sessionStorage.setItem('loggedOut', 'true');
+
+                        // Redirect to loadingpage.php
+                        window.location.replace('loadingpage.php');
+                    });
+                }
+
+                function resetTimer() {
+                    clearTimeout(time);
+                    // Set the inactivity timeout to 100 seconds (100000 milliseconds)
+                    time = setTimeout(logout, 300000);  // 100 seconds = 100000 ms
+                }
+
+                // Check if the user is logged in and clear the loggedOut flag
+                if (sessionStorage.getItem('loggedOut') === 'false') {
+                    sessionStorage.removeItem('loggedOut');
+                }
+            };
+
+            // Start the inactivity timeout function
+            inactivityTime();
+
             function confirmLogout(event) {
-                event.preventDefault(); // Prevent the default link behavior
+                event.preventDefault();
                 Swal.fire({
                     title: 'Are you sure?',
                     text: "Do you really want to log out?",
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
+                    confirmButtonColor: '#3085d6', // Green confirm button
+                    cancelButtonColor: '#dc3545', // Red cancel button
                     confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
                     customClass: {
-                        popup: 'custom-swal-popup',
-                        confirmButton: 'custom-swal-confirm',
-                        cancelButton: 'custom-swal-cancel'
-                    }
+                        popup: 'swal-popup',
+                        confirmButton: 'swal-confirm',
+                        cancelButton: 'swal-cancel'
+                    },
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = 'roleaccount.php'; // Redirect to the logout page
+                        // Execute the logout action (send a request to the server to log out)
+                        fetch('college-logout.php?action=logout')
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data); // Log response for debugging
+
+                                // Redirect the user to the role account page after logout
+                                window.location.href = 'roleaccount.php';
+
+                                // Modify the history to prevent back navigation after logout
+                                window.history.pushState(null, '', window.location.href);
+                                window.onpopstate = function () {
+                                    window.history.pushState(null, '', window.location.href);
+                                };
+                            })
+                            .catch(error => console.error('Error:', error));
                     }
                 });
             }
 
+            // This should only run when you're on a page where the user has logged out
+            if (window.location.href !== 'roleaccount.php') {
+                window.history.pushState(null, '', window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, '', window.location.href);
+                };
+            }
+            
+            // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
-            var dropdownMenu = document.querySelector('.dropdown-menu');
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+                const dropdown = this.querySelector('.dropdown-menu');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
             });
 
-            // Optional: Close the dropdown if clicking outside the profile area
-            window.onclick = function(event) {
-                if (!event.target.closest('#profileDropdown')) {
-                    var dropdownMenu = document.querySelector('.dropdown-menu');
-                    if (dropdownMenu.style.display === 'block') {
-                        dropdownMenu.style.display = 'none';
+            // Close dropdown if clicked outside
+            window.addEventListener('click', function(event) {
+                if (!document.getElementById('profileDropdown').contains(event.target)) {
+                    const dropdown = document.querySelector('.dropdown-menu');
+                    if (dropdown) {
+                        dropdown.style.display = 'none';
                     }
                 }
-            };
+            });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            // Add change event listeners to file inputs
-            document.getElementById('budget').addEventListener('change', validateBudgetFile);
-            document.getElementById('tor').addEventListener('change', validateTorFile);
+           
+            function logAction(actionDescription) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "college_logs.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.send("action=" + encodeURIComponent(actionDescription));
+            }
+
+            function logAndRedirect(actionDescription, url) {
+                logAction(actionDescription); // Log the action
+                setTimeout(function() {
+                    window.location.href = url; // Redirect after logging
+                }, 100); // Delay to ensure logging completes
+            }
+
+            // Add event listeners when the page is fully loaded
+            document.addEventListener("DOMContentLoaded", function() {
+                // Log clicks on main menu links
+                document.querySelectorAll(".menu > li > a").forEach(function(link) {
+                    link.addEventListener("click", function() {
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+                // Handle dropdown button clicks
+                var dropdowns = document.getElementsByClassName("dropdown-btn");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].addEventListener("click", function () {
+                        let dropdownContents = document.getElementsByClassName("dropdown-container");
+                        for (let j = 0; j < dropdownContents.length; j++) {
+                            dropdownContents[j].style.display = "none";
+                        }
+                        let dropdownContent = this.nextElementSibling;
+                        if (dropdownContent.style.display === "block") {
+                            dropdownContent.style.display = "none";
+                        } else {
+                            dropdownContent.style.display = "block";
+                        }
+                    });
+                }
+
+                // Log clicks on dropdown links
+                document.querySelectorAll(".dropdown-container a").forEach(function(link) {
+                    link.addEventListener("click", function(event) {
+                        event.stopPropagation();
+                        logAction(link.textContent.trim());
+                    });
+                });
+
+            // Log clicks on the "Profile" link
+            document.querySelector('.dropdown-menu a[href="coed-your-profile.php"]').addEventListener("click", function() {
+                logAction("Profile");
+            });
         });
 
-        function validateBudgetFile() {
-            const budgetFile = this.files[0];
-            const allowedTypes = /(\.docx|\.pdf|\.xls|\.xlsx)$/i;
-            
-
-            if (budgetFile) {
-                if (!allowedTypes.test(budgetFile.name)) {
-                    Swal.fire({
-                        icon: "error",
-                        title: 'Invalid File Type',
-                        text: 'Budget file must be a DOCX, PDF, XLS, or XLSX file.',
-                        confirmButtonText: 'OK',
-                        customClass: {
-                            popup: 'custom-error-popup',
-                            title: 'custom-error-title',
-                            text: 'custom-error-text',
-                            confirmButton: 'custom-error-confirm'
-                        }
-                    });
-                    this.value = ''; // Clear the input
+                document.addEventListener("DOMContentLoaded", () => {
+                function checkNotifications() {
+                    fetch('coed-check_notifications.php')
+                        .then(response => response.json())
+                        .then(data => {
+                            const chatNotification = document.getElementById('chatNotification');
+                            if (data.unread_count > 0) {
+                                chatNotification.style.display = 'inline-block';
+                            } else {
+                                chatNotification.style.display = 'none';
+                            }
+                        })
+                        .catch(error => console.error('Error checking notifications:', error));
                 }
-            }
-        }
 
-        function validateTorFile() {
-            const torFile = this.files[0];
-            const allowedTypes = /(\.docx|\.pdf|\.xls|\.xlsx)$/i;
-
-            if (torFile) {
-                if (!allowedTypes.test(torFile.name)) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Invalid File Type',
-                        text: 'TOR file must be a DOCX, PDF, XLS, or XLSX file.',
-                        confirmButtonText: 'OK',
-                        customClass: {
-                            popup: 'custom-error-popup',
-                            title: 'custom-error-title',
-                            text: 'custom-error-text',
-                            confirmButton: 'custom-error-confirm'
-                        }
-                    });
-                    this.value = ''; // Clear the input
-                } 
-            }
-        }
-
-        document.getElementById('resetButton').addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent default reset behavior
-            
-            // Reset the barangay dropdown back to the first option (Select Barangay)
-            document.getElementById('barangay').selectedIndex = 0;
-
-
-            // Reload the page after resetting
-            setTimeout(function() {
-                location.reload(); // Reload the page to refresh it
-            }, 100); // Slight delay to allow the reset action to complete
-        });         
+                // Check for notifications every 2 seconds
+                setInterval(checkNotifications, 2000);
+                checkNotifications(); // Initial check when page loads
+            });
         </script>
     </body>
 </html>
