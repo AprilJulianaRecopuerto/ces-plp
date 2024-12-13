@@ -598,7 +598,7 @@ $conn->close();
             </div>
         </nav>
         
-        <div class="sidebar">
+        div class="sidebar">
             <div class="logo">
                 <img src="images/logo.png" alt="Logo">
             </div>
@@ -622,17 +622,17 @@ $conn->close();
                 <li><a href="cas-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <li><a href="cas-mov.php"><img src="images/task.png">Mode of Verification</a></li>
+                <li><a href="cas-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="responses.php"><img src="images/setting.png">Responses</a></li>
+                <li><a href="cas-responses.php"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
-                    <img src="images/resource.png"> Audit Trails
+                    <img src="images/logs.png"> Audit Trails
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="cas-login.php">Log In History</a>
+                    <a href="cas-history.php">Log In History</a>
                     <a href="cas-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>

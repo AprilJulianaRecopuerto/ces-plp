@@ -622,17 +622,17 @@ $conn->close();
                 <li><a href="ccs-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <li><a href="ccs-mov.php"><img src="images/task.png">Mode of Verification</a></li>
+                <li><a href="ccs-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
 
-                <li><a href="responses.php"><img src="images/setting.png">Responses</a></li>
+                <li><a href="ccs-responses.php"><img src="images/feedback.png">Responses</a></li>
 
                 <!-- Dropdown for Audit Trails -->
                 <button class="dropdown-btn">
-                    <img src="images/resource.png"> Audit Trails
+                    <img src="images/logs.png"> Audit Trails
                     <i class="fas fa-chevron-down"></i> <!-- Dropdown icon -->
                 </button>
                 <div class="dropdown-container">
-                    <a href="ccs-login.php">Log In History</a>
+                    <a href="ccs-history.php">Log In History</a>
                     <a href="ccs-activitylogs.php">Activity Logs</a>
                 </div>
             </ul>
