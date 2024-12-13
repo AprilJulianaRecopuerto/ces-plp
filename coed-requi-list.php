@@ -1,5 +1,5 @@
 <?php
-session_start(); // Start the session
+session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['uname'])) {
@@ -8,171 +8,71 @@ if (!isset($_SESSION['uname'])) {
     exit;
 }
 
-// Database credentials
-$servername = "l7cup2om0gngra77.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_db = "gv5xdrzqyrg1qyvs";
-$password_db = "uv4wrt6zlfqzrpni";
-$dbname_mov = "tcbjgh4zgu5wj4bo";
-
-// Create connection to the database
-$conn_mov = new mysqli($servername, $username_db, $password_db, $dbname_mov);
-
-
-$servername_ur = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_ur = "equ6v8i5llo3uhjm"; 
-$password_ur = "vkfaxm2are5bjc3q"; 
-$dbname_user_registration = "ylwrjgaks3fw5sdj";
-
-$servername_pl = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username_pl = "zf8r3n4qqjyrfx7o";
-$password_pl = "su6qmqa0gxuerg98"; 
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
 $dbname_proj_list = "hpvs3ggjc4qfg9jp";
 
-
-$conn_proj = new mysqli($servername_pl, $username_pl, $password_pl, $dbname_proj_list); // Connection to proj_list database
+$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
 
 // Check connection
-if ($conn_mov->connect_error || $conn_proj->connect_error) {
-    die("Connection failed: " . $conn_mov->connect_error);
+if ($conn_proj_list->connect_error) {
+    die("Connection failed: " . $conn_proj_list->connect_error);
 }
 
-// Define the base directory for folders
-$base_directory = 'movuploads/coed-mov/';
+// Database credentials
+$servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_resource = "dnr20srzjycb99tw";
+$password_resource = "ndfnpz4j74v8t0p7";
+$dbname_resource = "x8uwt594q5jy7a7o";
 
-// Fetch the latest project title and dateof_imple from the proj_list database
-$query = "SELECT proj_title, dateof_imple FROM coed ORDER BY id DESC LIMIT 1"; // Adjusted to fetch both columns
-$result_proj = $conn_proj->query($query);
+// Create connection
+$conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
 
-// Check if the query was successful
-if ($result_proj === false) {
-    // Query failed, show an error
-    die("Error executing query: " . $conn_proj->error);
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-if ($result_proj->num_rows > 0) {
-    // Get the project title and date of implementation
-    $row = $result_proj->fetch_assoc();
-    $proj_title = $row['proj_title'];
-    $dateof_imple = $row['dateof_imple'];
-    
-    // Format dateof_imple if it's not already in the desired format (assuming it's in a valid date format)
-    $formatted_date = date('m-d-Y', strtotime($dateof_imple));
-    
-    // Format folder name (e.g., Project Title 05-20-2024)
-    $folder_name = $proj_title . ' ' . $formatted_date;
-    
-    // Folder path in 'movuploads/coed-mov/'
-    $folder_path = $base_directory . $folder_name;
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
 
-    // Check if the folder entry already exists in the coed_mov table
-    $check_existing_folder_query = "SELECT * FROM coed_mov WHERE folder_name = '$folder_name'";
-    $result_check = $conn_mov->query($check_existing_folder_query);
+// Fetch the profile picture from the colleges table in user_registration
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
 
-    if ($result_check->num_rows == 0) {
-        // Folder entry does not exist in the database, proceed to check filesystem and create folder
-        if (!file_exists($folder_path)) {
-            // Create the folder in the filesystem
-            if (mkdir($folder_path, 0777, true)) {
-                // Define the subfolders to be created
-                $subfolders = ['Program - Colloquium', 'Profile of Presenters', 'Presenters', 'Presentation per Presented', 'Post Evaluation Survey or Feedback', 'Photos', 'Certificate', 'Attendance'];
-
-                // Create each subfolder inside the main folder
-                foreach ($subfolders as $subfolder) {
-                    $subfolder_path = $folder_path . '/' . $subfolder;
-                    if (!mkdir($subfolder_path, 0777, true)) {
-                        $_SESSION['folder_error'] = 'Error creating subfolder: ' . $subfolder;
-                        break; // Stop creating further subfolders if one fails
-                    }
-                }
-
-                // Insert the folder name into the coed_mov table for tracking
-                $insert_folder_sql = "INSERT INTO coed_mov (folder_name) VALUES ('$folder_name')";
-                if ($conn_mov->query($insert_folder_sql) === TRUE) {
-                    $_SESSION['folder_create_success'] = 'Folder and subfolders created successfully for event: ' . $folder_name;
-                } else {
-                    $_SESSION['folder_error'] = 'Error inserting folder name into database: ' . $conn_mov->error;
-                }
-            } else {
-                $_SESSION['folder_error'] = 'Error creating folder for event: ' . $folder_name;
-            }
-        } else {
-            // The folder already exists in the filesystem but not in the database
-            $_SESSION['folder_error'] = 'The folder already exists in the filesystem but not in the database.';
-        }
-    } else {
-        // The folder entry already exists in the database, no action needed
-        $_SESSION['folder_info'] = 'The folder entry already exists in the database.';
-    }
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
 }
 
-// Handle folder creation via manual input
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'create') {
-    $folder_name = $conn_mov->real_escape_string(trim($_POST['folder_name']));
-    $folder_path = $base_directory . $folder_name; // Full path for new folder
+$uname = $_SESSION['uname'];
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $uname);
+$stmt->execute();
+$result_profile = $stmt->get_result();
 
-    // Check if folder already exists
-    $check_sql = "SELECT * FROM coed_mov WHERE folder_name = '$folder_name'";
-    $result = $conn_mov->query($check_sql);
-
-    if ($result->num_rows > 0) {
-        $_SESSION['warning'] = 'The folder name already exists. Please choose a different name.';
-        header('Location: coed-mov.php'); // Redirect after setting the session
-        exit();
-    }
-    
-    // Create the folder in the filesystem
-    if (mkdir($folder_path, 0777, true)) {
-        // Define subfolders
-        $subfolders = ['Program - Colloquium', 'Profile of Presenters', 'Presenters', 'Presentation per Presented', 'Post Evaluation Survey or Feedback', 'Photos', 'Certificate', 'Attendance'];
-        foreach ($subfolders as $subfolder) {
-            $subfolder_path = $folder_path . '/' . $subfolder;
-            if (!mkdir($subfolder_path, 0777, true)) {
-                $_SESSION['folder_error'] = 'Error creating subfolder: ' . $subfolder;
-                break;
-            }
-        }
-
-        // Insert folder name into the coed_mov table
-        $sql = "INSERT INTO coed_mov (folder_name) VALUES ('$folder_name')";
-        if ($conn_mov->query($sql) === TRUE) {
-            $_SESSION['folder_create_success'] = 'Folder and subfolders created successfully';
-            header('Location: coed-mov.php'); // Redirect after success
-            exit();
-        } else {
-            $_SESSION['folder_error'] = 'Error creating folder in database: ' . $conn_mov->error;
-            header('Location: coed-mov.php'); // Redirect after error
-            exit();
-        }
-    } else {
-        $_SESSION['folder_error'] = 'Error creating folder: ' . error_get_last()['message'];
-        header('Location: coed-mov.php'); // Redirect after error
-        exit();
-    }
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
 }
 
-
-// Fetch folders from the database, excluding deleted records
-$query = "SELECT * FROM coed_mov WHERE folder_name IS NOT NULL"; // Adjusted to filter out deleted records
-$result = $conn_mov->query($query);
-
-// Check if the query was successful
-if ($result === false) {
-    // Query failed, show an error
-    die("Error executing query: " . $conn_mov->error);
-}
+$stmt->close();
+$conn_profile->close();
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+        
         <title>CES PLP</title>
 
         <link rel="icon" href="images/logoicon.png">
 
+        <!-- SweetAlert CSS and JavaScript -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -186,6 +86,7 @@ if ($result === false) {
             body {
                 margin: 0;
                 background-color: #F6F5F5; /* Light gray background color */
+                font-family: 'Poppins', sans-serif;
             }
 
             .navbar {
@@ -402,22 +303,61 @@ if ($result === false) {
                 color: white; /* Change text color */
             }
 
-            .content-task {
-                margin-left: 340px; /* Align with the sidebar */
+            .content-resource {
+                margin-left: 320px; /* Align with the sidebar */
                 padding: 20px;
             }
-
-            .content-upload {
-                margin-left: 340px; /* Align with the sidebar */
-                padding: 20px;
+            
+            .form-container {
                 margin-top:110px;
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            .form-container h3 {
+                margin-top: 0;
+                font-family: 'Poppins', sans-serif;
+                font-size: 24px;
+                color: black;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-group label {
+                display: block;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            .form-group select, .form-group input[type="text"], .form-group input[type="date"], 
+            .form-group input[type="time"], .form-group input[type="number"] {
+                width: 100%;
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-size: 16px;
+                box-sizing: border-box;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .form-group input::placeholder {
+                font-family: 'Poppins', sans-serif;
+                color: #999;
+                font-style: italic;
+            }
+
+            .form-group select {
+                background: #f9f9f9;
             }
 
             .button-container {
                 display: flex;
-                margin-bottom: 20px; /* Space below the buttons */
-                margin-top:110px;
-                margin-left: -10px;
+                justify-content: flex-end; /* Align buttons to the right */
+                margin-top: 20px; /* Space above the buttons */
             }
 
             .button-container button {
@@ -437,26 +377,9 @@ if ($result === false) {
                 background-color: #45a049; /* Darker green on hover */
             }
 
-            .archive-button {
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                text-decoration:none;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-
-            .archive-button:hover {
-                background-color: #45a049; /* Darker green on hover */
-            }
-
             .custom-swal-popup {
                 font-family: 'Poppins', sans-serif;
+                font-size: 16px; /* Increase the font size */
                 width: 400px !important; /* Set a larger width */
             }
 
@@ -481,12 +404,6 @@ if ($result === false) {
                 outline: none; /* Remove default focus outline */
             }
 
-            .custom-swal-input {
-                width: 90% !important;
-                margin-left: 19px !important;
-            }
-
-            /* Custom styles for SweetAlert error popup */
             .custom-error-popup {
                 font-family: 'Poppins', sans-serif;
                 width: 400px !important; /* Set a larger width */
@@ -494,224 +411,12 @@ if ($result === false) {
 
             .custom-error-confirm {
                 font-family: 'Poppins', sans-serif;
-                font-family: 'Glacial Indifference', sans-serif;
                 font-size: 17px;
                 background-color: #e74c3c;
                 color: #fff;
                 border-radius: 10px;
                 cursor: pointer;
                 outline: none; /* Remove default focus outline */
-            }
-
-            /* Custom styles for SweetAlert error popup */
-            .custom-warning-popup {
-                font-family: 'Poppins', sans-serif;
-                width: 400px !important; /* Set a larger width */
-            }
-
-            .custom-warning-title {
-                font-family: 'Poppins', sans-serif;
-                color: #e74c3c; /* Custom title color for error */
-            }
-
-            .custom-warning-confirm {
-                font-family: 'Poppins', sans-serif;
-                font-size: 17px;
-                background-color: #e74c3c;
-                color: #fff;
-                border-radius: 10px;
-                cursor: pointer;
-                outline: none; /* Remove default focus outline */
-            }
-
-            .modal {
-                font-family: 'Poppins', sans-serif;
-                display: none; /* Hidden by default */
-                position: fixed; /* Stay in place */
-                z-index: 1000; /* Sit on top */
-                left: 0;
-                top: 0;
-                width: 100%; /* Full width */
-                height: 100%; /* Full height */
-                background-color: rgb(0,0,0); /* Fallback color */
-                background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-                
-            }
-
-            .modal-content {
-                border-radius:10px;
-                background-color: #fefefe;
-                margin: 15% auto; /* 15% from the top and centered */
-                margin-left: 540px;
-                padding: 20px;
-                padding-top:-15px;
-                border: 1px solid #888;
-                text-align:center;
-                width: 25%; /* Could be more or less, depending on screen size */
-                height: 36%;
-            }
-
-            .modal-content h2 {
-                margin-top:10px;
-            }
-
-            #submitFolder {
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                margin-left: 10px;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                font-family: 'Poppins', sans-serif;
-            }
-
-            input[type="text"] {
-                width: 100%; /* Make the input full-width */
-                padding: 10px; /* Add some padding */
-                margin: 10px 0; /* Add margin for spacing */
-                border: 1px solid #ccc; /* Light gray border */
-                border-radius: 4px; /* Rounded corners */
-                box-sizing: border-box; /* Include padding and border in element's total width and height */
-            }
-
-            input[type="text"]:focus {
-                border-color: #4CAF50; /* Change border color when focused */
-                outline: none; /* Remove default outline */
-            }
-
-            input[type="text"]::placeholder {
-                font-family: 'Poppins', sans-serif;
-                font-size: 16px;
-                color: #999; /* Light gray color for the placeholder text */
-                opacity: 1; /* Override default opacity */
-                font-style: italic; /* Italic style for placeholder text */
-            }
-
-            .close {
-                color: #aaa;
-                float: right;
-                font-size: 28px;
-                font-weight: bold;
-            }
-
-            .close:hover,
-            .close:focus {
-                color: black;
-                text-decoration: none;
-                cursor: pointer;
-            }
-
-            .folder-display {
-                font-family: 'Poppins', sans-serif;
-                display: flex; /* Use flexbox to layout folders */
-                flex-wrap: wrap; /* Allow wrapping to the next line */
-                gap: 20px; /* Space between folder items */
-            }
-
-            .folder {
-                display: flex; /* Use flex to align items */
-                flex-direction: column; /* Stack items vertically */
-                align-items: center; /* Center items horizontally */
-                padding: 10px;
-                border: 1px solid #ccc; /* Optional border */
-                border-radius: 5px; /* Rounded corners */
-                background-color: #f9f9f9; /* Background color */
-                width: 120px; /* Fixed width for folders */
-                height: auto;
-                text-align: center; /* Center text */
-            }
-
-            .file-icon {
-                margin-top:5px;
-                width: 50px; /* Set a fixed width for icons */
-                height: 45px; /* Set a fixed height for icons */
-                margin-bottom: 5px; /* Space between icon and folder name */
-            }
-
-            .folder-link {
-                text-decoration: none; /* Remove underline from link */
-                color: inherit; /* Inherit color from parent */
-                transition: transform 0.2s; /* Smooth scaling effect */
-            }
-
-            .folder-link:hover {
-                transform: scale(1.05); /* Scale up slightly on hover */
-            }
-
-            .folder-name {
-                margin-top: 5px; /* Space above folder name */
-                font-weight: normal; /* Make folder name bold */
-            }
-
-            .alert {
-                padding: 10px;
-                margin-bottom: 20px;
-                border-radius: 5px;
-            }
-
-            .alert-error {
-                background-color: #f8d7da;
-                color: #721c24;
-            }
-
-            .context-menu {
-                font-family: 'Poppins', sans-serif;
-                display: none; /* Hidden by default */
-                position: absolute; /* Position it absolutely */
-                background-color: white; /* Background color */
-                border: 1px solid #ccc; /* Border */
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Shadow */
-                z-index: 1000; /* Make sure it appears on top */
-            }
-
-            .context-menu ul {
-                list-style-type: none; /* Remove bullet points */
-                margin: 0;
-                padding: 5px;
-            }
-
-            .context-menu li {
-                padding: 8px 12px; /* Padding for menu items */
-                cursor: pointer; /* Pointer cursor on hover */
-            }
-
-            .context-menu li:hover {
-                background-color: #4CAF50;
-                color:white;
-            }
-
-            /* Button styling */
-            .btn {
-                font-family: 'Poppins', sans-serif;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 4px;
-                font-size: 17px;
-                cursor: pointer;
-                margin-top: 10px;
-                margin-right: 10px;
-                transition: background-color 0.3s ease;
-            }
-
-            .btn-create {
-                background-color: #28a745; /* Green */
-                color: white;
-            }
-
-            .btn-create:hover {
-                background-color: #218838; /* Darker green */
-            }
-
-            .btn-cancel {
-                background-color: #e74c3c;
-                color: white;
-            }
-
-            .btn-cancel:hover {
-                background-color: #c82333; /* Darker red */
             }
 
             .swal-popup {
@@ -760,16 +465,73 @@ if ($result === false) {
                 font-size: 14px; /* Size of the exclamation point */
             }
 
+            .table-container {
+                width: 100%;
+                margin-left: -12px;
+                overflow-x: auto;
+                margin-top: 20px; /* Space above the table */
+            }
+
+            .crud-table {
+                margin-top: 110px;
+                width: 100%;
+                border-collapse: collapse;
+                font-family: 'Poppins', sans-serif;
+                background-color: #ffffff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .crud-table th, .crud-table td {
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+                white-space: nowrap; /* Prevent text from wrapping */
+            }
+
+            .crud-table th {
+                text-align: center; 
+                background-color: #4CAF50;
+                color: white;
+                height: 40px;
+                width: 14px; /* Set a fixed width for table headers */
+            }
+
+            .crud-table td {
+                height: 50px;
+                background-color: #fafafa;
+            }
+
+            .crud-table tr:hover {
+                background-color: #f1f1f1;
+            }
+
+            .add a {
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                text-decoration: none;
+                transition: background-color 0.3s;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .add a:hover {
+                background-color: #45a049; /* Darker green on hover */
+            }
             .smaller-alert {
-                font-size: 14px; /* Adjust text size for a compact look */
-                padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
             }
         </style>
     </head>
 
     <body>
         <nav class="navbar">
-            <h2>Mode of Verification</h2> 
+            <h2>All Projects in COED</h2>
 
             <div class="profile-container">
                 <!-- Chat Icon with Notification Badge -->
@@ -826,7 +588,7 @@ if ($result === false) {
                 <li><a href="coed-budget-utilization.php"><img src="images/budget.png">Budget Allocation</a></li>
 
                 <!-- Dropdown for Task Management -->
-                <li><a href="coed-mov.php" class="active"><img src="images/task.png">Mode of Verification</a></li>
+                <li><a href="coed-mov.php"><img src="images/task.png">Mode of Verification</a></li>
 
                 <li><a href="coed-responses.php"><img src="images/feedback.png">Responses</a></li>
 
@@ -841,42 +603,75 @@ if ($result === false) {
                 </div>
             </ul>
         </div>
-        
-        <div class="content-task">
-            <div class="button-container">
-                <a href="coed-archive.php" id="archive" class="archive-button">Archive</a>
-            </div>
 
-            <!-- Display error message -->
-            <?php if (isset($error_message)): ?>
-                <div class="alert alert-error"><?= $error_message; ?></div>
-            <?php endif; ?>
+        <div class="content-resource">
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Project Title</th>
+                        <th>Semester</th>
+                        <th>Department</th>
+                        <th>Date of Event</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Fetch all projects from the coed table
+                    $sql = "SELECT * FROM coed";
+                    $result = $conn_proj_list->query($sql);
 
-            <!-- Folder Display Area -->
-            <div class="folder-display">
-                <?php
+                    // Initialize a flag to check if any rows are displayed
+                    $has_records = false;
+
                     if ($result && $result->num_rows > 0) {
-                        while($row = $result->fetch_assoc()) {
-                            $folder_name = htmlspecialchars($row['folder_name']); // Sanitize folder name
-                            echo "<div class='folder' data-folder-name='$folder_name'>
-                                    <a href='coed-subfolder.php?folder=" . urlencode($folder_name) . "' class='folder-link'>
-                                        <div class='folder-icon'>
-                                            <img src='images/folder.png' alt='File Icon' class='file-icon'>
-                                        </div>
-                                        <div class='folder-name'>$folder_name</div>
-                                    </a>
-                                </div>";
+                        while ($row = $result->fetch_assoc()) {
+                            $project_id = $row["id"];
+
+                            // Check if the project_id already exists in the coed_tor table
+                            $check_sql = "SELECT * FROM coed_requisition WHERE requi_sub = ?";
+                            $check_stmt = $conn->prepare($check_sql);
+                            $check_stmt->bind_param("i", $project_id);
+                            $check_stmt->execute();
+                            $check_result = $check_stmt->get_result();
+
+                            // If the project is already added in coed_tor, skip it
+                            if ($check_result && $check_result->num_rows > 0) {
+                                continue; // Skip this project if it exists in coed_tor
+                            }
+
+                            // If not already added, display the project
+                            echo "<tr>
+                                    <td>" . $project_id . "</td>
+                                    <td>" . $row["proj_title"] . "</td>
+                                    <td>" . $row["semester"] . "</td>
+                                    <td>" . $row["dept"] . "</td>
+                                    <td>" . $row["dateof_imple"] . "</td>
+                                    <td class='add'>
+                                        <a href='coed-add-requi.php?id=" . $project_id . "'>Add</a>
+                                    </td>
+                                </tr>";
+
+                            // Set the flag to true since we displayed at least one record
+                            $has_records = true;
                         }
-                    } else {
-                        echo "<div>No folders created yet.</div>";
                     }
-                ?>
-            </div>
+
+                    // Display a fallback message if no records were displayed
+                    if (!$has_records) {
+                        echo "<tr><td colspan='6'>No records found</td></tr>";
+                    }
+
+                    $conn_proj_list->close();
+                    ?>
+                </tbody>
+            </table>
         </div>
 
         <script>
             let inactivityTime = function () {
-                let time;
+            let time;
 
                 // List of events to reset the inactivity timer
                 window.onload = resetTimer;
@@ -972,7 +767,7 @@ if ($result === false) {
                     window.history.pushState(null, '', window.location.href);
                 };
             }
-
+            
             // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
                 const dropdown = this.querySelector('.dropdown-menu');
@@ -988,7 +783,7 @@ if ($result === false) {
                     }
                 }
             });
-
+           
             function logAction(actionDescription) {
                 var xhr = new XMLHttpRequest();
                 xhr.open("POST", "college_logs.php", true);
@@ -1037,17 +832,11 @@ if ($result === false) {
                     });
                 });
 
-                // Log clicks on the "Archive" link
-                document.getElementById("archive").addEventListener("click", function(event) {
-                    event.preventDefault(); // Prevent default action to allow logging first
-                    logAndRedirect("Archive", "coed-archive.php");
-                });
-
-                // Log clicks on the "Profile" link
-                document.querySelector('.dropdown-menu a[href="coed-your-profile.php"]').addEventListener("click", function() {
-                    logAction("Profile");
-                });
+            // Log clicks on the "Profile" link
+            document.querySelector('.dropdown-menu a[href="coed-your-profile.php"]').addEventListener("click", function() {
+                logAction("Profile");
             });
+        });
 
             document.addEventListener("DOMContentLoaded", () => {
                 function checkNotifications() {
