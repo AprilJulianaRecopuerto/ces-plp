@@ -1,98 +1,76 @@
 <?php
 session_start();
 
-// Database connection details
-$servername = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-$username = "equ6v8i5llo3uhjm"; // replace with your database username
-$password = "vkfaxm2are5bjc3q"; // replace with your database password
-$dbname = "ylwrjgaks3fw5sdj";
+// Check if the user is logged in
+if (!isset($_SESSION['uname'])) {
+    // Redirect to login page if the session variable is not set
+    header("Location: roleaccount.php");
+    exit;
+}
+
+$servername_proj = "ryvdxs57afyjk41z.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_proj = "zf8r3n4qqjyrfx7o";
+$password_proj = "su6qmqa0gxuerg98";
+$dbname_proj_list = "hpvs3ggjc4qfg9jp";
+
+$conn_proj_list = new mysqli($servername_proj, $username_proj, $password_proj, $dbname_proj_list);
+
+// Check connection
+if ($conn_proj_list->connect_error) {
+    die("Connection failed: " . $conn_proj_list->connect_error);
+}
+
+// Database credentials
+$servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_resource = "dnr20srzjycb99tw";
+$password_resource = "ndfnpz4j74v8t0p7";
+$dbname_resource = "x8uwt594q5jy7a7o";
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
 
 // Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Check if user is logged in
-if (!isset($_SESSION['uname'])) {
-    header("Location: roleaccount.php");
-    exit;
+$sn = "l3855uft9zao23e2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$un = "equ6v8i5llo3uhjm";
+$psd = "vkfaxm2are5bjc3q";
+$dbname_user_registration = "ylwrjgaks3fw5sdj";
+
+// Fetch the profile picture from the colleges table in user_registration
+$conn_profile = new mysqli($sn, $un, $psd, $dbname_user_registration);
+
+if ($conn_profile->connect_error) {
+    die("Connection failed: " . $conn_profile->connect_error);
 }
 
-// Get the logged-in user's username from the session
-$username = $_SESSION['uname'];
-
-// Fetch user details from the database using prepared statement
-$stmt = $conn->prepare("SELECT * FROM colleges WHERE uname = ?");
-$stmt->bind_param("s", $username);
+$uname = $_SESSION['uname'];
+$sql_profile = "SELECT picture FROM colleges WHERE uname = ?"; // Adjust 'username' to your matching column
+$stmt = $conn_profile->prepare($sql_profile);
+$stmt->bind_param("s", $uname);
 $stmt->execute();
-$result = $stmt->get_result();
+$result_profile = $stmt->get_result();
 
-if ($result->num_rows > 0) {
-    // Retrieve user details and store them in session variables
-    $row = $result->fetch_assoc();
-    $_SESSION['role'] = $row['role'];
-    $_SESSION['id_number'] = $row['id'];
-    $_SESSION['department'] = $row['department'];
-    $_SESSION['picture'] = $row['picture']; // Store the profile image path
-    $db_password_hash = $row['password']; // Store the password hash
-} else {
-    echo "User not found.";
-    exit;
+$profilePicture = null;
+if ($result_profile && $row_profile = $result_profile->fetch_assoc()) {
+    $profilePicture = $row_profile['picture']; // Fetch the 'picture' column
 }
 
-// Handle Change Password
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['current_password'], $_POST['new_password'], $_POST['confirm_password'])) {
-    $current_password = $_POST['current_password'];
-    $new_password = $_POST['new_password'];
-    $confirm_password = $_POST['confirm_password'];
-
-    // Validate new password and confirmation
-    if ($new_password !== $confirm_password) {
-        echo "<script>alert('New passwords do not match.');</script>";
-    } else {
-        // Fetch the user's current password from the database
-        $password_query = "SELECT password FROM colleges WHERE uname = '$username'";
-        $password_result = $conn->query($password_query);
-
-        if ($password_result->num_rows > 0) {
-            $password_row = $password_result->fetch_assoc();
-            $db_password = $password_row['password'];
-
-            // Check if the current password is correct (for plain text passwords)
-            if ($current_password === $db_password) {
-                // Update the new password in the database
-                $update_sql = "UPDATE colleges SET password = '$new_password' WHERE uname = '$username'";
-                if ($conn->query($update_sql) === TRUE) {
-                    echo "<script>alert('Password changed successfully.');</script>";
-                } else {
-                    echo "<script>alert('Error updating password.');</script>";
-                }
-            } else {
-                echo "<script>alert('Current password is incorrect.');</script>";
-            }
-        } else {
-            echo "<script>alert('User not found.');</script>";
-        }
-    }
-}
-
-// Close the statements and connection
 $stmt->close();
-$conn->close();
+$conn_profile->close();
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
         <title>CES PLP</title>
 
-        <link rel="icon" href="images/icoon.png">
+        <link rel="icon" href="images/logoicon.png">
 
         <!-- SweetAlert CSS and JavaScript -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -108,6 +86,7 @@ $conn->close();
             body {
                 margin: 0;
                 background-color: #F6F5F5; /* Light gray background color */
+                font-family: 'Poppins', sans-serif;
             }
 
             .navbar {
@@ -269,8 +248,8 @@ $conn->close();
                 color: white; /* Ensure the text color is white when hovered */
             }
 
-                /* Style the sidenav links and the dropdown button */
-                .menu .dropdown-btn {
+             /* Style the sidenav links and the dropdown button */
+             .menu .dropdown-btn {
                 list-style: none;
                 padding: 0;
                 margin: 0;
@@ -324,126 +303,120 @@ $conn->close();
                 color: white; /* Change text color */
             }
 
-            .content-settings {
-                margin-left: 340px; /* Align content with sidebar */
-                padding-top: 90px; /* Space for navbar */
+            .content-resource {
+                margin-left: 320px; /* Align with the sidebar */
                 padding: 20px;
-                display: flex; /* Use flexbox to center the content */
-                justify-content: center; /* Center the content horizontally */
-                align-items: center; /* Center the content vertically */
-                height: calc(100vh - 100px); /* Full height minus navbar */
+            }
             
-            }
-
-            .profile-section {
-                width: 300px; /* Adjust width as needed */
-                height: 390px;
+            .form-container {
+                margin-top:110px;
+                background-color: #ffffff;
                 padding: 20px;
-                margin-top: 90px;
-                margin-right: 25px;
-                border: 1px solid #ccc;
-                border-radius: 8px;
-                text-align: center;
-                background-color: #f9f9f9; /* Light background color */
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+                border-radius: 10px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             }
 
-            .profile-section img {
-                width: 170px; /* Increased size of the profile picture */
-                height: 170px; /* Set the size of the profile picture */
-                border-radius: 50%; /* Circular frame */
-            }
-
-            .profile-pic {
-                width: 220px; /* Adjust size as needed */
-                height: 220px; /* Adjust size as needed */
-                border-radius: 50%; /* Circular profile picture */
-                object-fit: cover; /* Ensures the image covers the area */
-                margin-bottom: 10px; /* Space between image and ID number */
-            }
-
-            .profile-section p {
+            .form-container h3 {
+                margin-top: 0;
                 font-family: 'Poppins', sans-serif;
-                font-size: 17px; /* Font size for ID number */
-                color: #333; /* Text color */
-                text-align: left;
+                font-size: 24px;
+                color: black;
             }
 
-            .info-section {
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-group label {
+                display: block;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            .form-group select, .form-group input[type="text"], .form-group input[type="date"], 
+            .form-group input[type="time"], .form-group input[type="number"] {
+                width: 100%;
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-size: 16px;
+                box-sizing: border-box;
                 font-family: 'Poppins', sans-serif;
-                font-size: 20px; /* Font size for ID number */
-                width: 970px; /* Adjust width as needed */
-                height: 200px;
-                border: 1px solid #ccc;
-                margin-right: 20px;
-                margin-top: -138px;
-                border-radius: 8px;
-                text-align: left;
-                background-color: #f9f9f9; /* Light background color */
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
             }
 
-            .info-section p,h3 {
-                padding-top: 15px;
-                padding-bottom: 15px;
-                padding-left: 25px;
-                line-height: 2px;
+            .form-group input::placeholder {
+                font-family: 'Poppins', sans-serif;
+                color: #999;
+                font-style: italic;
             }
 
-            .buttons {
-                margin-top: -250px;
-                margin-left: 680px;
+            .form-group select {
+                background: #f9f9f9;
             }
 
-            .change-password-button,
-            .edit-profile-button {
-                background-color: #22901C; /* Button color */
-                color: white; /* Text color */
-                border: none; /* Remove border */
-                border-radius: 5px; /* Rounded corners */
-                padding: 12px 20px; /* Increased padding for button */
-                cursor: pointer; /* Cursor change on hover */
-                font-size: 18px; /* Increased font size */
-                font-family: "Poppins", sans-serif; /* Font family */
-                margin-right: 10px;
-                text-decoration: none;
-                display: inline-block; /* Keeps it inline while allowing margins */
-                transition: background-color 0.3s; /* Smooth transition for hover effect */
-            }
-
-            .change-password-button:hover,
-            .edit-profile-button:hover {
-                background-color: #1a7d13; /* Darker green on hover */
-            }
-
-            .profile-placeholder-letter {
-                font-family: "Poppins", sans-serif; /* Font family */
-                width: 170px; /* Adjust size as needed */
-                height: 170px; /* Adjust size as needed */
-                border-radius: 50%; /* Circular profile picture */
-                object-fit: cover; /* Ensures the image covers the area */
-                background-color: #ccc; /* Placeholder background color */
+            .button-container {
                 display: flex;
-                justify-content: center;
-                align-items: center;
-                font-size: 35px; /* Font size for the letter */
-                color: green;
-                font-weight: bold; /* Make it bold if desired */
-                margin-left: 45px;
-                margin-bottom: 40px;
+                justify-content: flex-end; /* Align buttons to the right */
+                margin-top: 20px; /* Space above the buttons */
+            }
+
+            .button-container button {
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                margin-left: 10px;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .button-container button:hover {
+                background-color: #45a049; /* Darker green on hover */
             }
 
             .custom-swal-popup {
-                font-family: "Poppins", sans-serif !important;
-                width: 400px;
+                font-family: 'Poppins', sans-serif;
+                font-size: 16px; /* Increase the font size */
+                width: 400px !important; /* Set a larger width */
             }
 
             .custom-swal-confirm {
-                font-family: "Poppins", sans-serif !important;
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #089451;
+                border: 0.5px #089451 !important;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none !important; /* Remove default focus outline */
             }
 
             .custom-swal-cancel {
-                font-family: "Poppins", sans-serif !important;
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #e74c3c;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none; /* Remove default focus outline */
+            }
+
+            .custom-error-popup {
+                font-family: 'Poppins', sans-serif;
+                width: 400px !important; /* Set a larger width */
+            }
+
+            .custom-error-confirm {
+                font-family: 'Poppins', sans-serif;
+                font-size: 17px;
+                background-color: #e74c3c;
+                color: #fff;
+                border-radius: 10px;
+                cursor: pointer;
+                outline: none; /* Remove default focus outline */
             }
 
             .swal-popup {
@@ -491,16 +464,74 @@ $conn->close();
                 right: -10px; /* Adjust as needed */
                 font-size: 14px; /* Size of the exclamation point */
             }
+
+            .table-container {
+                width: 100%;
+                margin-left: -12px;
+                overflow-x: auto;
+                margin-top: 20px; /* Space above the table */
+            }
+
+            .crud-table {
+                margin-top: 110px;
+                width: 100%;
+                border-collapse: collapse;
+                font-family: 'Poppins', sans-serif;
+                background-color: #ffffff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .crud-table th, .crud-table td {
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+                white-space: nowrap; /* Prevent text from wrapping */
+            }
+
+            .crud-table th {
+                text-align: center; 
+                background-color: #4CAF50;
+                color: white;
+                height: 40px;
+                width: 14px; /* Set a fixed width for table headers */
+            }
+
+            .crud-table td {
+                height: 50px;
+                background-color: #fafafa;
+            }
+
+            .crud-table tr:hover {
+                background-color: #f1f1f1;
+            }
+
+            .add a {
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                text-decoration: none;
+                transition: background-color 0.3s;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .add a:hover {
+                background-color: #45a049; /* Darker green on hover */
+            }
             .smaller-alert {
-                font-size: 14px; /* Adjust text size for a compact look */
-                padding: 20px;   /* Adjust padding to mimic a smaller alert box */
-                }
+            font-size: 14px; /* Adjust text size for a compact look */
+            padding: 20px;   /* Adjust padding to mimic a smaller alert box */
+            }
         </style>
     </head>
 
     <body>
         <nav class="navbar">
-            <h2>Profile</h2> 
+            <h2>All Projects in CON</h2>
 
             <div class="profile-container">
                 <!-- Chat Icon with Notification Badge -->
@@ -510,12 +541,13 @@ $conn->close();
                 </a>
 
                 <div class="profile" id="profileDropdown">
-                    <?php 
+                    <?php
                         // Check if a profile picture is set in the session
-                        if (!empty($_SESSION['picture'])) {
-                            // Show the profile picture
-                            echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
+                        if (!empty($profilePicture)) {
+                            // Display the profile picture
+                            echo '<img src="' . htmlspecialchars($profilePicture) . '" alt="Profile Picture">';
                         } else {
+                            // Get the first letter of the username for the placeholder
                             $firstLetter = strtoupper(substr($_SESSION['uname'], 0, 1));
                             echo '<div class="profile-placeholder">' . htmlspecialchars($firstLetter) . '</div>';
                         }
@@ -572,35 +604,69 @@ $conn->close();
             </ul>
         </div>
 
-        <div class="content-settings">
-            <div class="profile-section">
-                <?php 
-                    // Check if a profile picture is set in the session
-                    if (!empty($_SESSION['picture'])) {
-                        // Show the profile picture
-                        echo '<img src="' . htmlspecialchars($_SESSION['picture']) . '" alt="Profile Picture">';
-                    } else {
-                        // Use a default placeholder image
-                        echo '<div class="profile-placeholder-letter">' . htmlspecialchars($firstLetter) . '</div>'; //New class
+        <div class="content-resource">
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Project Title</th>
+                        <th>Semester</th>
+                        <th>Department</th>
+                        <th>Date of Event</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Fetch all projects from the con table
+                    $sql = "SELECT * FROM con";
+                    $result = $conn_proj_list->query($sql);
+
+                    // Initialize a flag to check if any rows are displayed
+                    $has_records = false;
+
+                    if ($result && $result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            $project_id = $row["id"];
+
+                            // Check if the project_id already exists in the con_tor table
+                            $check_sql = "SELECT * FROM con_reservation WHERE venue_sub = ?";
+                            $check_stmt = $conn->prepare($check_sql);
+                            $check_stmt->bind_param("i", $project_id);
+                            $check_stmt->execute();
+                            $check_result = $check_stmt->get_result();
+
+                            // If the project is already added in con_tor, skip it
+                            if ($check_result && $check_result->num_rows > 0) {
+                                continue; // Skip this project if it exists in con_tor
+                            }
+
+                            // If not already added, display the project
+                            echo "<tr>
+                                    <td>" . $project_id . "</td>
+                                    <td>" . $row["proj_title"] . "</td>
+                                    <td>" . $row["semester"] . "</td>
+                                    <td>" . $row["dept"] . "</td>
+                                    <td>" . $row["dateof_imple"] . "</td>
+                                    <td class='add'>
+                                        <a href='con-add-venue.php?id=" . $project_id . "'>Add</a>
+                                    </td>
+                                </tr>";
+
+                            // Set the flag to true since we displayed at least one record
+                            $has_records = true;
+                        }
                     }
-                ?>
 
-                <p>ID Number: <?php echo $_SESSION['id_number']; ?></p>
-                <p>Department: <?php echo $_SESSION['department']; ?></p>
-                <p>Role: <?php echo $_SESSION['role']; ?></p>
-            </div>
-        
-            <div class="info-section">
-            <h3>Account Information</h3>
-                <p>Name: <?php echo $_SESSION['uname']; ?></p>
-                <p>Email: <?php echo $row['email']; // Assuming you have an email column ?></p>
-            </div>
-            </div>
-        </div>
+                    // Display a fallback message if no records were displayed
+                    if (!$has_records) {
+                        echo "<tr><td colspan='6'>No records found</td></tr>";
+                    }
 
-        <div class= "buttons">
-            <a href="con-edit-profile.php" class="edit-profile-button">Change Profile Picture</a>
-            <a href="con-change-password.php" class="change-password-button">Change Password</a>
+                    $conn_proj_list->close();
+                    ?>
+                </tbody>
+            </table>
         </div>
 
         <script>
@@ -701,7 +767,7 @@ $conn->close();
                     window.history.pushState(null, '', window.location.href);
                 };
             }
-            
+
             // Dropdown menu toggle
             document.getElementById('profileDropdown').addEventListener('click', function() {
                 const dropdown = this.querySelector('.dropdown-menu');
@@ -717,7 +783,7 @@ $conn->close();
                     }
                 }
             });
-
+           
             function logAction(actionDescription) {
                 var xhr = new XMLHttpRequest();
                 xhr.open("POST", "college_logs.php", true);
@@ -766,21 +832,11 @@ $conn->close();
                     });
                 });
 
-                 // Log clicks on the "Change Profile Picture" link
-                document.querySelector('.edit-profile-button').addEventListener("click", function() {
-                    logAction("Change Profile Picture");
-                });
-
-                // Log clicks on the "Change Password" link
-                document.querySelector('.change-password-button').addEventListener("click", function() {
-                    logAction("Change Password");
-                });
-
-                // Log clicks on the "Profile" link
-                document.querySelector('.dropdown-menu a[href="con-your-profile.php"]').addEventListener("click", function() {
-                    logAction("Profile");
-                });
+            // Log clicks on the "Profile" link
+            document.querySelector('.dropdown-menu a[href="con-your-profile.php"]').addEventListener("click", function() {
+                logAction("Profile");
             });
+        });
 
             document.addEventListener("DOMContentLoaded", () => {
                 function checkNotifications() {
@@ -804,4 +860,3 @@ $conn->close();
         </script>
     </body>
 </html>
-V
