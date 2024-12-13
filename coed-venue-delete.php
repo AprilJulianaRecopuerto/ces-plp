@@ -1,15 +1,16 @@
 <?php
-$servername = "localhost"; // Your database server
-$username = "root"; // Your database username
-$password = ""; // Your database password
-$dbname = "resource_utilization"; // Your database name
+// Database credentials
+$servername_resource = "mwgmw3rs78pvwk4e.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+$username_resource = "dnr20srzjycb99tw";
+$password_resource = "ndfnpz4j74v8t0p7";
+$dbname_resource = "x8uwt594q5jy7a7o";
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($servername_resource, $username_resource, $password_resource, $dbname_resource);
 
 // Check connection
 if ($conn->connect_error) {
-    die(json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]));
+    die("Connection failed: " . $conn->connect_error);
 }
 
 // Check if reservation_id is provided for count check
@@ -42,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_id'])) {
 
     $success = true; // Track success of deletions
 
-    // coede 1: Delete all records when both venue_name and request_name are 'all'
+    // Case 1: Delete all records when both venue_name and request_name are 'all'
     if ($venue_name === 'all' && $request_name === 'all') {
         // Delete all venues
         $deleteAllVenuesQuery = "DELETE FROM coed_venue_request WHERE reservation_id = ?";
@@ -70,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_id'])) {
             $stmt->execute();
         }
     } else if ($venue_name === 'single' && $request_name === 'single') {
-        // coede 2: Delete single records when exactly 1 venue and 1 request exist
+        // Case 2: Delete single records when exactly 1 venue and 1 request exist
         $deleteSingleVenueQuery = "DELETE FROM coed_venue_request WHERE reservation_id = ? LIMIT 1";
         $stmt = $conn->prepare($deleteSingleVenueQuery);
         $stmt->bind_param('i', $reservation_id);
@@ -95,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_id'])) {
             $stmt->execute();
         }
     } else {
-        // coede 3: Delete specific venue or request
+        // Case 3: Delete specific venue or request
         // If a specific venue name is provided
         if ($venue_name) {
             $deleteVenueQuery = "DELETE FROM coed_venue_request WHERE reservation_id = ? AND venue_name = ?";
